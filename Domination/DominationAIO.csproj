@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7A1D86E6-FB6E-4A40-99B9-754D0C8A3F40}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DominationAIO</RootNamespace>
+    <AssemblyName>DominationAIO</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <OutputPath>bin\Release</OutputPath>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EnsoulSharp.SDK">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="EnsoulSharp.Wrapper">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="SPrediction">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SPrediction.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Champions\Irelia.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Logic.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Menu.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Notifications.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\PRADALoader.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Spells.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\AntiAssasins.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\Interrupter.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\Jungle.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\OnGapcloser.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\OnUpdate.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\OnDraw.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\OnProcessSpellcast.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\OnUpdate.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\SkinHack.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\AfterAttack.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\BeforeAttack.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnAttack.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnCastSpell.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnGapcloser.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnProcessSpellCast.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnUpdate.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\Tumble.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\R\BeforeAttack.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyLogic\R\OnCastSpell.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyCache.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyExtensions.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyGeometry.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyLists.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MySpellDb.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyWizard.cs" />
+    <Compile Include="Champions\PRADAVayneReborn\Program.cs" />
+    <Compile Include="Champions\Riven By FunnySlayer.cs" />
+    <Compile Include="Champions\Aphelios.cs" />
+    <Compile Include="Champions\YasuoByFunnySlayer.cs" />
+    <Compile Include="Common\Logichelper.cs" />
+    <Compile Include="Evade\BlockSpellData.cs" />
+    <Compile Include="Evade\BlockSpellDataBase.cs" />
+    <Compile Include="Evade\Collision.cs" />
+    <Compile Include="Evade\CollisionObjectTypes.cs" />
+    <Compile Include="Evade\DamageBoostDatabase.cs" />
+    <Compile Include="Evade\DetectedCollision.cs" />
+    <Compile Include="Evade\DetectionType.cs" />
+    <Compile Include="Evade\EvadeManager.cs" />
+    <Compile Include="Evade\EvadeOthers.cs" />
+    <Compile Include="Evade\EvadeSpellData.cs" />
+    <Compile Include="Evade\EvadeSpellDatabase.cs" />
+    <Compile Include="Evade\EvadeTargetManager.cs" />
+    <Compile Include="Evade\FastPredResult.cs" />
+    <Compile Include="Evade\FoundIntersection.cs" />
+    <Compile Include="Evade\Geometry.cs" />
+    <Compile Include="Evade\IsSafeResult.cs" />
+    <Compile Include="Evade\SafePathResult.cs" />
+    <Compile Include="Evade\Skillshot.cs" />
+    <Compile Include="Evade\SkillshotDetector.cs" />
+    <Compile Include="Evade\SkillShotType.cs" />
+    <Compile Include="Evade\SpellData.cs" />
+    <Compile Include="Evade\SpellDatabase.cs" />
+    <Compile Include="Evade\Utils.cs" />
+    <Compile Include="Helper\CastManager.cs" />
+    <Compile Include="Common\Champion.cs" />
+    <Compile Include="Helper\DrawingManager.cs" />
+    <Compile Include="Helper\HeroManager.cs" />
+    <Compile Include="Helper\MenuHelper.cs" />
+    <Compile Include="Helper\MinionManager.cs" />
+    <Compile Include="Helper\SpellHelper.cs" />
+    <Compile Include="Champions\Troll Chat xD\Core\Troll.cs" />
+    <Compile Include="Champions\Troll Chat xD\Event\EventManager.cs" />
+    <Compile Include="Champions\Troll Chat xD\Helper\MenuHelper.cs" />
+    <Compile Include="Champions\Troll Chat xD\Menu\MenuManager.cs" />
+    <Compile Include="Champions\Troll Chat xD\Program.cs" />
+    <Compile Include="Champions\skinhack.cs" />
+    <Compile Include="Common\YasuoSpellDatabase.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Properties\app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Champions\Troll Chat xD\obj\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

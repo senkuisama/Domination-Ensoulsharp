@@ -130,7 +130,9 @@ namespace DominationAIO.Champions
             Dash.OnDash += Dash_OnDash;
 
             //Drawing.OnDraw += Drawing_OnDraw;
-        }
+
+            Orbwalker.OnAction += FarmAction;
+        }        
 
         private static void Drawing_OnDraw(EventArgs args)
         {
@@ -267,7 +269,7 @@ namespace DominationAIO.Champions
             if (args.Type == OrbwalkerType.OnAttack)
             {
                 onaa = true;
-                //DelayAction.Add(time - Game.Ping, () => { onaa = false; afteraa = true; });
+                DelayAction.Add(time, () => { onaa = false; afteraa = true; });
             }
             else onaa = false;
             /*if (args.Type == OrbwalkerType.AfterAttack)
@@ -281,6 +283,31 @@ namespace DominationAIO.Champions
                             onaa = true;
                         }
                         else onaa = false;*/
+        }
+
+        private static void FarmAction(object sender, OrbwalkerActionArgs args)
+        {
+            if(Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
+            {
+                if (args.Type == OrbwalkerType.AfterAttack)
+                {
+                    if(args.Target.IsJungle())
+                    {
+                        if(Q.IsReady() && RMenu.useqf.Enabled)
+                        {
+                            Q.CastOnUnit(args.Target);
+                        }
+                        if(W.IsReady() && RMenu.usewf.Enabled && args.Target.IsValidTarget(W.Range))
+                        {
+                            W.Cast();
+                        }
+                    }
+                    if(args.Target.IsMe)
+                    {
+                        if (!onaa && RMenu.useef.Enabled) E.Cast(args.Sender.Position);
+                    }
+                }
+            }           
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -311,7 +338,7 @@ namespace DominationAIO.Champions
             }*/
 
             #endregion
-            var target = TargetSelector.GetTarget(900);
+            var target = GameObjects.EnemyHeroes.FirstOrDefault(i => i.IsValidTarget(900) && i.Health < R.GetDamage(i) && i.DistanceToPlayer() < R.GetPrediction(i, false, -1, CollisionObjects.YasuoWall).CastPosition.DistanceToPlayer());
 
             if (!Player.IsDead)
             {
@@ -336,6 +363,11 @@ namespace DominationAIO.Champions
                         break;
                 }
             }
+        }
+
+        public static void harass()
+        {
+
         }
         public static void combo()
         {
@@ -363,7 +395,7 @@ namespace DominationAIO.Champions
             if (target == null) return;
 
             #region normal
-            if (qready && !wready && !eready && qenabled)
+            if (qready && !wready && !eready && qenabled && (!rready || !renabled))
             {
                 if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
                 {
@@ -383,7 +415,7 @@ namespace DominationAIO.Champions
                     }
                 }
             }
-            if (!qready && wready && !eready && wenabled)
+            if (!qready && wready && !eready && wenabled && (!rready || !renabled))
             {
                 if (afteraa)
                 {
@@ -394,7 +426,7 @@ namespace DominationAIO.Champions
                     DelayAction.Add(10, () => { return; });
                 }
             }
-            if (!qready && !wready && eready && eenabled)
+            if (!qready && !wready && eready && eenabled && (!rready || !renabled))
             {
                 if (onaa) return;
                 if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
@@ -450,7 +482,7 @@ namespace DominationAIO.Champions
                             }
                         }
                     }
-                    if (Player.CountEnemyHeroesInRange(600) > 1)
+                    if (Player.CountEnemyHeroesInRange(700) > 1)
                     {
                         if (eready)
                         {

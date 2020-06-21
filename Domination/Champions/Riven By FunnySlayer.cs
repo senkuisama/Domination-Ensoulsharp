@@ -224,6 +224,11 @@ namespace DominationAIO.Champions
                     Orbwalker.ResetAutoAttackTimer();
                     lastQcast = Variables.GameTimeTickCount;
                 }
+                if(spell.Name == "RivenTriCleave")
+                {
+                    Orbwalker.ResetAutoAttackTimer();
+                    lastQcast = Variables.GameTimeTickCount;
+                }
                 if (spell.Name.Contains("RivenFient"))
                 {
                     lastEcast = Variables.GameTimeTickCount;
@@ -269,7 +274,7 @@ namespace DominationAIO.Champions
             if (args.Type == OrbwalkerType.OnAttack)
             {
                 onaa = true;
-                DelayAction.Add(time, () => { onaa = false; afteraa = true; });
+                //DelayAction.Add(time, () => { onaa = false; afteraa = true; });
             }
             else onaa = false;
             /*if (args.Type == OrbwalkerType.AfterAttack)
@@ -301,10 +306,10 @@ namespace DominationAIO.Champions
                         {
                             W.Cast();
                         }
-                    }
-                    if(args.Target.IsMe)
-                    {
-                        if (!onaa && RMenu.useef.Enabled) E.Cast(args.Sender.Position);
+                        if (E.IsReady() && RMenu.useef.Enabled)
+                        {
+                            E.Cast(args.Target.Position);
+                        }
                     }
                 }
             }           
@@ -338,8 +343,7 @@ namespace DominationAIO.Champions
             }*/
 
             #endregion
-            var target = GameObjects.EnemyHeroes.FirstOrDefault(i => i.IsValidTarget(900) && i.Health < R.GetDamage(i) && i.DistanceToPlayer() < R.GetPrediction(i, false, -1, CollisionObjects.YasuoWall).CastPosition.DistanceToPlayer());
-
+            var target = GameObjects.EnemyHeroes.FirstOrDefault(i => i.IsValidTarget(900) && i.Health < R.GetDamage(i) && i.DistanceToPlayer() < R.GetPrediction(i, false, -1, CollisionObjects.YasuoWall).CastPosition.DistanceToPlayer());          
             if (!Player.IsDead)
             {
                 switch (Orbwalker.ActiveMode)
@@ -395,7 +399,7 @@ namespace DominationAIO.Champions
             if (target == null) return;
 
             #region normal
-            if (qready && !wready && !eready && qenabled && (!rready || !renabled))
+            if (qready && !wready && !eready && qenabled && ((!rready || R2()) || !renabled))
             {
                 if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
                 {
@@ -415,7 +419,7 @@ namespace DominationAIO.Champions
                     }
                 }
             }
-            if (!qready && wready && !eready && wenabled && (!rready || !renabled))
+            if (!qready && wready && !eready && wenabled && ((!rready || R2()) || !renabled))
             {
                 if (afteraa)
                 {
@@ -426,7 +430,7 @@ namespace DominationAIO.Champions
                     DelayAction.Add(10, () => { return; });
                 }
             }
-            if (!qready && !wready && eready && eenabled && (!rready || !renabled))
+            if (!qready && !wready && eready && eenabled && ((!rready || R2()) || !renabled))
             {
                 if (onaa) return;
                 if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
@@ -722,9 +726,12 @@ namespace DominationAIO.Champions
             }
             #endregion
 
-            if (RMenu.flash.Active && (fl.IsReady() || flash.IsReady()))
+            if (RMenu.flash.Active && (fl.IsReady() || flash.IsReady()) && target.DistanceToPlayer() > 450)
             {
-                
+                if(target.IsValidTarget(900))
+                {
+
+                }
             }else
             {
                 if(target.IsValidTarget(checkqgap + checkegap + 400))

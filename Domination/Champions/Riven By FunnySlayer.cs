@@ -30,7 +30,7 @@ namespace DominationAIO.Champions
         public static MenuBool useqgap = new MenuBool("useqgap", "Use Q gap");
         public static MenuSlider qgap = new MenuSlider("qgap", "Q gapcloser if target distance player <= ", (int)ObjectManager.Player.GetRealAutoAttackRange() + 200, (int)ObjectManager.Player.GetRealAutoAttackRange(), (int)ObjectManager.Player.GetRealAutoAttackRange() + 400);
         public static MenuSlider egap = new MenuSlider("egap", "E gap distance", 250, 100, 450);
-        public static MenuBool fastcombo = new MenuBool("fastcombo", "Fast Combo");
+        public static MenuKeyBind fastcombo = new MenuKeyBind("fastcombo", "Fast Combo", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
         public static MenuBool tiamatW = new MenuBool("tiamatW", "Tiamat W");
         public static MenuBool RQ = new MenuBool("RQ", "R2-Q");
         public static MenuBool ER1Q = new MenuBool("ER1Q", "E-R1-Q");
@@ -91,13 +91,13 @@ namespace DominationAIO.Champions
             combom.Add(RMenu.usew);
             combom.Add(RMenu.usee);
             combom.Add(RMenu.user);
-            combom.Add(RMenu.rh).Permashow();
+            combom.Add(RMenu.rh).Permashow(true, "R Combo <= x%", SharpDX.Color.DarkGreen);
 
-            combom.Add(RMenu.flash).Permashow();
+            combom.Add(RMenu.flash).Permashow(true, "Flash In Combo", SharpDX.Color.Yellow);
             combom.Add(RMenu.useqgap);
             combom.Add(RMenu.qgap);
             combom.Add(RMenu.egap);
-            combom.Add(RMenu.fastcombo);
+            combom.Add(RMenu.fastcombo).Permashow(true, "Fast Combo in level 3", SharpDX.Color.Red);
             combom.Add(RMenu.tiamatW);
             combom.Add(RMenu.RQ);
             combom.Add(RMenu.ER1Q);
@@ -399,762 +399,824 @@ namespace DominationAIO.Champions
             if (target == null) return;
 
             #region normal
-            if (qready && !wready && !eready && qenabled && ((!rready || R2()) || !renabled))
+            if(Player.Level <= 3 || !RMenu.fastcombo.Active)
             {
-                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
+                if (target.Health < 40)
                 {
-                    if (onaa) return;
-                    if (afteraa)
+                    if (qready && !wready && !eready)
                     {
-                        Q.CastOnUnit(target);
-                        DelayAction.Add(10, () => { return; });
+                        if(target.IsValidTarget(checkqgap) && target.DistanceToPlayer() >= Player.GetRealAutoAttackRange())
+                        {
+                            Q.CastOnUnit(target, true);
+                        }else
+                        {
+                            if(target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                            {
+                                if (afteraa) Q.CastOnUnit(target, true);
+                            }
+                        }
+                    }
+                    if (!qready && wready && !eready)
+                    {
+                        if (afteraa && target.IsValidTarget(W.Range)) W.CastOnUnit(target);
+                    }
+                    if (!qready && !wready && eready)
+                    {
+                        if (afteraa && target.IsValidTarget(W.Range)) E.CastOnUnit(target);
+                        if (!target.IsValidTarget(W.Range) && target.IsValidTarget(checkegap)) E.CastOnUnit(target, true);
+                    }
+                    if (qready && wready)
+                    {
+                        if (target.IsValidTarget(checkqgap) && !onaa && !beforeaa)
+                            if (target.DistanceToPlayer() < W.Range)
+                            {
+                                if (Player.HasBuff("riventricleavesoundtwo"))
+                                {
+                                    if (afteraa) W.Cast(target);
+                                }
+                                else
+                                {
+                                    if (afteraa) Q.CastOnUnit(target);
+                                }
+                            }
+                            else
+                            {
+                                if (target.IsValidTarget(checkqgap)) { Q.CastOnUnit(target, true); }
+                            }
+                    }
+                    if (qready && eready)
+                    {
+                        if(target.IsValidTarget(E.Range + 200) && !onaa && !beforeaa)
+                        {
+                            if (Player.HasBuff("riventricleavesoundtwo"))
+                            {
+                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange());
+                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() <= E.Range))
+                                {
+                                    if (c != Vector2.Zero)
+                                        E.Cast(c);
+                                }
+                            }
+                            if (afteraa) E.CastOnUnit(target);
+                        }
+                    }
+                    if (eready && wready)
+                    {
+                        if(target.IsValidTarget(checkegap) && !onaa && !beforeaa)
+                        {
+                            if(target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
+                            {
+                                E.CastOnUnit(target);
+                            }else
+                            {
+                                if (afteraa) W.CastOnUnit(target);
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    if (target.DistanceToPlayer() <= checkqgap + Player.GetRealAutoAttackRange() && target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() + 100)
+                    if (qready && !wready && !eready)
                     {
-                        Q.CastOnUnit(target);
-                        DelayAction.Add(10, () => { return; });
-                    }
-                }
-            }
-            if (!qready && wready && !eready && wenabled && ((!rready || R2()) || !renabled))
-            {
-                if (afteraa)
-                {
-                    if (target.IsValidTarget(W.Range + 50))
-                    {
-                        W.Cast(target.Position);
-                    }
-                    DelayAction.Add(10, () => { return; });
-                }
-            }
-            if (!qready && !wready && eready && eenabled && ((!rready || R2()) || !renabled))
-            {
-                if (onaa) return;
-                if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
-                {
-                    Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange());
-                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                    {
-                        if (c != Vector2.Zero)
-                            E.Cast(c);
-                    }
-                    E.Cast(target.Position);
-                    DelayAction.Add(10, () => { return; });
-                }
-                if (afteraa)
-                {
-                    if (Player.HasBuff("riventricleavesoundtwo"))
-                    {
-                        Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                        foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                        if (target.DistanceToPlayer() < checkqgap && target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
                         {
-                            E.Cast(c);
+                            if (!onaa && !beforeaa) Q.CastOnUnit(target, true);
                         }
-                        DelayAction.Add(10, () => { return; });
-                    }
-                }
-            }
-            if (rready && renabled)
-            {
-                if (R1() && target.DistanceToPlayer() < 700)
-                {
-                    if (target.HealthPercent < 40)
-                    {
-                        DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                    }
-                    if (target.HealthPercent < rheath)
-                    {
-                        if (eready)
+                        if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange())
                         {
-                            if (qready)
-                            {
+                            if (!onaa && !beforeaa) if (afteraa)
+                                    Q.CastOnUnit(target, true);
+                        }
+                    }
+                    if (!qready && wready && !eready)
+                    {
+                        if (afteraa && target.DistanceToPlayer() <= W.Range)
+                            W.Cast(target);
+                    }
+                    if (!qready && !wready && eready)
+                    {
+                        if (!onaa && !beforeaa) if (target.DistanceToPlayer() < checkegap && target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
                                 E.Cast(target.Position);
-                                DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                            }
-                        }
-                        else
-                        {
-                            if (qready)
-                            {
-                                E.Cast(target.Position);
-                                DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                            }
-                        }
+                            else if (afteraa && target.DistanceToPlayer() < Player.GetRealAutoAttackRange()) E.Cast(target);
                     }
-                    if (Player.CountEnemyHeroesInRange(700) > 1)
+                    if (qready && wready)
                     {
-                        if (eready)
-                        {
-                            if (qready)
+                        if (target.IsValidTarget(checkqgap) && !onaa && !beforeaa)
+                            if (target.DistanceToPlayer() < W.Range)
                             {
-                                E.Cast(target.Position);
-                                DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                            }
-                        }
-                        else
-                        {
-                            if (qready)
-                            {
-                                E.Cast(target.Position);
-                                DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                            }
-                        }
-                    }
-                }
-                if (R2())
-                {
-                    if (target.IsValidTarget(R.Range))
-                    {
-                        if(target.Health < R.GetDamage(target) + Player.TotalAttackDamage)
-                        {
-                            if (rpreddmg.Hitchance >= HitChance.High)
-                            {
-                                R.Cast(rpreddmg.CastPosition);
-                            }
-                        }
-                        if (beforeaa && target.Health + target.BonusHealth <= R.GetDamage(target) + Player.TotalAttackDamage * 2)
-                        {
-                            if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                            {
-                                R.Cast(rpreddmg.CastPosition);
-                                DelayAction.Add(1, () => { Orbwalker.Attack(target); });
-                            }
-                        }
-                        if (HaveTiamat())
-                        {
-                            if (afteraa)
-                            {
-                                Player.UseItem((int)ItemId.Tiamat);
-                                Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
-                                Player.UseItem((int)ItemId.Ravenous_Hydra);
-                                Player.UseItem((int)ItemId.Tiamat_Melee_Only);
-                            }
-                            if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 3 + W.GetDamage(target))
-                                if (qready || wready || eready)
+                                if (Player.HasBuff("riventricleavesoundtwo"))
                                 {
-                                    if (qready && wready && eready)
-                                    {
-                                        if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                        {
-                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (qready && wready)
-                                        {
-                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                        }
-                                        else
-                                        {
-                                            if (eready && qready)
-                                            {
-                                                DelayAction.Add(1, () => { E.Cast(Player.Position.Extend(rpreddmg.CastPosition, -10)); });
-                                                DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
-                                            }
-                                        }
-                                        if (qready && eready)
-                                        {
-                                            DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                        }
-                                        else
-                                        {
-                                            if (wready)
-                                            {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                            }
-                                        }
-                                        if (wready && eready)
-                                        {
-                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                        }
-                                        else
-                                        {
-                                            if (qready)
-                                            {
-                                                DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
-                                            }
-                                        }
-                                    }
+                                    if (afteraa) W.Cast(target);
                                 }
                                 else
                                 {
-                                    var rpredheath = R.GetHealthPrediction(target);
-                                    if (target.Health - rpredheath <= R.GetDamage(target))
-                                    {
-                                        if (rpreddmg.Hitchance >= HitChance.High)
-                                        {
-                                            R.Cast(rpreddmg.CastPosition);
-                                        }
-                                    }
-                                    if (target.Health <= R.GetDamage(target))
-                                    {
-                                        if (rpreddmg.Hitchance >= HitChance.High)
-                                        {
-                                            R.Cast(rpreddmg.CastPosition);
-                                        }
-                                    }
+                                    if (afteraa) Q.CastOnUnit(target);
                                 }
-                        }
-                        else
+                            }
+                            else
+                            {
+                                if (target.IsValidTarget(checkqgap)) { Q.CastOnUnit(target, true); }
+                            }
+                    }
+                    if (qready && eready)
+                    {
+                        if (target.IsValidTarget(checkegap) && !onaa && !beforeaa)
                         {
-                            if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target))
-                                if (qready || wready || eready)
+                            if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange())
+                            {
+                                if (!Player.HasBuff("riventricleavesoundtwo"))
                                 {
-                                    if (qready && wready && eready)
-                                    {
-                                        if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                        {
-                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (qready && wready)
-                                        {
-                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                        }
-                                        else
-                                        {
-                                            if (eready)
-                                            {
-
-                                            }
-                                        }
-                                        if (qready && eready)
-                                        {
-                                            DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                        }
-                                        else
-                                        {
-                                            if (wready)
-                                            {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                            }
-                                        }
-                                        if (wready && eready)
-                                        {
-                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                        }
-                                        else
-                                        {
-                                            if (qready)
-                                            {
-                                                DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
-                                            }
-                                        }
-                                    }
+                                    if (afteraa)
+                                        Q.CastOnUnit(target, true);
                                 }
                                 else
                                 {
-                                    var rpredheath = R.GetHealthPrediction(target);
-                                    if (target.Health - rpredheath <= R.GetDamage(target))
-                                    {
-                                        if (rpreddmg.Hitchance >= HitChance.High)
-                                        {
-                                            R.Cast(rpreddmg.CastPosition);
-                                        }
-                                    }
-                                    if (target.Health <= R.GetDamage(target))
-                                    {
-                                        if (rpreddmg.Hitchance >= HitChance.High)
-                                        {
-                                            R.Cast(rpreddmg.CastPosition);
-                                        }
-                                    }
+                                    if (afteraa)
+                                        E.Cast(target, true);
                                 }
+                            }
+                        }
+                    }
+                    if (eready && wready)
+                    {
+                        if (target.IsValidTarget(checkegap) && !onaa && !beforeaa)
+                        {
+                            if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange())
+                            {
+                                if (afteraa) W.CastOnUnit(target);
+                                if (afteraa) E.CastOnUnit(target);
+                            }
+                        }
+                    }                   
+                }               
+            }
+            else
+            {
+                if (qready && !wready && !eready && qenabled && ((!rready || R2()) || !renabled))
+                {
+                    if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
+                    {
+                        if (onaa) return;
+                        if (afteraa)
+                        {
+                            Q.CastOnUnit(target);
+                            DelayAction.Add(10, () => { return; });
                         }
                     }
                     else
                     {
-                        if (target.IsValidTarget(E.Range + Q.Range))
+                        if (target.DistanceToPlayer() <= checkqgap + Player.GetRealAutoAttackRange() && target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() + 100)
                         {
-                            if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2)
+                            Q.CastOnUnit(target);
+                            DelayAction.Add(10, () => { return; });
+                        }
+                    }
+                }
+                if (!qready && wready && !eready && wenabled && ((!rready || R2()) || !renabled))
+                {
+                    if (afteraa)
+                    {
+                        if (target.IsValidTarget(W.Range + 50))
+                        {
+                            W.Cast(target.Position);
+                        }
+                        DelayAction.Add(10, () => { return; });
+                    }
+                }
+                if (!qready && !wready && eready && eenabled && ((!rready || R2()) || !renabled))
+                {
+                    if (onaa) return;
+                    if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
+                    {
+                        Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange());
+                        foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                        {
+                            if (c != Vector2.Zero)
+                                E.Cast(c);
+                        }
+                        E.Cast(target.Position);
+                        DelayAction.Add(10, () => { return; });
+                    }
+                    if (afteraa)
+                    {
+                        if (Player.HasBuff("riventricleavesoundtwo"))
+                        {
+                            Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
+                            foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
                             {
-                                if (qready && eready)
+                                E.Cast(c);
+                            }
+                            DelayAction.Add(10, () => { return; });
+                        }
+                    }
+                }
+                if (rready && renabled)
+                {
+                    if (R1() && target.DistanceToPlayer() < 700)
+                    {
+                        if (target.HealthPercent < 40)
+                        {
+                            DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                        }
+                        if (target.HealthPercent < rheath)
+                        {
+                            if (eready)
+                            {
+                                if (qready)
                                 {
-                                    DelayAction.Add(1, () => { E.Cast(rpreddmg.CastPosition); });
-                                    DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
-                                    DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
+                                    E.Cast(target.Position);
+                                    DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                    DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
                                 }
-                                else
+                            }
+                            else
+                            {
+                                if (qready)
                                 {
-                                    if (qready)
-                                    {
-                                        DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                        DelayAction.Add(5, () => { Q.Cast(rpreddmg.CastPosition); });
-                                    }
+                                    E.Cast(target.Position);
+                                    DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                    DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
                                 }
                             }
                         }
-                        else
+                        if (Player.CountEnemyHeroesInRange(700) > 1)
                         {
-                            if (target.Health <= R.GetDamage(target))
+                            if (eready)
+                            {
+                                if (qready)
+                                {
+                                    E.Cast(target.Position);
+                                    DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                    DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
+                                }
+                            }
+                            else
+                            {
+                                if (qready)
+                                {
+                                    E.Cast(target.Position);
+                                    DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                    DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
+                                }
+                            }
+                        }
+                    }
+                    if (R2())
+                    {
+                        if (target.IsValidTarget(R.Range))
+                        {
+                            if (target.Health < R.GetDamage(target) + Player.TotalAttackDamage)
                             {
                                 if (rpreddmg.Hitchance >= HitChance.High)
                                 {
                                     R.Cast(rpreddmg.CastPosition);
                                 }
                             }
-                        }
-                    }
-                }
-            }
-            #endregion
-
-            if (RMenu.flash.Active && (fl.IsReady() || flash.IsReady()) && target.DistanceToPlayer() > 450)
-            {
-                if(target.IsValidTarget(900))
-                {
-
-                }
-            }else
-            {
-                if(target.IsValidTarget(checkqgap + checkegap + 400))
-                {
-                    if(rready && renabled && target.DistanceToPlayer() < 700 && (target.HealthPercent < rheath || Player.CountEnemyHeroesInRange(600) > 1))
-                    {
-                        if(R1() && target.DistanceToPlayer() < 700)
-                        {
-                            if(target.HealthPercent < 40)
+                            if (beforeaa && target.Health + target.BonusHealth <= R.GetDamage(target) + Player.TotalAttackDamage * 2)
                             {
-                                DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                            }
-                            if (target.HealthPercent < rheath)
-                            {
-                                if(eready)
+                                if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
                                 {
-                                    if(qready)
-                                    {
-                                        E.Cast(target.Position);
-                                        DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                        DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                                    }
-                                }else
-                                {
-                                    if(qready)
-                                    {
-                                        E.Cast(target.Position);
-                                        DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                        DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                                    }
+                                    R.Cast(rpreddmg.CastPosition);
+                                    DelayAction.Add(1, () => { Orbwalker.Attack(target); });
                                 }
                             }
-                            if (Player.CountEnemyHeroesInRange(600) > 1)
+                            if (HaveTiamat())
                             {
-                                if (eready)
+                                if (afteraa)
                                 {
-                                    if (qready)
-                                    {
-                                        E.Cast(target.Position);
-                                        DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                        DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                                    }
+                                    Player.UseItem((int)ItemId.Tiamat);
+                                    Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
+                                    Player.UseItem((int)ItemId.Ravenous_Hydra);
+                                    Player.UseItem((int)ItemId.Tiamat_Melee_Only);
                                 }
-                                else
-                                {
-                                    if (qready)
+                                if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 3 + W.GetDamage(target))
+                                    if (qready || wready || eready)
                                     {
-                                        E.Cast(target.Position);
-                                        DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
-                                        DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
-                                    }
-                                }
-                            }
-                        }
-                        if (R2())
-                        {
-                            if (target.IsValidTarget(W.Range + 75))
-                            {
-                                if(beforeaa && target.Health + target.BonusHealth <= R.GetDamage(target) + Player.TotalAttackDamage * 2)
-                                {
-                                    if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                    {
-                                        R.Cast(rpreddmg.CastPosition);
-                                        DelayAction.Add(2, () => { Orbwalker.Attack(target); });
-                                    }
-                                }
-                                if(HaveTiamat())
-                                {              
-                                    if(!onaa)
-                                    {
-                                        Player.UseItem((int)ItemId.Tiamat);
-                                        Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
-                                        Player.UseItem((int)ItemId.Ravenous_Hydra);
-                                        Player.UseItem((int)ItemId.Tiamat_Melee_Only);
-                                    }                                    
-                                    if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 3 + W.GetDamage(target))
-                                        if (qready || wready || eready)
+                                        if (qready && wready && eready)
                                         {
-                                            if (qready && wready && eready)
+                                            if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
                                             {
-                                                if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                                {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (qready && wready)
-                                                {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                }
-                                                else
-                                                {
-                                                    if (eready && qready)
-                                                    {
-                                                        DelayAction.Add(1, () => { E.Cast(Player.Position.Extend(rpreddmg.CastPosition, -10)); });
-                                                        DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                    }
-                                                }
-                                                if (qready && eready)
-                                                {
-                                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                }
-                                                else
-                                                {
-                                                    if (wready)
-                                                    {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    }
-                                                }
-                                                if (wready && eready)
-                                                {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                }
-                                                else
-                                                {
-                                                    if (qready)
-                                                    {
-                                                        DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                    }
-                                                }
+                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
                                             }
                                         }
                                         else
                                         {
-                                            var rpredheath = R.GetHealthPrediction(target);
-                                            if (target.Health - rpredheath <= R.GetDamage(target))
+                                            if (qready && wready)
                                             {
-                                                if (rpreddmg.Hitchance >= HitChance.High)
-                                                {
-                                                    R.Cast(rpreddmg.CastPosition);
-                                                }
-                                            }
-                                            if (target.Health <= R.GetDamage(target))
-                                            {
-                                                if (rpreddmg.Hitchance >= HitChance.High)
-                                                {
-                                                    R.Cast(rpreddmg.CastPosition);
-                                                }
-                                            }
-                                        }
-                                }
-                                else
-                                {
-                                    if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target))
-                                        if (qready || wready || eready)
-                                        {
-                                            if (qready && wready && eready)
-                                            {
-                                                if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                                {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                }
+                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
                                             }
                                             else
                                             {
-                                                if (qready && wready)
+                                                if (eready && qready)
                                                 {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                }
-                                                else
-                                                {
-                                                    if (eready)
-                                                    {
-
-                                                    }
-                                                }
-                                                if (qready && eready)
-                                                {
-                                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                }
-                                                else
-                                                {
-                                                    if (wready)
-                                                    {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    }
-                                                }
-                                                if (wready && eready)
-                                                {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
-                                                }
-                                                else
-                                                {
-                                                    if (qready)
-                                                    {
-                                                        DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
-                                                    }
+                                                    DelayAction.Add(1, () => { E.Cast(Player.Position.Extend(rpreddmg.CastPosition, -10)); });
+                                                    DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
+                                                    DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
                                                 }
                                             }
-                                        }
-                                        else
-                                        {
-                                            var rpredheath = R.GetHealthPrediction(target);
-                                            if (target.Health - rpredheath <= R.GetDamage(target))
-                                            {
-                                                if (rpreddmg.Hitchance >= HitChance.High)
-                                                {
-                                                    R.Cast(rpreddmg.CastPosition);
-                                                }
-                                            }
-                                            if (target.Health <= R.GetDamage(target))
-                                            {
-                                                if (rpreddmg.Hitchance >= HitChance.High)
-                                                {
-                                                    R.Cast(rpreddmg.CastPosition);
-                                                }
-                                            }
-                                        }
-                                }                                
-                            }else
-                            {
-                                if(target.IsValidTarget(E.Range + Q.Range))
-                                {
-                                    if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2)
-                                    {
-                                        if (qready && eready)
-                                        {
-                                            DelayAction.Add(1, () => { E.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
-                                            DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
-                                        }else
-                                        {
-                                            if(qready)
+                                            if (qready && eready)
                                             {
                                                 DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(5, () => { Q.Cast(rpreddmg.CastPosition); });
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (target.Health <= R.GetDamage(target))
-                                    {
-                                        if(rpreddmg.Hitchance >= HitChance.High)
-                                        {
-                                            R.Cast(rpreddmg.CastPosition);
-                                        }
-                                    }
-                                }                                
-                            }
-                        }
-                    }
-                    else
-                    {                       
-                        if ((qready && qenabled) || (wready && wenabled) || (eready && eenabled))
-                        {
-                            if(HaveTiamat())
-                            {
-                                if ((qready && qenabled) && (wready && wenabled) && (eready && eenabled))
-                                {
-                                    if(target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                    {
-                                        if (onaa) return;
-                                        if (afteraa)
-                                        {
-                                            Q.CastOnUnit(target);
-                                            DelayAction.Add(10, () => { return; });
-                                        }
-                                        if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange())
-                                        {
-                                            Q.CastOnUnit(target);
-                                            DelayAction.Add(10, () => { return; });
-                                        }
-                                        if (afteraa)
-                                        {
-                                            if(Player.HasBuff("riventricleavesoundtwo"))
-                                            {
-                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                foreach(var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                {
-                                                    E.Cast(c);
-                                                }                                                
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }
-
-                                    }else
-                                    {
-                                        if (target.DistanceToPlayer() <= checkqgap + checkegap + Player.GetRealAutoAttackRange())
-                                        {
-                                            Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                            foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                            {
-                                                if(c != Vector2.Zero)
-                                                E.Cast(c);
-                                            }
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(40, () => { Q.CastOnUnit(target); });
-                                            DelayAction.Add(60, () => { return; });
-                                        }
-                                        else
-                                        {
-                                            /*if (target.DistanceToPlayer() >= checkegap + Player.GetRealAutoAttackRange())
-                                            {
-                                                E.Cast(target.Position);
-                                                DelayAction.Add(10, () => { return; });
+                                                DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
                                             }
                                             else
                                             {
-                                                E.Cast(target.Position);
-                                                DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                                DelayAction.Add(10, () => { return; });
-                                            }*/
+                                                if (wready)
+                                                {
+                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                }
+                                            }
+                                            if (wready && eready)
+                                            {
+                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                            }
+                                            else
+                                            {
+                                                if (qready)
+                                                {
+                                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                    DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                }
+                                            }
                                         }
+                                    }
+                                    else
+                                    {
+                                        var rpredheath = R.GetHealthPrediction(target);
+                                        if (target.Health - rpredheath <= R.GetDamage(target))
+                                        {
+                                            if (rpreddmg.Hitchance >= HitChance.High)
+                                            {
+                                                R.Cast(rpreddmg.CastPosition);
+                                            }
+                                        }
+                                        if (target.Health <= R.GetDamage(target))
+                                        {
+                                            if (rpreddmg.Hitchance >= HitChance.High)
+                                            {
+                                                R.Cast(rpreddmg.CastPosition);
+                                            }
+                                        }
+                                    }
+                            }
+                            else
+                            {
+                                if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target))
+                                    if (qready || wready || eready)
+                                    {
+                                        if (qready && wready && eready)
+                                        {
+                                            if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
+                                            {
+                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (qready && wready)
+                                            {
+                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                            }
+                                            else
+                                            {
+                                                if (eready)
+                                                {
+
+                                                }
+                                            }
+                                            if (qready && eready)
+                                            {
+                                                DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                            }
+                                            else
+                                            {
+                                                if (wready)
+                                                {
+                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                    DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                }
+                                            }
+                                            if (wready && eready)
+                                            {
+                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                            }
+                                            else
+                                            {
+                                                if (qready)
+                                                {
+                                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                    DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var rpredheath = R.GetHealthPrediction(target);
+                                        if (target.Health - rpredheath <= R.GetDamage(target))
+                                        {
+                                            if (rpreddmg.Hitchance >= HitChance.High)
+                                            {
+                                                R.Cast(rpreddmg.CastPosition);
+                                            }
+                                        }
+                                        if (target.Health <= R.GetDamage(target))
+                                        {
+                                            if (rpreddmg.Hitchance >= HitChance.High)
+                                            {
+                                                R.Cast(rpreddmg.CastPosition);
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                        else
+                        {
+                            if (target.IsValidTarget(E.Range + Q.Range))
+                            {
+                                if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2)
+                                {
+                                    if (qready && eready)
+                                    {
+                                        DelayAction.Add(1, () => { E.Cast(rpreddmg.CastPosition); });
+                                        DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
+                                        DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
+                                    }
+                                    else
+                                    {
+                                        if (qready)
+                                        {
+                                            DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                            DelayAction.Add(5, () => { Q.Cast(rpreddmg.CastPosition); });
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (target.Health <= R.GetDamage(target))
+                                {
+                                    if (rpreddmg.Hitchance >= HitChance.High)
+                                    {
+                                        R.Cast(rpreddmg.CastPosition);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (RMenu.flash.Active && (fl.IsReady() || flash.IsReady()) && target.DistanceToPlayer() > 450)
+                {
+                    if (target.IsValidTarget(900))
+                    {
+
+                    }
+                }
+                else
+                {
+                    if (target.IsValidTarget(checkqgap + checkegap + 400))
+                    {
+                        if (rready && renabled && target.DistanceToPlayer() < 700 && (target.HealthPercent < rheath || Player.CountEnemyHeroesInRange(600) > 1))
+                        {
+                            if (R1() && target.DistanceToPlayer() < 700)
+                            {
+                                if (target.HealthPercent < 40)
+                                {
+                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                }
+                                if (target.HealthPercent < rheath)
+                                {
+                                    if (eready)
+                                    {
+                                        if (qready)
+                                        {
+                                            E.Cast(target.Position);
+                                            DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                            DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (qready)
+                                        {
+                                            E.Cast(target.Position);
+                                            DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                            DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
+                                        }
+                                    }
+                                }
+                                if (Player.CountEnemyHeroesInRange(600) > 1)
+                                {
+                                    if (eready)
+                                    {
+                                        if (qready)
+                                        {
+                                            E.Cast(target.Position);
+                                            DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                            DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (qready)
+                                        {
+                                            E.Cast(target.Position);
+                                            DelayAction.Add(100 - Game.Ping, () => { R.Cast(target); });
+                                            DelayAction.Add(110 - Game.Ping, () => { Q.Cast(target); });
+                                        }
+                                    }
+                                }
+                            }
+                            if (R2())
+                            {
+                                if (target.IsValidTarget(W.Range + 75))
+                                {
+                                    if (beforeaa && target.Health + target.BonusHealth <= R.GetDamage(target) + Player.TotalAttackDamage * 2)
+                                    {
+                                        if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
+                                        {
+                                            R.Cast(rpreddmg.CastPosition);
+                                            DelayAction.Add(2, () => { Orbwalker.Attack(target); });
+                                        }
+                                    }
+                                    if (HaveTiamat())
+                                    {
+                                        if (!onaa)
+                                        {
+                                            Player.UseItem((int)ItemId.Tiamat);
+                                            Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
+                                            Player.UseItem((int)ItemId.Ravenous_Hydra);
+                                            Player.UseItem((int)ItemId.Tiamat_Melee_Only);
+                                        }
+                                        if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 3 + W.GetDamage(target))
+                                            if (qready || wready || eready)
+                                            {
+                                                if (qready && wready && eready)
+                                                {
+                                                    if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
+                                                    {
+                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (qready && wready)
+                                                    {
+                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                    else
+                                                    {
+                                                        if (eready && qready)
+                                                        {
+                                                            DelayAction.Add(1, () => { E.Cast(Player.Position.Extend(rpreddmg.CastPosition, -10)); });
+                                                            DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
+                                                            DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                        }
+                                                    }
+                                                    if (qready && eready)
+                                                    {
+                                                        DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                    else
+                                                    {
+                                                        if (wready)
+                                                        {
+                                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        }
+                                                    }
+                                                    if (wready && eready)
+                                                    {
+                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                    else
+                                                    {
+                                                        if (qready)
+                                                        {
+                                                            DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                            DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var rpredheath = R.GetHealthPrediction(target);
+                                                if (target.Health - rpredheath <= R.GetDamage(target))
+                                                {
+                                                    if (rpreddmg.Hitchance >= HitChance.High)
+                                                    {
+                                                        R.Cast(rpreddmg.CastPosition);
+                                                    }
+                                                }
+                                                if (target.Health <= R.GetDamage(target))
+                                                {
+                                                    if (rpreddmg.Hitchance >= HitChance.High)
+                                                    {
+                                                        R.Cast(rpreddmg.CastPosition);
+                                                    }
+                                                }
+                                            }
+                                    }
+                                    else
+                                    {
+                                        if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target))
+                                            if (qready || wready || eready)
+                                            {
+                                                if (qready && wready && eready)
+                                                {
+                                                    if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
+                                                    {
+                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (qready && wready)
+                                                    {
+                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                    else
+                                                    {
+                                                        if (eready)
+                                                        {
+
+                                                        }
+                                                    }
+                                                    if (qready && eready)
+                                                    {
+                                                        DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(3, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                    else
+                                                    {
+                                                        if (wready)
+                                                        {
+                                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                            DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                        }
+                                                    }
+                                                    if (wready && eready)
+                                                    {
+                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        DelayAction.Add(2, () => { R.Cast(rpreddmg.CastPosition); });
+                                                    }
+                                                    else
+                                                    {
+                                                        if (qready)
+                                                        {
+                                                            DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                            DelayAction.Add(2, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var rpredheath = R.GetHealthPrediction(target);
+                                                if (target.Health - rpredheath <= R.GetDamage(target))
+                                                {
+                                                    if (rpreddmg.Hitchance >= HitChance.High)
+                                                    {
+                                                        R.Cast(rpreddmg.CastPosition);
+                                                    }
+                                                }
+                                                if (target.Health <= R.GetDamage(target))
+                                                {
+                                                    if (rpreddmg.Hitchance >= HitChance.High)
+                                                    {
+                                                        R.Cast(rpreddmg.CastPosition);
+                                                    }
+                                                }
+                                            }
                                     }
                                 }
                                 else
                                 {
-                                    if (qready && qenabled && wready && wenabled)
+                                    if (target.IsValidTarget(E.Range + Q.Range))
+                                    {
+                                        if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2)
+                                        {
+                                            if (qready && eready)
+                                            {
+                                                DelayAction.Add(1, () => { E.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(50, () => { R.Cast(rpreddmg.CastPosition); });
+                                                DelayAction.Add(60, () => { Q.Cast(rpreddmg.CastPosition); });
+                                            }
+                                            else
+                                            {
+                                                if (qready)
+                                                {
+                                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
+                                                    DelayAction.Add(5, () => { Q.Cast(rpreddmg.CastPosition); });
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (target.Health <= R.GetDamage(target))
+                                        {
+                                            if (rpreddmg.Hitchance >= HitChance.High)
+                                            {
+                                                R.Cast(rpreddmg.CastPosition);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if ((qready && qenabled) || (wready && wenabled) || (eready && eenabled))
+                            {
+                                if (HaveTiamat())
+                                {
+                                    if ((qready && qenabled) && (wready && wenabled) && (eready && eenabled))
                                     {
                                         if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
                                         {
                                             if (onaa) return;
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                            {
-                                                if (afteraa)
-                                                {
-                                                    Q.CastOnUnit(target);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                            else
+                                            if (afteraa)
                                             {
                                                 Q.CastOnUnit(target);
                                                 DelayAction.Add(10, () => { return; });
                                             }
-                                        }
-                                        else
-                                        {
-                                            if (onaa && !target.IsValidTarget(checkqgap)) return;
-                                            Q.CastOnUnit(target);
-                                            DelayAction.Add(10, () => { return; });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (eready && eenabled)
-                                        {
-                                            if (onaa) return;
-                                            if (target.DistanceToPlayer() <= checkegap)
+                                            if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange())
                                             {
-                                                E.Cast(target.Position);
+                                                Q.CastOnUnit(target);
                                                 DelayAction.Add(10, () => { return; });
                                             }
-                                        }
-                                    }
-                                    if (qready && qenabled && eready && eenabled)
-                                    {
-                                        if(target.IsValidTarget(checkegap + checkqgap))
-                                        {
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
+                                            if (afteraa)
                                             {
-                                                if (onaa) return;
-                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                                if (Player.HasBuff("riventricleavesoundtwo"))
                                                 {
-                                                    if (afteraa)
+                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
+                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
                                                     {
-                                                        if (Player.HasBuff("riventricleavesoundtwo"))
-                                                        {
-                                                            Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                            foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                            {
-                                                                if (c != Vector2.Zero)
-                                                                    E.Cast(c);
-                                                            }
-                                                        }
-                                                        Q.CastOnUnit(target);
-                                                        DelayAction.Add(10, () => { return; });
+                                                        E.Cast(c);
                                                     }
-                                                }
-                                                else
-                                                {
-                                                    Q.CastOnUnit(target);
                                                     DelayAction.Add(10, () => { return; });
                                                 }
                                             }
-                                            else
-                                            {
-                                                if (onaa) return;
-                                                E.Cast(target.Position);
-                                                DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }                                       
-                                    }
-                                    else
-                                    {
-                                        if (wready && wenabled)
-                                        {
 
                                         }
-                                    }
-                                    if (eready && eenabled && wready && wenabled)
-                                    {
-                                        if (onaa) return;
-                                        if (target.DistanceToPlayer() <= checkegap)
+                                        else
                                         {
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(10, () => { return; });
+                                            if (target.DistanceToPlayer() <= checkqgap + checkegap + Player.GetRealAutoAttackRange())
+                                            {
+                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
+                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                {
+                                                    if (c != Vector2.Zero)
+                                                        E.Cast(c);
+                                                }
+                                                E.Cast(target.Position);
+                                                DelayAction.Add(40, () => { Q.CastOnUnit(target); });
+                                                DelayAction.Add(60, () => { return; });
+                                            }
+                                            else
+                                            {
+                                                /*if (target.DistanceToPlayer() >= checkegap + Player.GetRealAutoAttackRange())
+                                                {
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                                else
+                                                {
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(1, () => { Q.CastOnUnit(target); });
+                                                    DelayAction.Add(10, () => { return; });
+                                                }*/
+                                            }
                                         }
                                     }
                                     else
                                     {
-                                        if (qready && qenabled)
+                                        if (qready && qenabled && wready && wenabled)
                                         {
                                             if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
                                             {
@@ -1180,93 +1242,114 @@ namespace DominationAIO.Champions
                                                 DelayAction.Add(10, () => { return; });
                                             }
                                         }
-                                    }
-                                }
-                            }        
-                            else
-                            {
-                                if ((qready && qenabled) && (wready && wenabled) && (eready && eenabled))
-                                {
-                                    if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                    {
-                                        if (onaa) return;
-                                        if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                        else
                                         {
-                                            if (afteraa)
+                                            if (eready && eenabled)
                                             {
-                                                Q.CastOnUnit(target);
-                                                if (target.IsValidTarget(W.Range + 75))
+                                                if (onaa) return;
+                                                if (target.DistanceToPlayer() <= checkegap)
                                                 {
-                                                    W.Cast(target.Position);
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(10, () => { return; });
                                                 }
-                                                DelayAction.Add(10, () => { return; });
+                                            }
+                                        }
+                                        if (qready && qenabled && eready && eenabled)
+                                        {
+                                            if (target.IsValidTarget(checkegap + checkqgap))
+                                            {
+                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
+                                                {
+                                                    if (onaa) return;
+                                                    if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                                    {
+                                                        if (afteraa)
+                                                        {
+                                                            if (Player.HasBuff("riventricleavesoundtwo"))
+                                                            {
+                                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
+                                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                                {
+                                                                    if (c != Vector2.Zero)
+                                                                        E.Cast(c);
+                                                                }
+                                                            }
+                                                            Q.CastOnUnit(target);
+                                                            DelayAction.Add(10, () => { return; });
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        Q.CastOnUnit(target);
+                                                        DelayAction.Add(10, () => { return; });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (onaa) return;
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(1, () => { Q.CastOnUnit(target); });
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
                                             }
                                         }
                                         else
                                         {
-                                            Q.CastOnUnit(target);
-                                            DelayAction.Add(10, () => { return; });
-                                        }
-                                        if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
-                                        {
-                                            Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                            foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                            if (wready && wenabled)
                                             {
-                                                if (c != Vector2.Zero)
-                                                    E.Cast(c);
-                                            }
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                            DelayAction.Add(10, () => { return; });
-                                        }
-                                        if (afteraa)
-                                        {
-                                            if (Player.HasBuff("riventricleavesoundtwo"))
-                                            {
-                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                {
-                                                    E.Cast(c);
-                                                }
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }
 
-                                    }
-                                    else
-                                    {
-                                        if (target.DistanceToPlayer() <= checkqgap + checkegap + Player.GetRealAutoAttackRange())
-                                        {
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                            DelayAction.Add(10, () => { return; });
+                                            }
                                         }
-                                        else
+                                        if (eready && eenabled && wready && wenabled)
                                         {
-                                            /*if (target.DistanceToPlayer() <= checkegap + Player.GetRealAutoAttackRange())
+                                            if (onaa) return;
+                                            if (target.DistanceToPlayer() <= checkegap)
                                             {
                                                 E.Cast(target.Position);
                                                 DelayAction.Add(10, () => { return; });
                                             }
-                                            else
+                                        }
+                                        else
+                                        {
+                                            if (qready && qenabled)
                                             {
-                                                E.Cast(target.Position);
-                                                DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                                DelayAction.Add(10, () => { return; });
-                                            }*/
+                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
+                                                {
+                                                    if (onaa) return;
+                                                    if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                                    {
+                                                        if (afteraa)
+                                                        {
+                                                            Q.CastOnUnit(target);
+                                                            DelayAction.Add(10, () => { return; });
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        Q.CastOnUnit(target);
+                                                        DelayAction.Add(10, () => { return; });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (onaa && !target.IsValidTarget(checkqgap)) return;
+                                                    Q.CastOnUnit(target);
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                            }
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    if (qready && qenabled && wready && wenabled)
-                                    {                                        
+                                    if ((qready && qenabled) && (wready && wenabled) && (eready && eenabled))
+                                    {
                                         if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
                                         {
                                             if (onaa) return;
-                                            if(target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
                                             {
-                                                if(afteraa)
+                                                if (afteraa)
                                                 {
                                                     Q.CastOnUnit(target);
                                                     if (target.IsValidTarget(W.Range + 75))
@@ -1274,61 +1357,178 @@ namespace DominationAIO.Champions
                                                         W.Cast(target.Position);
                                                     }
                                                     DelayAction.Add(10, () => { return; });
-                                                }                                                
+                                                }
                                             }
                                             else
                                             {
                                                 Q.CastOnUnit(target);
                                                 DelayAction.Add(10, () => { return; });
-                                            }                                            
+                                            }
+                                            if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
+                                            {
+                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
+                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                {
+                                                    if (c != Vector2.Zero)
+                                                        E.Cast(c);
+                                                }
+                                                E.Cast(target.Position);
+                                                DelayAction.Add(1, () => { Q.CastOnUnit(target); });
+                                                DelayAction.Add(10, () => { return; });
+                                            }
+                                            if (afteraa)
+                                            {
+                                                if (Player.HasBuff("riventricleavesoundtwo"))
+                                                {
+                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
+                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                    {
+                                                        E.Cast(c);
+                                                    }
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                            }
+
                                         }
                                         else
                                         {
-                                            if (onaa && !target.IsValidTarget(checkqgap)) return;
-                                            Q.CastOnUnit(target);
-                                            DelayAction.Add(10, () => { return; });
+                                            if (target.DistanceToPlayer() <= checkqgap + checkegap + Player.GetRealAutoAttackRange())
+                                            {
+                                                E.Cast(target.Position);
+                                                DelayAction.Add(1, () => { Q.CastOnUnit(target); });
+                                                DelayAction.Add(10, () => { return; });
+                                            }
+                                            else
+                                            {
+                                                /*if (target.DistanceToPlayer() <= checkegap + Player.GetRealAutoAttackRange())
+                                                {
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                                else
+                                                {
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(1, () => { Q.CastOnUnit(target); });
+                                                    DelayAction.Add(10, () => { return; });
+                                                }*/
+                                            }
                                         }
                                     }
                                     else
                                     {
-                                        if (eready && eenabled)
+                                        if (qready && qenabled && wready && wenabled)
                                         {
-                                            if (onaa) return;
-                                            if (target.DistanceToPlayer() <= checkegap)
+                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
                                             {
-                                                E.Cast(target.Position);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                            if(afteraa && Player.HasBuff("riventricleavesoundtwo"))
-                                            {
-                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                if (onaa) return;
+                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
                                                 {
-                                                    E.Cast(c);
+                                                    if (afteraa)
+                                                    {
+                                                        Q.CastOnUnit(target);
+                                                        if (target.IsValidTarget(W.Range + 75))
+                                                        {
+                                                            W.Cast(target.Position);
+                                                        }
+                                                        DelayAction.Add(10, () => { return; });
+                                                    }
                                                 }
+                                                else
+                                                {
+                                                    Q.CastOnUnit(target);
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (onaa && !target.IsValidTarget(checkqgap)) return;
+                                                Q.CastOnUnit(target);
                                                 DelayAction.Add(10, () => { return; });
                                             }
                                         }
-                                    }
-                                    if (qready && qenabled && eready && eenabled)
-                                    {
-                                        if (target.IsValidTarget(checkegap + checkqgap))
+                                        else
                                         {
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                            if (eready && eenabled)
                                             {
                                                 if (onaa) return;
-                                                if (afteraa)
+                                                if (target.DistanceToPlayer() <= checkegap)
                                                 {
-                                                    Q.CastOnUnit(target);
-                                                    if (target.IsValidTarget(E.Range))
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                                if (afteraa && Player.HasBuff("riventricleavesoundtwo"))
+                                                {
+                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
+                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
                                                     {
-                                                        if (Player.HasBuff("riventricleavesoundtwo"))
+                                                        E.Cast(c);
+                                                    }
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                            }
+                                        }
+                                        if (qready && qenabled && eready && eenabled)
+                                        {
+                                            if (target.IsValidTarget(checkegap + checkqgap))
+                                            {
+                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                                {
+                                                    if (onaa) return;
+                                                    if (afteraa)
+                                                    {
+                                                        Q.CastOnUnit(target);
+                                                        if (target.IsValidTarget(E.Range))
                                                         {
-                                                            Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                            foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                            if (Player.HasBuff("riventricleavesoundtwo"))
                                                             {
-                                                                E.Cast(c);
+                                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
+                                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                                {
+                                                                    E.Cast(c);
+                                                                }
                                                             }
+                                                        }
+                                                        DelayAction.Add(10, () => { return; });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (onaa) return;
+                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
+                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                    {
+                                                        E.Cast(c);
+                                                    }
+                                                    DelayAction.Add(1, () => { Q.CastOnUnit(target); });
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (wready && wenabled)
+                                            {
+                                                if (afteraa && target.IsValidTarget(W.Range))
+                                                {
+                                                    W.Cast(target.Position);
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
+                                            }
+                                        }
+                                        if (eready && eenabled && wready && wenabled)
+                                        {
+                                            if (onaa) return;
+                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                                            {
+                                                if (afteraa && target.IsValidTarget(W.Range))
+                                                {
+                                                    W.Cast(target.Position);
+                                                    if (Player.HasBuff("riventricleavesoundtwo"))
+                                                    {
+                                                        Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
+                                                        foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                        {
+                                                            E.Cast(c);
                                                         }
                                                     }
                                                     DelayAction.Add(10, () => { return; });
@@ -1336,81 +1536,39 @@ namespace DominationAIO.Champions
                                             }
                                             else
                                             {
-                                                if (onaa) return;
-                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
+                                                if (target.DistanceToPlayer() <= checkegap)
                                                 {
-                                                    E.Cast(c);
+                                                    E.Cast(target.Position);
+                                                    DelayAction.Add(10, () => { return; });
                                                 }
-                                                DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (wready && wenabled)
-                                        {
-                                            if (afteraa && target.IsValidTarget(W.Range))
-                                            {
-                                                W.Cast(target.Position);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }
-                                    }
-                                    if (eready && eenabled && wready && wenabled)
-                                    {
-                                        if (onaa) return;
-                                        if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                        {
-                                            if (afteraa && target.IsValidTarget(W.Range))
-                                            {
-                                                W.Cast(target.Position);
-                                                if (Player.HasBuff("riventricleavesoundtwo"))
-                                                {
-                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                    {
-                                                        E.Cast(c);
-                                                    }
-                                                }
-                                                DelayAction.Add(10, () => { return; });
                                             }
                                         }
                                         else
                                         {
-                                            if (target.DistanceToPlayer() <= checkegap)
+                                            if (qready && qenabled)
                                             {
-                                                E.Cast(target.Position);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }                                                                                   
-                                    }
-                                    else
-                                    {
-                                        if (qready && qenabled)
-                                        {
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                            {
-                                                if (onaa) return;
-                                                if(afteraa)
+                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
                                                 {
-                                                    Q.CastOnUnit(target);
-                                                }                                                
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                            else
-                                            {
-                                                if (onaa && !target.IsValidTarget(checkqgap)) return;
-                                                if(target.DistanceToPlayer() > Player.GetRealAutoAttackRange() + 100)
-                                                {
-                                                    Q.CastOnUnit(target);
+                                                    if (onaa) return;
+                                                    if (afteraa)
+                                                    {
+                                                        Q.CastOnUnit(target);
+                                                    }
+                                                    DelayAction.Add(10, () => { return; });
                                                 }
                                                 else
                                                 {
-                                                    Q.CastOnUnit(target);
-                                                }                                              
-                                                DelayAction.Add(10, () => { return; });
+                                                    if (onaa && !target.IsValidTarget(checkqgap)) return;
+                                                    if (target.DistanceToPlayer() > Player.GetRealAutoAttackRange() + 100)
+                                                    {
+                                                        Q.CastOnUnit(target);
+                                                    }
+                                                    else
+                                                    {
+                                                        Q.CastOnUnit(target);
+                                                    }
+                                                    DelayAction.Add(10, () => { return; });
+                                                }
                                             }
                                         }
                                     }
@@ -1420,6 +1578,7 @@ namespace DominationAIO.Champions
                     }
                 }
             }
+            #endregion
         }
 
         private static bool HaveTiamat()

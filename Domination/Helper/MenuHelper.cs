@@ -4,12 +4,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using EnsoulSharp;
+using EnsoulSharp.SDK;
+using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.MenuUI.Values;
 
 namespace DominationAIO.Champions.Helper
 {
     public static class MenuHelper
     {
+        public static AMenuComponent Item(this EnsoulSharp.SDK.MenuUI.Menu menu, string name, bool championUnique = false)
+        {
+            if (championUnique)
+            {
+                name = ObjectManager.Player.CharacterName + name;
+            }
+
+            //Search in our own items
+            foreach (var item in menu.Components.ToArray().Where(item => !(item.Value is EnsoulSharp.SDK.MenuUI.Menu) && item.Value.Name == name))
+            {
+                return item.Value;
+            }
+
+            //Search in submenus
+            foreach (var subMenu in menu.Components.ToArray().Where(x => x.Value is EnsoulSharp.SDK.MenuUI.Menu))
+            {
+                foreach (var item in (subMenu.Value as EnsoulSharp.SDK.MenuUI.Menu)?.Components)
+                {
+                    if (item.Value is EnsoulSharp.SDK.MenuUI.Menu)
+                    {
+                        var result = (item.Value as EnsoulSharp.SDK.MenuUI.Menu).Item(name, championUnique);
+                        if (result != null)
+                        {
+                            return result;
+                        }
+                    }
+                    else if (item.Value.Name == name)
+                    {
+                        return item.Value;
+
+                    }
+                }
+
+            }
+
+            return null;
+        }
         public static void AddMenuBool(this EnsoulSharp.SDK.MenuUI.Menu menu, string name, string displayName, bool value = true)
         {
             menu.Add(new MenuBool(name, displayName, value));

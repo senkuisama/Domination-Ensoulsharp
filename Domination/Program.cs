@@ -15,6 +15,8 @@ namespace DominationAIO
         {
             try
             {
+                Hacks.DisableAntiDisconnect = true;
+                if (Hacks.DisableAntiDisconnect == false) Hacks.DisableAntiDisconnect = true;
                 switch (GameObjects.Player.CharacterName)
                 {
                     case "Aphelios":
@@ -48,7 +50,7 @@ namespace DominationAIO
                         Console.WriteLine("DominationAIO Does Not Support " + ObjectManager.Player.CharacterName);
                         break;                   
                 }
-                skinhack.OnLoad();
+                skinhack.OnLoad(); 
                 Troll_Chat_xD.Program.OnLoad();
             }
             catch (Exception ex)

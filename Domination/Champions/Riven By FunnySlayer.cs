@@ -131,7 +131,7 @@ namespace DominationAIO.Champions
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Dash.OnDash += Dash_OnDash;
 
-            //Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnDraw += Drawing_OnDraw;
 
             Orbwalker.OnAction += FarmAction;
         }        
@@ -141,6 +141,8 @@ namespace DominationAIO.Champions
             if(!Player.IsDead)
             {
                 Drawing.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Red);
+                Drawing.DrawCircle(Player.Position, 400, System.Drawing.Color.Yellow);
+                Drawing.DrawCircle(Player.Position, 700, System.Drawing.Color.Blue);
             }
         }
 
@@ -331,7 +333,7 @@ namespace DominationAIO.Champions
         private static void Game_OnUpdate(EventArgs args)
         {
             SpellData sdataw = Player.Spellbook.GetSpell(SpellSlot.W).SData;
-            W = new Spell(SpellSlot.W, sdataw.CastRadius);
+            W = new Spell(SpellSlot.W, 200 + Player.BoundingRadius);
             #region old
             /*if (RMenu.Qdelay.Enabled)
             {
@@ -436,7 +438,7 @@ namespace DominationAIO.Champions
                     {
                         if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
                         if (afteraa && target.IsValidTarget(W.Range)) W.Cast(target);
-                        if (W.IsInRange(target) && target.DistanceToPlayer() > Player.GetRealAutoAttackRange()) W.Cast(target);
+                        if (W.IsInRange(target) && target.DistanceToPlayer() > Player.GetRealAutoAttackRange() || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
                     }
                     if (!qready && !wready && eready)
                     {
@@ -452,7 +454,7 @@ namespace DominationAIO.Champions
                                 if (Player.HasBuff("riventricleavesoundtwo"))
                                 {
                                     if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa) W.Cast(target);
+                                    if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
                                 }
                                 else
                                 {
@@ -462,7 +464,7 @@ namespace DominationAIO.Champions
                             }
                             else
                             {
-                                if (target.IsValidTarget(checkqgap)) { Q.CastOnUnit(target, true); }
+                                if (target.IsValidTarget(checkqgap)) { Q.Cast(target, true); }
                             }
                     }
                     if (qready && eready)
@@ -493,7 +495,7 @@ namespace DominationAIO.Champions
                             }else
                             {
                                 if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                if (afteraa) W.Cast(target);
+                                if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
                             }
                         }
                     }
@@ -517,7 +519,7 @@ namespace DominationAIO.Champions
                     if (!qready && wready && !eready)
                     {
                         if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                        if (afteraa && target.DistanceToPlayer() <= W.Range)
+                        if (afteraa || target.IsFleeing || !target.IsFacing(Player) && target.DistanceToPlayer() <= W.Range)
                             W.Cast(target);
                     }
                     if (!qready && !wready && eready)
@@ -534,7 +536,7 @@ namespace DominationAIO.Champions
                                 if (Player.HasBuff("riventricleavesoundtwo"))
                                 {
                                     if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa) W.Cast(target);
+                                    if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
                                 }
                                 else
                                 {
@@ -576,7 +578,7 @@ namespace DominationAIO.Champions
                             if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange())
                             {
                                 if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                if (afteraa) W.Cast(target);
+                                if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
                                 if (afteraa) E.Cast(target);
                             }
                         }
@@ -609,12 +611,12 @@ namespace DominationAIO.Champions
                 }
                 if (!qready && wready && !eready && wenabled && ((!rready || R2()) || !renabled))
                 {
-                    if (afteraa)
+                    if (afteraa || target.IsFleeing || !target.IsFacing(Player))
                     {
-                        if (target.IsValidTarget(W.Range + 50))
+                        if (target.IsValidTarget(W.Range))
                         {
                             if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            W.Cast(target.Position);
+                            W.Cast(target);
                         }
                         DelayAction.Add(10, () => { return; });
                     }
@@ -632,7 +634,7 @@ namespace DominationAIO.Champions
                                 E.Cast(c);
                         }
                         if(target.IsValidTarget(checkegap))
-                        E.Cast(target.Position);
+                        E.Cast(target);
                         DelayAction.Add(10, () => { return; });
                     }
                     if (afteraa)
@@ -1092,7 +1094,7 @@ namespace DominationAIO.Champions
                             }
                             if (R2())
                             {
-                                if (target.IsValidTarget(W.Range + 75))
+                                if (target.IsValidTarget(W.Range))
                                 {
                                     if (beforeaa && target.Health + target.BonusHealth <= R.GetDamage(target) + Player.TotalAttackDamage * 2)
                                     {
@@ -1518,12 +1520,15 @@ namespace DominationAIO.Champions
                                             {
                                                 if (afteraa)
                                                 {
-                                                    Q.Cast(target);
-                                                    if (target.IsValidTarget(W.Range + 75))
-                                                    {
-                                                        W.Cast(target.Position);
-                                                    }
+                                                    Q.Cast(target);                                                    
                                                     DelayAction.Add(10, () => { return; });
+                                                }
+                                                if(afteraa  || target.IsFleeing || !target.IsFacing(Player))
+                                                {
+                                                    if (target.IsValidTarget(W.Range))
+                                                    {
+                                                        W.Cast(target);
+                                                    }
                                                 }
                                             }
                                             else
@@ -1599,12 +1604,15 @@ namespace DominationAIO.Champions
                                                 {
                                                     if (afteraa)
                                                     {
-                                                        Q.Cast(target);
+                                                        Q.Cast(target);                                                       
+                                                        DelayAction.Add(10, () => { return; });
+                                                    }
+                                                    if(afteraa || target.IsFleeing || !target.IsFacing(Player))
+                                                    {
                                                         if (target.IsValidTarget(W.Range + 75))
                                                         {
                                                             W.Cast(target.Position);
                                                         }
-                                                        DelayAction.Add(10, () => { return; });
                                                     }
                                                 }
                                                 else
@@ -1687,7 +1695,7 @@ namespace DominationAIO.Champions
                                             if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
                                             if (wready && wenabled)
                                             {
-                                                if (afteraa && target.IsValidTarget(W.Range))
+                                                if (afteraa || target.IsFleeing || !target.IsFacing(Player) && target.IsValidTarget(W.Range))
                                                 {
                                                     W.Cast(target.Position);
                                                     DelayAction.Add(10, () => { return; });
@@ -1700,9 +1708,9 @@ namespace DominationAIO.Champions
                                             if (onaa) return;
                                             if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
                                             {
-                                                if (afteraa && target.IsValidTarget(W.Range))
+                                                if (afteraa || target.IsFleeing || !target.IsFacing(Player) && target.IsValidTarget(W.Range))
                                                 {
-                                                    W.Cast(target.Position);
+                                                    W.Cast(target);
                                                     if (Player.HasBuff("riventricleavesoundtwo"))
                                                     {
                                                         Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);

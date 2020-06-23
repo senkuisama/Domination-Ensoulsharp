@@ -403,7 +403,7 @@ namespace Template
                                 }
                             }
                         }
-                        EcomboCastPostion(target);
+                        NewEPred();
                     }
                     if (MenuSettings.Combo.useR.Enabled && R.IsReady() && !target.HasBuff("ireliamark"))
                     {
@@ -635,7 +635,81 @@ namespace Template
                     }                    
                 }
             }
-        }        
+        }  
+        
+        private static void NewEPred()
+        {
+            var targets = GameObjects.EnemyHeroes.Where(heroes => heroes.IsValidTarget(700) && !heroes.IsDead);
+            var getetarget = GameObjects.EnemyHeroes.Where(heroes => heroes.IsValidTarget(700) && !heroes.IsDead && heroes.HasBuff("ireliamark"));
+            var count = targets.Count();
+            var buffcount = getetarget.Count();
+
+            if (count == 0 || !E.IsReady(0) || count == buffcount) return;
+
+            foreach(var target in targets.Where(hero => !hero.HasBuff("ireliamark")))
+            {
+                if (target != null) return;
+
+                if (objPlayer.HasBuff("IreliaE"))
+                {
+                    E.UpdateSourcePosition(ECatPos, objPlayer.Position);
+                }
+                else
+                {
+                    E.UpdateSourcePosition(objPlayer.Position, objPlayer.Position);
+                }
+
+                var checkepred = E.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
+
+                if (count >= 2)
+                {
+                    if (count - buffcount > 1)
+                    {
+                        if (objPlayer.HasBuff("IreliaE"))
+                        {
+                            int j = 600;
+                            for (int i = 1; i < 11; i++, j -= 50)
+                            {
+                                if (checkepred.Hitchance >= HitChance.High && checkepred.CastPosition.Extend(ECatPos, -j).DistanceToPlayer() < 775 && checkepred.CastPosition.Extend(ECatPos, -j).Distance(target) > 100)
+                                    E.Cast(checkepred.CastPosition.Extend(ECatPos, -400));
+                            }                           
+                        }
+                        else
+                        {
+                            var gete1pos = new Geometry.Circle(objPlayer.Position, 730, 100);
+                            foreach(var e1pos in gete1pos.Points.Where(e => !e.IsWall() && !e.IsZero))
+                            {
+                                E.UpdateSourcePosition(e1pos.ToVector3(), objPlayer.Position);
+                                if (E.GetPrediction(target).CastPosition.IsZero) return;
+                                else { E.Cast(e1pos); DelayAction.Add(1, () => { return; }); }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (objPlayer.HasBuff("IreliaE"))
+                    {
+                        int j = 600;
+                        for (int i = 1; i < 11; i++, j -= 50)
+                        {
+                            if (checkepred.Hitchance >= HitChance.High && checkepred.CastPosition.Extend(ECatPos, -j).DistanceToPlayer() < 775 && checkepred.CastPosition.Extend(ECatPos, -j).Distance(target) > 100)
+                                E.Cast(checkepred.CastPosition.Extend(ECatPos, -400));
+                        }
+                    }
+                    else
+                    {
+                        var gete1pos = new Geometry.Circle(objPlayer.Position, 730, 100);
+                        foreach (var e1pos in gete1pos.Points.Where(e => !e.IsWall() && !e.IsZero))
+                        {
+                            E.UpdateSourcePosition(e1pos.ToVector3(), objPlayer.Position);
+                            if (E.GetPrediction(target).CastPosition.IsZero) return;
+                            else { E.Cast(e1pos); DelayAction.Add(1, () => { return; }); }
+                        }
+                    }
+                }
+            }           
+        }
         private static void Harass()
         {
             

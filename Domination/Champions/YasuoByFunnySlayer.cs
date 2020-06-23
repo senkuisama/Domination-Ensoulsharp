@@ -1652,8 +1652,7 @@ namespace Yasuo
             return getPrediction.CastPosition;
         }
         public static bool Edashing()
-            => Game.Time * 1000 - lastEtime >= -1f && Game.Time * 1000 - lastEtime < 475/Espeeds()
-            || objPlayer.IsDashing();
+            => Game.Time * 1000 - lastEtime >= -1f && Game.Time * 1000 - lastEtime < 475/Espeeds() || objPlayer.IsDashing();
         public static AIBaseClient GetNearObj(AIBaseClient target = null)
         {
             var pos = Epred(target);

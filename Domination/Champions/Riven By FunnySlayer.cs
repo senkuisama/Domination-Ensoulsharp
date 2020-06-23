@@ -81,6 +81,7 @@ namespace DominationAIO.Champions
         {
             Game.Print("FunnySlayer Riven || Still under test");
             Q = new Spell(SpellSlot.Q, 350);
+            W = new Spell(SpellSlot.W, 200 + Player.BoundingRadius);
             E = new Spell(SpellSlot.E, 250);
             R = new Spell(SpellSlot.R, 900);
             fl = new Spell(flash, 400f);
@@ -331,9 +332,7 @@ namespace DominationAIO.Champions
         }
 
         private static void Game_OnUpdate(EventArgs args)
-        {
-            SpellData sdataw = Player.Spellbook.GetSpell(SpellSlot.W).SData;
-            W = new Spell(SpellSlot.W, 200 + Player.BoundingRadius);
+        {        
             #region old
             /*if (RMenu.Qdelay.Enabled)
             {
@@ -745,7 +744,7 @@ namespace DominationAIO.Champions
                                         {
                                             if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
                                             {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(120, () => { Q.Cast(target); });
                                             }
@@ -754,7 +753,7 @@ namespace DominationAIO.Champions
                                         {
                                             if (qready && wready)
                                             {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(120, () => { Q.Cast(target); });
                                             }
@@ -776,13 +775,13 @@ namespace DominationAIO.Champions
                                             {
                                                 if (wready)
                                                 {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                    //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                     DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                 }
                                             }
                                             if (wready && eready)
                                             {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                             }
                                             else
@@ -823,7 +822,7 @@ namespace DominationAIO.Champions
                                         {
                                             if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
                                             {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(120, () => { Q.Cast(target); });
                                             }
@@ -832,7 +831,7 @@ namespace DominationAIO.Champions
                                         {
                                             if (qready && wready)
                                             {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(120, () => { Q.Cast(target); });
                                             }
@@ -852,13 +851,13 @@ namespace DominationAIO.Champions
                                             {
                                                 if (wready)
                                                 {
-                                                    DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                    //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                     DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                 }
                                             }
                                             if (wready && eready)
                                             {
-                                                DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                 DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                             }
                                             else
@@ -924,7 +923,7 @@ namespace DominationAIO.Champions
                     }
                 }
                 
-                if (RMenu.flash.Active && (fl.IsReady() || flash.IsReady()) && target.DistanceToPlayer() >= 400 && target.IsValidTarget(700))
+                if (RMenu.flash.Active && flash.IsReady() && target.DistanceToPlayer() >= 400 && target.IsValidTarget(900))
                 {
                     if (target.IsValidTarget(900))
                     {
@@ -940,17 +939,12 @@ namespace DominationAIO.Champions
                                     R.Cast(target);
                                 }
                                 );
-                                DelayAction.Add(111, () =>
+                                DelayAction.Add(160, () =>
                                 {
-                                    fl.Cast(target);
+                                    fl.Cast(target.Position);
                                 }
                                 );
-                                DelayAction.Add(112, () =>
-                                {
-                                    W.Cast(target);
-                                }
-                                );
-                                DelayAction.Add(120, () =>
+                                DelayAction.Add(200, () =>
                                 {
                                     Q.Cast(target);
                                 }
@@ -958,25 +952,21 @@ namespace DominationAIO.Champions
                             }
 
                             {
-                                if(Variables.GameTimeTickCount - lastEcast > 0 && Variables.GameTimeTickCount - lastEcast < 99)
+                                if(Variables.GameTimeTickCount - lastEcast < 99)
                                 {
-                                    if(wready && qready)
+                                    if(wready || qready)
                                     {
                                         R.Cast(target);
-                                        DelayAction.Add(10, () =>
+                                        DelayAction.Add(100, () =>
                                         {
-                                            fl.Cast(target);
+                                            fl.Cast(target.Position);
                                         }
                                         );
-                                        if(target.IsValidTarget(W.Range))
+                                        DelayAction.Add(130, () =>
                                         {
-                                            W.Cast(target);
-                                            DelayAction.Add(8, () =>
-                                            {
-                                                Q.Cast(target);
-                                            }
-                                            );
+                                            Q.Cast(target);
                                         }
+                                        );
                                     }
                                 }
                             }
@@ -985,52 +975,41 @@ namespace DominationAIO.Champions
                         {
                             if (cancancelanimation)
                             {
-                                if (cancancelanimation)
+                                E.Cast(target);
+                                DelayAction.Add(130, () =>
                                 {
-                                    E.Cast(target);
-                                    DelayAction.Add(110, () =>
+                                    R.Cast(target);
+                                }
+                                );
+                                DelayAction.Add(480, () =>
+                                {
+                                    fl.Cast(target.Position);
+                                }
+                                );
+                                DelayAction.Add(510, () =>
+                                {
+                                    Q.Cast(target);
+                                }
+                                );
+                            }
+
+                            {
+                                if (Variables.GameTimeTickCount - lastEcast < 99)
+                                {
+                                    if (wready || qready)
                                     {
                                         R.Cast(target);
-                                    }
-                                    );
-                                    DelayAction.Add(111, () =>
-                                    {
-                                        fl.Cast(target);
-                                    }
-                                    );
-                                    DelayAction.Add(112, () =>
-                                    {
-                                        W.Cast(target);
-                                    }
-                                    );
-                                    DelayAction.Add(120, () =>
-                                    {
-                                        Q.Cast(target);
-                                    }
-                                    );
-                                }
-
-                                {
-                                    if (Variables.GameTimeTickCount - lastEcast > 0 && Variables.GameTimeTickCount - lastEcast < 99)
-                                    {
-                                        if (wready && qready)
+                                        DelayAction.Add(350, () =>
                                         {
-                                            R.Cast(target);
-                                            DelayAction.Add(10, () =>
-                                            {
-                                                fl.Cast(target);
-                                            }
-                                            );
-                                            if (target.IsValidTarget(W.Range))
-                                            {
-                                                W.Cast(target);
-                                                DelayAction.Add(8, () =>
-                                                {
-                                                    Q.Cast(target);
-                                                }
-                                                );
-                                            }
+                                            fl.Cast(target.Position);
                                         }
+                                        );
+                                        DelayAction.Add(380, () =>
+                                        {
+                                            Q.Cast(target);
+                                        }
+                                        );
+
                                     }
                                 }
                             }
@@ -1120,7 +1099,7 @@ namespace DominationAIO.Champions
                                                 {
                                                     if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
                                                     {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(120, () => { Q.Cast(target); });
                                                     }
@@ -1129,7 +1108,7 @@ namespace DominationAIO.Champions
                                                 {
                                                     if (qready && wready)
                                                     {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(120, () => { Q.Cast(target); });
                                                     }
@@ -1151,7 +1130,7 @@ namespace DominationAIO.Champions
                                                     {
                                                         if (wready)
                                                         {
-                                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                            //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                             DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                         }
                                                     }
@@ -1198,7 +1177,7 @@ namespace DominationAIO.Champions
                                                 {
                                                     if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
                                                     {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(120, () => { Q.Cast(target); });
                                                     }
@@ -1207,7 +1186,7 @@ namespace DominationAIO.Champions
                                                 {
                                                     if (qready && wready)
                                                     {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(120, () => { Q.Cast(target); });
                                                     }
@@ -1227,13 +1206,13 @@ namespace DominationAIO.Champions
                                                     {
                                                         if (wready)
                                                         {
-                                                            DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                            //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                             DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                         }
                                                     }
                                                     if (wready && eready)
                                                     {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
+                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
                                                         DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
                                                     }
                                                     else

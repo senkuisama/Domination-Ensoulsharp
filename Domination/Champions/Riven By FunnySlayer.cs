@@ -143,7 +143,7 @@ namespace DominationAIO.Champions
             {
                 Drawing.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Red);
                 Drawing.DrawCircle(Player.Position, 400, System.Drawing.Color.Yellow);
-                Drawing.DrawCircle(Player.Position, 700, System.Drawing.Color.Blue);
+                Drawing.DrawCircle(Player.Position, 900, System.Drawing.Color.Blue);
             }
         }
 
@@ -390,7 +390,9 @@ namespace DominationAIO.Champions
         }
         public static void combo()
         {
-            var target = TargetSelector.GetTarget(1300);
+            var target = TargetSelector.SelectedTarget;
+            if(target == null || !target.IsValidTarget(700))
+            target = TargetSelector.GetTarget(1300);
 
             var qready = Q.IsReady();
             var wready = W.IsReady();
@@ -923,12 +925,13 @@ namespace DominationAIO.Champions
                     }
                 }
                 
-                if (RMenu.flash.Active && flash.IsReady() && target.DistanceToPlayer() >= 400 && target.IsValidTarget(900))
+                if (RMenu.flash.Active && flash.IsReady() && target.DistanceToPlayer() >= 425 && target.IsValidTarget(950))
                 {
-                    if (target.IsValidTarget(900))
+                    if (target.IsValidTarget(1000))
                     {
                         var cancancelanimation = false;
                         if (wready && qready && eready) cancancelanimation = true; else cancancelanimation = false;
+                        if (Player.IsDashing() && target.Distance(Player) < W.Range) W.Cast(target);
                         if(R1())
                         {
                             if(cancancelanimation)
@@ -939,12 +942,12 @@ namespace DominationAIO.Champions
                                     R.Cast(target);
                                 }
                                 );
-                                DelayAction.Add(160, () =>
+                                DelayAction.Add(140, () =>
                                 {
                                     fl.Cast(target.Position);
                                 }
                                 );
-                                DelayAction.Add(200, () =>
+                                DelayAction.Add(180, () =>
                                 {
                                     Q.Cast(target);
                                 }
@@ -957,12 +960,12 @@ namespace DominationAIO.Champions
                                     if(wready || qready)
                                     {
                                         R.Cast(target);
-                                        DelayAction.Add(100, () =>
+                                        DelayAction.Add(80, () =>
                                         {
                                             fl.Cast(target.Position);
                                         }
                                         );
-                                        DelayAction.Add(130, () =>
+                                        DelayAction.Add(120, () =>
                                         {
                                             Q.Cast(target);
                                         }
@@ -981,12 +984,12 @@ namespace DominationAIO.Champions
                                     R.Cast(target);
                                 }
                                 );
-                                DelayAction.Add(480, () =>
+                                DelayAction.Add(460, () =>
                                 {
                                     fl.Cast(target.Position);
                                 }
                                 );
-                                DelayAction.Add(510, () =>
+                                DelayAction.Add(490, () =>
                                 {
                                     Q.Cast(target);
                                 }
@@ -999,12 +1002,12 @@ namespace DominationAIO.Champions
                                     if (wready || qready)
                                     {
                                         R.Cast(target);
-                                        DelayAction.Add(350, () =>
+                                        DelayAction.Add(330, () =>
                                         {
                                             fl.Cast(target.Position);
                                         }
                                         );
-                                        DelayAction.Add(380, () =>
+                                        DelayAction.Add(360, () =>
                                         {
                                             Q.Cast(target);
                                         }

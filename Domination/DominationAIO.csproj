@@ -104,7 +104,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Champions\Irelia.cs" />
+    <Compile Include="Champions\Kaisa By FunnySlaye.cs" />
+    <Compile Include="Champions\Irelia By FunnySlayer.cs" />
     <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Logic.cs" />
     <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Menu.cs" />
     <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Notifications.cs" />
@@ -137,8 +138,8 @@
     <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyWizard.cs" />
     <Compile Include="Champions\PRADAVayneReborn\Program.cs" />
     <Compile Include="Champions\Riven By FunnySlayer.cs" />
-    <Compile Include="Champions\Aphelios.cs" />
-    <Compile Include="Champions\YasuoByFunnySlayer.cs" />
+    <Compile Include="Champions\Aphelios By FunnySlayer.cs" />
+    <Compile Include="Champions\Yasuo Credit Brian.cs" />
     <Compile Include="Common\Logichelper.cs" />
     <Compile Include="Evade\BlockSpellData.cs" />
     <Compile Include="Evade\BlockSpellDataBase.cs" />

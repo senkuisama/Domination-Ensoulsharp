@@ -57,6 +57,7 @@ namespace DominationAIO.Champions
         {
             setspell.LoadSpells();
             setmenu.LoadMenus();
+            Init.events();
         }
 
         public class setspell

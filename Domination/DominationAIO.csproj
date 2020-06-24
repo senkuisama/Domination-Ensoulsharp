@@ -104,7 +104,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Champions\Kaisa By FunnySlaye.cs" />
+    <Compile Include="Champions\Kaisa By FunnySlayer.cs" />
     <Compile Include="Champions\Irelia By FunnySlayer.cs" />
     <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Logic.cs" />
     <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Menu.cs" />

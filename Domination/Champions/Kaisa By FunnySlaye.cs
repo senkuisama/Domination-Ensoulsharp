@@ -110,6 +110,7 @@ namespace DominationAIO.Champions
                 kaisa.Add(harass);
                 kaisa.Add(farm);
                 kaisa.Add(misc);
+                kaisa.Attach();
             }
         }
 

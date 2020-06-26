@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 using EnsoulSharp.SDK.MenuUI.Values;
 using EnsoulSharp.SDK.MenuUI;
 using SharpDX;
+using EnsoulSharp.SDK.Utility;
 
 namespace DominationAIO.Champions
-{   
-    public class menuclass
-    {        
+{
+    internal class menuclass
+    {
         public class combo
         {
             public static MenuBool useq = new MenuBool("useq", "Use Combo Q");
@@ -48,27 +49,28 @@ namespace DominationAIO.Champions
             public static MenuBool usew = new MenuBool("usew", "W ks");
         }
     }
-    public class Kaisa
+    internal class Kaisa
     {
         private static Spell Q, W, E, R;
-        public AIHeroClient Player = ObjectManager.Player;
+        private static AIHeroClient Player = ObjectManager.Player;
+        private static bool aa, ba, oa;
 
         public static void ongameload()
         {
             setspell.LoadSpells();
             setmenu.LoadMenus();
-            Init.events();
+            events();
         }
 
         public class setspell
 
-        {           
+        {
             public static void LoadSpells()
             {
                 Q = new Spell(SpellSlot.Q, 645);
                 W = new Spell(SpellSlot.W, 3000);
-                E = new Spell(SpellSlot.E);                
-
+                E = new Spell(SpellSlot.E);
+                R = new Spell(SpellSlot.R, 1500);
                 Q.SetTargetted(0.25f, 1800);
                 W.SetSkillshot(0.4f, 100, 1750, true, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             }
@@ -113,275 +115,290 @@ namespace DominationAIO.Champions
                 kaisa.Attach();
             }
         }
-
-        public class Init
+        public static void events()
         {
-            private static bool aa, ba, oa;
-            public static void events()
-            {
-                Game.OnUpdate += Game_OnUpdate;
-                Orbwalker.OnAction += Orbwalker_OnAction;
-                Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
-            }
+            Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.OnAction += Orbwalker_OnAction;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+        }
 
-            private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserArgs args)
-            {
-                if (sender.IsMe) return;
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserArgs args)
+        {
+            if (sender.IsMe) return;
 
-                if(menuclass.misc.usee.Enabled && E.IsReady(0))
+            if (menuclass.misc.usee.Enabled && E.IsReady(0))
+            {
+                if (args.EndPosition.DistanceToPlayer() < 350)
                 {
-                    if(args.EndPosition.DistanceToPlayer() < 350)
+                    E.Cast(Game.CursorPos);
+                }
+            }
+        }
+
+        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        {
+            if (args.Type == OrbwalkerType.BeforeAttack)
+            {
+                ba = true;
+            }
+            else ba = false;
+            if (args.Type == OrbwalkerType.OnAttack)
+            {
+                oa = true;
+            }
+            else oa = false;
+            if (args.Type == OrbwalkerType.AfterAttack)
+            {
+                aa = true;
+            }
+            else aa = false;
+        }
+
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            if (Player.IsDead) return;
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(3000) && !i.IsDead);
+
+
+            if (targets != null)
+                foreach (var target in targets)
+                {
+                    if (target == null) return;
+
+                    if (menuclass.misc.usew.Enabled && W.IsReady(0))
                     {
-                        E.Cast(Game.CursorPos);
-                    }
-                }
-            }
-
-            private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
-            {
-                if (args.Type == OrbwalkerType.BeforeAttack)
-                {
-                    ba = true;
-                }
-                else ba = false;
-                if (args.Type == OrbwalkerType.OnAttack)
-                {
-                    oa = true;
-                }
-                else oa = false;
-                if (args.Type == OrbwalkerType.AfterAttack)
-                {
-                    aa = true;
-                }
-                else aa = false;
-            }
-
-            private static void Game_OnUpdate(EventArgs args)
-            {
-                if (ObjectManager.Player.IsDead) return;
-
-                R = new Spell(SpellSlot.R, CheckRRange());
-
-                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(3000) && !i.IsDead);
-
-
-                if (targets != null)
-                    foreach (var target in targets)
-                    {
-                        if (target == null) return;
-
-                        if(menuclass.misc.usew.Enabled && W.IsReady(0))
+                        if (target.Health <= W.GetDamage(target))
                         {
-                            if(target.Health <= W.GetDamage(target))
+                            var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
+                            if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
                             {
-                                var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
-                                if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
-                                {
-                                    if (!oa && !ba) W.Cast(wpred.CastPosition);
-                                }
+                                if (!oa && !ba) W.Cast(wpred.CastPosition);
                             }
                         }
+                    }
 
-                        if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
+                    if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
+                    {
+                        if (menuclass.combo.useq.Enabled && Q.IsReady(0) && target.IsValidTarget(Q.Range))
                         {
-                            if (menuclass.combo.useq.Enabled && Q.IsReady(0) && target.IsValidTarget(Q.Range))
+                            if (GetMinionInRange(Q.Range) <= menuclass.combo.useqminion.Value)
                             {
-                                if (GetMinionInRange(Q.Range) <= menuclass.combo.useqminion.Value)
+                                if (menuclass.combo.useqafteraa.Enabled)
                                 {
-                                    if (menuclass.combo.useqafteraa.Enabled)
-                                    {
-                                        if (aa) Q.Cast(target);
-                                    }
-                                    else
-                                    {
-                                        Q.Cast(target);
-                                    }
-                                }
-                            }
-                            if (menuclass.combo.usew.Enabled && W.IsReady(0) && target.IsValidTarget(W.Range))
-                            {
-                                var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
-                                if(menuclass.combo.usewout.Enabled)
-                                {
-                                    if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
-                                    {
-                                        if (!oa && !ba && target.DistanceToPlayer() > ObjectManager.Player.GetRealAutoAttackRange()) W.Cast(wpred.CastPosition);
-                                    }
+                                    if (aa) Q.Cast(target);
                                 }
                                 else
                                 {
-                                    if(wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
-                                    {
-                                        if (!oa && !ba) W.Cast(wpred.CastPosition);
-                                    }
-                                }
-                            }
-                            if (menuclass.combo.usee.Enabled && E.IsReady(0))
-                            {
-                                if(!oa && !ba)
-                                {
-                                    if(target.DistanceToPlayer() < menuclass.combo.edistance.Value)
-                                    {
-                                        E.Cast(Game.CursorPos);
-                                    }
-                                }
-                            }
-                            if (menuclass.combo.user.Enabled && R.IsReady(0))
-                            {
-                                if(target.HealthPercent <= menuclass.combo.rp.Value && target.DistanceToPlayer() > menuclass.combo.rr.Value)
-                                {
-                                    if(Rpos() != Vector3.Zero)
-                                    R.Cast(Rpos());
-                                }
-                                if(ObjectManager.Player.HealthPercent > 0 && ObjectManager.Player.HealthPercent < menuclass.combo.rp.Value)
-                                {
-                                    if (Rpos() != Vector3.Zero)
-                                        R.Cast(Rpos());
-                                }
-                                if(GetHeroesInRange(1000) >= 3 && ObjectManager.Player.HealthPercent > 0 && ObjectManager.Player.HealthPercent < 75)
-                                {
-                                    if (Rpos() != Vector3.Zero && menuclass.combo.usercombat)
-                                        R.Cast(Rpos());
+                                    Q.Cast(target);
                                 }
                             }
                         }
-                        if (Orbwalker.ActiveMode == OrbwalkerMode.Harass)
+                        if (menuclass.combo.usew.Enabled && W.IsReady(0) && target.IsValidTarget(W.Range))
                         {
-                            if (menuclass.harass.useq.Enabled && Q.IsReady(0) && target.IsValidTarget(Q.Range))
+                            var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
+                            if (menuclass.combo.usewout.Enabled)
                             {
-                                Q.Cast(target);
-                            }
-                            if (menuclass.harass.usew.Enabled && W.IsReady(0) && target.IsValidTarget(W.Range))
-                            {
-                                var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
                                 if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
                                 {
-                                    if (!oa && !ba) W.Cast(wpred.CastPosition);
-                                }
-                            }
-                        }
-                    }
-
-                if (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
-                {
-                    if(GetMinionInRange(ObjectManager.Player.GetRealAutoAttackRange()) > 3)
-                    {
-                        if (menuclass.farm.useq) Q.Cast();
-                        if (menuclass.farm.usee && !oa && !ba) E.Cast(Game.CursorPos);
-                    }
-                    if (GetMinionInRange(ObjectManager.Player.GetRealAutoAttackRange() + 300) < 1 && GetMinionInRange(W.Range) >= 1)
-                    {
-                        var thisminion = GameObjects.EnemyMinions.Where(i => !i.IsValidTarget(ObjectManager.Player.GetRealAutoAttackRange() + 300) && i.DistanceToPlayer() < W.Range && i.Health < W.GetDamage(i)).FirstOrDefault(i => i.DistanceToPlayer() < W.Range);
-                        var wpred = W.GetPrediction(thisminion, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
-                        if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
-                        {
-                            if (menuclass.farm.usew.Enabled) W.Cast(wpred.CastPosition);
-                        }
-                    }
-                }
-            }
-
-            private static int GetMinionInRange(float range)
-            {
-                return GameObjects.EnemyMinions.Count(minion => minion.IsValidTarget(range));
-            }
-            private static int GetHeroesInRange(float range)
-            {
-                return GameObjects.EnemyHeroes.Count(minion => minion.IsValidTarget(range));
-            }
-
-            private static int CheckRRange()
-            {
-                int range = 1500;
-                if (R.Level == 1)
-                {
-                    range = 1500;
-                }
-                if (R.Level == 2)
-                {
-                    range = 2250;
-                }
-                if (R.Level == 3)
-                {
-                    range = 3000;
-                }
-                return range;
-            }
-
-            private static Vector3 Rpos()
-            {
-                var pos = Vector3.Zero;
-                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(R.Range) && i.HasBuff("kaisapassivemarker"));
-                var turret = GameObjects.EnemyTurrets.Where(i => i.IsValidTarget(R.Range)).FirstOrDefault();
-                if (targets == null) pos = Vector3.Zero;
-                if (GetHeroesInRange(R.Range) == 0) pos = Vector3.Zero;
-                /*foreach(var target in targets)
-                {
-                        if (target == null || !target.HasBuff("kaisapassivemarker")) pos = Vector3.Zero;
-                    Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 75, 20);
-                        foreach(var checkpoint in newcircle.Points.Where(i => i.DistanceToPlayer() < R.Range))
-                        {
-                            if (GetHeroesInRange(R.Range) == 0) pos = Vector3.Zero;
-                            if(GetHeroesInRange(1000) >= 2)
-                            {
-                                if (checkpoint.CountEnemyHeroesInRange(400) < GetHeroesInRange(1000))
-                                {
-                                    pos = checkpoint.ToVector3();
+                                    if (!oa && !ba && target.DistanceToPlayer() > ObjectManager.Player.GetRealAutoAttackRange()) W.Cast(wpred.CastPosition);
                                 }
                             }
                             else
                             {
-                                if(checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
+                                if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
                                 {
-                                    pos = checkpoint.ToVector3();
+                                    if (!oa && !ba) W.Cast(wpred.CastPosition);
                                 }
-                            }                           
+                            }
                         }
-                }*/
-                foreach (var target in targets.Where(i => i.IsValidTarget(R.Range)))
-                {
-                    if (target == null) pos = Vector3.Zero;
-                    Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 150, 20);
-                    foreach (var checkpoint in newcircle.Points.Where(i => i.DistanceToPlayer() < R.Range))
+                        if (menuclass.combo.usee.Enabled && E.IsReady(0))
+                        {
+                            if (!oa && !ba)
+                            {
+                                if (target.DistanceToPlayer() < menuclass.combo.edistance.Value)
+                                {
+                                    E.Cast(Game.CursorPos);
+                                }
+                            }
+                        }
+                        if (menuclass.combo.user.Enabled && R.IsReady(0))
+                        {
+                            if (target.HealthPercent <= menuclass.combo.rp.Value && target.DistanceToPlayer() > menuclass.combo.rr.Value)
+                            {
+                                if (Rpos() != Vector3.Zero)
+                                    R.Cast(Rpos());
+                            }
+                            if (ObjectManager.Player.HealthPercent > 0 && ObjectManager.Player.HealthPercent < menuclass.combo.rp.Value)
+                            {
+                                if (Rpos() != Vector3.Zero)
+                                    if (E.IsReady())
+                                    {
+                                        E.Cast();
+                                        DelayAction.Add(200, () => { R.Cast(Rpos()); });
+                                    }
+                                    else R.Cast(Rpos());
+                            }
+                            if (GetHeroesInRange(1000) >= 3 && ObjectManager.Player.HealthPercent > 0 && ObjectManager.Player.HealthPercent < 75)
+                            {
+                                if (Rpos() != Vector3.Zero && menuclass.combo.usercombat)
+                                    if (E.IsReady())
+                                    {
+                                        E.Cast();
+                                        DelayAction.Add(200, () => { R.Cast(Rpos()); });
+                                    }
+                                    else R.Cast(Rpos());
+                            }
+                        }
+                    }
+                    if (Orbwalker.ActiveMode == OrbwalkerMode.Harass)
                     {
-                        if(checkpoint.CountEnemyHeroesInRange(400) == 1)
+                        if (menuclass.harass.useq.Enabled && Q.IsReady(0) && target.IsValidTarget(Q.Range))
                         {
-                            if (GetHeroesInRange(700) >= 2)
-                            {
-                                if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400))
-                                {
-                                    if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
-                                    {
-                                        pos = checkpoint.ToVector3();
-                                    }
-                                }
-                            }
+                            Q.Cast(target);
                         }
-                        if(checkpoint.CountEnemyHeroesInRange(400) == 2)
+                        if (menuclass.harass.usew.Enabled && W.IsReady(0) && target.IsValidTarget(W.Range))
                         {
-                            if(GetHeroesInRange(700) >= 3)
+                            var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
+                            if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
                             {
-                                if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400))
-                                {
-                                    if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
-                                    {
-                                        pos = checkpoint.ToVector3();
-                                    }
-                                }
-                            }
-                        }
-                        if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400) + 1)
-                        {
-                            if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
-                            {
-                                pos = checkpoint.ToVector3();
+                                if (!oa && !ba) W.Cast(wpred.CastPosition);
                             }
                         }
                     }
                 }
 
-                return pos;
+            if (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
+            {
+                if (GetMinionInRange(ObjectManager.Player.GetRealAutoAttackRange()) > 3)
+                {
+                    if (menuclass.farm.useq) Q.Cast();
+                    if (menuclass.farm.usee && !oa && !ba) E.Cast(Game.CursorPos);
+                }
+                if (GetMinionInRange(ObjectManager.Player.GetRealAutoAttackRange() + 300) < 1 && GetMinionInRange(W.Range) >= 1)
+                {
+                    var thisminion = GameObjects.EnemyMinions.Where(i => !i.IsValidTarget(ObjectManager.Player.GetRealAutoAttackRange() + 300) && i.DistanceToPlayer() < W.Range && i.Health < W.GetDamage(i)).FirstOrDefault(i => i.DistanceToPlayer() < W.Range);
+                    var wpred = W.GetPrediction(thisminion, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
+                    if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                    {
+                        if (menuclass.farm.usew.Enabled) W.Cast(wpred.CastPosition);
+                    }
+                }
             }
+        }
+
+        private static int GetMinionInRange(float range)
+        {
+            return GameObjects.EnemyMinions.Count(minion => minion.IsValidTarget(range));
+        }
+        private static int GetHeroesInRange(float range)
+        {
+            return GameObjects.EnemyHeroes.Count(minion => minion.IsValidTarget(range));
+        }
+
+        private static float CheckRRange()
+        {
+            if (R.Level == 0)
+            {
+                return 0;
+            }
+            if (R.Level == 1)
+            {
+                return 1500;
+            }
+            if (R.Level == 2)
+            {
+                return 2250;
+            }
+            if (R.Level == 3)
+            {
+                return 3000;
+            }
+            return 0;
+        }
+
+        private static Vector3 Rpos()
+        {
+            var pos = Vector3.Zero;
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(R.Range) && i.HasBuff("kaisapassivemarker"));
+            var turret = GameObjects.EnemyTurrets.Where(i => i.IsValidTarget(R.Range)).FirstOrDefault();
+            if (targets == null) pos = Vector3.Zero;
+
+            foreach (var target in targets)
+            {
+                Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 200, 20);
+                foreach (var circle in newcircle.Points)
+                {
+                    if (circle.CountEnemyHeroesInRange(400) <= 2)
+                    {
+                        pos = circle.ToVector3();
+                    }
+                }
+            }
+            /*foreach(var target in targets)
+            {
+                    if (target == null || !target.HasBuff("kaisapassivemarker")) pos = Vector3.Zero;
+                Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 75, 20);
+                    foreach(var checkpoint in newcircle.Points.Where(i => i.DistanceToPlayer() < R.Range))
+                    {
+                        if (GetHeroesInRange(R.Range) == 0) pos = Vector3.Zero;
+                        if(GetHeroesInRange(1000) >= 2)
+                        {
+                            if (checkpoint.CountEnemyHeroesInRange(400) < GetHeroesInRange(1000))
+                            {
+                                pos = checkpoint.ToVector3();
+                            }
+                        }
+                        else
+                        {
+                            if(checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
+                            {
+                                pos = checkpoint.ToVector3();
+                            }
+                        }                           
+                    }
+            }*/
+            /*foreach (var target in targets.Where(i => i.IsValidTarget(R.Range)))
+            {
+                if (target == null) pos = Vector3.Zero;
+                Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 150, 20);
+                foreach (var checkpoint in newcircle.Points.Where(i => i.DistanceToPlayer() < R.Range))
+                {
+                    if (checkpoint.CountEnemyHeroesInRange(400) == 1)
+                    {
+                        if (GetHeroesInRange(700) >= 2)
+                        {
+                            if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400))
+                            {
+                                if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
+                                {
+                                    pos = checkpoint.ToVector3();
+                                }
+                            }
+                        }
+                    }
+                    if (checkpoint.CountEnemyHeroesInRange(400) == 2)
+                    {
+                        if (GetHeroesInRange(700) >= 3)
+                        {
+                            if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400))
+                            {
+                                if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
+                                {
+                                    pos = checkpoint.ToVector3();
+                                }
+                            }
+                        }
+                    }
+                    if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400) + 1)
+                    {
+                        if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
+                        {
+                            pos = checkpoint.ToVector3();
+                        }
+                    }
+                }
+            }*/
+            return pos;
         }
     }
 }

@@ -104,6 +104,12 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\GangPlank\Barrel.cs" />
+    <Compile Include="Champions\GangPlank\Config.cs" />
+    <Compile Include="Champions\GangPlank\DelayManager.cs" />
+    <Compile Include="Champions\GangPlank\Helper.cs" />
+    <Compile Include="Champions\GangPlank\Program.cs" />
+    <Compile Include="Champions\GangPlank\version.cs" />
     <Compile Include="Champions\Kaisa By FunnySlayer.cs" />
     <Compile Include="Champions\Irelia By FunnySlayer.cs" />
     <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Logic.cs" />

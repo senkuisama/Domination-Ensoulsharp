@@ -18,3 +18,4 @@ C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debu
 C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.csproj.CopyComplete
 C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.exe
 C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.pdb
+C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.csprojAssemblyReference.cache

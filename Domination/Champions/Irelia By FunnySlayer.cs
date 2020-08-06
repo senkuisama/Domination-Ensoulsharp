@@ -85,14 +85,15 @@ namespace Template
     }
     public class loaded
     {
-        private static SpellSlot summonerIgnite;
-        private static Spell Q, W, E, R;
         private static AIHeroClient objPlayer = ObjectManager.Player;
         private static Menu myMenu;
+        public static Spell Q, Q1, Q2, Q3, Q4;
+        public static Spell W, W1, W2, W3, W4;
+        public static Spell E, E1, E2, E3, E4;
+        public static Spell R, R1, R2, R3, R4;
 
         public static void OnLoad()
         {
-            Game.Print("<font color='#b756c5' size='25'> It just a Beta version, Dont forget to feedback </font>");
             Q = new Spell(SpellSlot.Q, 600f);
             Q.SetTargetted(0f, Qspeed());
 
@@ -100,12 +101,16 @@ namespace Template
             W.SetCharged("IreliaW", "ireliawdefense", 800, 800, 0);
 
             E = new Spell(SpellSlot.E, 775f);
-            E.SetSkillshot(0.25f, 5f, 2000f, false, false, SkillshotType.Line, HitChance.High, default(Vector3), default(Vector3));
+            E.SetSkillshot(0.25f, 80f, 1800f, false, false, SkillshotType.Line);
 
-            R = new Spell(SpellSlot.R, 1000f);
+            E1 = new Spell(SpellSlot.E, 775f);
+            E1.SetSkillshot(0.15f + (0.25f * 2), 80, 1800f, false, false, SkillshotType.Circle);
+
+            E2 = new Spell(SpellSlot.Unknown, 775f);
+            E2.SetSkillshot(0.25f, 80f, 1800f, false, false, SkillshotType.Line);
+
+            R = new Spell(SpellSlot.R, 800f);
             R.SetSkillshot(0.25f, 300, 1500, true, SkillshotType.Line);
-
-            #region Menu Init
 
             myMenu = new Menu(objPlayer.CharacterName, "Irelia The Flash", true);
 
@@ -114,14 +119,14 @@ namespace Template
                 MenuSettings.Combo.comboSeparator,
                 MenuSettings.secsec,
                 MenuSettings.Combo.useQ,
-                MenuSettings.Combo.Qmd,               
+                MenuSettings.Combo.Qmd,
                 MenuSettings.Combo.useW,
                 MenuSettings.Combo.useE,
                 MenuSettings.Combo.useR,
                 MenuSettings.Combo.x,
                 MenuSettings.Combo.y,
             };
-            comboMenu.Add(MenuSettings.Combo.Qmaxstacks).Permashow();
+            comboMenu.Add(MenuSettings.Combo.Qmaxstacks).Permashow(true, "Q Max Stack", SharpDX.Color.Yellow);
             comboMenu.Add(MenuSettings.Combo.Qat);
             myMenu.Add(comboMenu);
 
@@ -149,15 +154,18 @@ namespace Template
             {
                 MenuSettings.JungleClear.jungleClearSeparator,
                 MenuSettings.secsec,
+                MenuSettings.JungleClear.useQ,
+                MenuSettings.JungleClear.useE,
             };
-            //myMenu.Add(jungleClearMenu);
+            myMenu.Add(jungleClearMenu);
 
             var lastHitMenu = new Menu("lastHitMenu", "Last Hit")
             {
                 MenuSettings.LastHit.lastHitSeparator,
                 MenuSettings.secsec,
+                MenuSettings.LastHit.useQ,
             };
-            //myMenu.Add(lastHitMenu);
+            myMenu.Add(lastHitMenu);
 
             var miscMenu = new Menu("miscMenu", "Misc")
             {
@@ -179,58 +187,39 @@ namespace Template
             };
             myMenu.Add(drawingMenu);
 
-
             myMenu.Attach();
 
-            #endregion
-
-            Game.OnUpdate                    += OnUpdate;
-            Drawing.OnDraw                  += OnDraw;
-            Drawing.OnEndScene              += OnEndScene;
-            Orbwalker.OnAction              += OnAction;
-            Interrupter.OnInterrupterSpell  += OnInterrupterSpell;
-            Gapcloser.OnGapcloser           += OnGapcloser;
+            Game.OnUpdate += OnUpdate;
+            Drawing.OnDraw += OnDraw;
+            Drawing.OnEndScene += OnEndScene;
+            Orbwalker.OnAction += OnAction;
+            Interrupter.OnInterrupterSpell += OnInterrupterSpell;
+            Gapcloser.OnGapcloser += OnGapcloser;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
         }
-        public static Vector3 ECatPos;
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "IreliaEMissile")
             {
                 ECatPos = args.End;
             }
-        }
-
-        public static AIBaseClient GetGapObj(AIHeroClient aIHeroClient)
-        {
-            var obj = new List<AIBaseClient>();
-            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
-            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
-            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
-            return obj.Where(
-                    i => (i.Position.Distance(aIHeroClient.Position) <= objPlayer.Distance(aIHeroClient.Position) + 100 
-                    || i.Position.Distance(aIHeroClient.Position) <= objPlayer.GetRealAutoAttackRange()))
-                .MinOrDefault(i => i.Distance(objPlayer.Position));
-        }
-        public static List<AIMinionClient> GetEnemyLaneMinionsTargetsInRange(float range)
-        {
-            return GameObjects.EnemyMinions.Where(x => x.IsValidTarget(range) && x.IsMinion() && x.Health < Q.GetDamage(x)).Cast<AIMinionClient>().ToList();
-        }
-        public static List<AIMinionClient> GetJungleTargetsInRange(float range)
-        {
-            return GameObjects.Jungle.Where(x => x.IsValidTarget(range) && x.IsMonster).Cast<AIMinionClient>().ToList();
-        }
-        public static List<AIHeroClient> GetTargets(float range)
-        {
-            return GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(range) && x.IsEnemy).Cast<AIHeroClient>().ToList();
+            if (sender.IsMe && args.SData.Name == "IreliaR")
+            {
+                rtime = Variables.GameTimeTickCount;
+            }
+            if (sender.IsMe && (args.SData.Name == "IreliaE2" || args.SData.Name == "IreliaE"))
+            {
+                etime = Variables.GameTimeTickCount;
+            }
         }
         private static void OnUpdate(EventArgs args)
         {
+            Q.Speed = Qspeed();
             if (objPlayer.IsDead || objPlayer.IsRecalling())
                 return;
             if (MenuGUI.IsChatOpen || MenuGUI.IsShopOpen)
-                return;            
-            if(MenuSettings.Combo.Qat.Value >= objPlayer.HealthPercent)
+                return;
+            if (MenuSettings.Combo.Qat.Value >= objPlayer.HealthPercent)
             {
                 MenuSettings.Combo.Qmaxstacks.Enabled = true;
             }
@@ -239,10 +228,9 @@ namespace Template
                 case OrbwalkerMode.Combo:
                     Combo();
                     KillSteal();
-                    foreach (var target in GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(600)))
+                    foreach (var target in GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(600) && GetQDmg(x) >= x.Health))
                     {
-                        if (target.Health <= GetQDmg(target) && Q.CastOnUnit(target))
-                            return;
+                        if (target.Health <= GetQDmg(target)) Q.Cast(target);
                     }
                     break;
                 case OrbwalkerMode.Harass:
@@ -258,11 +246,6 @@ namespace Template
             }
         }
 
-        #region Orbwalker Modes
-        public static float Qspeed()
-        {
-            return 1500 + objPlayer.MoveSpeed;
-        }
         private static void Combo()
         {
             var obj = new List<AIBaseClient>();
@@ -270,83 +253,68 @@ namespace Template
             obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
             obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
             var targets = TargetSelector.GetTargets(2000);
-            if(targets != null)
+            if (targets != null)
             {
                 foreach (var target in GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(2000)))
                 {
-                    if(MenuSettings.Combo.useQ.Enabled && Q.IsReady())
+                    /*Game.Print(GetQDmg(target) + " cal");
+                    Game.Print(Q.GetDamage(target) + " Get dmg");
+                    Game.Print(objPlayer.GetBonusPhysicalDamage());*/
+                    if (MenuSettings.Combo.useQ.Enabled && Q.IsReady())
                     {
                         AIBaseClient gapobj = GetGapObj(target);
-                        if(target.HasBuff("ireliamark") || target.Health < GetQDmg(target))
+                        if (target.HasBuff("ireliamark") || target.Health < GetQDmg(target))
                         {
-                            foreach(AIBaseClient aIBaseClient in obj.Where(i => i.HasBuff("ireliamark") || i.Health <= GetQDmg(i)))
+                            foreach (AIBaseClient aIBaseClient in obj.Where(i => i.HasBuff("ireliamark") || i.Health <= GetQDmg(i)))
                             {
-                                if(MenuSettings.Combo.Qmd.Value >= objPlayer.HealthPercent && aIBaseClient.NetworkId != target.NetworkId)
+                                if (ObjectManager.Player.HealthPercent < MenuSettings.Combo.Qmd.Value && aIBaseClient != null && aIBaseClient.NetworkId != target.NetworkId)
                                 {
-                                    if (objPlayer.HasBuff("ireliapassivestacksmax"))
+                                    if (MenuSettings.Combo.Qmaxstacks.Enabled)
                                     {
-                                        if(MenuSettings.Combo.Qmaxstacks.Enabled)
+                                        if (Extensions.Distance(target.Position, aIBaseClient.Position) < 600 && aIBaseClient.Health < GetQDmg(aIBaseClient))
                                         {
-                                            if(Extensions.Distance(target.Position, aIBaseClient.Position) < 600 && aIBaseClient.Health < GetQDmg(aIBaseClient))
+                                            if (objPlayer.ManaPercent >= 15)
                                             {
-                                                if(objPlayer.ManaPercent >= 15)
-                                                {
+                                                if (aIBaseClient.DistanceToPlayer() < Q.Range)
                                                     Q.Cast(aIBaseClient);
-                                                }
                                             }
-                                        }
-                                        else
-                                        {
-                                            Q.Cast(target);
                                         }
                                     }
                                     else
                                     {
-                                        if (Extensions.Distance(target.Position, aIBaseClient.Position) < 600)
+                                        if (!objPlayer.HasBuff("ireliapassivestacksmax"))
                                         {
-                                            if (objPlayer.ManaPercent >= 15 && aIBaseClient.Health < GetQDmg(aIBaseClient))
+                                            if (Extensions.Distance(target.Position, aIBaseClient.Position) < 600 && aIBaseClient.Health < GetQDmg(aIBaseClient))
                                             {
-                                                Q.Cast(aIBaseClient);
+                                                if (objPlayer.ManaPercent >= 15)
+                                                {
+                                                    if (aIBaseClient.DistanceToPlayer() < Q.Range)
+                                                        Q.Cast(aIBaseClient);
+                                                }
                                             }
                                         }
                                     }
+
                                 }
                                 else
                                 {
-                                    Q.Cast(target);
+                                    if (target.DistanceToPlayer() < Q.Range)
+                                        Q.Cast(target);
                                 }
                             }
                         }
                         else
                         {
                             QgapObj(target);
-                            if(gapobj != null && (gapobj.HasBuff("ireliamark") || gapobj.Health <= GetQDmg(gapobj)) && Q.CanCast(gapobj))
-                            {
-                                if(target.DistanceToPlayer() <= objPlayer.GetRealAutoAttackRange() + 200 && objPlayer.ManaPercent > 20)
-                                {
-                                    foreach (AIBaseClient aIBaseClient in obj.Where(i => i.HasBuff("ireliamark") || i.Health <= GetQDmg(i)))
-                                    {
-                                        if(Extensions.Distance(gapobj.Position, aIBaseClient.Position) < 600 && aIBaseClient.Health < GetQDmg(aIBaseClient))
-                                        {
-                                            Q.Cast(aIBaseClient);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if(gapobj.Health < GetQDmg(gapobj))
-                                    Q.Cast(gapobj);
-                                }
-                            }
                         }
                     }
                     if (MenuSettings.Combo.useW.Enabled)
                     {
-                        if(W.IsCharging)
+                        if (W.IsCharging)
                         {
                             DelayAction.Add(300 - Game.Ping, () =>
                             {
-                                if(!target.IsValidTarget(800))
+                                if (!target.IsValidTarget(800))
                                 {
                                     if (GetGapObj(target) != null)
                                     {
@@ -355,9 +323,9 @@ namespace Template
                                 }
                             });
                         }
-                        if(GetGapObj(target) != null)
+                        if (GetGapObj(target) != null)
                         {
-                            if(GetGapObj(target).NetworkId != target.NetworkId)
+                            if (GetGapObj(target).NetworkId != target.NetworkId)
                             {
                                 if (GetGapObj(target).Health <= Q.GetDamage(GetGapObj(target)) + W.GetDamage(GetGapObj(target)) && GetGapObj(target).Health >= GetQDmg(GetGapObj(target)) && Extensions.Distance(target.Position, GetGapObj(target).Position) < 500)
                                 {
@@ -386,65 +354,81 @@ namespace Template
                     }
                     if (MenuSettings.Combo.useE.Enabled && E.IsReady() && !target.HasBuff("ireliamark"))
                     {
-                        if(MenuSettings.Combo.useQ.Enabled && Q.IsReady())
+                        /*if(MenuSettings.Combo.useQ.Enabled && Q.IsReady())
                         {
                             if(objPlayer.HasBuff("IreliaE"))
                             {
                                 var PosCanE = ECatPos.Extend(target.Position, 300);
-                                foreach (AIBaseClient aIBaseClient in obj.Where(i => i.HasBuff("ireliamark") || i.Health <= Q.GetDamage(i)))
+                                foreach (AIBaseClient aIBaseClient in obj.Where(i => i.HasBuff("ireliamark") || i.Health <= GetQDmg(i)))
                                 {
                                     if(aIBaseClient.Position.Distance(PosCanE) < 700 && aIBaseClient.Position.Distance(target) < 500)
                                     {
                                         if(objPlayer.ManaPercent > 20 && aIBaseClient.Health < GetQDmg(aIBaseClient))
                                         {
-                                            Q.Cast(aIBaseClient);
+                                            if (aIBaseClient.DistanceToPlayer() < Q.Range)
+                                                Q.Cast(aIBaseClient);
                                         }
                                     }
                                 }
                             }
+                        }*/
+                        //EcomboCastPostion(target);
+                        if (Variables.GameTimeTickCount - (rtime + 700) > 0)
+                        {
+                            NewEPred();
                         }
-                        NewEPred();
                     }
                     if (MenuSettings.Combo.useR.Enabled && R.IsReady() && !target.HasBuff("ireliamark"))
                     {
                         var Rpred = R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-                        CastRx();
-                        if(objPlayer.Position.CountEnemyHeroesInRange(800) < 2 && target.Distance(objPlayer) < 600)
-                        {
-                            if(target.Health <= GetQDmg(target) * 3 + (W.IsReady() ? W.GetDamage(target) : 0) + (E.IsReady() ? E.GetDamage(target) : 0) + R.GetDamage(target) + 100)
+                        if (Variables.GameTimeTickCount - (etime + 500) > 0)
+                            CastRx();
+                        if (Variables.GameTimeTickCount - (etime + 500) > 0)
+                            if (objPlayer.Position.CountEnemyHeroesInRange(800) < 2 && target.Distance(objPlayer) < 600)
                             {
-                                if (Rpred.Hitchance == HitChance.VeryHigh && Rpred.CastPosition.DistanceToPlayer() < R.Range - 200)
-                                    R.Cast(Rpred.CastPosition);
+                                if (target.Health <= GetQDmg(target) * 3 + (W.IsReady() ? W.GetDamage(target) : 0) + (E.IsReady() ? E.GetDamage(target) : 0) + R.GetDamage(target) + 100)
+                                {
+                                    if (Rpred.Hitchance == HitChance.VeryHigh && Rpred.CastPosition.DistanceToPlayer() < R.Range - 200)
+                                        if (Variables.GameTimeTickCount - (etime + 500) > 0 && Rpred.CastPosition.DistanceToPlayer() < R.Range)
+                                            R.Cast(Rpred.CastPosition);
+                                }
                             }
-                        }
-                        if (target.HealthPercent <= MenuSettings.Combo.y.Value)
-                        {
-                            if (Rpred.Hitchance == HitChance.VeryHigh && Rpred.CastPosition.DistanceToPlayer() < R.Range - 75)
-                                if (Q.IsReady())
-                                {
-                                    if (target.Health > GetQDmg(target))
-                                        R.Cast(Rpred.CastPosition);
-                                }
-                                else
-                                {
-                                    R.Cast(Rpred.CastPosition);
-                                }
-                        }
-                        R.CastIfWillHit(target, MenuSettings.Combo.x);
+
+                        if (Variables.GameTimeTickCount - (etime + 500) > 0)
+                            if (target.HealthPercent <= MenuSettings.Combo.y.Value)
+                            {
+                                if (Rpred.Hitchance == HitChance.VeryHigh && Rpred.CastPosition.DistanceToPlayer() < R.Range - 75)
+                                    if (Q.IsReady())
+                                    {
+                                        if (target.Health > GetQDmg(target))
+                                            if (Variables.GameTimeTickCount - (etime + 500) > 0 && Rpred.CastPosition.DistanceToPlayer() < R.Range)
+                                                R.Cast(Rpred.CastPosition);
+                                    }
+                                    else
+                                    {
+                                        if (Variables.GameTimeTickCount - (etime + 500) > 0 && Rpred.CastPosition.DistanceToPlayer() < R.Range)
+                                            R.Cast(Rpred.CastPosition);
+                                    }
+                            }
+
+                        if (Variables.GameTimeTickCount - (etime + 500) > 0 && Rpred.CastPosition.DistanceToPlayer() < R.Range)
+                            R.CastIfWillHit(target, MenuSettings.Combo.x);
                     }
                 }
-            }                      
+            }
         }
+
         private static void QgapObj(AIBaseClient target)
         {
-            foreach(AIBaseClient Objects in GameObjects.EnemyMinions.Where(i => (i.Health < GetQDmg(i) || i.HasBuff("ireliamark"))
-            && i.IsValidTarget(600)
-            && (i.Distance(target) <= objPlayer.Distance(target) + 150 || i.Distance(target) <= objPlayer.GetRealAutoAttackRange())
+            foreach (AIBaseClient Objects in GameObjects.EnemyMinions.Where(i => (i.Health < GetQDmg(i) || i.HasBuff("ireliamark"))
+             && i.IsValidTarget(600)
+             && (i.Distance(target) <= objPlayer.Distance(target) + 150 || i.Distance(target) <= objPlayer.GetRealAutoAttackRange())
             ))
             {
-                if(Objects != null && Objects.Health < GetQDmg(Objects))
+                if (Objects != null && Objects.Health < GetQDmg(Objects))
                 {
-                    Q.Cast(Objects);
+                    if (Objects.DistanceToPlayer() < Q.Range && (Objects.Distance(target) < objPlayer.Distance(target) || Objects.Distance(target) < objPlayer.GetRealAutoAttackRange()))
+                        Q.Cast(Objects);
                     if (Objects.Position.Distance(target) < 600 && MenuSettings.Combo.useE.Enabled && !objPlayer.HasBuff("IreliaE"))
                     {
                         E.Cast(objPlayer.Position - 800);
@@ -458,7 +442,8 @@ namespace Template
             {
                 if (Objects != null && Objects.Health < GetQDmg(Objects))
                 {
-                    Q.Cast(Objects);
+                    if (Objects.DistanceToPlayer() < Q.Range && (Objects.Distance(target) < objPlayer.Distance(target) || Objects.Distance(target) < objPlayer.GetRealAutoAttackRange()))
+                        Q.Cast(Objects);
                     if (Objects.Position.Distance(target) < 600 && MenuSettings.Combo.useE.Enabled && !objPlayer.HasBuff("IreliaE"))
                     {
                         E.Cast(objPlayer.Position - 800);
@@ -472,54 +457,14 @@ namespace Template
             {
                 if (Objects != null && Objects.Health < GetQDmg(Objects))
                 {
-                    Q.Cast(Objects);
+                    if (Objects.DistanceToPlayer() < Q.Range && (Objects.Distance(target) < objPlayer.Distance(target) || Objects.Distance(target) < objPlayer.GetRealAutoAttackRange()))
+                        Q.Cast(Objects);
                     if (Objects.Position.Distance(target) < 600 && MenuSettings.Combo.useE.Enabled && !objPlayer.HasBuff("IreliaE"))
                     {
                         E.Cast(objPlayer.Position - 800);
                     }
                 }
             }
-        }
-        private static double GetQDmg(AIBaseClient target)
-        {
-            double dmgQ = Q.GetDamage(target);
-            double dmgSheen = 0;
-            double dmgMinions = 55;
-            if(objPlayer.HasBuff("Sheen") || (objPlayer.HasItem((int)ItemId.Sheen) && objPlayer.CanUseItem((int)ItemId.Sheen)))
-            {
-                dmgSheen = objPlayer.GetAutoAttackDamage(target);
-            }
-            if (Q.Level == 1)
-            {
-                dmgQ = 5f + objPlayer.TotalAttackDamage;
-                dmgMinions = 55;
-            }
-            if (Q.Level == 2)
-            {
-                dmgQ = 25f + objPlayer.TotalAttackDamage;
-                dmgMinions = 75;
-            }
-            if (Q.Level == 3)
-            {
-                dmgQ = 45f + objPlayer.TotalAttackDamage;
-                dmgMinions = 95;
-            }
-            if (Q.Level == 4)
-            {
-                dmgQ = 65f + objPlayer.TotalAttackDamage;
-                dmgMinions = 115;
-            }
-            if (Q.Level == 5)
-            {
-                dmgQ = 85f + objPlayer.TotalAttackDamage;
-                dmgMinions = 135;
-            }
-            double Alldmg = dmgQ + dmgSheen;
-            if(target.IsMinion)
-            {
-                Alldmg = dmgQ + dmgSheen + dmgMinions + objPlayer.GetAutoAttackDamage(target) * 25 /100;
-            }
-            return objPlayer.CalculateDamage(target, DamageType.Physical, Alldmg);
         }
         public static void CastRx() //Made by Brian(Valve Sharp)
         {
@@ -536,14 +481,14 @@ namespace Template
                 foreach (var pred in
                     targets.Select(i => R.GetPrediction(i, false, -1, CollisionObjects.YasuoWall))
                         .Where(
-                            i => i.Hitchance >= HitChance.High && i.AoeTargetsHitCount >= MenuSettings.Combo.x.Value)
+                            i => i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount >= MenuSettings.Combo.x.Value)
                         .OrderByDescending(i => i.AoeTargetsHitCount))
                 {
                     castPos = pred.CastPosition;
                     break;
                 }
 
-                if (castPos != Vector3.Zero)
+                if (castPos != Vector3.Zero && castPos.DistanceToPlayer() < R.Range)
                 {
                     R.Cast(castPos);
                 }
@@ -554,208 +499,219 @@ namespace Template
                 Console.WriteLine("R.cast Error" + ex);
             }
         }
-        private static void EcomboCastPostion(AIHeroClient aiheroClient_0)
-        {
-            Vector3 vector = Vector3.Zero;
-            Vector3 vector2 = Vector3.Zero;
-            if (!Extensions.IsValidTarget(aiheroClient_0, E.Range, true))
-            {
-                aiheroClient_0 = TargetSelector.GetTarget(E.Range, false);
-            }
-            if (aiheroClient_0 != null && !aiheroClient_0.HasBuffOfType(BuffType.SpellImmunity) && !aiheroClient_0.HasBuffOfType(BuffType.SpellShield))
-            {
-                SpellPrediction.PredictionOutput prediction = E.GetPrediction(aiheroClient_0);
-                if (prediction.Hitchance >= HitChance.High)
-                {
-                    if(objPlayer.HasBuff("IreliaE"))
-                    {
-                        Geometry.Circle circle = new Geometry.Circle(ObjectManager.Player.Position, 730);
-                        foreach (Vector2 vector3 in circle.Points.Where(i => i.DistanceToPlayer() < 775 
-                        //&& (
-                        //((aiheroClient_0.DistanceToPlayer() > 264 && aiheroClient_0.DistanceToPlayer() < 424) ? i.DistanceToPlayer() / 2000 <= prediction.CastPosition.DistanceToPlayer() / 1600 + 0.2 : i.DistanceToPlayer() / 2000 <= prediction.CastPosition.DistanceToPlayer() / 1600 + 0.4)
-                        //&& ((aiheroClient_0.DistanceToPlayer() < 504 && aiheroClient_0.DistanceToPlayer() > 424) ? i.DistanceToPlayer() / 2000 <= prediction.CastPosition.DistanceToPlayer() / 1600 + 0.1 : i.DistanceToPlayer() / 2000 <= prediction.CastPosition.DistanceToPlayer() / 1600 + 0.4)
-                        //&& ((aiheroClient_0.DistanceToPlayer() > 504) ? i.DistanceToPlayer() / 2000 <= prediction.CastPosition.DistanceToPlayer() / 1600 + 0.05 : i.DistanceToPlayer() / 2000 <= prediction.CastPosition.DistanceToPlayer() / 1600 + 0.4)
-                        //)
-                        ))
-                        {
-                            var projectionInfo = prediction.CastPosition.ProjectOn(vector3.ToVector3(), ECatPos);
-                            if (projectionInfo.IsOnSegment && projectionInfo.LinePoint.Distance(aiheroClient_0.Position) <= 120 && projectionInfo.LinePoint.Distance(prediction.CastPosition) <= 120)
-                            {
-                                vector = vector3.ToVector3();
-                                vector2 = ECatPos;
-                            }
-                        }
-                        if (vector.DistanceToPlayer() <= E.Range)
-                        {
-                            if (vector != Vector3.Zero && vector2 != Vector3.Zero && Extensions.Distance(vector, vector2) > 300)
-                            {
-                                if (objPlayer.HasBuff("IreliaE"))
-                                {
-                                    E.Cast(vector, false);
-                                }
-                                else
-                                {
-                                    return;
-                                }
-                            }else
-                            {
-                                return;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Geometry.Circle circle = new Geometry.Circle(ObjectManager.Player.Position, 730);
-                        foreach (Vector2 vector3 in circle.Points)
-                        {
-                            foreach (Vector2 vector4 in circle.Points)
-                            {
-                                var projectionInfo = prediction.CastPosition.ProjectOn(vector3.ToVector3(), vector4.ToVector3());
-                                if (projectionInfo.IsOnSegment && projectionInfo.LinePoint.Distance(aiheroClient_0.Position) <= 120 && projectionInfo.LinePoint.Distance(prediction.CastPosition) <= 120)
-                                {
-                                    vector = Extensions.ToVector3(vector3, 0f);
-                                    vector2 = Extensions.ToVector3(vector4, 0f);
-                                }
-                            }
-                        }
-                        if (Extensions.DistanceToPlayer(vector) <= E.Range && Extensions.DistanceToPlayer(vector2) <= E.Range)
-                        {
-                            if (vector.Distance(vector2) > 300 && vector != Vector3.Zero && vector2 != Vector3.Zero)
-                            {
-                                if (!objPlayer.HasBuff("IreliaE") && vector2.Distance(aiheroClient_0) > 200)
-                                {
-                                    E.Cast(vector2, false);
-                                }
-                                else
-                                {
-                                    return;
-                                }
-                            }
-                        }
-                    }                    
-                }
-            }
-        }  
-        
+
         private static void NewEPred()
         {
-            var targets = GameObjects.EnemyHeroes.Where(heroes => heroes.IsValidTarget(700) && !heroes.IsDead);
-            var getetarget = GameObjects.EnemyHeroes.Where(heroes => heroes.IsValidTarget(700) && !heroes.IsDead && heroes.HasBuff("ireliamark"));
-            var count = targets.Count();
-            var buffcount = getetarget.Count();
-
-            if (count == 0 || !E.IsReady(0) || count == buffcount) return;
-
-            foreach(var target in targets.Where(hero => !hero.HasBuff("ireliamark")))
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead);
+            var target = TargetSelector.GetTarget(2000);
             {
-                if (target != null) return;
-
-                if (objPlayer.HasBuff("IreliaE"))
+                if (target != null || !target.HasBuff("ireliamark"))
                 {
-                    E.UpdateSourcePosition(ECatPos, objPlayer.Position);
-                }
-                else
-                {
-                    E.UpdateSourcePosition(objPlayer.Position, objPlayer.Position);
-                }
+                    var echeck = E1.GetPrediction(target);
+                    float ereal = 0.25f + 0.025f + Game.Ping / 1000;
+                    //((E.Range) / 7750 ) * 2f;
 
-                var checkepred = E.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-
-                if (count >= 2)
-                {
-                    if (count - buffcount > 1)
+                    if (E.IsReady(0))
                     {
-                        if (objPlayer.HasBuff("IreliaE"))
+                        if (!objPlayer.HasBuff("IreliaE"))
                         {
-                            int j = 600;
-                            for (int i = 1; i < 11; i++, j -= 50)
+                            if (echeck.CastPosition.DistanceToPlayer() < 975)
                             {
-                                if (checkepred.Hitchance >= HitChance.High && checkepred.CastPosition.Extend(ECatPos, -j).DistanceToPlayer() < 775 && checkepred.CastPosition.Extend(ECatPos, -j).Distance(target) > 100)
-                                    E.Cast(checkepred.CastPosition.Extend(ECatPos, -400));
-                            }                           
+                                Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
+
+                                {
+                                    foreach (var onecircle in circle.Points)
+                                    {
+                                        if (onecircle.Distance(target) > 450)
+                                        {
+                                            E.Cast(onecircle);
+                                        }
+                                    }
+                                }
+                            }
                         }
                         else
                         {
-                            var gete1pos = new Geometry.Circle(objPlayer.Position, 730, 100);
-                            foreach(var e1pos in gete1pos.Points.Where(e => !e.IsWall() && !e.IsZero))
+                            var epred = E.GetPrediction(target);
+                            var castepos = Vector2.Zero;
+                            for (int i = 775; i > 150; i--)
                             {
-                                E.UpdateSourcePosition(e1pos.ToVector3(), objPlayer.Position);
-                                if (E.GetPrediction(target).CastPosition.IsZero) return;
-                                else { E.Cast(e1pos); DelayAction.Add(1, () => { return; }); }
+                                Geometry.Circle onecircle = new Geometry.Circle(objPlayer.Position, i);
+                                foreach (var circle in onecircle.Points)
+                                {
+                                    E.Delay = (i - E2.GetPrediction(target).CastPosition.DistanceToPlayer()) / E.Speed + 0.25f + ereal;
+                                }
+                            }
+                            for (int i = 10000; i > 150; i -= 50)
+                            {
+                                if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() < 775)
+                                    castepos = epred.CastPosition.Extend(ECatPos, -i).ToVector2();
+                            }
+                            if (castepos != Vector2.Zero)
+                            {
+                                E.Cast(castepos);
                             }
                         }
                     }
                 }
-                else
-                {
-                    if (objPlayer.HasBuff("IreliaE"))
-                    {
-                        int j = 600;
-                        for (int i = 1; i < 11; i++, j -= 50)
-                        {
-                            if (checkepred.Hitchance >= HitChance.High && checkepred.CastPosition.Extend(ECatPos, -j).DistanceToPlayer() < 775 && checkepred.CastPosition.Extend(ECatPos, -j).Distance(target) > 100)
-                                E.Cast(checkepred.CastPosition.Extend(ECatPos, -400));
-                        }
-                    }
-                    else
-                    {
-                        var gete1pos = new Geometry.Circle(objPlayer.Position, 730, 100);
-                        foreach (var e1pos in gete1pos.Points.Where(e => !e.IsWall() && !e.IsZero))
-                        {
-                            E.UpdateSourcePosition(e1pos.ToVector3(), objPlayer.Position);
-                            if (E.GetPrediction(target).CastPosition.IsZero) return;
-                            else { E.Cast(e1pos); DelayAction.Add(1, () => { return; }); }
-                        }
-                    }
-                }
-            }           
+            }
+        }
+        private static double GetQDmg(AIBaseClient target)
+        {
+            double dmgQ = Q.GetDamage(target);
+            double dmgSheen = 0;
+            double dmgMinions = 60;
+            float passive = 0;
+
+            bool sheen = false;
+            bool trinity = false;
+
+            if (ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force))
+            {
+                trinity = false;
+                DelayAction.Add(10, () => { trinity = true; });
+            }
+            else { trinity = false; }
+            if (ObjectManager.Player.CanUseItem((int)ItemId.Sheen))
+            {
+                sheen = false;
+                DelayAction.Add(10, () => { sheen = true; });
+            }
+            else { sheen = false; }
+
+            if (ObjectManager.Player.Level > 0 && ObjectManager.Player.HasBuff("ireliapassivestacksmax"))
+            {
+                passive = (objPlayer.Level - 1) * (ObjectManager.Player.Level == 1 ? 0 : 3) + 15;
+            }
+            if (ObjectManager.Player.HasBuff("Sheen") || sheen)
+            {
+                dmgSheen = ObjectManager.Player.TotalAttackDamage - 5;
+            }
+            if (trinity)
+            {
+                dmgSheen = (ObjectManager.Player.TotalAttackDamage - 30) * 2;
+            }
+            switch (Q.Level)
+            {
+                case 1:
+                    dmgQ = 5f + ObjectManager.Player.TotalAttackDamage * 60 / 100;
+                    dmgMinions = 60;
+                    break;
+                case 2:
+                    dmgQ = 25f + ObjectManager.Player.TotalAttackDamage * 60 / 100;
+                    dmgMinions = 100;
+                    break;
+                case 3:
+                    dmgQ = 45f + ObjectManager.Player.TotalAttackDamage * 60 / 100;
+                    dmgMinions = 140;
+                    break;
+                case 4:
+                    dmgQ = 65f + ObjectManager.Player.TotalAttackDamage * 60 / 100;
+                    dmgMinions = 180;
+                    break;
+                case 5:
+                    dmgQ = 85f + ObjectManager.Player.TotalAttackDamage * 60 / 100;
+                    dmgMinions = 220;
+                    break;
+            }
+            double Alldmg = dmgQ + dmgSheen;
+            if (target.IsMinion)
+            {
+                Alldmg = dmgMinions + (ObjectManager.Player.TotalAttackDamage * 60 / 100) + dmgSheen;
+            }
+            return ObjectManager.Player.CalculatePhysicalDamage(target, Alldmg) + ObjectManager.Player.CalculateMagicDamage(target, passive);
+        }
+
+        public static AIBaseClient GetGapObj(AIHeroClient aIHeroClient)
+        {
+            var obj = new List<AIBaseClient>();
+            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
+            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
+            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly));
+            return obj.Where(
+                    i => (i.Position.Distance(aIHeroClient.Position) <= objPlayer.Distance(aIHeroClient.Position) + 100
+                    || i.Position.Distance(aIHeroClient.Position) <= objPlayer.GetRealAutoAttackRange()))
+                .MinOrDefault(i => i.Distance(objPlayer.Position));
+        }
+
+        public static Vector3 ECatPos;
+        public static float rtime;
+        public static float etime;
+        public static float Qspeed()
+        {
+            return 1500 + objPlayer.MoveSpeed;
+        }
+        private static void KillSteal()
+        {
+            var target = TargetSelector.GetTarget(Q.Range);
+            if (target != null && target.Health <= GetQDmg(target))
+            {
+                Q.Cast(target);
+                return;
+            }
+
         }
         private static void Harass()
         {
-            
+
+        }
+        public static List<AIMinionClient> GetEnemyLaneMinionsTargetsInRange(float range)
+        {
+            return GameObjects.EnemyMinions.Where(x => x.IsValidTarget(range) && x.IsMinion()).Cast<AIMinionClient>().ToList();
         }
         private static void LaneClear()
         {
-            foreach(var min in GetEnemyLaneMinionsTargetsInRange(Q.Range))
+            foreach (var min in GetEnemyLaneMinionsTargetsInRange(Q.Range))
             {
-                if(min != null && min.Health <= GetQDmg(min) && Q.IsReady())
+                if (min != null)
                 {
-                    if (MenuSettings.LaneClear.mana.Enabled)
-                    {
-                        if (objPlayer.ManaPercent >= MenuSettings.LaneClear.x.Value)
-                        {
-                            Q.Cast(min);
-                        }
-                        else
-                            return;
-                    }
-                    else Q.Cast(min);
+                    /*Game.Print(GetQDmg(min) + " cal");
+                    Game.Print(Q.GetDamage(min) + " Get dmg");
+                    Game.Print(objPlayer.GetBonusPhysicalDamage());*/
                 }
+                if (MenuSettings.LaneClear.useQ.Enabled)
+                    if (min != null && min.Health <= GetQDmg(min) && Q.IsReady())
+                    {
+                        if (MenuSettings.LaneClear.mana.Enabled)
+                        {
+                            if (objPlayer.ManaPercent >= MenuSettings.LaneClear.x.Value)
+                            {
+                                Q.Cast(min);
+                            }
+                            else
+                                return;
+                        }
+                        else Q.Cast(min);
+                    }
             }
+        }
+        public static List<AIMinionClient> GetJungleTargetsInRange(float range)
+        {
+            return GameObjects.Jungle.Where(x => x.IsValidTarget(range) && x.IsMonster).Cast<AIMinionClient>().ToList();
         }
         private static void JungleClear()
         {
-            foreach(var mod in GetJungleTargetsInRange(R.Range))
+            foreach (var mod in GetJungleTargetsInRange(R.Range))
             {
-                if(mod != null)
+                if (mod != null)
                 {
-                    if(MenuSettings.JungleClear.useQ.Enabled && Q.IsReady() && mod.DistanceToPlayer() <= Q.Range)
+                    if (MenuSettings.JungleClear.useQ.Enabled && Q.IsReady() && mod.DistanceToPlayer() <= Q.Range)
                     {
-                        if(mod.HasBuff("ireliamark"))
+                        if (mod.HasBuff("ireliamark") || mod.Health <= GetQDmg(mod))
                         {
-                            Q.CastOnUnit(mod);
+                            Q.Cast(mod);
                         }
-                        if(mod.Health <= Q.GetDamage(mod))
+                        if (mod.Health <= GetQDmg(mod))
                         {
-                            Q.CastOnUnit(mod);
+                            Q.Cast(mod);
                         }
                     }
-                    if(MenuSettings.JungleClear.useE.Enabled && E.IsReady() && !mod.HasBuff("ireliamark"))
+                    if (MenuSettings.JungleClear.useE.Enabled && E.IsReady() && !mod.HasBuff("ireliamark"))
                     {
                         var Epos = objPlayer.Position.Extend(mod.Position, -775);
                         var Epred = E.GetPrediction(mod, false);
                         var Ecast = Epred.CastPosition.Extend(Epos, -50);
-                        if(Ecast.DistanceToPlayer() <= 775)
+                        if (Ecast.DistanceToPlayer() <= 775)
                         {
                             if (!objPlayer.HasBuff("IreliaE"))
                             {
@@ -775,37 +731,15 @@ namespace Template
         {
             foreach (var min in GetEnemyLaneMinionsTargetsInRange(Q.Range))
             {
-                if (min != null && min.Health <= Q.GetDamage(min) && Q.IsReady())
+                if (min != null && min.Health <= GetQDmg(min) && Q.IsReady())
                 {
-                    if(MenuSettings.LastHit.useQ.Enabled)
+                    if (MenuSettings.LastHit.useQ.Enabled)
                     {
-                        Q.CastOnUnit(min);
+                        Q.Cast(min);
                     }
                 }
             }
         }
-
-        #endregion
-
-        #region Events
-
-        private static void OnAction(object sender, OrbwalkerActionArgs args)
-        {
-
-        }
-        private static void OnInterrupterSpell(AIHeroClient sender, Interrupter.InterruptSpellArgs arg)
-        {
-
-        }
-        private static void OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserArgs args)
-        {
-
-        }
-
-        #endregion
-
-        #region Drawings
-
         private static void OnDraw(EventArgs args)
         {
             if (MenuSettings.Drawing.disableDrawings.Enabled)
@@ -813,7 +747,7 @@ namespace Template
 
             if (MenuSettings.Drawing.drawQ.Enabled && Q.IsReady())
             {
-                Render.Circle.DrawCircle(objPlayer.Position, Q.Range, System.Drawing.Color.AliceBlue);
+                Render.Circle.DrawCircle(objPlayer.Position, Q.Range, System.Drawing.Color.Red);
             }
             if (MenuSettings.Drawing.drawW.Enabled && W.IsReady())
             {
@@ -860,32 +794,6 @@ namespace Template
                 Drawing.DrawLine(startPoint, endPoint, 12, System.Drawing.Color.Yellow);
             }
         }
-
-        #endregion
-
-        #region Misc
-        public static bool E2()
-        {
-            return objPlayer.HasBuff("IreliaE");
-        }
-        public static bool E1()
-        {
-            return !objPlayer.HasBuff("IreliaE");
-        }
-
-        private static void KillSteal()
-        {
-            var target = TargetSelector.GetTarget(Q.Range);
-            if(target != null && target.Health <= Q.GetDamage(target))
-            {
-                Q.CastOnUnit(target);
-                return;
-            }
-
-        }
-
-        #region Extensions
-
         private static float getDamage(AIBaseClient target, bool q = false, bool w = false, bool r = false, bool ignite = false)
         {
             float damage = 0;
@@ -902,9 +810,6 @@ namespace Template
             if (r && R.IsReady())
                 damage += (float)Damage.GetSpellDamage(objPlayer, target, SpellSlot.R);
 
-            if (ignite && summonerIgnite.IsReady())
-                damage += (float)objPlayer.GetSummonerSpellDamage(target, SummonerSpell.Ignite);
-
             if (objPlayer.GetBuffCount("itemmagicshankcharge") == 100) // oktw sebby
                 damage += (float)objPlayer.CalculateMagicDamage(target, 100 + 0.1 * objPlayer.TotalMagicalDamage);
 
@@ -915,9 +820,17 @@ namespace Template
 
             return damage;
         }
+        private static void OnAction(object sender, OrbwalkerActionArgs args)
+        {
 
-        #endregion
+        }
+        private static void OnInterrupterSpell(AIHeroClient sender, Interrupter.InterruptSpellArgs arg)
+        {
 
-        #endregion
+        }
+        private static void OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserArgs args)
+        {
+
+        }
     }
 }

@@ -82,8 +82,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EnsoulSharp.SDK">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.SDK.dll</HintPath>
+    <Reference Include="EnsoulSharp.SDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bcecb37b3b5656dd, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Pictures\pixiv\EnsoulSharp\System\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.Wrapper">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>

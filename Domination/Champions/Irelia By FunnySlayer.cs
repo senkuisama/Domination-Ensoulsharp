@@ -103,7 +103,7 @@ namespace Template
             E = new Spell(SpellSlot.E, 775f);
             E.SetSkillshot(0.25f, 80f, 1800f, false, false, SkillshotType.Line);
 
-            E1 = new Spell(SpellSlot.E, 775f);
+            E1 = new Spell(SpellSlot.Unknown, 775f);
             E1.SetSkillshot(0.15f + (0.25f * 2), 80, 1800f, false, false, SkillshotType.Circle);
 
             E2 = new Spell(SpellSlot.Unknown, 775f);
@@ -505,17 +505,17 @@ namespace Template
             var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead);
             var target = TargetSelector.GetTarget(2000);
             {
-                if (target != null || !target.HasBuff("ireliamark"))
+                if (target == null || target.HasBuff("ireliamark")) return;
+
+                if (target != null && !target.HasBuff("ireliamark"))
                 {
-                    var echeck = E1.GetPrediction(target);
                     float ereal = 0.25f + 0.025f + Game.Ping / 1000;
-                    //((E.Range) / 7750 ) * 2f;
 
                     if (E.IsReady(0))
                     {
                         if (!objPlayer.HasBuff("IreliaE"))
                         {
-                            if (echeck.CastPosition.DistanceToPlayer() < 975)
+                            if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 975)
                             {
                                 Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
 
@@ -530,21 +530,20 @@ namespace Template
                                 }
                             }
                         }
-                        else
-                        {
-                            var epred = E.GetPrediction(target);
+                        if (objPlayer.HasBuff("IreliaE"))
+                        {                           
                             var castepos = Vector2.Zero;
-                            for (int i = 775; i > 150; i--)
+                            Geometry.Circle onecircle = new Geometry.Circle(objPlayer.Position, 725);
+                            foreach (var circle in onecircle.Points)
                             {
-                                Geometry.Circle onecircle = new Geometry.Circle(objPlayer.Position, i);
-                                foreach (var circle in onecircle.Points)
-                                {
-                                    E.Delay = (i - E2.GetPrediction(target).CastPosition.DistanceToPlayer()) / E.Speed + 0.25f + ereal;
-                                }
+                                E.Delay = (725 - E2.GetPrediction(target).CastPosition.Distance(objPlayer)) / E.Speed + 0.25f + ereal;
                             }
-                            for (int i = 10000; i > 150; i -= 50)
+
+                            var epred = E.GetPrediction(target);
+
+                            for (int i = 10000; i > 55; i -= 50)
                             {
-                                if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() < 775)
+                                if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() <= 775)
                                     castepos = epred.CastPosition.Extend(ECatPos, -i).ToVector2();
                             }
                             if (castepos != Vector2.Zero)

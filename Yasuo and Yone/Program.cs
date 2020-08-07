@@ -1672,7 +1672,7 @@ namespace ConsoleApp
 
                             if (HaveQ3)
                             {
-                                if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value && target1.IsValidTarget(YasuoMenu.RangeCheck.Q3range.Value))
                                 {
                                     QcastTarget(target1);
                                 }
@@ -1683,7 +1683,7 @@ namespace ConsoleApp
                             }
                             else
                             {
-                                if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value && target1.IsValidTarget(YasuoMenu.RangeCheck.Qrange.Value))
                                 {
                                     QcastTarget(target1);
                                 }
@@ -1937,17 +1937,20 @@ namespace ConsoleApp
             AllObj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
 
             //set
-            foreach(var aobj in AllObj)
-            {
-                obj1 = aobj;
-                foreach (var bobj in AllObj.Where(i => i.NetworkId != aobj.NetworkId))
+            if(AllObj.Any() && AllObj.Count >= 2)
+                foreach (var aobj in AllObj)
                 {
-                    obj2 = bobj;
+                    if (aobj != null)
+                        obj1 = aobj;
+                    foreach (var bobj in AllObj.Where(i => i.NetworkId != aobj.NetworkId))
+                    {
+                        if (bobj != null)
+                            obj2 = bobj;
+                    }
                 }
-            }           
 
             //ready ?
-            if(obj1.NetworkId != obj2.NetworkId && obj1 != null && obj2 != null)
+            if (obj1.NetworkId != obj2.NetworkId && obj1 != null && obj2 != null)
             {
                 ready = true;
             }
@@ -1964,12 +1967,12 @@ namespace ConsoleApp
 
                 if (ziczacpos1.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value)
                 {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || UnderTower(PosAfterE(obj1)))
+                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj1)))
                         E1.Cast(obj1);
                 }
                 if (ziczacpos2.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value)
                 {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || UnderTower(PosAfterE(obj2)))
+                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj2)))
                         E1.Cast(obj2);
                 }
             }           
@@ -1978,7 +1981,7 @@ namespace ConsoleApp
         {
             if (target == null || oaa == true) return;
             var obj = GetNearObj(target);
-            if(YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
+            if(YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1 && E.IsReady())
             {
                 LogicEZicZac(target);
             }

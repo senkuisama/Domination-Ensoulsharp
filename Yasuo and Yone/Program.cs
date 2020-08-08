@@ -46,47 +46,6 @@ namespace ConsoleApp
 
             if (ObjectManager.Player.CharacterName == "Yone")
                 ("Yone Script make by FunnySlayer, Good luck").YoneLoad();
-
-            try
-            {
-                Game.Print("SkinHack v1.0.1");
-                Game.Print("Thanks for help 011110001");
-                Game.Print("Creator: emredeger");
-
-                var menu = new Menu("skinhack", "SkinHack", true);
-
-                var champs = menu.Add(new Menu("Champions", "Champions"));
-                var allies = champs.Add(new Menu("Allies", "Allies"));
-                var enemies = champs.Add(new Menu("Enemies", "Enemies"));
-
-                foreach (var hero in GameObjects.Heroes.Where(h => !h.CharacterName.Equals("Ezreal")))
-                {
-                    var champMenu = new Menu(hero.CharacterName, hero.CharacterName);
-                    champMenu.Add(new MenuSlider("SkinIndex", "Skin Index", 1, 1, 70));
-                    champMenu.GetValue<MenuSlider>("SkinIndex").ValueChanged += (s, e) =>
-                    {
-                        Console.WriteLine($"[SKINHACK] Skin ID: {champMenu.GetValue<MenuSlider>("SkinIndex").Value}");
-                        GameObjects.Heroes.ForEach(
-                            p =>
-                            {
-                                if (p.CharacterName == hero.CharacterName)
-                                {
-                                    Console.WriteLine($"[SKINHACK] Changed: {hero.CharacterName}");
-                                    p.SetSkin(champMenu.GetValue<MenuSlider>("SkinIndex").Value);
-                                }
-                            });
-                    };
-
-                    var rootMenu = hero.IsAlly ? allies : enemies;
-                    rootMenu.Add(champMenu);
-                }
-
-                menu.Attach();
-            }
-            catch
-            {
-
-            }
         }
     }
     internal static class Yasuo_GodLike
@@ -104,7 +63,7 @@ namespace ConsoleApp
         {
             Game.Print(a);
             Console.WriteLine(a);
-            
+            Yone.YoneLoaded();
         }
     }
 
@@ -1672,7 +1631,7 @@ namespace ConsoleApp
 
                             if (HaveQ3)
                             {
-                                if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value && target1.IsValidTarget(YasuoMenu.RangeCheck.Q3range.Value))
+                                if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
                                 {
                                     QcastTarget(target1);
                                 }
@@ -1683,7 +1642,7 @@ namespace ConsoleApp
                             }
                             else
                             {
-                                if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value && target1.IsValidTarget(YasuoMenu.RangeCheck.Qrange.Value))
+                                if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
                                 {
                                     QcastTarget(target1);
                                 }
@@ -1761,7 +1720,7 @@ namespace ConsoleApp
             var Eminions = GameObjects.EnemyMinions.Where(i => i.IsValidTarget(E.Range) && CanE(i));
             if (Qminions != null && YasuoMenu.Yasuo_Clear.Yasuo_Qclear.Enabled && Q.IsReady())
             {
-                foreach(var min in Qminions)
+                foreach (var min in Qminions)
                 {
                     if (isYasuoDashing)
                     {
@@ -1784,8 +1743,8 @@ namespace ConsoleApp
                                     {
                                         var qFarm = Q3.GetPrediction(min);
 
-                                        if(qFarm.Hitchance >= HitChance.High && qFarm.CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range)
-                                        Q3.Cast(qFarm.CastPosition);
+                                        if (qFarm.Hitchance >= HitChance.High && qFarm.CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range)
+                                            Q3.Cast(qFarm.CastPosition);
                                     }
                                 }
                                 else
@@ -1823,10 +1782,10 @@ namespace ConsoleApp
                                 }
                             }
                         }
-                    }                    
+                    }
                 }
             }
-            if(Eminions != null && YasuoMenu.Yasuo_Clear.Yasuo_Eclear.Enabled && E.IsReady())
+            if (Eminions != null && YasuoMenu.Yasuo_Clear.Yasuo_Eclear.Enabled && E.IsReady())
             {
                 foreach(var min in Eminions)
                 {
@@ -1937,20 +1896,17 @@ namespace ConsoleApp
             AllObj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
 
             //set
-            if(AllObj.Any() && AllObj.Count >= 2)
-                foreach (var aobj in AllObj)
+            foreach(var aobj in AllObj)
+            {
+                obj1 = aobj;
+                foreach (var bobj in AllObj.Where(i => i.NetworkId != aobj.NetworkId))
                 {
-                    if (aobj != null)
-                        obj1 = aobj;
-                    foreach (var bobj in AllObj.Where(i => i.NetworkId != aobj.NetworkId))
-                    {
-                        if (bobj != null)
-                            obj2 = bobj;
-                    }
+                    obj2 = bobj;
                 }
+            }           
 
             //ready ?
-            if (obj1.NetworkId != obj2.NetworkId && obj1 != null && obj2 != null)
+            if(obj1.NetworkId != obj2.NetworkId && obj1 != null && obj2 != null)
             {
                 ready = true;
             }
@@ -1967,12 +1923,12 @@ namespace ConsoleApp
 
                 if (ziczacpos1.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value)
                 {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj1)))
+                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || UnderTower(PosAfterE(obj1)))
                         E1.Cast(obj1);
                 }
                 if (ziczacpos2.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value)
                 {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj2)))
+                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || UnderTower(PosAfterE(obj2)))
                         E1.Cast(obj2);
                 }
             }           
@@ -1981,7 +1937,7 @@ namespace ConsoleApp
         {
             if (target == null || oaa == true) return;
             var obj = GetNearObj(target);
-            if(YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1 && E.IsReady())
+            if(YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
             {
                 LogicEZicZac(target);
             }
@@ -2422,12 +2378,247 @@ namespace ConsoleApp
 
         public class EQwind
         {
-
+            public static MenuBool Combo_EQWind = new MenuBool("Combo_EQWind", "EWind logic");
         }
     }
     internal class Yone
     {
+        private static Spell Q1, Q3, W, E, E2, R;
+        private static AIHeroClient objPlayer = ObjectManager.Player;
+        public static Menu YoneTheMenu;
+        public static bool baa = false;
+        public static bool oaa = false;
+        public static bool aaa = false;
+        private static bool isQ3()
+        {
+            if(Q1.Name == "YoneQ3")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private static bool isE2()
+        {
+            if(ObjectManager.Player.Mana > 0 && E.IsReady())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private static Vector3 EShadowPos()
+        {
+            var shadow = GameObjects.Get<AIMinionClient>().Where(i => i.IsValidTarget() && i.IsVisible).FirstOrDefault();
+            if(shadow == null)
+            {
+                return Vector3.Zero;
+            }
+            else
+            {
+                return shadow.Position;
+            }
+        }
+        public static void YoneLoaded()
+        {
+            YoneTheMenu = new Menu("YoneTheMenu", "Yone God Like", true);
+            var combomenu = new Menu("combomenu", "Combo Settings");
+            /*{
+                YoneMenu.Cancelaa.Q_cancel,
+                YoneMenu.Cancelaa.W_cancel,
+                YoneMenu.Cancelaa.E_cancel,
+                YoneMenu.Cancelaa.R_cancel,
+                YoneMenu.Qcombo.Combo_Qcombo,
+                YoneMenu.Qcombo.Combo_Qwindcombo,
+                YoneMenu.Qcombo.Combo_Qbeforeaa,
+                YoneMenu.Qcombo.Combo_Qafteraa,
+                YoneMenu.Qcombo.Combo_Qauto,
+                YoneMenu.Qcombo.AcceptQ3,
+                YoneMenu.Wcombo.Combo_Wcombo,
+                YoneMenu.Wcombo.Combo_Wafteraa,
+                YoneMenu.Wcombo.Combo_Woutaarange,
+                YoneMenu.Wcombo.Combo_Wifhavewind,
+                YoneMenu.Wcombo.Combo_Whit,
+                YoneMenu.Wcombo.Combo_Wtargetheath,
+                YoneMenu.Wcombo.Combo_Wplayerheath,
+                YoneMenu.Ecombo.Combo_Ecombo,
+                YoneMenu.Ecombo.Combo_Edashturret,
+                YoneMenu.Ecombo.Combo_Etargetheath,
+                YoneMenu.Ecombo.Combo_Eplayerheath,
+                YoneMenu.Ecombo.Combo_Ereturn,
+                YoneMenu.Ecombo.Combo_Eoutaarange,
+                YoneMenu.Ecombo.Combo_Eifhavewind,
+                YoneMenu.Ecombo.Combo_Etargetcount,
+                YoneMenu.Rcombo.Combo_Rcombo,
+                YoneMenu.Rcombo.Combo_Rhitcount,
+                YoneMenu.Rcombo.Combo_Rtargetheath,
+                YoneMenu.EQwind.Combo_EQWind
+            };*/
+            YoneTheMenu.Add(combomenu); YoneTheMenu.Attach();
 
+            Q1 = new Spell(SpellSlot.Q, 475);
+            Q3 = new Spell(SpellSlot.Q, 900);
+            W = new Spell(SpellSlot.W, 600);
+            E = new Spell(SpellSlot.E, 300);
+            R = new Spell(SpellSlot.R, 1000);
+
+            Q1.SetSkillshot(0.2f, 20, float.MaxValue, false, SkillshotType.Line);
+            Q3.SetSkillshot(0.25f, 50, 1500, false, SkillshotType.Line);
+            W.SetSkillshot(0.25f, 100, float.MaxValue, false, SkillshotType.Line);
+            R.SetSkillshot(0.4f, 100, float.MaxValue, false, SkillshotType.Line);
+
+            Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.OnAction += Orbwalker_OnAction;
+        }
+
+        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        {
+            if(args.Type == OrbwalkerType.AfterAttack)
+            {
+                var Qminions = GameObjects.Jungle.Where(i => i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding());
+                if (Qminions != null && Q1.IsReady())
+                {
+                    foreach (var min in Qminions)
+                    {
+                        if (isQ3())
+                        {
+                            var qFarm = Q3.GetPrediction(min);
+
+                            if (!UnderTower(objPlayer.Position.Extend(qFarm.CastPosition, 500)))
+                            {
+                                Q3.Cast(qFarm.CastPosition);
+                            }
+                        }
+                        else
+                        {
+                            var qFarm = Q1.GetPrediction(min);
+
+                            Q1.Cast(qFarm.CastPosition);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            if (objPlayer.IsDead) return;
+            switch (Orbwalker.ActiveMode)
+            {
+                case OrbwalkerMode.Harass:
+                    Yone_Clear();
+                    break;
+                case OrbwalkerMode.Combo:
+                    Yone_Combo();
+                    break;
+                case OrbwalkerMode.LaneClear:
+                    Yone_Clear();
+                    break;
+            }
+        }
+        private static void Yone_Clear()
+        {
+            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding());
+            if (Qminions != null && Q1.IsReady())
+            {
+                foreach (var min in Qminions)
+                {
+                    if (!min.IsMinion())
+                    {
+                        if (min.HealthPercent >= 30) return;
+
+                        else
+                        {
+                            if (isQ3())
+                            {
+                                var qFarm = Q3.GetPrediction(min);
+
+                                if (qFarm.Hitchance >= HitChance.High && qFarm.CastPosition.DistanceToPlayer() <= 900 && !UnderTower(objPlayer.Position.Extend(qFarm.CastPosition, 500)))
+                                    Q3.Cast(qFarm.CastPosition);
+                            }
+                            else
+                            {
+                                var qFarm = Q1.GetPrediction(min);
+
+                                if (qFarm.Hitchance >= HitChance.High && qFarm.CastPosition.DistanceToPlayer() <= 475)
+                                    Q1.Cast(qFarm.CastPosition);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (isQ3())
+                        {
+                            var qFarm = Q3.GetLineFarmLocation(Qminions.ToList());
+
+                            if (qFarm.MinionsHit >= 1 && !UnderTower(objPlayer.Position.Extend(qFarm.Position, 500)))
+                            {
+                                Q3.Cast(qFarm.Position);
+                            }
+                        }
+                        else
+                        {
+                            var qFarm = Q1.GetLineFarmLocation(Qminions.ToList());
+
+                            if (qFarm.MinionsHit >= 1)
+                            {
+                                Q1.Cast(qFarm.Position);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public static bool UnderTower(Vector3 pos)
+        {
+            return
+                ObjectManager.Get<AITurretClient>()
+                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius));
+        }
+
+        private static void Yone_Combo()
+        {
+            var target = TargetSelector.GetTarget(1000);
+            if (target == null) return;
+
+            QCombo(target);
+
+            if(W.IsReady() && target.IsValidTarget(600) && !target.IsValidTarget(objPlayer.GetRealAutoAttackRange()))
+            {
+                if(W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                {
+                    W.Cast(W.GetPrediction(target).CastPosition);
+                }
+            }
+        }
+
+        private static void QCombo(AIBaseClient target)
+        {
+            if (target.IsValidTarget(isQ3() ? 1000 : 500))
+            {
+                if (Q1.IsReady())
+                {
+                    if (!isQ3())
+                    {
+                        var qpred = Q1.GetPrediction(target);
+                        if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
+                            if (qpred.CastPosition.DistanceToPlayer() <= 475)
+                                Q1.Cast(qpred.CastPosition);
+                    }
+                    else
+                    {
+                        var qpred = Q3.GetPrediction(target);
+                        if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
+                            if (qpred.CastPosition.DistanceToPlayer() <= 900)
+                                Q1.Cast(qpred.CastPosition);
+                    }
+                }
+            }
+        }
     }
     #endregion
 }

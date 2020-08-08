@@ -46,6 +46,47 @@ namespace ConsoleApp
 
             if (ObjectManager.Player.CharacterName == "Yone")
                 ("Yone Script make by FunnySlayer, Good luck").YoneLoad();
+
+            try
+            {
+                Game.Print("SkinHack v1.0.1");
+                Game.Print("Thanks for help 011110001");
+                Game.Print("Creator: emredeger");
+
+                var menu = new Menu("skinhack", "SkinHack", true);
+
+                var champs = menu.Add(new Menu("Champions", "Champions"));
+                var allies = champs.Add(new Menu("Allies", "Allies"));
+                var enemies = champs.Add(new Menu("Enemies", "Enemies"));
+
+                foreach (var hero in GameObjects.Heroes.Where(h => !h.CharacterName.Equals("Ezreal")))
+                {
+                    var champMenu = new Menu(hero.CharacterName, hero.CharacterName);
+                    champMenu.Add(new MenuSlider("SkinIndex", "Skin Index", 1, 1, 50));
+                    champMenu.GetValue<MenuSlider>("SkinIndex").ValueChanged += (s, e) =>
+                    {
+                        Console.WriteLine($"[SKINHACK] Skin ID: {champMenu.GetValue<MenuSlider>("SkinIndex").Value}");
+                        GameObjects.Heroes.ForEach(
+                            p =>
+                            {
+                                if (p.CharacterName == hero.CharacterName)
+                                {
+                                    Console.WriteLine($"[SKINHACK] Changed: {hero.CharacterName}");
+                                    p.SetSkin(champMenu.GetValue<MenuSlider>("SkinIndex").Value);
+                                }
+                            });
+                    };
+
+                    var rootMenu = hero.IsAlly ? allies : enemies;
+                    rootMenu.Add(champMenu);
+                }
+
+                menu.Attach();
+            }
+            catch
+            {
+
+            }
         }
     }
     internal static class Yasuo_GodLike
@@ -2346,7 +2387,7 @@ namespace ConsoleApp
             public static MenuBool Combo_Qafteraa = new MenuBool("Qafteraa", "_ Only use Q [After aa]", false);
 
             public static MenuBool Combo_Qauto = new MenuBool("Comb_Qauto", "Auto use Q", false);
-            public static MenuBool AcceptQ3 = new MenuBool("AcceptQ3", "---> Q wind", false);
+            public static MenuBool AcceptQ3 = new MenuBool("AcceptQ3", "---> Wind", false);
         }
         public class Wcombo
         {
@@ -2355,14 +2396,12 @@ namespace ConsoleApp
             public static MenuBool Combo_Woutaarange = new MenuBool("Woutaarange", "_ Only use W [Out aa range]", true);
             public static MenuBool Combo_Wifhavewind = new MenuBool("Wifhavewind", "_ Only use W [Player have Wind]", false);
             public static MenuSliderButton Combo_Whit = new MenuSliderButton("Whit", ": : Use W if hit x target", 1, 0, 5);
-            public static MenuSliderButton Combo_Wtargetheath = new MenuSliderButton("Wtargetheath", ": : Use W if target heath <=", 60, 0, 100);
-            public static MenuSliderButton Combo_Wplayerheath = new MenuSliderButton("Wplayerheath", ": : Use W if player heath <=", 70, 0, 100);
         }
         public class Ecombo
         {
             public static MenuBool Combo_Ecombo = new MenuBool("Ecombo", "E in combo");
             public static MenuBool Combo_Edashturret = new MenuBool("Edashturret", "_ E dash turret");
-            public static MenuSliderButton Combo_Etargetheath = new MenuSliderButton("Etargetheath", ": : Use E if target heath <=", 60);
+            public static MenuSliderButton Combo_Etargetheath = new MenuSliderButton("Etargetheath", ": : Use E if target heath <=", 100);
             public static MenuSliderButton Combo_Eplayerheath = new MenuSliderButton("Eplayerheath", ": : Use E if player heath <=", 80);
             public static MenuBool Combo_Ereturn = new MenuBool("Ereturn", "_ E return [gap closer]");
             public static MenuBool Combo_Eoutaarange = new MenuBool("Eoutaarange", "_ only use E [Out aa range]");
@@ -2373,12 +2412,18 @@ namespace ConsoleApp
         {
             public static MenuBool Combo_Rcombo = new MenuBool("Rcombo", "R in combo");
             public static MenuSliderButton Combo_Rtargetheath = new MenuSliderButton("Rtargetheath", ": : Use R if target heath <= ", 40);
-            public static MenuSliderButton Combo_Rhitcount = new MenuSliderButton("Rhitcount", "Use R if can hit >= ", 2, 1, 5);
+            public static MenuSliderButton Combo_Rhitcount = new MenuSliderButton("Rhitcount", "Use R if can hit >= ", 3, 1, 5);
         }
 
         public class EQwind
         {
             public static MenuBool Combo_EQWind = new MenuBool("Combo_EQWind", "EWind logic");
+        }
+        public class Keys
+        {
+            public static MenuKeyBind TurretKey = new MenuKeyBind("TurretKey", "Allow combo in Turret", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
+            public static MenuKeyBind SemiR = new MenuKeyBind("SemiR", "R Using Key", System.Windows.Forms.Keys.T, KeyBindType.Press);
+            public static MenuKeyBind SemiE = new MenuKeyBind("SemiE", "E Using Key", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
         }
     }
     internal class Yone
@@ -2402,7 +2447,7 @@ namespace ConsoleApp
         }
         private static bool isE2()
         {
-            if(ObjectManager.Player.Mana > 0 && E.IsReady())
+            if(ObjectManager.Player.Mana > 0)
             {
                 return true;
             }
@@ -2413,20 +2458,25 @@ namespace ConsoleApp
         }
         private static Vector3 EShadowPos()
         {
-            var shadow = GameObjects.Get<AIMinionClient>().Where(i => i.IsValidTarget() && i.IsVisible).FirstOrDefault();
-            if(shadow == null)
+            var shadows = GameObjects.Get<AIBaseClient>().Where(i => i.CharacterName == "TestCubeRender10Vision" && i.HealthPercent == 100);
+            var pos = Vector3.Zero;
+            foreach(var shadow in shadows)
             {
-                return Vector3.Zero;
+                if (shadow == null)
+                {
+                    pos =  Vector3.Zero;
+                }
+                else
+                {
+                    pos = shadow.Position;
+                }
             }
-            else
-            {
-                return shadow.Position;
-            }
+            return pos;
         }
         public static void YoneLoaded()
         {
             YoneTheMenu = new Menu("YoneTheMenu", "Yone God Like", true);
-            var combomenu = new Menu("combomenu", "Combo Settings");
+            var combomenu = new MenuSeparator("combomenu", "Combo Settings");
             /*{
                 YoneMenu.Cancelaa.Q_cancel,
                 YoneMenu.Cancelaa.W_cancel,
@@ -2458,7 +2508,48 @@ namespace ConsoleApp
                 YoneMenu.Rcombo.Combo_Rtargetheath,
                 YoneMenu.EQwind.Combo_EQWind
             };*/
-            YoneTheMenu.Add(combomenu); YoneTheMenu.Attach();
+
+            Menu Qcb = new Menu("Qcombo", "Q Settings") { YoneMenu.Qcombo.Combo_Qcombo,
+                YoneMenu.Qcombo.Combo_Qwindcombo,
+                YoneMenu.Qcombo.Combo_Qbeforeaa,
+                YoneMenu.Qcombo.Combo_Qafteraa,
+                YoneMenu.Qcombo.Combo_Qauto,
+                YoneMenu.Qcombo.AcceptQ3,};
+            Menu Wcb = new Menu("Wcombo", "W Settings") { YoneMenu.Wcombo.Combo_Wcombo,
+                YoneMenu.Wcombo.Combo_Wafteraa,
+                YoneMenu.Wcombo.Combo_Woutaarange,
+                YoneMenu.Wcombo.Combo_Wifhavewind,
+                YoneMenu.Wcombo.Combo_Whit,};
+            Menu Ecb = new Menu("Ecombo", "E Settings") { YoneMenu.Ecombo.Combo_Ecombo,
+                YoneMenu.Ecombo.Combo_Edashturret,
+                YoneMenu.Ecombo.Combo_Etargetheath,
+                YoneMenu.Ecombo.Combo_Eplayerheath,
+                YoneMenu.Ecombo.Combo_Ereturn,
+                YoneMenu.Ecombo.Combo_Eoutaarange,
+                YoneMenu.Ecombo.Combo_Eifhavewind,
+                YoneMenu.Ecombo.Combo_Etargetcount,};
+            Menu Rcb = new Menu("Rcombo", "R Settings") { YoneMenu.Rcombo.Combo_Rcombo,
+                YoneMenu.Rcombo.Combo_Rhitcount,
+                YoneMenu.Rcombo.Combo_Rtargetheath,};
+
+            Menu AA = new Menu("AA", "AA Settings") { YoneMenu.Cancelaa.Q_cancel,
+                YoneMenu.Cancelaa.W_cancel,
+                YoneMenu.Cancelaa.E_cancel,
+                YoneMenu.Cancelaa.R_cancel,};
+
+            Menu Keys = new Menu("Keys", "Keys Settings") { YoneMenu.Keys.TurretKey,
+                YoneMenu.Keys.SemiE,
+                YoneMenu.Keys.SemiR,};
+
+            YoneTheMenu.Add(combomenu);
+            YoneTheMenu.Add(Qcb);
+            YoneTheMenu.Add(Wcb);
+            YoneTheMenu.Add(Ecb);
+            YoneTheMenu.Add(Rcb);
+            YoneTheMenu.Add(AA);
+            YoneTheMenu.Add(Keys);
+            YoneTheMenu.Attach();
+
 
             Q1 = new Spell(SpellSlot.Q, 475);
             Q3 = new Spell(SpellSlot.Q, 900);
@@ -2473,11 +2564,44 @@ namespace ConsoleApp
 
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnAction += Orbwalker_OnAction;
+            Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private static void Drawing_OnDraw(EventArgs args)
+        {
+            if(isE2() && EShadowPos() != Vector3.Zero)
+            {
+                Drawing.DrawCircle(EShadowPos(), 70, Color.SkyBlue);
+            }
         }
 
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
-            if(args.Type == OrbwalkerType.AfterAttack)
+            if (args.Type == OrbwalkerType.AfterAttack)
+            {
+                aaa = true;
+                baa = false;
+                oaa = false;
+            }
+            else aaa = false;
+
+            if (args.Type == OrbwalkerType.BeforeAttack)
+            {
+                aaa = false;
+                baa = true;
+                oaa = false;
+            }
+            else baa = false;
+
+            if (args.Type == OrbwalkerType.OnAttack)
+            {
+                aaa = false;
+                baa = false;
+                oaa = true;
+            }
+            else oaa = false;
+
+            if (args.Type == OrbwalkerType.AfterAttack)
             {
                 var Qminions = GameObjects.Jungle.Where(i => i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding());
                 if (Qminions != null && Q1.IsReady())
@@ -2507,6 +2631,21 @@ namespace ConsoleApp
         private static void Game_OnUpdate(EventArgs args)
         {
             if (objPlayer.IsDead) return;
+            if (YoneMenu.Keys.SemiR.Active && R.IsReady())
+            {
+                var targets = TargetSelector.GetTargets(2000);
+                Vector3 Rpos = Vector3.Zero;
+
+                if (!targets.Any()) return;
+                foreach (var Rprediction in targets.Select(i => R.GetPrediction(i)).Where(i => i.Hitchance >= HitChance.High || (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount > 1)).OrderByDescending(i => i.AoeTargetsHitCount))
+                {
+                    Rpos = Rprediction.CastPosition;
+                }
+                if(Rpos != Vector3.Zero)
+                {
+                    R.Cast(Rpos);
+                }
+            }
             switch (Orbwalker.ActiveMode)
             {
                 case OrbwalkerMode.Harass:
@@ -2573,31 +2712,38 @@ namespace ConsoleApp
                 }
             }
         }
-        public static bool UnderTower(Vector3 pos)
+        public static bool UnderTower(Vector3 pos, int bonus = 0)
         {
             return
                 ObjectManager.Get<AITurretClient>()
-                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius));
+                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius + bonus));
         }
 
         private static void Yone_Combo()
         {
-            var target = TargetSelector.GetTarget(1000);
+            var target = TargetSelector.GetTarget(5000);
             if (target == null) return;
 
-            QCombo(target);
-
-            if(W.IsReady() && target.IsValidTarget(600) && !target.IsValidTarget(objPlayer.GetRealAutoAttackRange()))
+            /*if(isE2())
+            if(EShadowPos() != Vector3.Zero)
             {
-                if(W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
-                {
-                    W.Cast(W.GetPrediction(target).CastPosition);
-                }
+                Game.Print("Shadow Detected");
+                
             }
+            else
+            {
+                Game.Print("Shadow Undetected");
+            }*/
+            QCombo(target);
+            WCombo(target);
+            ECombo(target);
         }
 
         private static void QCombo(AIBaseClient target)
         {
+            if (oaa && !YoneMenu.Cancelaa.Q_cancel.Enabled) return;
+            if (!Q1.IsReady()) return;
+
             if (target.IsValidTarget(isQ3() ? 1000 : 500))
             {
                 if (Q1.IsReady())
@@ -2606,18 +2752,90 @@ namespace ConsoleApp
                     {
                         var qpred = Q1.GetPrediction(target);
                         if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
-                            if (qpred.CastPosition.DistanceToPlayer() <= 475)
-                                Q1.Cast(qpred.CastPosition);
+                            if (qpred.CastPosition.DistanceToPlayer() <= 475 && YoneMenu.Qcombo.Combo_Qcombo.Enabled)
+                                if((!YoneMenu.Qcombo.Combo_Qafteraa.Enabled || aaa) || (!YoneMenu.Qcombo.Combo_Qbeforeaa.Enabled || baa))
+                                    Q1.Cast(qpred.CastPosition);
                     }
                     else
                     {
                         var qpred = Q3.GetPrediction(target);
                         if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
-                            if (qpred.CastPosition.DistanceToPlayer() <= 900)
-                                Q1.Cast(qpred.CastPosition);
+                            if (qpred.CastPosition.DistanceToPlayer() <= 900 && YoneMenu.Qcombo.Combo_Qwindcombo.Enabled)
+                                if(!UnderTower(objPlayer.Position.Extend(qpred.CastPosition, 500)) || YoneMenu.Keys.TurretKey.Active)
+                                    Q3.Cast(qpred.CastPosition);
                     }
                 }
             }
+        }
+        private static void WCombo(AIBaseClient target)
+        {
+            if (!W.IsReady()) return;
+            if (oaa && !YoneMenu.Cancelaa.W_cancel.Enabled) return;
+            if ((!YoneMenu.Wcombo.Combo_Wcombo.Enabled) || (YoneMenu.Wcombo.Combo_Wafteraa.Enabled && !aaa) || (YoneMenu.Wcombo.Combo_Woutaarange.Enabled && target.InAutoAttackRange()) || (YoneMenu.Wcombo.Combo_Wifhavewind.Enabled && !isQ3())) return;
+
+            if (W.IsReady() && target.IsValidTarget(600) && !target.IsValidTarget(objPlayer.GetRealAutoAttackRange()))
+            {
+                if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                {
+                    W.Cast(W.GetPrediction(target).CastPosition);
+                }
+            }
+        }
+        private static void ECombo(AIBaseClient target)
+        {
+            if (oaa && !YoneMenu.Cancelaa.E_cancel.Enabled) return;
+            if (!YoneMenu.Ecombo.Combo_Ecombo.Enabled) return;
+            if (!E.IsReady()) return;
+
+            if (isE2())
+            {
+                if(EShadowPos() != Vector3.Zero)
+                {
+                    if (!target.IsValidTarget(isQ3() ? 900 + 200 : 475 + 200) && target.Position.Distance(EShadowPos()) > (isQ3() ? 900 + 200 : 475 + 200))
+                        return;
+                }                
+            }
+            else
+            {
+                if (!target.IsValidTarget(isQ3() ? 900 + 200 : 475 + 200))
+                    return;
+            }
+
+            if (!isE2())
+            {
+                if (YoneMenu.Ecombo.Combo_Edashturret.Enabled)
+                {
+                    if (UnderTower(objPlayer.Position) && UnderTower(target.Position) && !UnderTower(objPlayer.Position.Extend(target.Position, -300)))
+                    {
+                        E.Cast(target.Position);
+                    }
+                }
+                if (YoneMenu.Ecombo.Combo_Etargetheath.Enabled && YoneMenu.Ecombo.Combo_Etargetheath.Value >= target.HealthPercent && !UnderTower(target.Position, 300))
+                {
+                    if (!UnderTower(objPlayer.Position.Extend(target.Position, 300)) && !UnderTower(objPlayer.Position.Extend(target.Position, -300)))
+                        E.Cast(target.Position);
+                }
+                if (YoneMenu.Ecombo.Combo_Etargetcount.Enabled)
+                {
+                    if (objPlayer.CountEnemyHeroesInRange(600) > 1)
+                    {
+                        E.Cast(target.Position);
+                    }
+                }
+                if(UnderTower(target.Position, 250) && YoneMenu.Keys.SemiE.Active)
+                {
+                    E.Cast(target.Position);
+                }
+            }
+            if(isE2())
+                if (target.DistanceToPlayer() > (isQ3() ? 900 + 200 : 475 + 300))
+                {
+                    if (EShadowPos() != Vector3.Zero && target.Distance(EShadowPos()) < target.DistanceToPlayer() - 300)
+                    {
+                        if (YoneMenu.Ecombo.Combo_Ereturn.Enabled)
+                            E.Cast(target.Position);
+                    }
+                }
         }
     }
     #endregion

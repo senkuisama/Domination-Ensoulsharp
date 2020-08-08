@@ -52,7 +52,7 @@ namespace DominationAIO.Champions
         public static MenuBool antigap = new MenuBool("antigap", "Anti Gap with W");
     }
     internal class Rupdate
-    {       
+    {
         public static AIHeroClient Player { get { return ObjectManager.Player; } }
         public static Spell Q, W, E, R, Item, fl, ig;
         public static SpellSlot flash = Player.GetSpellSlot("summonerflash");
@@ -86,7 +86,7 @@ namespace DominationAIO.Champions
             R = new Spell(SpellSlot.R, 900);
             fl = new Spell(flash, 400f);
             ig = new Spell(ignite, 400);
-            R.SetSkillshot(0.25f, 45, 1600, false, false, SkillshotType.Cone); 
+            R.SetSkillshot(0.25f, 45, 1600, false, false, SkillshotType.Cone);
 
             RivenMenu = new Menu("RivenMenu", "FunnySlayer Riven", true);
             var combom = new Menu("combom", "Combo Menu");
@@ -128,6 +128,7 @@ namespace DominationAIO.Champions
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnAction += Orbwalker_OnAction;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+            AIBaseClient.OnPlayAnimation += AIBaseClient_OnPlayAnimation;
             Interrupter.OnInterrupterSpell += Interrupter_OnInterrupterSpell;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Dash.OnDash += Dash_OnDash;
@@ -135,11 +136,24 @@ namespace DominationAIO.Champions
             Drawing.OnDraw += Drawing_OnDraw;
 
             Orbwalker.OnAction += FarmAction;
-        }        
+        }
+
+        private static void AIBaseClient_OnPlayAnimation(AIBaseClient sender, AIBaseClientPlayAnimationEventArgs args)
+        {
+            if (sender.IsMe)
+            {
+                if (args.Animation.Contains("Spell1"))
+                {
+                    Orbwalker.ResetAutoAttackTimer();
+                    DelayAction.Add(100, () => { Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(sender.Position - 500, -50)); });
+                    DelayAction.Add(100, () => { CanAttack = true; });
+                }
+            }
+        }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if(!Player.IsDead)
+            if (!Player.IsDead)
             {
                 Drawing.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Red);
                 Drawing.DrawCircle(Player.Position, 400, System.Drawing.Color.Yellow);
@@ -171,11 +185,11 @@ namespace DominationAIO.Champions
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserArgs args)
         {
             if (sender.IsMe) return;
-            if(W.IsReady() && sender.IsValidTarget(W.Range))
+            if (W.IsReady() && sender.IsValidTarget(W.Range))
             {
-                if(Player.CanUseItem((int)ItemId.Tiamat) 
-                    || Player.CanUseItem((int)ItemId.Ravenous_Hydra) 
-                    || Player.CanUseItem((int)ItemId.Tiamat_Melee_Only) 
+                if (Player.CanUseItem((int)ItemId.Tiamat)
+                    || Player.CanUseItem((int)ItemId.Ravenous_Hydra)
+                    || Player.CanUseItem((int)ItemId.Tiamat_Melee_Only)
                     || Player.CanUseItem((int)ItemId.Ravenous_Hydra_Melee_Only)
                     )
                 {
@@ -184,7 +198,7 @@ namespace DominationAIO.Champions
                     Player.UseItem((int)ItemId.Ravenous_Hydra);
                     Player.UseItem((int)ItemId.Tiamat_Melee_Only);
                     DelayAction.Add(1, () => { W.Cast(sender); });
-                }else DelayAction.Add(1, () => { W.Cast(sender); });
+                } else DelayAction.Add(1, () => { W.Cast(sender); });
             }
         }
 
@@ -208,25 +222,30 @@ namespace DominationAIO.Champions
                 else DelayAction.Add(1, () => { W.Cast(sender); });
             }
         }
-
+        public static bool CanAttack = false;
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
             SpellData sdataw = Player.Spellbook.GetSpell(SpellSlot.W).SData;
             var spell = args.SData;
-            var targets = GameObjects.EnemyHeroes.Where(heroes => heroes.IsValidTarget(Player.GetRealAutoAttackRange())); 
+            var targets = GameObjects.EnemyHeroes.Where(heroes => heroes.IsValidTarget(Player.GetRealAutoAttackRange()));
             if (sender.IsMe)
             {
-                if(spell.Name == sdataw.Name && Orbwalker.ActiveMode == OrbwalkerMode.Combo && Q.SpellIsReadyAndActive(RMenu.useq))
+                if (Orbwalker.IsAutoAttack(spell.Name))
                 {
-                    if(!Player.HasBuff("riventricleavesoundtwo"))
-                    Q.Cast(Game.CursorPos);
+                    CanAttack = false;
+                    Game.Print("Orb attack");
+                }
+                if (spell.Name == sdataw.Name && Orbwalker.ActiveMode == OrbwalkerMode.Combo && Q.SpellIsReadyAndActive(RMenu.useq))
+                {
+                    if (!Player.HasBuff("riventricleavesoundtwo"))
+                        Q.Cast(Game.CursorPos);
                     DelayAction.Add(1, () => { return; });
                 }
                 if (spell.Name.Contains("ItemTiamatCleave"))
                 {
-                    if(Orbwalker.ActiveMode == OrbwalkerMode.Combo || Orbwalker.ActiveMode == OrbwalkerMode.Harass)
+                    if (Orbwalker.ActiveMode == OrbwalkerMode.Combo || Orbwalker.ActiveMode == OrbwalkerMode.Harass)
                     {
-                        if(targets.Count() > 0 || targets != null)
+                        if (targets.Count() > 0 || targets != null)
                             W.Cast();
                     }
                     lastTiamat = Variables.GameTimeTickCount;
@@ -234,11 +253,15 @@ namespace DominationAIO.Champions
                 if (spell.Name.Contains("RivenTriCleave"))
                 {
                     Orbwalker.ResetAutoAttackTimer();
+                    DelayAction.Add(100, () => { Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(args.End, -50)); });
+                    DelayAction.Add(100, () => { CanAttack = true; });
                     lastQcast = Variables.GameTimeTickCount;
                 }
-                if(spell.Name == "RivenTriCleave")
+                if (spell.Name == "RivenTriCleave")
                 {
                     Orbwalker.ResetAutoAttackTimer();
+                    DelayAction.Add(100, () => { Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(args.End, -50)); });
+                    DelayAction.Add(100, () => { CanAttack = true; });
                     lastQcast = Variables.GameTimeTickCount;
                 }
                 if (spell.Name.Contains("RivenFient"))
@@ -308,17 +331,17 @@ namespace DominationAIO.Champions
 
         private static void FarmAction(object sender, OrbwalkerActionArgs args)
         {
-            if(Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
+            if (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
             {
                 if (args.Type == OrbwalkerType.AfterAttack)
                 {
-                    if(args.Target.IsJungle())
+                    if (args.Target.IsJungle())
                     {
-                        if(Q.IsReady() && RMenu.useqf.Enabled)
+                        if (Q.IsReady() && RMenu.useqf.Enabled)
                         {
                             Q.CastOnUnit(args.Target);
                         }
-                        if(W.IsReady() && RMenu.usewf.Enabled && args.Target.IsValidTarget(W.Range))
+                        if (W.IsReady() && RMenu.usewf.Enabled && args.Target.IsValidTarget(W.Range))
                         {
                             W.Cast();
                         }
@@ -328,11 +351,11 @@ namespace DominationAIO.Champions
                         }
                     }
                 }
-            }           
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)
-        {        
+        {
             #region old
             /*if (RMenu.Qdelay.Enabled)
             {
@@ -358,19 +381,24 @@ namespace DominationAIO.Champions
             }*/
 
             #endregion
-            var target = GameObjects.EnemyHeroes.FirstOrDefault(i => i.IsValidTarget(900) && i.Health < R.GetDamage(i) && i.DistanceToPlayer() < R.GetPrediction(i, false, -1, CollisionObjects.YasuoWall).CastPosition.DistanceToPlayer());          
+            var target = GameObjects.EnemyHeroes.FirstOrDefault(i => i.IsValidTarget(900) && i.Health < R.GetDamage(i) && i.DistanceToPlayer() < R.GetPrediction(i, false, -1, CollisionObjects.YasuoWall).CastPosition.DistanceToPlayer());
             if (!Player.IsDead)
             {
+                if (Orbwalker.CanAttack() == true)
+                {
+                    CanAttack = true;
+                }
                 switch (Orbwalker.ActiveMode)
                 {
                     case OrbwalkerMode.Combo:
+                        AttackNearestTarget();
                         combo();
-                        if(RMenu.user.Enabled && R2())
+                        if (RMenu.user.Enabled && R2())
                         {
-                            if(!onaa && R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall).Hitchance >= HitChance.High)
+                            if (!onaa && R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall).Hitchance >= HitChance.High)
                             {
-                                if(target.Health <= R.GetDamage(target))
-                                R.Cast(R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall).CastPosition);
+                                if (target.Health <= R.GetDamage(target))
+                                    R.Cast(R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall).CastPosition);
                             }
                         }
                         break;
@@ -391,8 +419,8 @@ namespace DominationAIO.Champions
         public static void combo()
         {
             var target = TargetSelector.SelectedTarget;
-            if(target == null || !target.IsValidTarget(700))
-            target = TargetSelector.GetTarget(1300);
+            if (target == null || !target.IsValidTarget(700))
+                target = TargetSelector.GetTarget(1300);
 
             var qready = Q.IsReady();
             var wready = W.IsReady();
@@ -411,24 +439,22 @@ namespace DominationAIO.Champions
 
             var rpreddmg = R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
 
-            if (!qenabled || !wenabled || !eenabled || !renabled) return;
-
             if (target == null) return;
 
             #region normal
-            if(Player.Level <= 3 || !RMenu.fastcombo.Active)
+            if (Player.Level <= 3 || !RMenu.fastcombo.Active)
             {
                 if (target.Health < 40)
                 {
                     if (qready && !wready && !eready)
                     {
-                        if(target.IsValidTarget(checkqgap) && target.DistanceToPlayer() >= Player.GetRealAutoAttackRange())
+                        if (target.IsValidTarget(checkqgap) && target.DistanceToPlayer() >= Player.GetRealAutoAttackRange())
                         {
                             if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                Q.Cast(target, true);
-                        }else
+                            Q.Cast(target, true);
+                        } else
                         {
-                            if(target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
                             {
                                 if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
                                 if (afteraa) Q.Cast(target, true);
@@ -470,7 +496,7 @@ namespace DominationAIO.Champions
                     }
                     if (qready && eready)
                     {
-                        if(target.IsValidTarget(E.Range + 200) && !onaa && !beforeaa)
+                        if (target.IsValidTarget(E.Range + 200) && !onaa && !beforeaa)
                         {
                             if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
                             if (Player.HasBuff("riventricleavesoundtwo"))
@@ -487,13 +513,13 @@ namespace DominationAIO.Champions
                     }
                     if (eready && wready)
                     {
-                        if(target.IsValidTarget(checkegap) && !onaa && !beforeaa)
+                        if (target.IsValidTarget(checkegap) && !onaa && !beforeaa)
                         {
-                            if(target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
+                            if (target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
                             {
                                 if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
                                 E.Cast(target);
-                            }else
+                            } else
                             {
                                 if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
                                 if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
@@ -583,8 +609,8 @@ namespace DominationAIO.Champions
                                 if (afteraa) E.Cast(target);
                             }
                         }
-                    }                   
-                }               
+                    }
+                }
             }
             else
             {
@@ -634,8 +660,8 @@ namespace DominationAIO.Champions
                             if (c != Vector2.Zero)
                                 E.Cast(c);
                         }
-                        if(target.IsValidTarget(checkegap))
-                        E.Cast(target);
+                        if (target.IsValidTarget(checkegap))
+                            E.Cast(target);
                         DelayAction.Add(10, () => { return; });
                     }
                     if (afteraa)
@@ -656,9 +682,9 @@ namespace DominationAIO.Champions
                 {
                     if (R1() && target.DistanceToPlayer() < 700)
                     {
-                        if(target.HealthPercent <= rheath)
+                        if (target.HealthPercent <= rheath)
                         {
-                            if(Variables.GameTimeTickCount - lastEcast < 300 && Variables.GameTimeTickCount - lastEcast > 99)
+                            if (Variables.GameTimeTickCount - lastEcast < 300 && Variables.GameTimeTickCount - lastEcast > 99)
                             {
                                 R.Cast(target);
                                 DelayAction.Add(5, () => { Q.Cast(target); });
@@ -674,7 +700,7 @@ namespace DominationAIO.Champions
                             {
                                 if (qready)
                                 {
-                                        E.Cast(target.Position);
+                                    E.Cast(target.Position);
                                     DelayAction.Add(110 - Game.Ping, () => { R.Cast(target); });
                                     DelayAction.Add(120 - Game.Ping, () => { Q.Cast(target); });
                                 }
@@ -683,7 +709,7 @@ namespace DominationAIO.Champions
                             {
                                 if (qready)
                                 {
-                                        E.Cast(target.Position);
+                                    E.Cast(target.Position);
                                     DelayAction.Add(110 - Game.Ping, () => { R.Cast(target); });
                                     DelayAction.Add(120 - Game.Ping, () => { Q.Cast(target); });
                                 }
@@ -924,7 +950,7 @@ namespace DominationAIO.Champions
                         }
                     }
                 }
-                
+
                 if (RMenu.flash.Active && flash.IsReady() && target.DistanceToPlayer() >= 425 && target.IsValidTarget(950))
                 {
                     if (target.IsValidTarget(1000))
@@ -932,9 +958,9 @@ namespace DominationAIO.Champions
                         var cancancelanimation = false;
                         if (wready && qready && eready) cancancelanimation = true; else cancancelanimation = false;
                         if (Player.IsDashing() && target.Distance(Player) < W.Range) W.Cast(target);
-                        if(R1())
+                        if (R1())
                         {
-                            if(cancancelanimation)
+                            if (cancancelanimation)
                             {
                                 E.Cast(target);
                                 DelayAction.Add(110, () =>
@@ -955,9 +981,9 @@ namespace DominationAIO.Champions
                             }
 
                             {
-                                if(Variables.GameTimeTickCount - lastEcast < 99)
+                                if (Variables.GameTimeTickCount - lastEcast < 99)
                                 {
-                                    if(wready || qready)
+                                    if (wready || qready)
                                     {
                                         R.Cast(target);
                                         DelayAction.Add(80, () =>
@@ -974,7 +1000,7 @@ namespace DominationAIO.Champions
                                 }
                             }
                         }
-                        if(R2())
+                        if (R2())
                         {
                             if (cancancelanimation)
                             {
@@ -1417,7 +1443,7 @@ namespace DominationAIO.Champions
                                                                         E.Cast(c);
                                                                 }
                                                             }
-                                                            DelayAction.Add(120, () => { Q.Cast(target); });                                                         
+                                                            DelayAction.Add(120, () => { Q.Cast(target); });
                                                             DelayAction.Add(200, () => { return; });
                                                         }
                                                     }
@@ -1502,10 +1528,10 @@ namespace DominationAIO.Champions
                                             {
                                                 if (afteraa)
                                                 {
-                                                    Q.Cast(target);                                                    
+                                                    Q.Cast(target);
                                                     DelayAction.Add(10, () => { return; });
                                                 }
-                                                if(afteraa  || target.IsFleeing || !target.IsFacing(Player))
+                                                if (afteraa || target.IsFleeing || !target.IsFacing(Player))
                                                 {
                                                     if (target.IsValidTarget(W.Range))
                                                     {
@@ -1586,10 +1612,10 @@ namespace DominationAIO.Champions
                                                 {
                                                     if (afteraa)
                                                     {
-                                                        Q.Cast(target);                                                       
+                                                        Q.Cast(target);
                                                         DelayAction.Add(10, () => { return; });
                                                     }
-                                                    if(afteraa || target.IsFleeing || !target.IsFacing(Player))
+                                                    if (afteraa || target.IsFleeing || !target.IsFacing(Player))
                                                     {
                                                         if (target.IsValidTarget(W.Range + 75))
                                                         {
@@ -1752,6 +1778,16 @@ namespace DominationAIO.Champions
             #endregion
         }
 
+        private static void AttackNearestTarget()
+        {
+            var target = GameObjects.Get<AIHeroClient>().Where(i => i.IsValidTarget() && !i.IsAlly && i.IsValidTarget(Player.GetRealAutoAttackRange() + 30)).FirstOrDefault();
+            if(target != null && target.IsValidTarget(Player.GetRealAutoAttackRange() + 30) && CanAttack)
+            {
+                Orbwalker.Attack(target);
+                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                Game.Print("Attacked");
+            }
+        }
         private static bool HaveTiamat()
         {
             return Player.CanUseItem((int)ItemId.Tiamat)

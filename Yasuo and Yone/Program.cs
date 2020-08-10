@@ -193,10 +193,13 @@ namespace ConsoleApp
     {
         #region Logic
         public static Vector3 PosExploit(AIBaseClient target = null)
-        {
-            if (target == null) return (new Vector3(50000, 50000, 50000));
+        {           
             if (!YasuoMenu.UseExploit.Enabled) return (objPlayer.Position);
-            return target.Position.Extend(ObjectManager.Player.Position, -500000);
+            else
+            {
+                if (target == null) return (new Vector3(50000, 50000, 50000));
+                return target.Position.Extend(ObjectManager.Player.Position, -500000);
+            }        
         }
 
         public static Vector3 PosAfterE(AIBaseClient target)
@@ -1660,9 +1663,10 @@ namespace ConsoleApp
                         if ((target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Knockback)) && R.IsReady() && target.IsValidTarget(R.Range) && YasuoMenu.Rcombo.RtargetHeath.Value >= target.HealthPercent && YasuoMenu.Rcombo.Yasuo_Rcombo.Enabled)
                         {
                             var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
-                            if (Variables.GameTimeTickCount - buff.EndTime * 1000 >= Variables.GameTimeTickCount + 200)
+                            if ((buff.EndTime - Game.Time) * 1000 <= 100 + Game.Ping)
                             {
-                                R.Cast(target);
+                                Game.Print("R accepted");
+                                R.Cast(target.Position);
                             }
                             if (Q.IsReady() && E.IsReady())
                             {

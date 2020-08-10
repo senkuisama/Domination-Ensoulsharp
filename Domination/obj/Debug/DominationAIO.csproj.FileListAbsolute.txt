@@ -1,0 +1,4 @@
+C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.csprojAssemblyReference.cache
+C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.Properties.Resources.resources
+C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.csproj.GenerateResource.cache
+C:\Users\FunnySlayer\Documents\GitHub\Domination-Ensoulsharp\Domination\obj\Debug\DominationAIO.csproj.CoreCompileInputs.cache

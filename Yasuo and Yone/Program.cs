@@ -112,6 +112,7 @@ namespace ConsoleApp
 
     internal class YasuoMenu
     {
+        public static MenuBool ChatWibu = new MenuBool("ChatWibu", "Chat All", false);
         public class RangeCheck
         {
             public static MenuSlider Qrange = new MenuSlider("Qrange", "Q Range", 475, 0, 475);
@@ -184,6 +185,8 @@ namespace ConsoleApp
             public static MenuKeyBind TurretKey = new MenuKeyBind(",TurretKey", "Accept E turret", System.Windows.Forms.Keys.T, KeyBindType.Toggle);
             public static MenuKeyBind EQFlashKey = new MenuKeyBind(",EQFlashKey", "EQ flash key", System.Windows.Forms.Keys.G, KeyBindType.Press);
         }
+
+        public static MenuBool UseExploit = new MenuBool("Use Exploit Q", "Bug Q When Dash");
     }   
 
     internal class Yasuo
@@ -192,7 +195,7 @@ namespace ConsoleApp
         public static Vector3 PosExploit(AIBaseClient target = null)
         {
             if (target == null) return (new Vector3(50000, 50000, 50000));
-
+            if (!YasuoMenu.UseExploit.Enabled) return (objPlayer.Position);
             return target.Position.Extend(ObjectManager.Player.Position, -500000);
         }
 
@@ -413,12 +416,30 @@ namespace ConsoleApp
                 .Permashow(true, Name, SharpDX.Color.Azure);
 
             YasuoTheMenu = new Menu("Yasuo God Like", "Yasuo God Like", true);
-            YasuoTheMenu.Add(animemenu);
-            if(Name != "FunnySlayer")
-            Game.Say(Name + " is playing this game", true);
+            YasuoTheMenu.Add(YasuoMenu.ChatWibu);
 
-            else Game.Say("-   FunnySlayer   - God Like is Playing", true);
-            YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
+            if (YasuoMenu.ChatWibu.Enabled)
+            {
+                if (Name != "FunnySlayer")
+                    Game.Say(Name + " is playing this game", true);
+
+                else Game.Say("-   FunnySlayer   - God Like is Playing", true);
+                YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
+            }
+
+            YasuoMenu.ChatWibu.ValueChanged += (sender, e) => {
+
+                if (YasuoMenu.ChatWibu.Enabled) {
+
+                    if (Name != "FunnySlayer")
+                        Game.Say(Name + " is playing this game", true);
+
+                    else Game.Say("-   FunnySlayer   - God Like is Playing", true);
+                    YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
+                }
+            };
+
+            YasuoTheMenu.Add(animemenu);            
 
             var SkillRange = new Menu("SkillRange", "Yasuo Skill Range");
             var Qcombo = new Menu("YasuoQincombo", "Yasuo_Q Combo");
@@ -486,6 +507,8 @@ namespace ConsoleApp
             YasuoTheMenu.Add(ysClear);
             YasuoTheMenu.Add(yskeys);
 
+            YasuoTheMenu.Add(YasuoMenu.UseExploit).Permashow();
+
             YasuoTheMenu.Attach();
 
 
@@ -509,7 +532,7 @@ namespace ConsoleApp
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnPlayAnimation += AIHeroClient_OnPlayAnimation;
         }
-        #endregion     
+        #endregion
 
         #region Events
 
@@ -1637,7 +1660,7 @@ namespace ConsoleApp
                         if ((target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Knockback)) && R.IsReady() && target.IsValidTarget(R.Range) && YasuoMenu.Rcombo.RtargetHeath.Value >= target.HealthPercent && YasuoMenu.Rcombo.Yasuo_Rcombo.Enabled)
                         {
                             var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
-                            if (buff.EndTime * 100 < 150 + Game.Ping)
+                            if (Variables.GameTimeTickCount - buff.EndTime * 1000 >= Variables.GameTimeTickCount + 200)
                             {
                                 R.Cast(target);
                             }
@@ -2106,7 +2129,7 @@ namespace ConsoleApp
                 {
                     if (objPlayer.GetDashInfo().EndPos.Distance(target) <= YasuoMenu.RangeCheck.EQrange.Value)
                     {
-                        Q3.Cast(PosAfterE(target));
+                        Q3.Cast(PosExploit(target));
                     }
                 }
             }
@@ -2537,9 +2560,10 @@ namespace ConsoleApp
                 YoneMenu.Cancelaa.E_cancel,
                 YoneMenu.Cancelaa.R_cancel,};
 
-            Menu Keys = new Menu("Keys", "Keys Settings") { YoneMenu.Keys.TurretKey,
-                YoneMenu.Keys.SemiE,
-                YoneMenu.Keys.SemiR,};
+            Menu Keys = new Menu("Keys", "Keys Settings");
+            Keys.Add(YoneMenu.Keys.TurretKey).Permashow();
+            Keys.Add(YoneMenu.Keys.SemiE).Permashow();
+            Keys.Add(YoneMenu.Keys.SemiR).Permashow();
 
             YoneTheMenu.Add(combomenu);
             YoneTheMenu.Add(Qcb);
@@ -2560,7 +2584,7 @@ namespace ConsoleApp
             Q1.SetSkillshot(0.2f, 20, float.MaxValue, false, SkillshotType.Line);
             Q3.SetSkillshot(0.25f, 50, 1500, false, SkillshotType.Line);
             W.SetSkillshot(0.25f, 100, float.MaxValue, false, SkillshotType.Line);
-            R.SetSkillshot(0.4f, 100, float.MaxValue, false, SkillshotType.Line);
+            R.SetSkillshot(0.7f, 150, float.MaxValue, false, SkillshotType.Line);
 
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnAction += Orbwalker_OnAction;
@@ -2737,35 +2761,54 @@ namespace ConsoleApp
             QCombo(target);
             WCombo(target);
             ECombo(target);
-        }
 
-        private static void QCombo(AIBaseClient target)
+            if (R.IsReady() && YoneMenu.Rcombo.Combo_Rcombo.Enabled)
+            {
+                var targets = TargetSelector.GetTargets(1000);
+                Vector3 Rpos = Vector3.Zero;
+
+                if (!targets.Any()) return;
+                foreach (var Rprediction in targets.Select(i => R.GetPrediction(i)).Where(i => (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount >= YoneMenu.Rcombo.Combo_Rhitcount)).OrderByDescending(i => i.AoeTargetsHitCount))
+                {
+                    Rpos = Rprediction.CastPosition;
+                }
+                if (Rpos != Vector3.Zero)
+                {
+                    R.Cast(Rpos);
+                }
+            }
+        }
+        
+        private static void QCombo(AIBaseClient target1)
         {
             if (oaa && !YoneMenu.Cancelaa.Q_cancel.Enabled) return;
             if (!Q1.IsReady()) return;
-
-            if (target.IsValidTarget(isQ3() ? 1000 : 500))
+            foreach(AIBaseClient target in GameObjects.Get<AIHeroClient>().Where(i => !i.IsAlly && !i.IsDead))
             {
-                if (Q1.IsReady())
+                if (target == null) return;
+                if (target.IsValidTarget(isQ3() ? 1000 : 500))
                 {
-                    if (!isQ3())
+                    if (Q1.IsReady())
                     {
-                        var qpred = Q1.GetPrediction(target);
-                        if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
-                            if (qpred.CastPosition.DistanceToPlayer() <= 475 && YoneMenu.Qcombo.Combo_Qcombo.Enabled)
-                                if((!YoneMenu.Qcombo.Combo_Qafteraa.Enabled || aaa) || (!YoneMenu.Qcombo.Combo_Qbeforeaa.Enabled || baa))
-                                    Q1.Cast(qpred.CastPosition);
-                    }
-                    else
-                    {
-                        var qpred = Q3.GetPrediction(target);
-                        if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
-                            if (qpred.CastPosition.DistanceToPlayer() <= 900 && YoneMenu.Qcombo.Combo_Qwindcombo.Enabled)
-                                if(!UnderTower(objPlayer.Position.Extend(qpred.CastPosition, 500)) || YoneMenu.Keys.TurretKey.Active)
-                                    Q3.Cast(qpred.CastPosition);
+                        if (!isQ3())
+                        {
+                            var qpred = Q1.GetPrediction(target);
+                            if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
+                                if (qpred.CastPosition.DistanceToPlayer() <= 475 && YoneMenu.Qcombo.Combo_Qcombo.Enabled)
+                                    if ((!YoneMenu.Qcombo.Combo_Qafteraa.Enabled || aaa) || (!YoneMenu.Qcombo.Combo_Qbeforeaa.Enabled || baa))
+                                        Q1.Cast(qpred.CastPosition);
+                        }
+                        else
+                        {
+                            var qpred = Q3.GetPrediction(target);
+                            if (qpred.Hitchance >= HitChance.High || (qpred.Hitchance >= HitChance.Medium && qpred.AoeTargetsHitCount > 1))
+                                if (qpred.CastPosition.DistanceToPlayer() <= 900 && YoneMenu.Qcombo.Combo_Qwindcombo.Enabled)
+                                    if (!UnderTower(objPlayer.Position.Extend(qpred.CastPosition, 500)) || YoneMenu.Keys.TurretKey.Active)
+                                        Q3.Cast(qpred.CastPosition);
+                        }
                     }
                 }
-            }
+            }           
         }
         private static void WCombo(AIBaseClient target)
         {
@@ -2809,6 +2852,19 @@ namespace ConsoleApp
                     {
                         E.Cast(target.Position);
                     }
+                    if (UnderTower(objPlayer.Position) && UnderTower(target.Position) && UnderTower(objPlayer.Position.Extend(target.Position, -300)))
+                    {
+                        foreach(AITurretClient turret in GameObjects.EnemyTurrets.Where(i => !i.IsAlly && !i.IsDead && i.DistanceToPlayer() < 850))
+                        {
+                            if(turret != null)
+                            {
+                                if(!UnderTower(objPlayer.Position.Extend(turret.Position, -300)))
+                                {
+                                    E.Cast(turret.Position);
+                                }
+                            }
+                        }
+                    }
                 }
                 if (YoneMenu.Ecombo.Combo_Etargetheath.Enabled && YoneMenu.Ecombo.Combo_Etargetheath.Value >= target.HealthPercent && !UnderTower(target.Position, 300))
                 {
@@ -2827,15 +2883,23 @@ namespace ConsoleApp
                     E.Cast(target.Position);
                 }
             }
-            if(isE2())
-                if (target.DistanceToPlayer() > (isQ3() ? 900 + 200 : 475 + 300))
+            if(isE2() && EShadowPos() != Vector3.Zero && YoneMenu.Ecombo.Combo_Ereturn.Enabled)
+            {
+                if (target.DistanceToPlayer() > (isQ3() ? 900 : 475 + 200))
                 {
-                    if (EShadowPos() != Vector3.Zero && target.Distance(EShadowPos()) < target.DistanceToPlayer() - 300)
+                    if (target.Distance(EShadowPos()) < target.DistanceToPlayer() - 250)
                     {
-                        if (YoneMenu.Ecombo.Combo_Ereturn.Enabled)
-                            E.Cast(target.Position);
+                        E.Cast(target.Position);
                     }
                 }
+                if (isQ3() && Q1.IsReady())
+                {
+                    if(target.DistanceToPlayer() - 200 > EShadowPos().Distance(target) && objPlayer.ManaPercent < 40)
+                    {
+                        E.Cast(target.Position);
+                    }
+                }
+            }               
         }
     }
     #endregion

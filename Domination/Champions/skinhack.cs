@@ -24,7 +24,7 @@ namespace DominationAIO.Champions
                 Game.Print("SkinHack v1.0.1");
                 Game.Print("Thanks for help 011110001");
                 Game.Print("Creator: emredeger");
-                
+
                 menu = new Menu("skinhack", "SkinHack", true);
 
                 var champs = menu.Add(new Menu("Champions", "Champions"));
@@ -39,7 +39,7 @@ namespace DominationAIO.Champions
                     {
                         Console.WriteLine($"[SKINHACK] Skin ID: {champMenu.GetValue<MenuSlider>("SkinIndex").Value}");
                         GameObjects.Heroes.ForEach(
-                            p => 
+                            p =>
                             {
                                 if (p.CharacterName == hero.CharacterName)
                                 {

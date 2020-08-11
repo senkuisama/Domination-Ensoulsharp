@@ -2765,22 +2765,7 @@ namespace ConsoleApp
             QCombo(target);
             WCombo(target);
             ECombo(target);
-
-            if (R.IsReady() && YoneMenu.Rcombo.Combo_Rcombo.Enabled)
-            {
-                var targets = TargetSelector.GetTargets(1000);
-                Vector3 Rpos = Vector3.Zero;
-
-                if (!targets.Any()) return;
-                foreach (var Rprediction in targets.Select(i => R.GetPrediction(i)).Where(i => (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount >= YoneMenu.Rcombo.Combo_Rhitcount)).OrderByDescending(i => i.AoeTargetsHitCount))
-                {
-                    Rpos = Rprediction.CastPosition;
-                }
-                if (Rpos != Vector3.Zero)
-                {
-                    R.Cast(Rpos);
-                }
-            }
+           
         }
         
         private static void QCombo(AIBaseClient target1)

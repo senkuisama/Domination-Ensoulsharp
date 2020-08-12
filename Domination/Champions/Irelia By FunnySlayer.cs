@@ -585,7 +585,7 @@ namespace Template
                     {
                         if (!objPlayer.HasBuff("IreliaE"))
                         {
-                            if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 975)
+                            if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 825)
                             {
                                 Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
 
@@ -636,7 +636,6 @@ namespace Template
                                             + ereal
                                             );
                                     }
-                                    else { return; }
 
                                     if (E.GetPrediction(target).Hitchance >= HitChance.High && E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 775)
                                     {
@@ -651,7 +650,6 @@ namespace Template
                                     {
                                         E.Cast(CastPos);
                                     }
-                                    else { return; }
                                 }
                             }
                         }

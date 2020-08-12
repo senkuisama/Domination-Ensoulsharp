@@ -544,34 +544,34 @@ namespace ConsoleApp
             if (sender.IsMe && args.Animation == "Spell3")
             {
                 isYasuoDashing = true;
-            }
-
-            if (YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active && Q.IsReady(0) && isYasuoDashing)
-            {
-                foreach (var target in GameObjects.EnemyHeroes.Where(i => !i.IsDead && !i.IsAlly && i.IsVisible && i.IsValidTarget(600)))
+                if (YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active && Q.IsReady(0))
                 {
-                    if (target != null && target.Distance(objPlayer.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value && objPlayer.GetDashInfo().EndPos.DistanceToPlayer() < 200)
+                    foreach (var target in GameObjects.EnemyHeroes.Where(i => !i.IsDead && !i.IsAlly && i.IsVisible && i.IsValidTarget(600)))
                     {
-                        Q.Cast(PosExploit(target));
+                        if (target != null && target.Distance(objPlayer.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value && objPlayer.GetDashInfo().EndPos.DistanceToPlayer() < 200)
+                        {
+                            Q.Cast(PosExploit(target));
+                        }
+                    }
+                    if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active && Q.Name != "YasuoQ3Wrapper")
+                    {
+                        Q.Cast(PosExploit());
+                    }
+                    if (YasuoMenu.Yasuo_Keys.EQFlashKey.Active && Q.Name != "YasuoQ3Wrapper")
+                    {
+                        Q.Cast(PosExploit());
+                    }
+                    if (ObjectManager.Player.HasBuff("YasuoQ1"))
+                    {
+                        Q.Cast(PosExploit());
                     }
                 }
-                if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active && Q.Name != "YasuoQ3Wrapper")
-                {
-                    Q.Cast(PosExploit());
-                }
-                if (YasuoMenu.Yasuo_Keys.EQFlashKey.Active && Q.Name != "YasuoQ3Wrapper")
-                {
-                    Q.Cast(PosExploit());
-                }
-                if (ObjectManager.Player.HasBuff("YasuoQ1"))
-                {
-                    Q.Cast(PosExploit());
-                }
-            }
+            }           
         }
 
         private static void Game_OnUpdate(EventArgs args)
         {
+            if (Hacks.DisableAntiDisconnect == false) Hacks.DisableAntiDisconnect = true;
             if (objPlayer.IsDead) return;
             if (objPlayer.IsDashing()) isYasuoDashing = true;
             if (!objPlayer.IsDashing()) isYasuoDashing = false;
@@ -1663,15 +1663,14 @@ namespace ConsoleApp
                         if ((target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Knockback)) && R.IsReady() && target.IsValidTarget(R.Range) && YasuoMenu.Rcombo.RtargetHeath.Value >= target.HealthPercent && YasuoMenu.Rcombo.Yasuo_Rcombo.Enabled)
                         {
                             var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
-                            if ((buff.EndTime - Game.Time) * 1000 <= 100 + Game.Ping)
+                            if ((buff.EndTime - Game.Time) * 1000 <= 7)
                             {
                                 Game.Print("R accepted");
                                 R.Cast(target.Position);
                             }
                             if (Q.IsReady() && E.IsReady())
                             {
-                                var EQR = new List<AIBaseClient>();
-                                EQR.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && !i.HasBuff("YasuoE")));
+                                var EQR = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && !i.HasBuff("YasuoE"));
 
                                 if (EQR.Any())
                                 {
@@ -1681,10 +1680,6 @@ namespace ConsoleApp
                                         Q.Cast(PosExploit(obj));
                                         R.Cast(target.Position);
                                     }
-                                }
-                                else
-                                {
-
                                 }
                             }
                             if (Q.IsReady() && isYasuoDashing)
@@ -2765,7 +2760,22 @@ namespace ConsoleApp
             QCombo(target);
             WCombo(target);
             ECombo(target);
-           
+
+            if (R.IsReady() && YoneMenu.Rcombo.Combo_Rcombo.Enabled)
+            {
+                var targets = TargetSelector.GetTargets(1000);
+                Vector3 Rpos = Vector3.Zero;
+
+                if (!targets.Any()) return;
+                foreach (var Rprediction in targets.Select(i => R.GetPrediction(i)).Where(i => (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount >= YoneMenu.Rcombo.Combo_Rhitcount)).OrderByDescending(i => i.AoeTargetsHitCount))
+                {
+                    Rpos = Rprediction.CastPosition;
+                }
+                if (Rpos != Vector3.Zero)
+                {
+                    R.Cast(Rpos);
+                }
+            }
         }
         
         private static void QCombo(AIBaseClient target1)

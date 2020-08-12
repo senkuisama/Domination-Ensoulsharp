@@ -50,7 +50,7 @@ namespace Template
         {
             public static MenuBool Rcombo = new MenuBool("Rcombo", "R in Combo [Calculator Dmg]");
             public static MenuSlider Rheath = new MenuSlider("Rheath", "Target Heath", 60);
-            public static MenuSlider Rhit = new MenuSlider("Rhit", "Hit Count", 3, 2, 5);
+            public static MenuSlider Rhit = new MenuSlider("Rhit", "Hit Count", 2, 2, 5);
         }
         public class KeysSettings
         {
@@ -110,8 +110,8 @@ namespace Template
             Menu Emenu = new Menu("Emenu", "E Settings")
             {
                 MenuSettings.ESettings.Ecombo,
-                MenuSettings.ESettings.Efeedback,
                 MenuSettings.ESettings.ImproveE,
+                MenuSettings.ESettings.Efeedback,               
             };
 
             Menu Rmenu = new Menu("Rmenu", "R Settings")
@@ -327,24 +327,48 @@ namespace Template
                 //ireliamark                         E Buffs
                 if (Q.IsReady() && MenuSettings.QSettings.Qcombo.Enabled)
                 {
-                    if (CanQ(target))
+                    if (MenuSettings.QSettings.QDancing.Enabled)
                     {
-                        if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
+                        if (CanQ(target))
                         {
-                            if (OutAARange.Any())
+                            if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
                             {
-                                foreach (AIBaseClient obj in OutAARange)
+                                #region Use Same Fuction
+                                if (QRange.Any() && QRange.Count >= 2)
                                 {
-                                    if (obj.Distance(target) <= 600)
-                                        if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                            Q.Cast(obj);
+                                    foreach (AIBaseClient one in QRange)
+                                    {
+                                        foreach (AIBaseClient two in QRange)
+                                        {
+                                            if (one.NetworkId != two.NetworkId)
+                                            {
+                                                AIBaseClient follow = null;
+                                                if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                {
+                                                    follow = two;
+                                                }
+                                                else
+                                                {
+                                                    if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                    {
+                                                        follow = one;
+                                                    }
+                                                }
+
+                                                if (follow != null)
+                                                {
+                                                    if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                        Q.Cast(follow);
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                if (InAARange.Any())
+                                #endregion
+
+                                if (OutAARange.Any())
                                 {
-                                    foreach (AIBaseClient obj in InAARange)
+                                    foreach (AIBaseClient obj in OutAARange)
                                     {
                                         if (obj.Distance(target) <= 600)
                                             if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
@@ -353,125 +377,141 @@ namespace Template
                                 }
                                 else
                                 {
-                                    #region Use Same Fuction
-                                    if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
+                                    if (InAARange.Any())
                                     {
-                                        if (QRange.Any() && QRange.Count >= 2)
+                                        foreach (AIBaseClient obj in InAARange)
                                         {
-                                            foreach (AIBaseClient one in QRange)
+                                            if (obj.Distance(target) <= 600)
+                                                if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                    Q.Cast(obj);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        #region Use Same Fuction
+                                        if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
+                                        {
+                                            if (QRange.Any() && QRange.Count >= 2)
                                             {
-                                                foreach (AIBaseClient two in QRange)
+                                                foreach (AIBaseClient one in QRange)
                                                 {
-                                                    if (one.NetworkId != two.NetworkId)
+                                                    foreach (AIBaseClient two in QRange)
                                                     {
-                                                        AIBaseClient follow = null;
-                                                        if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                        if (one.NetworkId != two.NetworkId)
                                                         {
-                                                            follow = two;
-                                                        }
-                                                        else
-                                                        {
-                                                            if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                            AIBaseClient follow = null;
+                                                            if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
                                                             {
-                                                                follow = one;
+                                                                follow = two;
                                                             }
                                                             else
                                                             {
-                                                                QGapCloserPos(target.Position);
+                                                                if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                                {
+                                                                    follow = one;
+                                                                }
+                                                                else
+                                                                {
+                                                                    QGapCloserPos(target.Position);
+                                                                }
                                                             }
-                                                        }
 
-                                                        if (follow == null)
-                                                        {
-                                                            QGapCloserPos(target.Position);
-                                                        }
-                                                        else
-                                                        {
-                                                            if (objPlayer.ManaPercent >= 15)
+                                                            if (follow == null)
                                                             {
-                                                                if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                                    Q.Cast(follow);
+                                                                QGapCloserPos(target.Position);
                                                             }
                                                             else
                                                             {
-                                                                QGapCloserPos(target.Position);
+                                                                if (objPlayer.ManaPercent >= 15)
+                                                                {
+                                                                    if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                                        Q.Cast(follow);
+                                                                }
+                                                                else
+                                                                {
+                                                                    QGapCloserPos(target.Position);
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
+                                            }
+                                            else
+                                            {
+                                                QGapCloserPos(target.Position);
                                             }
                                         }
                                         else
                                         {
                                             QGapCloserPos(target.Position);
                                         }
-                                    }
-                                    else
-                                    {
-                                        QGapCloserPos(target.Position);
-                                    }
 
-                                    #endregion
+                                        #endregion
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (target.DistanceToPlayer() <= Q.Range + 1)
+                                {
+                                    if (!UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                        Q.Cast(target);
                                 }
                             }
                         }
-                        else
-                        {
-                            if (target.DistanceToPlayer() <= Q.Range + 1)
-                            {
-                                if (!UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                    Q.Cast(target);
-                            }
-                        }
-                    }
 
-                    if (!CanQ(target))
-                    {
-                        if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
+                        if (!CanQ(target))
                         {
-                            if (QRange.Any() && QRange.Count >= 2)
+                            if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
                             {
-                                foreach(AIBaseClient one in QRange)
+                                if (QRange.Any() && QRange.Count >= 2)
                                 {
-                                    foreach(AIBaseClient two in QRange)
+                                    foreach (AIBaseClient one in QRange)
                                     {
-                                        if(one.NetworkId != two.NetworkId)
+                                        foreach (AIBaseClient two in QRange)
                                         {
-                                            AIBaseClient follow = null;
-                                            if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                            if (one.NetworkId != two.NetworkId)
                                             {
-                                                follow = two;
-                                            }
-                                            else
-                                            {
-                                                if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                AIBaseClient follow = null;
+                                                if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
                                                 {
-                                                    follow = one;
+                                                    follow = two;
                                                 }
                                                 else
                                                 {
-                                                    QGapCloserPos(target.Position);
+                                                    if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                    {
+                                                        follow = one;
+                                                    }
+                                                    else
+                                                    {
+                                                        QGapCloserPos(target.Position);
+                                                    }
                                                 }
-                                            }
 
-                                            if(follow == null)
-                                            {
-                                                QGapCloserPos(target.Position);
-                                            }
-                                            else
-                                            {
-                                                if(objPlayer.ManaPercent >= 15)
+                                                if (follow == null)
                                                 {
-                                                    if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                        Q.Cast(follow);
+                                                    QGapCloserPos(target.Position);
                                                 }
                                                 else
                                                 {
-                                                    QGapCloserPos(target.Position);
+                                                    if (objPlayer.ManaPercent >= 15)
+                                                    {
+                                                        if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                            Q.Cast(follow);
+                                                    }
+                                                    else
+                                                    {
+                                                        QGapCloserPos(target.Position);
+                                                    }
                                                 }
                                             }
                                         }
                                     }
+                                }
+                                else
+                                {
+                                    QGapCloserPos(target.Position);
                                 }
                             }
                             else
@@ -479,11 +519,12 @@ namespace Template
                                 QGapCloserPos(target.Position);
                             }
                         }
-                        else
-                        {
-                            QGapCloserPos(target.Position);
-                        }
                     }
+                    else
+                    {
+                        QGapCloserPos(target.Position);
+                    }
+                    
                 }
 
                 if(E.IsReady() && MenuSettings.ESettings.Ecombo.Enabled)
@@ -627,7 +668,7 @@ namespace Template
                             {
                                 if (!target.IsValidTarget(775)) return;
                                 Vector3 CastPos = Vector3.Zero;
-                                for (int i = 775; i > 75; i--)
+                                for (int i = 775; i > 25; i--)
                                 {
                                     if (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() <= 775)
                                     {

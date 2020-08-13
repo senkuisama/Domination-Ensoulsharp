@@ -2818,16 +2818,7 @@ namespace ConsoleApp
             if (oaa && !YoneMenu.Cancelaa.W_cancel.Enabled) return;
 
             if (W.IsReady() && target.IsValidTarget(600))
-            {
-                if (YoneMenu.Wcombo.Combo_Wafteraa.Enabled && aaa)
-                {
-                    if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
-                    {
-                        W.Cast(W.GetPrediction(target).CastPosition);
-                    }
-                }
-
-
+            {               
                 if (YoneMenu.Wcombo.Combo_Woutaarange.Enabled && !target.IsValidTarget(objPlayer.GetRealAutoAttackRange() -20))
                 {
                     if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
@@ -2835,14 +2826,33 @@ namespace ConsoleApp
                         W.Cast(W.GetPrediction(target).CastPosition);
                     }
                 }
-
-                if(YoneMenu.Wcombo.Combo_Wifhavewind.Enabled && isQ3())
+                else
                 {
-                    if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                    if (YoneMenu.Wcombo.Combo_Wifhavewind.Enabled && isQ3())
                     {
-                        W.Cast(W.GetPrediction(target).CastPosition);
+                        if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                        {
+                            W.Cast(W.GetPrediction(target).CastPosition);
+                        }
                     }
-                }
+                    else
+                    {
+                        if (YoneMenu.Wcombo.Combo_Wafteraa.Enabled && aaa)
+                        {
+                            if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                            {
+                                W.Cast(W.GetPrediction(target).CastPosition);
+                            }
+                        }
+                        else
+                        {
+                            if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                            {
+                                W.Cast(W.GetPrediction(target).CastPosition);
+                            }
+                        }
+                    }
+                }                
             }
         }
         private static void ECombo(AIBaseClient target)

@@ -161,6 +161,7 @@ namespace ConsoleApp
         {
             public static MenuBool Yasuo_Rcombo = new MenuBool(",Yasuo_Rcombo", "Yasuo R in Combo");
             public static MenuBool Yasuo_Rcombo_EQR = new MenuBool(",Yasuo_Rcombo_EQR", "Logic EQ R");
+            public static MenuBool AlwaysEQR = new MenuBool("...AlwaysEQR", "R Tornado always");
             public static MenuSlider RtargetHeath = new MenuSlider("RtargetHeath", "---> Target heath ", 70, 0, 101);
         }
 
@@ -495,6 +496,7 @@ namespace ConsoleApp
 
             Rcombo.Add(YasuoMenu.Rcombo.Yasuo_Rcombo);
             Rcombo.Add(YasuoMenu.Rcombo.Yasuo_Rcombo_EQR);
+            Rcombo.Add(YasuoMenu.Rcombo.AlwaysEQR);
             Rcombo.Add(YasuoMenu.Rcombo.RtargetHeath);
 
             Wcombo.Add(YasuoMenu.Wcombo.Yasuo_Wcombo);
@@ -1663,7 +1665,7 @@ namespace ConsoleApp
                         if ((target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Knockback)) && R.IsReady() && target.IsValidTarget(R.Range) && YasuoMenu.Rcombo.RtargetHeath.Value >= target.HealthPercent && YasuoMenu.Rcombo.Yasuo_Rcombo.Enabled)
                         {
                             var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
-                            if ((buff.EndTime - Game.Time) * 1000 <= 7)
+                            if ((buff.EndTime - Game.Time) * 1000 <= 7 && !YasuoMenu.Rcombo.AlwaysEQR.Enabled)
                             {
                                 Game.Print("R accepted");
                                 R.Cast(target.Position);
@@ -2435,6 +2437,7 @@ namespace ConsoleApp
             public static MenuBool Combo_Rcombo = new MenuBool("Rcombo", "R in combo");
             public static MenuSliderButton Combo_Rtargetheath = new MenuSliderButton("Rtargetheath", ": : Use R if target heath <= ", 40);
             public static MenuSliderButton Combo_Rhitcount = new MenuSliderButton("Rhitcount", "Use R if can hit >= ", 3, 1, 5);
+            
         }
 
         public class EQwind

@@ -2414,7 +2414,7 @@ namespace ConsoleApp
         public class Wcombo
         {
             public static MenuBool Combo_Wcombo = new MenuBool("Wcombo", "W in combo");
-            public static MenuBool Combo_Wafteraa = new MenuBool("Wafteraa", "_ Only use W [After aa]", false);
+            public static MenuBool Combo_Wafteraa = new MenuBool("Wafteraa", "_ Only use W [After aa]", true);
             public static MenuBool Combo_Woutaarange = new MenuBool("Woutaarange", "_ Only use W [Out aa range]", true);
             public static MenuBool Combo_Wifhavewind = new MenuBool("Wifhavewind", "_ Only use W [Player have Wind]", false);
             public static MenuSliderButton Combo_Whit = new MenuSliderButton("Whit", ": : Use W if hit x target", 1, 0, 5);
@@ -2813,13 +2813,32 @@ namespace ConsoleApp
         {
             if (!W.IsReady()) return;
             if (oaa && !YoneMenu.Cancelaa.W_cancel.Enabled) return;
-            if ((!YoneMenu.Wcombo.Combo_Wcombo.Enabled) || (YoneMenu.Wcombo.Combo_Wafteraa.Enabled && !aaa) || (YoneMenu.Wcombo.Combo_Woutaarange.Enabled && target.InAutoAttackRange()) || (YoneMenu.Wcombo.Combo_Wifhavewind.Enabled && !isQ3())) return;
 
-            if (W.IsReady() && target.IsValidTarget(600) && !target.IsValidTarget(objPlayer.GetRealAutoAttackRange()))
+            if (W.IsReady() && target.IsValidTarget(600))
             {
-                if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                if (YoneMenu.Wcombo.Combo_Wafteraa.Enabled && aaa)
                 {
-                    W.Cast(W.GetPrediction(target).CastPosition);
+                    if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                    {
+                        W.Cast(W.GetPrediction(target).CastPosition);
+                    }
+                }
+
+
+                if (YoneMenu.Wcombo.Combo_Woutaarange.Enabled && !target.IsValidTarget(objPlayer.GetRealAutoAttackRange() -20))
+                {
+                    if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                    {
+                        W.Cast(W.GetPrediction(target).CastPosition);
+                    }
+                }
+
+                if(YoneMenu.Wcombo.Combo_Wifhavewind.Enabled && isQ3())
+                {
+                    if (W.GetPrediction(target).Hitchance >= HitChance.Medium && W.GetPrediction(target).CastPosition.DistanceToPlayer() <= 600)
+                    {
+                        W.Cast(W.GetPrediction(target).CastPosition);
+                    }
                 }
             }
         }

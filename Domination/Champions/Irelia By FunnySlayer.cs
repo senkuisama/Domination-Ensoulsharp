@@ -78,13 +78,13 @@ namespace Template
             W.SetCharged("IreliaW", "ireliawdefense", 800, 800, 0);
 
             E = new Spell(SpellSlot.E, 775f);
-            E.SetSkillshot(0.25f, 40f, 1800f, false, false, SkillshotType.Line);
+            E.SetSkillshot(0.25f, 5f, 1800f, false, false, SkillshotType.Line);
 
             E1 = new Spell(SpellSlot.Unknown, 775f);
-            E1.SetSkillshot(0.15f + (0.25f * 2), 40, 1800f, false, false, SkillshotType.Circle);
+            E1.SetSkillshot(0.15f + (0.25f * 2), 5f, 1800f, false, false, SkillshotType.Circle);
 
             E2 = new Spell(SpellSlot.Unknown, 775f);
-            E2.SetSkillshot(0.25f, 40f, 1800f, false, false, SkillshotType.Line);
+            E2.SetSkillshot(0.25f, 5f, 1800f, false, false, SkillshotType.Line);
 
             R = new Spell(SpellSlot.R, 1000);
             R.SetSkillshot(0.5f, 50, 1500, false, SkillshotType.Line);
@@ -183,7 +183,7 @@ namespace Template
             {
                 #region New E pred
                 var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead);
-                var target = TargetSelector.GetTarget(2000);
+                var target = TargetSelector.GetTarget(775);
                 {
                     if (target == null) return;
 
@@ -193,7 +193,7 @@ namespace Template
                     {
                         if (!objPlayer.HasBuff("IreliaE"))
                         {
-                            if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 725)
+                            if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 775)
                             {
                                 Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
 
@@ -208,68 +208,20 @@ namespace Template
                                 }
                             }
                         }
-
-                        #region Old
-                        /*if (objPlayer.HasBuff("IreliaE"))
-                        {
-                            var castepos = Vector2.Zero;
-                            var epred = E.GetPrediction(target);
-                            int j = 0;
-                            for (int i = 1000; i > 100; i--, j = i)
-                            {                                
-                                if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() <= 775)
-                                {
-                                    castepos = epred.CastPosition.Extend(ECatPos, -i).ToVector2();
-                                }
-                            }
-
-                            {
-                                E.Delay = (j - E2.GetPrediction(target).CastPosition.DistanceToPlayer()) / E.Speed + 0.25f + ereal;
-                            }
-                            
-
-                            if (castepos != Vector2.Zero)
-                            {
-                                E.Cast(castepos);
-                            }
-                        }
-
-                        if (objPlayer.HasBuff("IreliaE"))
-                        {
-                            var castepos = Vector2.Zero;
-                            E.Delay = ((-(target.DistanceToPlayer() - 775)) - E2.GetPrediction(target).CastPosition.Distance(objPlayer)) / E.Speed + 0.25f + ereal;
-
-                            var epred = E.GetPrediction(target);
-
-                            for (int i = 10000; i > 100; i -= 50)
-                            {
-                                if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() <= 775)
-                                {
-
-                                }
-                                castepos = epred.CastPosition.Extend(ECatPos, -i).ToVector2();
-                            }
-                            if (castepos != Vector2.Zero)
-                            {
-                                E.Cast(castepos);
-                            }
-                        }*/
-                        #endregion
-
                         if (objPlayer.HasBuff("IreliaE"))
                         {
                             Vector3 CastPos = Vector3.Zero;
                             for (int i = 775; i > 75; i--)
                             {
-                                if(E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() <= 775)
+                                if (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() <= 775)
                                 {
                                     E.Delay = (
                                         (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() - E2.GetPrediction(target).CastPosition.DistanceToPlayer()) / E.Speed + 0.25f
-                                        +ereal
+                                        + ereal - 0.1f
                                         );
                                 }
 
-                                if(E.GetPrediction(target).Hitchance >= HitChance.High && E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 775)
+                                if (E.GetPrediction(target).Hitchance >= HitChance.High && E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 775)
                                 {
                                     CastPos = E.GetPrediction(target).CastPosition.Extend(ECatPos, -i);
                                 }
@@ -282,7 +234,7 @@ namespace Template
                                 {
                                     E.Cast(CastPos);
                                 }
-                            }                         
+                            }
                         }
                     }
                 }
@@ -331,6 +283,125 @@ namespace Template
                     {
                         if (CanQ(target))
                         {
+                            #region Again
+                            #region Use Same Fuction
+                            if (QRange.Any() && QRange.Count >= 2)
+                            {
+                                foreach (AIBaseClient one in QRange)
+                                {
+                                    foreach (AIBaseClient two in QRange)
+                                    {
+                                        if (one.NetworkId != two.NetworkId)
+                                        {
+                                            AIBaseClient follow = null;
+                                            if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                            {
+                                                follow = two;
+                                            }
+                                            else
+                                            {
+                                                if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                {
+                                                    follow = one;
+                                                }
+                                            }
+
+                                            if (follow != null)
+                                            {
+                                                if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                    Q.Cast(follow);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            #endregion
+
+                            if (OutAARange.Any())
+                            {
+                                foreach (AIBaseClient obj in OutAARange)
+                                {
+                                    if (obj.Distance(target) <= 600)
+                                        if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                            Q.Cast(obj);
+                                }
+                            }
+                            else
+                            {
+                                if (InAARange.Any())
+                                {
+                                    foreach (AIBaseClient obj in InAARange)
+                                    {
+                                        if (obj.Distance(target) <= 600)
+                                            if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                Q.Cast(obj);
+                                    }
+                                }
+                                else
+                                {
+                                    #region Use Same Fuction
+                                    if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
+                                    {
+                                        if (QRange.Any() && QRange.Count >= 2)
+                                        {
+                                            foreach (AIBaseClient one in QRange)
+                                            {
+                                                foreach (AIBaseClient two in QRange)
+                                                {
+                                                    if (one.NetworkId != two.NetworkId)
+                                                    {
+                                                        AIBaseClient follow = null;
+                                                        if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                        {
+                                                            follow = two;
+                                                        }
+                                                        else
+                                                        {
+                                                            if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
+                                                            {
+                                                                follow = one;
+                                                            }
+                                                            else
+                                                            {
+                                                                QGapCloserPos(target.Position);
+                                                            }
+                                                        }
+
+                                                        if (follow == null)
+                                                        {
+                                                            QGapCloserPos(target.Position);
+                                                        }
+                                                        else
+                                                        {
+                                                            if (objPlayer.ManaPercent >= 15)
+                                                            {
+                                                                if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                                    Q.Cast(follow);
+                                                            }
+                                                            else
+                                                            {
+                                                                QGapCloserPos(target.Position);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            QGapCloserPos(target.Position);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        QGapCloserPos(target.Position);
+                                    }
+
+                                    #endregion
+                                }
+                            }
+                            #endregion
+
                             if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
                             {
                                 #region Use Same Fuction
@@ -633,7 +704,21 @@ namespace Template
                                 {
                                     foreach (var onecircle in circle.Points)
                                     {
-                                        if (onecircle.Distance(target) > 450)
+                                        if (onecircle.Distance(target) > 600)
+                                        {
+                                            E.Cast(onecircle);
+                                        }
+                                    }
+                                }
+                            }
+                            if (objPlayer.IsDashing())
+                            {
+                                if (objPlayer.GetDashInfo().EndPos.Distance(target) < 775)
+                                {
+                                    Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
+
+                                    {
+                                        foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 600))
                                         {
                                             E.Cast(onecircle);
                                         }
@@ -641,40 +726,19 @@ namespace Template
                                 }
                             }
                         }
-                        /*if (objPlayer.HasBuff("IreliaE"))
-                        {
-                            var castepos = Vector2.Zero;
-                            Geometry.Circle onecircle = new Geometry.Circle(objPlayer.Position, 725);
-                            foreach (var circle in onecircle.Points)
-                            {
-                                E.Delay = (725 - E2.GetPrediction(target).CastPosition.Distance(objPlayer)) / E.Speed + 0.25f + ereal;
-                            }
-
-                            var epred = E.GetPrediction(target);
-
-                            for (int i = 10000; i > 55; i -= 50)
-                            {
-                                if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() <= 775)
-                                    castepos = epred.CastPosition.Extend(ECatPos, -i).ToVector2();
-                            }
-                            if (castepos != Vector2.Zero)
-                            {
-                                E.Cast(castepos);
-                            }
-                        }*/
                         if (MenuSettings.ESettings.ImproveE.Enabled)
                         {
                             if (objPlayer.HasBuff("IreliaE"))
                             {
                                 if (!target.IsValidTarget(775)) return;
                                 Vector3 CastPos = Vector3.Zero;
-                                for (int i = 775; i > 25; i--)
+                                for (int i = 775; i > 50; i--)
                                 {
                                     if (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() <= 775)
                                     {
                                         E.Delay = (
                                             (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() - E2.GetPrediction(target).CastPosition.DistanceToPlayer()) / E.Speed + 0.25f
-                                            + ereal
+                                            + ereal - 0.1f
                                             );
                                     }
 
@@ -711,13 +775,14 @@ namespace Template
                                 {
                                     if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() <= 775)
                                         castepos = epred.CastPosition.Extend(ECatPos, -i).ToVector2();
-                                }
-                                if (castepos != Vector2.Zero)
-                                {
-                                    E.Cast(castepos);
+
+                                    if (castepos != Vector2.Zero)
+                                    {
+                                        E.Cast(castepos);
+                                    }
                                 }
                             }
-                        }             
+                        }
                     }
                 }
             }
@@ -781,11 +846,11 @@ namespace Template
                     break;
             }
             double Alldmg = dmgQ + dmgSheen;
-            if (target.IsMinion)
+            if (target.IsMinion && !target.IsJungle())
             {
                 Alldmg = dmgMinions + (ObjectManager.Player.TotalAttackDamage * 60 / 100) + dmgSheen;
             }
-            return ObjectManager.Player.CalculatePhysicalDamage(target, Alldmg) + ObjectManager.Player.CalculateMagicDamage(target, passive);
+            return Q.GetDamage(target) + ObjectManager.Player.CalculateMagicDamage(target, passive) + objPlayer.CalculateDamage(target, DamageType.Physical, dmgSheen);
         }             
         public static float Qspeed()
         {
@@ -794,9 +859,9 @@ namespace Template
         public static List<AIBaseClient> Q_ListAIBaseClient(float minvalue = 0, float maxvalue = 0, AIBaseClient target = null)
         {
             if(target == null)
-                return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.DistanceToPlayer() <= maxvalue && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i)).ToList();
+                return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i)).ToList();
             else
-                return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.DistanceToPlayer() <= maxvalue && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i) && i.NetworkId != target.NetworkId).ToList();
+                return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i) && i.NetworkId != target.NetworkId).ToList();
         }
     }
 }

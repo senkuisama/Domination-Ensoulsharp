@@ -16,41 +16,86 @@ using System.Runtime.CompilerServices;
 using System.Drawing;
 using SharpDX.Multimedia;
 using DominationAIO.Champions.Helper;
+using System.Diagnostics;
 
 namespace DominationAIO.Champions
 {
-    public class RMenu
+    public static class RivenHelp
     {
-        //simple combo
-        public static MenuBool useq = new MenuBool("useq", "Use Combo Q");
-        public static MenuBool usew = new MenuBool("usew", "Use Combo W");
-        public static MenuBool usee = new MenuBool("usee", "Use Combo E");
-        public static MenuBool user = new MenuBool("user", "Use Combo R");
-        //logic combo
-        public static MenuSlider rh = new MenuSlider("rh", "R target heath <= x%", 60);
-        public static MenuKeyBind flash = new MenuKeyBind("flash", "Use Combo Flash", System.Windows.Forms.Keys.A, KeyBindType.Toggle) { Active = false };
-        public static MenuBool useqgap = new MenuBool("useqgap", "Use Q gap");
-        public static MenuSlider qgap = new MenuSlider("qgap", "Q gapcloser if target distance player <= ", (int)ObjectManager.Player.GetRealAutoAttackRange() + 200, (int)ObjectManager.Player.GetRealAutoAttackRange(), (int)ObjectManager.Player.GetRealAutoAttackRange() + 400);
-        public static MenuSlider egap = new MenuSlider("egap", "E gap distance", 400, 200, 700);
-        public static MenuKeyBind fastcombo = new MenuKeyBind("fastcombo", "Fast Combo", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
-        public static MenuBool tiamatW = new MenuBool("tiamatW", "Tiamat W");
-        public static MenuBool RQ = new MenuBool("RQ", "R2-Q");
-        public static MenuBool ER1Q = new MenuBool("ER1Q", "E-R1-Q");
+        public static void DelayTargetCast(this Spell spell, AIBaseClient target = null, int time = 0)
+        {
+            if (spell.IsReady())
+                DelayAction.Add(time, () =>
+                {
+                    spell.Cast(target);
+                });
+        }
 
-        //simple harass
-        public static MenuBool useqh = new MenuBool("useqh", "Use Harass Q");
-        public static MenuBool usewh = new MenuBool("usewh", "Use Harass W");
-        public static MenuBool useeh = new MenuBool("useeh", "Use Harass E");
-
-        //simple farm
-        public static MenuBool useqf = new MenuBool("useqf", "Use Farm Q");
-        public static MenuBool usewf = new MenuBool("usewf", "Use Farm W");
-        public static MenuBool useef = new MenuBool("useef", "Use Farm E");
-
-        //simple events
-        public static MenuBool itr = new MenuBool("itr", "Interrupter with W");
-        public static MenuBool antigap = new MenuBool("antigap", "Anti Gap with W");
+        public static void DelayPosCast(this Spell spell, Vector3 pos, int time = 0)
+        {
+            if (spell.IsReady())
+                DelayAction.Add(time, () =>
+                {
+                    spell.Cast(pos);
+                });
+        }
     }
+    internal class MenuRiven
+    {
+        public static MenuKeyBind BurstCombo = new MenuKeyBind("BurstCombo", "Burst", System.Windows.Forms.Keys.T, KeyBindType.Press);
+        public class QSettings
+        {
+            public static MenuBool Qcombo = new MenuBool("Qcombo", "Q Combo");
+            public static MenuBool QafterAA = new MenuBool("QafterAA", "Q After AA");
+            public static MenuBool FastQ = new MenuBool("FaseQ", "Fast Q");
+            public static MenuBool QGapcloser = new MenuBool("QGapcloser", "Q Gapcloser");
+        }
+
+        public class WSettings
+        {
+            public static MenuBool Wcombo = new MenuBool("Wcombo", "W Combo");
+            public static MenuBool WafterAA = new MenuBool("WafterAA", "W after AA");
+            public static MenuBool WDash = new MenuBool("WDash", "W on Dash");
+            public static MenuBool Winterupt = new MenuBool("Winterupt", "W interupt");
+
+        }
+
+        public class ESettings
+        {
+            public static MenuBool Ecombo = new MenuBool("Ecombo", "E Combo");
+            public static MenuBool Egapcloser = new MenuBool("Egapcloser", "E Gapcloser");
+            public static MenuBool EafterAA = new MenuBool("EafterAA", "E after AA");
+        }
+
+        public class RSettings
+        {
+            public static MenuBool Rcombo = new MenuBool("Rcombo", "R Combo");
+            public static MenuSlider target = new MenuSlider("target", "Target", 70);
+            public static MenuBool R1 = new MenuBool("R1", "----> R1");
+            public static MenuBool R2 = new MenuBool("R2", "----> R2");
+            public static MenuBool R2Q = new MenuBool("R2Q", "R2 ---> Q");
+            public static MenuBool tiamatR = new MenuBool("tiamatR", "Tiamat <---> R2");
+            public static MenuBool R2AA = new MenuBool("R2AA", "R2 ---> AA");
+            public static MenuBool ER2 = new MenuBool("ER2", "E ---> R2");
+            public static MenuBool ER1Q = new MenuBool("ER1Q", "E ---> R1 / R2 ---> Q");
+        }
+
+        public class RangeSettings
+        {
+            public static MenuSlider QRange = new MenuSlider("QRange", "Q Range", 350, (int)ObjectManager.Player.GetRealAutoAttackRange(), 500);
+            public static MenuSlider WRange = new MenuSlider("WRange", "W Range", 265, (int)ObjectManager.Player.GetRealAutoAttackRange(), 330);
+            public static MenuSlider ERange = new MenuSlider("ERange", "E Range", 300, (int)ObjectManager.Player.GetRealAutoAttackRange(), 600);
+            public static MenuSlider R2Range = new MenuSlider("R2Range", "R2 Range", 900, (int)ObjectManager.Player.GetRealAutoAttackRange(), 900);
+        }
+
+        public class ClearSettings
+        {
+            public static MenuBool useQ = new MenuBool("useQ", "Use Q");
+            public static MenuBool useW = new MenuBool("useW", "Use W");
+            public static MenuBool useE = new MenuBool("useE", "Use E");
+        }
+    }
+
     internal class Rupdate
     {
         public static AIHeroClient Player { get { return ObjectManager.Player; } }
@@ -75,7 +120,7 @@ namespace DominationAIO.Champions
         }
         public static bool R2()
         {
-            return R.Name == "RivenIzunaBlade" && R.IsReady();
+            return R.Name == "RivenIzunaBlade";
         }
         public static void OnLoaded()
         {
@@ -86,69 +131,77 @@ namespace DominationAIO.Champions
             R = new Spell(SpellSlot.R, 900);
             fl = new Spell(flash, 400f);
             ig = new Spell(ignite, 400);
-            R.SetSkillshot(0.25f, 45, 1600, false, false, SkillshotType.Cone);
+            Q.SetTargetted(0.1f, float.MaxValue);
+            R.SetSkillshot(0.25f, 45, 1600, false, false, SkillshotType.Line);
 
             RivenMenu = new Menu("RivenMenu", "FunnySlayer Riven", true);
-            var combom = new Menu("combom", "Combo Menu");
-            combom.Add(RMenu.useq);
-            combom.Add(RMenu.usew);
-            combom.Add(RMenu.usee);
-            combom.Add(RMenu.user);
-            combom.Add(RMenu.rh).Permashow(true, "R Combo <= x%", SharpDX.Color.DarkGreen);
 
-            combom.Add(RMenu.flash).Permashow(true, "Flash In Combo", SharpDX.Color.Yellow);
-            combom.Add(RMenu.useqgap);
-            combom.Add(RMenu.qgap);
-            combom.Add(RMenu.egap);
-            combom.Add(RMenu.fastcombo).Permashow(true, "Fast Combo in level 3", SharpDX.Color.Red);
-            combom.Add(RMenu.tiamatW);
-            combom.Add(RMenu.RQ);
-            combom.Add(RMenu.ER1Q);
-            RivenMenu.Add(combom);
+            var Qmenu = new Menu("Qmenu", "Q Settings");
+            var Wmenu = new Menu("Wmenu", "W Settings");
+            var Emenu = new Menu("Emenu", "E Settings");
+            var Rmenu = new Menu("Rmenu", "R Settings");
+            var range = new Menu("range", "Range Settings");
+            var clear = new Menu("clear", "Clear Settings");
 
-            var harassm = new Menu("harassm", "Harass Menu");
-            harassm.Add(RMenu.useqh);
-            harassm.Add(RMenu.usewh);
-            harassm.Add(RMenu.useeh);
-            RivenMenu.Add(harassm);
+            Qmenu.Add(MenuRiven.QSettings.Qcombo);
+            Qmenu.Add(MenuRiven.QSettings.QafterAA);
+            Qmenu.Add(MenuRiven.QSettings.FastQ);
+            Qmenu.Add(MenuRiven.QSettings.QGapcloser);
 
-            var farmm = new Menu("farmm", "Farm Menu");
-            farmm.Add(RMenu.useqf);
-            farmm.Add(RMenu.usewf);
-            farmm.Add(RMenu.useef);
-            RivenMenu.Add(farmm);
+            Wmenu.Add(MenuRiven.WSettings.Wcombo);
+            Wmenu.Add(MenuRiven.WSettings.WDash);
+            Wmenu.Add(MenuRiven.WSettings.Winterupt);
+            Wmenu.Add(MenuRiven.WSettings.WafterAA);
 
-            var miscm = new Menu("miscm", "Misc Menu");
-            miscm.Add(RMenu.itr);
-            miscm.Add(RMenu.antigap);
-            RivenMenu.Add(miscm);
+            Emenu.Add(MenuRiven.ESettings.Ecombo);
+            Emenu.Add(MenuRiven.ESettings.EafterAA);
+            Emenu.Add(MenuRiven.ESettings.Egapcloser);
+
+            Rmenu.Add(MenuRiven.RSettings.Rcombo);
+            Rmenu.Add(MenuRiven.RSettings.target);
+            Rmenu.Add(MenuRiven.RSettings.R1);
+            Rmenu.Add(MenuRiven.RSettings.R2);
+            Rmenu.Add(MenuRiven.RSettings.ER1Q);
+            Rmenu.Add(MenuRiven.RSettings.ER2);
+            Rmenu.Add(MenuRiven.RSettings.R2AA);
+            Rmenu.Add(MenuRiven.RSettings.R2Q);
+            Rmenu.Add(MenuRiven.RSettings.tiamatR);
+
+            range.Add(MenuRiven.RangeSettings.QRange);
+            range.Add(MenuRiven.RangeSettings.WRange);
+            range.Add(MenuRiven.RangeSettings.ERange);
+            range.Add(MenuRiven.RangeSettings.R2Range);
+
+            clear.Add(MenuRiven.ClearSettings.useQ);
+            clear.Add(MenuRiven.ClearSettings.useW);
+            clear.Add(MenuRiven.ClearSettings.useE);
+
+            RivenMenu.Add(MenuRiven.BurstCombo).Permashow();
+            RivenMenu.Add(Qmenu);
+            RivenMenu.Add(Wmenu);
+            RivenMenu.Add(Emenu);
+            RivenMenu.Add(Rmenu);
+            RivenMenu.Add(range);
+            RivenMenu.Add(clear);
 
             RivenMenu.Attach();
 
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnAction += Orbwalker_OnAction;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
-            AIBaseClient.OnPlayAnimation += AIBaseClient_OnPlayAnimation;
             Interrupter.OnInterrupterSpell += Interrupter_OnInterrupterSpell;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Dash.OnDash += Dash_OnDash;
 
             Drawing.OnDraw += Drawing_OnDraw;
 
-            Orbwalker.OnAction += FarmAction;
+
         }
 
-        private static void AIBaseClient_OnPlayAnimation(AIBaseClient sender, AIBaseClientPlayAnimationEventArgs args)
+
+        private static Vector3 MovePos(Vector3 Startpos)
         {
-            if (sender.IsMe)
-            {
-                if (args.Animation.Contains("Spell1"))
-                {
-                    Orbwalker.ResetAutoAttackTimer();
-                    DelayAction.Add(100, () => { Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(sender.Position - 500, -50)); });
-                    DelayAction.Add(100, () => { CanAttack = true; });
-                }
-            }
+            return ObjectManager.Player.Position.Extend(Startpos, -300);
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -198,7 +251,8 @@ namespace DominationAIO.Champions
                     Player.UseItem((int)ItemId.Ravenous_Hydra);
                     Player.UseItem((int)ItemId.Tiamat_Melee_Only);
                     DelayAction.Add(1, () => { W.Cast(sender); });
-                } else DelayAction.Add(1, () => { W.Cast(sender); });
+                }
+                else DelayAction.Add(1, () => { W.Cast(sender); });
             }
         }
 
@@ -222,86 +276,214 @@ namespace DominationAIO.Champions
                 else DelayAction.Add(1, () => { W.Cast(sender); });
             }
         }
-        public static bool CanAttack = false;
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
-            SpellData sdataw = Player.Spellbook.GetSpell(SpellSlot.W).SData;
-            var spell = args.SData;
-            var targets = GameObjects.EnemyHeroes.Where(heroes => heroes.IsValidTarget(Player.GetRealAutoAttackRange()));
             if (sender.IsMe)
             {
-                if (Orbwalker.IsAutoAttack(spell.Name))
+                if (args.SData.Name.Contains("ItemTiamatCleave") && W.IsReady())
                 {
-                    CanAttack = false;
-                    Game.Print("Orb attack");
+                    var targets = TargetSelector.GetTargets(W.Range);
+                    if (targets.Any())
+                        W.Cast();
                 }
-                if (spell.Name == sdataw.Name && Orbwalker.ActiveMode == OrbwalkerMode.Combo && Q.SpellIsReadyAndActive(RMenu.useq))
+
+                if (args.SData.Name == "RivenTriCleave")
                 {
-                    if (!Player.HasBuff("riventricleavesoundtwo"))
-                        Q.Cast(Game.CursorPos);
-                    DelayAction.Add(1, () => { return; });
+                    lastQcast = Variables.TickCount;
+                    Orbwalker.ResetAutoAttackTimer();
                 }
-                if (spell.Name.Contains("ItemTiamatCleave"))
+            }
+               
+
+            if (!sender.IsMe)
+            {
+                if (args.SData.Name.Contains("TalonCutthroat"))
                 {
-                    if (Orbwalker.ActiveMode == OrbwalkerMode.Combo || Orbwalker.ActiveMode == OrbwalkerMode.Harass)
+                    if (args.Target.NetworkId == Player.NetworkId)
                     {
-                        if (targets.Count() > 0 || targets != null)
-                            W.Cast();
+                        if (W.IsReady() && sender.IsValidTarget(W.Range)) W.Cast(sender.Position);
                     }
-                    lastTiamat = Variables.GameTimeTickCount;
                 }
-                if (spell.Name.Contains("RivenTriCleave"))
+                if (args.SData.Name.Contains("RenektonPreExecute"))
                 {
-                    Orbwalker.ResetAutoAttackTimer();
-                    DelayAction.Add(100, () => { Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(args.End, -50)); });
-                    DelayAction.Add(100, () => { CanAttack = true; });
-                    lastQcast = Variables.GameTimeTickCount;
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (W.IsReady()) W.Cast(sender.Position);
+                    }
                 }
-                if (spell.Name == "RivenTriCleave")
+                if (args.SData.Name.Contains("GarenRPreCast"))
                 {
-                    Orbwalker.ResetAutoAttackTimer();
-                    DelayAction.Add(100, () => { Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(args.End, -50)); });
-                    DelayAction.Add(100, () => { CanAttack = true; });
-                    lastQcast = Variables.GameTimeTickCount;
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(Player.Position.Extend(sender.Position, -300));
+                    }
                 }
-                if (spell.Name.Contains("RivenFient"))
+                if (args.SData.Name.Contains("GarenQAttack"))
                 {
-                    lastEcast = Variables.GameTimeTickCount;
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
                 }
-                if (spell.Name == ("RivenFient"))
+                if (args.SData.Name.Contains("XenZhaoThrust3"))
                 {
-                    lastEcast = Variables.GameTimeTickCount;
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (W.IsReady() && sender.IsValidTarget(W.Range)) W.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("RengarQ"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("RengarPassiveBuffDash"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("RengarPassiveBuffDashAADummy"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("TwitchEParticle"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("FizzPiercingStrike"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("HungeringStrike"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("YasuoDash"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.GetDashInfo().EndPos.Extend(Player.Position, -300));
+                    }
+                }
+                if (args.SData.Name.Contains("KatarinaRTrigger"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (W.IsReady() && sender.IsValidTarget(W.Range)) W.Cast();
+                        else if (E.IsReady()) E.Cast(Player.Position.Extend(sender.Position, -300));
+                    }
+                }
+                if (args.SData.Name.Contains("YasuoDash"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.GetDashInfo().EndPos.Extend(Player.Position, -300));
+                    }
+                }
+                if (args.SData.Name.Contains("KatarinaE"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (W.IsReady()) W.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("MonkeyKingQAttack"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("MonkeyKingSpinToWin"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                        else if (W.IsReady()) W.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("MonkeyKingQAttack"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("MonkeyKingQAttack"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
+                }
+                if (args.SData.Name.Contains("MonkeyKingQAttack"))
+                {
+                    if (args.Target.NetworkId == Player.NetworkId)
+                    {
+                        if (E.IsReady()) E.Cast(sender.Position);
+                    }
                 }
             }
         }
 
+        public static void DoMove()
+        {
+            if (Orbwalker.ActiveMode == OrbwalkerMode.Combo || Orbwalker.ActiveMode == OrbwalkerMode.Harass || Orbwalker.ActiveMode == OrbwalkerMode.LaneClear || Orbwalker.ActiveMode == OrbwalkerMode.LastHit || MenuRiven.BurstCombo.Active)
+            {
+                if (Variables.TickCount - lastQcast >= 150 && Variables.TickCount - lastQcast <= 260 && MenuRiven.QSettings.FastQ.Enabled)
+                {
+                    Player.IssueOrder(GameObjectOrder.MoveTo, MovePos(Game.CursorPos));
+                }
+            }
+        }
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
-            int time = 340;
-            if (Orbwalker.AttackSpeed < 0.7f)
-            {
-                time = 340;
-            }
-            else
-            {
-                if (Orbwalker.AttackSpeed < 0.8f)
-                {
-                    time = 320;
-                }
-                if (Orbwalker.AttackSpeed > 0.9f && Orbwalker.AttackSpeed < 1.2f)
-                {
-                    time = 295;
-                }
-                if (Orbwalker.AttackSpeed > 1.2f)
-                {
-                    time = 245;
-                }
-            }
+            DoMove();
             if (args.Type == OrbwalkerType.AfterAttack)
             {
-                if (args.Type == OrbwalkerType.AfterAttack)
+                afteraa = true;
+                if(!args.Target.IsAlly && args.Target.Position.IsBuilding() && Q.IsReady() && (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear || Orbwalker.ActiveMode == OrbwalkerMode.Harass))
                 {
-                    afteraa = true;
+                    Q.Cast(args.Target.Position);
+                    DoMove();
+                }
+
+                if ((args.Target.IsJungle() || args.Target.IsMinion()) && Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
+                {                   
+                    if (W.IsReady() && MenuRiven.ClearSettings.useW.Enabled && args.Target.IsValidTarget(W.Range))
+                    {
+                        W.Cast();
+                    }
+                    else
+                    {                    
+                        if (E.IsReady() && MenuRiven.ClearSettings.useE.Enabled && !args.Target.IsMinion())
+                        {
+                            E.Cast(args.Target.Position);
+                        }
+                        else
+                        {
+                            if (Q.IsReady() && MenuRiven.ClearSettings.useQ.Enabled)
+                            {
+                                Q.CastOnUnit(args.Target);
+                            }
+                        }
+                    }                    
                 }
             }
             else afteraa = false;
@@ -313,103 +495,119 @@ namespace DominationAIO.Champions
             if (args.Type == OrbwalkerType.OnAttack)
             {
                 onaa = true;
-                //DelayAction.Add(time, () => { onaa = false; afteraa = true; });
             }
             else onaa = false;
-            /*if (args.Type == OrbwalkerType.AfterAttack)
-                        {
-                            afteraa = true;
-                        }
-                        else afteraa = false;
-
-             if (args.Type == OrbwalkerType.OnAttack)
-                        {
-                            onaa = true;
-                        }
-                        else onaa = false;*/
         }
 
-        private static void FarmAction(object sender, OrbwalkerActionArgs args)
+        public static void Burst()
         {
-            if (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
+            var target = TargetSelector.SelectedTarget;
+            if (target != null && target.IsValidTarget())
             {
-                if (args.Type == OrbwalkerType.AfterAttack)
+                if (Player.IsDashing() && HaveTiamat() && target.IsValidTarget(W.Range + 200))
                 {
-                    if (args.Target.IsJungle())
+                    Player.UseItem((int)ItemId.Tiamat);
+                    Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
+                    Player.UseItem((int)ItemId.Ravenous_Hydra);
+                    Player.UseItem((int)ItemId.Tiamat_Melee_Only);
+                }
+                if (R.IsReady() && W.IsReady() && E.IsReady() && Player.Distance(target.Position) <= 250 + 70 + Player.AttackRange)
+                {
+                    E.Cast(target.Position);
+                    R.DelayPosCast(target.Position, 1);
+                    W.DelayPosCast(target.Position, 100);
+                    if (Q.IsReady())
                     {
-                        if (Q.IsReady() && RMenu.useqf.Enabled)
+                        Q.DelayTargetCast(target, 205);
+                    }
+                }
+                else if (R.IsReady() && E.IsReady() && W.IsReady() && Q.IsReady() &&
+                         Player.Distance(target.Position) <= 400 + 70 + Player.AttackRange)
+                {
+                    E.Cast(target.Position);
+                    R.DelayPosCast(target.Position, 1);
+                    Q.DelayTargetCast(target, 150);
+                    W.DelayPosCast(target.Position, 160);
+                }
+                else if (fl.IsReady()
+                    && R.IsReady() && (Player.Distance(target.Position) <= 800) && E.IsReady() && W.IsReady())
+                {
+                    E.Cast(target.Position);
+                    R.DelayPosCast(target.Position, 1);
+                    DelayAction.Add(170, () => {
+                        if (HaveTiamat())
                         {
-                            Q.CastOnUnit(args.Target);
+                            Player.UseItem((int)ItemId.Tiamat);
+                            Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
+                            Player.UseItem((int)ItemId.Ravenous_Hydra);
+                            Player.UseItem((int)ItemId.Tiamat_Melee_Only);
                         }
-                        if (W.IsReady() && RMenu.usewf.Enabled && args.Target.IsValidTarget(W.Range))
+                        W.DelayPosCast(target.Position, 10);
+                        fl.DelayPosCast(target.Position, 20);
+                    });
+
+                    if (Q.IsReady())
+                    {
+                        Q.DelayTargetCast(target, 285);
+                    }
+                }
+                else if (fl.IsReady()
+                    && R.IsReady() && E.IsReady() && W.IsReady() && (Player.Distance(target.Position) <= 800))
+                {
+                    E.Cast(target.Position);
+                    R.DelayPosCast(target.Position, 1);
+                    DelayAction.Add(170, () => {
+                        if (HaveTiamat())
                         {
-                            W.Cast();
+                            Player.UseItem((int)ItemId.Tiamat);
+                            Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
+                            Player.UseItem((int)ItemId.Ravenous_Hydra);
+                            Player.UseItem((int)ItemId.Tiamat_Melee_Only);
                         }
-                        if (E.IsReady() && RMenu.useef.Enabled)
-                        {
-                            E.Cast(args.Target.Position);
-                        }
+                        W.DelayPosCast(target.Position, 10);
+                        fl.DelayPosCast(target.Position, 20);
+                    });
+                    if (Q.IsReady())
+                    {
+                        Q.DelayTargetCast(target, 285);
                     }
                 }
             }
         }
-
         private static void Game_OnUpdate(EventArgs args)
         {
-            #region old
-            /*if (RMenu.Qdelay.Enabled)
+            
+            if (Player.HasBuff("RivenFengShuiEngine"))
             {
-                if(Orbwalker.AttackSpeed < 0.7f)
-                {
-                    RMenu.Qdelayslider.Value = 300;
-                }
-                else
-                {
-                    if(Orbwalker.AttackSpeed < 1f)
-                    {
-                        RMenu.Qdelayslider.Value = 280;
-                    }
-                    if (Orbwalker.AttackSpeed > 1f && Orbwalker.AttackSpeed < 1.3f)
-                    {
-                        RMenu.Qdelayslider.Value = 250;
-                    }
-                    if (Orbwalker.AttackSpeed > 1.3f)
-                    {
-                        RMenu.Qdelayslider.Value = 200;
-                    }
-                }
-            }*/
-
-            #endregion
-            var target = GameObjects.EnemyHeroes.FirstOrDefault(i => i.IsValidTarget(900) && i.Health < R.GetDamage(i) && i.DistanceToPlayer() < R.GetPrediction(i, false, -1, CollisionObjects.YasuoWall).CastPosition.DistanceToPlayer());
-            if (!Player.IsDead)
-            {
-                if (Orbwalker.CanAttack() == true)
-                {
-                    CanAttack = true;
-                }
-                switch (Orbwalker.ActiveMode)
-                {
-                    case OrbwalkerMode.Combo:
-                        AttackNearestTarget();
-                        combo();
-                        if (RMenu.user.Enabled && R2())
-                        {
-                            if (!onaa && R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall).Hitchance >= HitChance.High)
-                            {
-                                if (target.Health <= R.GetDamage(target))
-                                    R.Cast(R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall).CastPosition);
-                            }
-                        }
-                        break;
-                    case OrbwalkerMode.Harass:
-                        break;
-                    case OrbwalkerMode.LaneClear:
-                        break;
-                    case OrbwalkerMode.LastHit:
-                        break;
-                }
+                W.Range = MenuRiven.RangeSettings.WRange.Value + 65;
+                Q.Range = MenuRiven.RangeSettings.QRange.Value + 65;
             }
+            else
+            {
+                W.Range = MenuRiven.RangeSettings.WRange.Value;
+                Q.Range = MenuRiven.RangeSettings.QRange.Value;
+            }
+            
+            E.Range = MenuRiven.RangeSettings.ERange.Value;
+            R.Range = MenuRiven.RangeSettings.R2Range.Value;
+            if (Player.IsDead) return;
+
+            DoMove();
+
+
+            
+
+            if (MenuRiven.BurstCombo.Active && E.IsReady() && R.IsReady() && W.IsReady())
+            {
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                Burst();
+
+            }
+            else
+            {
+                if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
+                    combo();
+            }           
         }
 
         public static void harass()
@@ -418,1579 +616,211 @@ namespace DominationAIO.Champions
         }
         public static void combo()
         {
-            var target = TargetSelector.SelectedTarget;
-            if (target == null || !target.IsValidTarget(700))
-                target = TargetSelector.GetTarget(1300);
+            DoMove();
 
-            var qready = Q.IsReady();
-            var wready = W.IsReady();
-            var eready = E.IsReady();
-            var rready = R.IsReady();
-
-            var qenabled = RMenu.useq.Enabled;
-            var wenabled = RMenu.usew.Enabled;
-            var eenabled = RMenu.usee.Enabled;
-            var renabled = RMenu.user.Enabled;
-
-            var rheath = RMenu.rh.Value;
-
-            var checkqgap = RMenu.useqgap.Enabled ? RMenu.qgap.Value : 0;
-            var checkegap = RMenu.egap.Value;
-
-            var rpreddmg = R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-
-            if (target == null) return;
-
-            #region normal
-            if (Player.Level <= 3 || !RMenu.fastcombo.Active)
+            var target = TargetSelector.GetTarget(400 + Player.GetRealAutoAttackRange(), DamageType.Physical);
+            
+            if(target != null)
             {
-                if (target.Health < 40)
+                /*if (Player.IsDashing() && HaveTiamat() && target.IsValidTarget(W.Range  + 200))
                 {
-                    if (qready && !wready && !eready)
+                    Player.UseItem((int)ItemId.Tiamat);
+                    Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
+                    Player.UseItem((int)ItemId.Ravenous_Hydra);
+                    Player.UseItem((int)ItemId.Tiamat_Melee_Only);
+                }*/
+
+                if (R.IsReady() && target.HealthPercent <= MenuRiven.RSettings.target && MenuRiven.RSettings.Rcombo.Enabled)
+                {
+                    if (R1() && MenuRiven.RSettings.R1.Enabled)
                     {
-                        if (target.IsValidTarget(checkqgap) && target.DistanceToPlayer() >= Player.GetRealAutoAttackRange())
+                        if (Q.IsReady() && target.IsValidTarget(Q.Range) && MenuRiven.QSettings.Qcombo.Enabled)
                         {
-                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            Q.Cast(target, true);
-                        } else
-                        {
-                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                            if (afteraa)
                             {
-                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                if (afteraa) Q.Cast(target, true);
+                                Q.DelayTargetCast(target);
+                            }
+                            if (!target.InAutoAttackRange() && Variables.TickCount - lastQcast > 700)
+                            {
+                                Q.DelayTargetCast(target);
                             }
                         }
-                    }
-                    if (!qready && wready && !eready)
-                    {
-                        if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                        if (afteraa && target.IsValidTarget(W.Range)) W.Cast(target);
-                        if (W.IsInRange(target) && target.DistanceToPlayer() > Player.GetRealAutoAttackRange() || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
-                    }
-                    if (!qready && !wready && eready)
-                    {
-                        if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                        if (afteraa && target.IsValidTarget(W.Range)) E.Cast(target);
-                        if (!target.IsValidTarget(W.Range) && target.IsValidTarget(checkegap)) E.Cast(target, true);
-                    }
-                    if (qready && wready)
-                    {
-                        if (target.IsValidTarget(checkqgap) && !onaa && !beforeaa)
-                            if (target.DistanceToPlayer() < W.Range)
-                            {
-                                if (Player.HasBuff("riventricleavesoundtwo"))
-                                {
-                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
-                                }
-                                else
-                                {
-                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa) Q.Cast(target);
-                                }
-                            }
-                            else
-                            {
-                                if (target.IsValidTarget(checkqgap)) { Q.Cast(target, true); }
-                            }
-                    }
-                    if (qready && eready)
-                    {
-                        if (target.IsValidTarget(E.Range + 200) && !onaa && !beforeaa)
+
+                        if (W.IsReady() && target.IsValidTarget(W.Range) && MenuRiven.WSettings.Wcombo.Enabled)
                         {
-                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            if (Player.HasBuff("riventricleavesoundtwo"))
+                            if (!Orbwalker.CanAttack())
                             {
-                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange());
-                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() <= E.Range))
-                                {
-                                    if (c != Vector2.Zero)
-                                        E.Cast(c);
-                                }
+                                W.DelayPosCast(target.Position);
                             }
-                            if (afteraa) E.Cast(target);
+
+                            if (Variables.TickCount - lastQcast > 500 && Player.IsDashing())
+                            {
+                                W.DelayPosCast(target.Position);
+                            }
+
+                            if (target.InAutoAttackRange() && afteraa)
+                            {
+                                W.DelayPosCast(target.Position);
+                            }
+
+                            if (target.IsDashing() && target.IsValidTarget(W.Range))
+                            {
+                                W.DelayPosCast(target.Position);
+                            }
+                        }
+
+                        if (E.IsReady() && target.IsValidTarget(E.Range))
+                        {
+                            if (W.IsReady() ? !target.IsValidTarget(W.Range) : !target.InAutoAttackRange())
+                            {
+                                E.DelayPosCast(target.Position);
+                            }
+                        }
+
+                        if (E.IsReady() && Q.IsReady())
+                        {
+                            E.Cast(target.Position);
+                            R.DelayPosCast(target.Position, 1);
+                            Q.DelayTargetCast(target, 200);
+                        }
+
+                        if(!E.IsReady() && !Q.IsReady())
+                        {
+                            R.Cast(target.Position);
                         }
                     }
-                    if (eready && wready)
+                    if (R2() && MenuRiven.RSettings.R2.Enabled)
                     {
-                        if (target.IsValidTarget(checkegap) && !onaa && !beforeaa)
+                        if (Q.IsReady() && target.IsValidTarget(Q.Range) && MenuRiven.QSettings.Qcombo.Enabled)
                         {
-                            if (target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
+                            if (afteraa)
                             {
-                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                E.Cast(target);
-                            } else
+                                Q.DelayTargetCast(target);
+                            }
+                            if (!target.InAutoAttackRange() && Variables.TickCount - lastQcast > 700)
                             {
-                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
+                                Q.DelayTargetCast(target);
+                            }
+                        }
+
+                        if (W.IsReady() && target.IsValidTarget(W.Range) && MenuRiven.WSettings.Wcombo.Enabled)
+                        {
+                            if (!Orbwalker.CanAttack())
+                            {
+                                W.DelayPosCast(target.Position);
+                            }
+
+                            if (Variables.TickCount - lastQcast > 500 && Player.IsDashing())
+                            {
+                                W.DelayPosCast(target.Position);
+                            }
+
+                            if (target.InAutoAttackRange() && afteraa)
+                            {
+                                W.DelayPosCast(target.Position);
+                            }
+
+                            if (target.IsDashing() && target.IsValidTarget(W.Range))
+                            {
+                                W.DelayPosCast(target.Position);
+                            }
+                        }
+
+                        if (E.IsReady() && target.IsValidTarget(E.Range))
+                        {
+                            if (W.IsReady() ? !target.IsValidTarget(W.Range) : !target.InAutoAttackRange())
+                            {
+                                E.DelayPosCast(target.Position);
+                            }
+                        }
+
+                        if (target.Health <= R.GetDamage(target) && R.GetPrediction(target).Hitchance >= HitChance.High)
+                        {
+                            R.DelayPosCast(R.GetPrediction(target).CastPosition);
+                        }
+
+                        if (Q.IsReady() && target.InAutoAttackRange())
+                        {
+                            if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) + Player.GetAutoAttackDamage(target))
+                            {
+                                if (E.IsReady())
+                                    E.Cast(target.Position);
+                                R.DelayPosCast(R.GetPrediction(target).CastPosition, 1);
+                                Q.DelayTargetCast(target, 150);
+                            }
+                        }
+
+                        if(target.InAutoAttackRange() && beforeaa && !Q.IsReady())
+                        {
+                            if (target.Health <= R.GetDamage(target) + Player.GetAutoAttackDamage(target))
+                            {
+                                R.DelayPosCast(R.GetPrediction(target).CastPosition);
+                            }
+                        }
+
+                        if (target.IsValidTarget(W.Range) && W.IsReady())
+                        {
+                            if (target.Health <= R.GetDamage(target) + W.GetDamage(target))
+                            {
+                                R.DelayPosCast(R.GetPrediction(target).CastPosition);
                             }
                         }
                     }
                 }
                 else
                 {
-                    if (qready && !wready && !eready)
+                    if (Q.IsReady() && target.IsValidTarget(Q.Range) && MenuRiven.QSettings.Qcombo.Enabled)
                     {
-                        if (target.DistanceToPlayer() < checkqgap && target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
-                        {
-                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            if (!onaa && !beforeaa) Q.Cast(target, true);
-                        }
-                        if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange())
-                        {
-                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            if (!onaa && !beforeaa) if (afteraa)
-                                    Q.Cast(target, true);
-                        }
-                    }
-                    if (!qready && wready && !eready)
-                    {
-                        if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                        if (afteraa || target.IsFleeing || !target.IsFacing(Player) && target.DistanceToPlayer() <= W.Range)
-                            W.Cast(target);
-                    }
-                    if (!qready && !wready && eready)
-                    {
-                        if (!onaa && !beforeaa) if (target.DistanceToPlayer() < checkegap && target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
-                                E.Cast(target.Position);
-                            else if (afteraa && target.DistanceToPlayer() < Player.GetRealAutoAttackRange()) E.Cast(target);
-                    }
-                    if (qready && wready)
-                    {
-                        if (target.IsValidTarget(checkqgap) && !onaa && !beforeaa)
-                            if (target.DistanceToPlayer() < W.Range)
-                            {
-                                if (Player.HasBuff("riventricleavesoundtwo"))
-                                {
-                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
-                                }
-                                else
-                                {
-                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa) Q.Cast(target);
-                                }
-                            }
-                            else
-                            {
-                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                if (target.IsValidTarget(checkqgap)) { Q.Cast(target, true); }
-                            }
-                    }
-                    if (qready && eready)
-                    {
-                        if (target.IsValidTarget(checkegap) && !onaa && !beforeaa)
-                        {
-                            if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange())
-                            {
-                                if (!Player.HasBuff("riventricleavesoundtwo"))
-                                {
-                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa)
-                                        Q.Cast(target, true);
-                                }
-                                else
-                                {
-                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                    if (afteraa)
-                                        E.Cast(target, true);
-                                }
-                            }
-                        }
-                    }
-                    if (eready && wready)
-                    {
-                        if (target.IsValidTarget(checkegap) && !onaa && !beforeaa)
-                        {
-                            if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange())
-                            {
-                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                if (afteraa || target.IsFleeing || !target.IsFacing(Player)) W.Cast(target);
-                                if (afteraa) E.Cast(target);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (qready && !wready && !eready && qenabled && ((!rready || R2()) || !renabled))
-                {
-                    if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                    {
-                        if (onaa) return;
                         if (afteraa)
                         {
-                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            Q.Cast(target);
-                            DelayAction.Add(10, () => { return; });
+                            Q.DelayTargetCast(target);
+                        }
+                        if (!target.InAutoAttackRange() && Variables.TickCount - lastQcast > 700)
+                        {
+                            Q.DelayTargetCast(target);
                         }
                     }
-                    else
+
+                    if(W.IsReady() && target.IsValidTarget(W.Range) && MenuRiven.WSettings.Wcombo.Enabled)
                     {
-                        if (target.DistanceToPlayer() <= checkqgap + Player.GetRealAutoAttackRange() && target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() + 100)
+                        if (!Orbwalker.CanAttack())
                         {
-                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            Q.Cast(target);
-                            DelayAction.Add(10, () => { return; });
+                            W.DelayPosCast(target.Position);
+                        }
+
+                        if(Variables.TickCount - lastQcast > 500 && Player.IsDashing())
+                        {
+                            W.DelayPosCast(target.Position);
+                        }
+
+                        if(target.InAutoAttackRange() && afteraa)
+                        {
+                            W.DelayPosCast(target.Position);
+                        }
+
+                        if (target.IsDashing() && target.IsValidTarget(W.Range))
+                        {
+                            W.DelayPosCast(target.Position);
                         }
                     }
-                }
-                if (!qready && wready && !eready && wenabled && ((!rready || R2()) || !renabled))
-                {
-                    if (afteraa || target.IsFleeing || !target.IsFacing(Player))
+
+                    if(E.IsReady() && target.IsValidTarget(E.Range))
                     {
-                        if (target.IsValidTarget(W.Range))
+                        if (W.IsReady() ? !target.IsValidTarget(W.Range) : !target.InAutoAttackRange())
                         {
-                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                            W.Cast(target);
-                        }
-                        DelayAction.Add(10, () => { return; });
-                    }
-                }
-                if (!qready && !wready && eready && eenabled && ((!rready || R2()) || !renabled))
-                {
-                    if (onaa) return;
-                    if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
-                    {
-                        if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                        Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange());
-                        foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                        {
-                            if (c != Vector2.Zero)
-                                E.Cast(c);
-                        }
-                        if (target.IsValidTarget(checkegap))
-                            E.Cast(target);
-                        DelayAction.Add(10, () => { return; });
-                    }
-                    if (afteraa)
-                    {
-                        if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                        if (Player.HasBuff("riventricleavesoundtwo"))
-                        {
-                            Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                            foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                            {
-                                E.Cast(c);
-                            }
-                            DelayAction.Add(10, () => { return; });
-                        }
-                    }
-                }
-                if (rready && renabled)
-                {
-                    if (R1() && target.DistanceToPlayer() < 700)
-                    {
-                        if (target.HealthPercent <= rheath)
-                        {
-                            if (Variables.GameTimeTickCount - lastEcast < 300 && Variables.GameTimeTickCount - lastEcast > 99)
-                            {
-                                R.Cast(target);
-                                DelayAction.Add(5, () => { Q.Cast(target); });
-                            }
-                        }
-                        if (target.HealthPercent < 40)
-                        {
-                            DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                        }
-                        if (target.HealthPercent <= rheath)
-                        {
-                            if (eready)
-                            {
-                                if (qready)
-                                {
-                                    E.Cast(target.Position);
-                                    DelayAction.Add(110 - Game.Ping, () => { R.Cast(target); });
-                                    DelayAction.Add(120 - Game.Ping, () => { Q.Cast(target); });
-                                }
-                            }
-                            else
-                            {
-                                if (qready)
-                                {
-                                    E.Cast(target.Position);
-                                    DelayAction.Add(110 - Game.Ping, () => { R.Cast(target); });
-                                    DelayAction.Add(120 - Game.Ping, () => { Q.Cast(target); });
-                                }
-                            }
-                        }
-                        if (Player.CountEnemyHeroesInRange(700) > 1)
-                        {
-                            if (eready)
-                            {
-                                if (qready)
-                                {
-                                    E.Cast(target.Position);
-                                    DelayAction.Add(110 - Game.Ping, () => { R.Cast(target); });
-                                    DelayAction.Add(120 - Game.Ping, () => { Q.Cast(target); });
-                                }
-                            }
-                            else
-                            {
-                                if (qready)
-                                {
-                                    E.Cast(target.Position);
-                                    DelayAction.Add(110 - Game.Ping, () => { R.Cast(target); });
-                                    DelayAction.Add(120 - Game.Ping, () => { Q.Cast(target); });
-                                }
-                            }
-                        }
-                    }
-                    if (R2())
-                    {
-                        if (target.IsValidTarget(900))
-                        {
-                            if (target.Health < R.GetDamage(target) + Player.TotalAttackDamage)
-                            {
-                                if (rpreddmg.Hitchance >= HitChance.High)
-                                {
-                                    R.Cast(rpreddmg.CastPosition);
-                                }
-                            }
-                            if (beforeaa && target.Health + target.BonusHealth <= R.GetDamage(target) + Player.TotalAttackDamage * 2)
-                            {
-                                if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                {
-                                    R.Cast(rpreddmg.CastPosition);
-                                    DelayAction.Add(1, () => { Orbwalker.Attack(target); });
-                                }
-                            }
-                            if (HaveTiamat())
-                            {
-                                if (afteraa)
-                                {
-                                    Player.UseItem((int)ItemId.Tiamat);
-                                    Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
-                                    Player.UseItem((int)ItemId.Ravenous_Hydra);
-                                    Player.UseItem((int)ItemId.Tiamat_Melee_Only);
-                                }
-                                if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target))
-                                    if (qready || wready || eready)
-                                    {
-                                        if (qready && wready && eready)
-                                        {
-                                            if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                            {
-                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (qready && wready)
-                                            {
-                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                            }
-                                            else
-                                            {
-                                                if (eready && qready)
-                                                {
-                                                    E.Cast(Player.Position.Extend(rpreddmg.CastPosition, -10));
-                                                    DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(120, () => { Q.Cast(target); });
-                                                }
-                                            }
-                                            if (qready && eready)
-                                            {
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                            }
-                                            else
-                                            {
-                                                if (wready)
-                                                {
-                                                    //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                }
-                                            }
-                                            if (wready && eready)
-                                            {
-                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                            }
-                                            else
-                                            {
-                                                if (qready)
-                                                {
-                                                    DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(120, () => { Q.Cast(target); });
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        var rpredheath = R.GetHealthPrediction(target);
-                                        if (target.Health - rpredheath <= R.GetDamage(target))
-                                        {
-                                            if (rpreddmg.Hitchance >= HitChance.High)
-                                            {
-                                                R.Cast(rpreddmg.CastPosition);
-                                            }
-                                        }
-                                        if (target.Health <= R.GetDamage(target))
-                                        {
-                                            if (rpreddmg.Hitchance >= HitChance.High)
-                                            {
-                                                R.Cast(rpreddmg.CastPosition);
-                                            }
-                                        }
-                                    }
-                            }
-                            else
-                            {
-                                if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target))
-                                    if (qready || wready || eready)
-                                    {
-                                        if (qready && wready && eready)
-                                        {
-                                            if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                            {
-                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (qready && wready)
-                                            {
-                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                            }
-                                            else
-                                            {
-                                                if (eready)
-                                                {
-
-                                                }
-                                            }
-                                            if (qready && eready)
-                                            {
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                            }
-                                            else
-                                            {
-                                                if (wready)
-                                                {
-                                                    //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                }
-                                            }
-                                            if (wready && eready)
-                                            {
-                                                //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                            }
-                                            else
-                                            {
-                                                if (qready)
-                                                {
-                                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(110, () => { Q.Cast(target); });
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        var rpredheath = R.GetHealthPrediction(target);
-                                        if (target.Health - rpredheath <= R.GetDamage(target))
-                                        {
-                                            if (rpreddmg.Hitchance >= HitChance.High)
-                                            {
-                                                R.Cast(rpreddmg.CastPosition);
-                                            }
-                                        }
-                                        if (target.Health <= R.GetDamage(target))
-                                        {
-                                            if (rpreddmg.Hitchance >= HitChance.High)
-                                            {
-                                                R.Cast(rpreddmg.CastPosition);
-                                            }
-                                        }
-                                    }
-                            }
-                        }
-                        if (target.IsValidTarget(E.Range + Q.Range))
-                        {
-                            if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2)
-                            {
-                                if (qready && eready)
-                                {
-                                    DelayAction.Add(1, () => { E.Cast(rpreddmg.CastPosition); });
-                                    DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                    DelayAction.Add(120, () => { Q.Cast(target); });
-                                }
-                                else
-                                {
-                                    if (qready)
-                                    {
-                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                        DelayAction.Add(120, () => { Q.Cast(target); });
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (target.Health <= R.GetDamage(target))
-                            {
-                                if (rpreddmg.Hitchance >= HitChance.High)
-                                {
-                                    R.Cast(rpreddmg.CastPosition);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (RMenu.flash.Active && flash.IsReady() && target.DistanceToPlayer() >= 425 && target.IsValidTarget(950))
-                {
-                    if (target.IsValidTarget(1000))
-                    {
-                        var cancancelanimation = false;
-                        if (wready && qready && eready) cancancelanimation = true; else cancancelanimation = false;
-                        if (Player.IsDashing() && target.Distance(Player) < W.Range) W.Cast(target);
-                        if (R1())
-                        {
-                            if (cancancelanimation)
-                            {
-                                E.Cast(target);
-                                DelayAction.Add(110, () =>
-                                {
-                                    R.Cast(target);
-                                }
-                                );
-                                DelayAction.Add(140, () =>
-                                {
-                                    fl.Cast(target.Position);
-                                }
-                                );
-                                DelayAction.Add(180, () =>
-                                {
-                                    Q.Cast(target);
-                                }
-                                );
-                            }
-
-                            {
-                                if (Variables.GameTimeTickCount - lastEcast < 99)
-                                {
-                                    if (wready || qready)
-                                    {
-                                        R.Cast(target);
-                                        DelayAction.Add(80, () =>
-                                        {
-                                            fl.Cast(target.Position);
-                                        }
-                                        );
-                                        DelayAction.Add(120, () =>
-                                        {
-                                            Q.Cast(target);
-                                        }
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                        if (R2())
-                        {
-                            if (cancancelanimation)
-                            {
-                                E.Cast(target);
-                                DelayAction.Add(130, () =>
-                                {
-                                    R.Cast(target);
-                                }
-                                );
-                                DelayAction.Add(460, () =>
-                                {
-                                    fl.Cast(target.Position);
-                                }
-                                );
-                                DelayAction.Add(490, () =>
-                                {
-                                    Q.Cast(target);
-                                }
-                                );
-                            }
-
-                            {
-                                if (Variables.GameTimeTickCount - lastEcast < 99)
-                                {
-                                    if (wready || qready)
-                                    {
-                                        R.Cast(target);
-                                        DelayAction.Add(330, () =>
-                                        {
-                                            fl.Cast(target.Position);
-                                        }
-                                        );
-                                        DelayAction.Add(360, () =>
-                                        {
-                                            Q.Cast(target);
-                                        }
-                                        );
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (target.IsValidTarget(checkqgap + checkegap + 400))
-                    {
-                        if (rready && renabled && target.DistanceToPlayer() < 700 && (target.HealthPercent < rheath || Player.CountEnemyHeroesInRange(600) > 1))
-                        {
-                            if (R1() && target.DistanceToPlayer() < 700)
-                            {
-                                if (target.HealthPercent < 40)
-                                {
-                                    DelayAction.Add(1, () => { R.Cast(rpreddmg.CastPosition); });
-                                }
-                                if (target.HealthPercent < rheath)
-                                {
-                                    if (eready)
-                                    {
-                                        if (qready)
-                                        {
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(112, () => { R.Cast(target); });
-                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (qready)
-                                        {
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(110, () => { R.Cast(target); });
-                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                        }
-                                    }
-                                }
-                                if (Player.CountEnemyHeroesInRange(600) > 1)
-                                {
-                                    if (eready)
-                                    {
-                                        if (qready)
-                                        {
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(110, () => { R.Cast(target); });
-                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (qready)
-                                        {
-                                            E.Cast(target.Position);
-                                            DelayAction.Add(110, () => { R.Cast(target); });
-                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                        }
-                                    }
-                                }
-                            }
-                            if (R2())
-                            {
-                                if (target.IsValidTarget(W.Range))
-                                {
-                                    if (beforeaa && target.Health + target.BonusHealth <= R.GetDamage(target) + Player.TotalAttackDamage * 2)
-                                    {
-                                        if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                        {
-                                            R.Cast(rpreddmg.CastPosition);
-                                            DelayAction.Add(120, () => { Orbwalker.Attack(target); });
-                                        }
-                                    }
-                                    if (HaveTiamat())
-                                    {
-                                        if (!onaa)
-                                        {
-                                            Player.UseItem((int)ItemId.Tiamat);
-                                            Player.UseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
-                                            Player.UseItem((int)ItemId.Ravenous_Hydra);
-                                            Player.UseItem((int)ItemId.Tiamat_Melee_Only);
-                                        }
-                                        if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 3 + W.GetDamage(target))
-                                            if (qready || wready || eready)
-                                            {
-                                                if (qready && wready && eready)
-                                                {
-                                                    if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                                    {
-                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (qready && wready)
-                                                    {
-                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    }
-                                                    else
-                                                    {
-                                                        if (eready && qready)
-                                                        {
-                                                            DelayAction.Add(1, () => { E.Cast(Player.Position.Extend(rpreddmg.CastPosition, -10)); });
-                                                            DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                                        }
-                                                    }
-                                                    if (qready && eready)
-                                                    {
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    }
-                                                    else
-                                                    {
-                                                        if (wready)
-                                                        {
-                                                            //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                            DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        }
-                                                    }
-                                                    if (wready && eready)
-                                                    {
-                                                        DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    }
-                                                    else
-                                                    {
-                                                        if (qready)
-                                                        {
-                                                            DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                var rpredheath = R.GetHealthPrediction(target);
-                                                if (target.Health - rpredheath <= R.GetDamage(target))
-                                                {
-                                                    if (rpreddmg.Hitchance >= HitChance.High)
-                                                    {
-                                                        R.Cast(rpreddmg.CastPosition);
-                                                    }
-                                                }
-                                                if (target.Health <= R.GetDamage(target))
-                                                {
-                                                    if (rpreddmg.Hitchance >= HitChance.High)
-                                                    {
-                                                        R.Cast(rpreddmg.CastPosition);
-                                                    }
-                                                }
-                                            }
-                                    }
-                                    else
-                                    {
-                                        if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target))
-                                            if (qready || wready || eready)
-                                            {
-                                                if (qready && wready && eready)
-                                                {
-                                                    if (rpreddmg.Hitchance >= HitChance.High && rpreddmg.CastPosition != Vector3.Zero)
-                                                    {
-                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (qready && wready)
-                                                    {
-                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    }
-                                                    else
-                                                    {
-                                                        if (eready)
-                                                        {
-
-                                                        }
-                                                    }
-                                                    if (qready && eready)
-                                                    {
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    }
-                                                    else
-                                                    {
-                                                        if (wready)
-                                                        {
-                                                            //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                            DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                        }
-                                                    }
-                                                    if (wready && eready)
-                                                    {
-                                                        //DelayAction.Add(1, () => { W.Cast(rpreddmg.CastPosition); });
-                                                        DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    }
-                                                    else
-                                                    {
-                                                        if (qready)
-                                                        {
-                                                            DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                var rpredheath = R.GetHealthPrediction(target);
-                                                if (target.Health - rpredheath <= R.GetDamage(target))
-                                                {
-                                                    if (rpreddmg.Hitchance >= HitChance.High)
-                                                    {
-                                                        R.Cast(rpreddmg.CastPosition);
-                                                    }
-                                                }
-                                                if (target.Health <= R.GetDamage(target))
-                                                {
-                                                    if (rpreddmg.Hitchance >= HitChance.High)
-                                                    {
-                                                        R.Cast(rpreddmg.CastPosition);
-                                                    }
-                                                }
-                                            }
-                                    }
-                                }
-                                else
-                                {
-                                    if (target.IsValidTarget(E.Range + Q.Range))
-                                    {
-                                        if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) * 2)
-                                        {
-                                            if (qready && eready)
-                                            {
-                                                DelayAction.Add(1, () => { E.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                            }
-                                            else
-                                            {
-                                                if (qready)
-                                                {
-                                                    DelayAction.Add(110, () => { R.Cast(rpreddmg.CastPosition); });
-                                                    DelayAction.Add(120, () => { Q.Cast(target); });
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (target.Health <= R.GetDamage(target))
-                                        {
-                                            if (rpreddmg.Hitchance >= HitChance.High)
-                                            {
-                                                R.Cast(rpreddmg.CastPosition);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if ((qready && qenabled) || (wready && wenabled) || (eready && eenabled))
-                            {
-                                if (HaveTiamat())
-                                {
-                                    if ((qready && qenabled) && (wready && wenabled) && (eready && eenabled))
-                                    {
-                                        if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                        {
-                                            if (onaa) return;
-                                            if (afteraa)
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                Q.CastOnUnit(target);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                            if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange())
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                Q.CastOnUnit(target);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                            if (afteraa)
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (Player.HasBuff("riventricleavesoundtwo"))
-                                                {
-                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                    {
-                                                        E.Cast(c);
-                                                    }
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            if (target.DistanceToPlayer() <= checkqgap + checkegap + Player.GetRealAutoAttackRange())
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                {
-                                                    if (c != Vector2.Zero)
-                                                        E.Cast(c);
-                                                }
-                                                if (target.IsValidTarget(checkegap))
-                                                    E.Cast(target.Position);
-                                                DelayAction.Add(120, () => { Q.CastOnUnit(target); });
-                                                DelayAction.Add(200, () => { return; });
-                                            }
-                                            else
-                                            {
-                                                /*if (target.DistanceToPlayer() >= checkegap + Player.GetRealAutoAttackRange())
-                                                {
-                                                    E.Cast(target.Position);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                                else
-                                                {
-                                                    E.Cast(target.Position);
-                                                    DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                                    DelayAction.Add(10, () => { return; });
-                                                }*/
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (qready && qenabled && wready && wenabled)
-                                        {
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (onaa) return;
-                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                                {
-                                                    if (afteraa)
-                                                    {
-                                                        Q.CastOnUnit(target);
-                                                        DelayAction.Add(10, () => { return; });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    Q.CastOnUnit(target);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (onaa && !target.IsValidTarget(checkqgap)) return;
-                                                Q.CastOnUnit(target);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                            if (eready && eenabled)
-                                            {
-                                                if (onaa) return;
-                                                if (target.DistanceToPlayer() <= checkegap)
-                                                {
-                                                    E.Cast(target.Position);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                        }
-                                        if (qready && qenabled && eready && eenabled)
-                                        {
-                                            if (target.IsValidTarget(checkegap + checkqgap))
-                                            {
-                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                                {
-                                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                    if (onaa) return;
-                                                    if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                                    {
-                                                        if (afteraa)
-                                                        {
-                                                            if (Player.HasBuff("riventricleavesoundtwo"))
-                                                            {
-                                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                                {
-                                                                    if (c != Vector2.Zero)
-                                                                        E.Cast(c);
-                                                                }
-                                                            }
-                                                            DelayAction.Add(120, () => { Q.Cast(target); });
-                                                            DelayAction.Add(200, () => { return; });
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                        Q.Cast(target);
-                                                        DelayAction.Add(10, () => { return; });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                    if (onaa) return;
-                                                    if (target.IsValidTarget(checkegap))
-                                                        E.Cast(target.Position);
-                                                    DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    DelayAction.Add(200, () => { return; });
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (wready && wenabled)
-                                            {
-
-                                            }
-                                        }
-                                        if (eready && eenabled && wready && wenabled)
-                                        {
-                                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                            if (onaa) return;
-                                            if (target.DistanceToPlayer() <= checkegap)
-                                            {
-                                                E.Cast(target.Position);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (qready && qenabled)
-                                            {
-                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                                {
-                                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                    if (onaa) return;
-                                                    if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                                    {
-                                                        if (afteraa)
-                                                        {
-                                                            Q.Cast(target);
-                                                            DelayAction.Add(10, () => { return; });
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                        Q.Cast(target);
-                                                        DelayAction.Add(10, () => { return; });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                    if (onaa && !target.IsValidTarget(checkqgap)) return;
-                                                    Q.Cast(target);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if ((qready && qenabled) && (wready && wenabled) && (eready && eenabled))
-                                    {
-                                        if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                        {
-                                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                            if (onaa) return;
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                            {
-                                                if (afteraa)
-                                                {
-                                                    Q.Cast(target);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                                if (afteraa || target.IsFleeing || !target.IsFacing(Player))
-                                                {
-                                                    if (target.IsValidTarget(W.Range))
-                                                    {
-                                                        W.Cast(target);
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                Q.Cast(target);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                            if (target.DistanceToPlayer() >= Player.GetRealAutoAttackRange() && !afteraa && !beforeaa)
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                {
-                                                    if (c != Vector2.Zero)
-                                                        E.Cast(c);
-                                                }
-                                                if (target.IsValidTarget(checkegap))
-                                                    E.Cast(target.Position);
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                                DelayAction.Add(200, () => { return; });
-                                            }
-                                            if (afteraa)
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (Player.HasBuff("riventricleavesoundtwo"))
-                                                {
-                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Player.GetRealAutoAttackRange() - 20);
-                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                    {
-                                                        E.Cast(c);
-                                                    }
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            if (target.DistanceToPlayer() <= checkqgap + checkegap + Player.GetRealAutoAttackRange())
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (target.IsValidTarget(checkegap))
-                                                    E.Cast(target.Position);
-                                                DelayAction.Add(120, () => { Q.Cast(target); });
-                                                DelayAction.Add(200, () => { return; });
-                                            }
-                                            else
-                                            {
-                                                /*if (target.DistanceToPlayer() <= checkegap + Player.GetRealAutoAttackRange())
-                                                {
-                                                    E.Cast(target.Position);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                                else
-                                                {
-                                                    E.Cast(target.Position);
-                                                    DelayAction.Add(1, () => { Q.CastOnUnit(target); });
-                                                    DelayAction.Add(10, () => { return; });
-                                                }*/
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (qready && qenabled && wready && wenabled)
-                                        {
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange() + 100)
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (onaa) return;
-                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                                {
-                                                    if (afteraa)
-                                                    {
-                                                        Q.Cast(target);
-                                                        DelayAction.Add(10, () => { return; });
-                                                    }
-                                                    if (afteraa || target.IsFleeing || !target.IsFacing(Player))
-                                                    {
-                                                        if (target.IsValidTarget(W.Range + 75))
-                                                        {
-                                                            W.Cast(target.Position);
-                                                        }
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                    Q.Cast(target);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (onaa && !target.IsValidTarget(checkqgap)) return;
-                                                Q.Cast(target);
-                                                DelayAction.Add(10, () => { return; });
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (eready && eenabled)
-                                            {
-                                                if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                                if (onaa) return;
-                                                if (target.DistanceToPlayer() <= checkegap)
-                                                {
-                                                    E.Cast(target.Position);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                                if (afteraa && Player.HasBuff("riventricleavesoundtwo"))
-                                                {
-                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                    {
-                                                        E.Cast(c);
-                                                    }
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                        }
-                                        if (qready && qenabled && eready && eenabled)
-                                        {
-                                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                            if (target.IsValidTarget(checkegap + checkqgap))
-                                            {
-                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                                {
-                                                    if (onaa) return;
-                                                    if (afteraa)
-                                                    {
-                                                        Q.Cast(target);
-                                                        if (target.IsValidTarget(E.Range))
-                                                        {
-                                                            if (Player.HasBuff("riventricleavesoundtwo"))
-                                                            {
-                                                                Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                                foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                                {
-                                                                    E.Cast(c);
-                                                                }
-                                                            }
-                                                        }
-                                                        DelayAction.Add(10, () => { return; });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (onaa) return;
-                                                    Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                    foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                    {
-                                                        E.Cast(c);
-                                                    }
-                                                    DelayAction.Add(120, () => { Q.Cast(target); });
-                                                    DelayAction.Add(200, () => { return; });
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                            if (wready && wenabled)
-                                            {
-                                                if (afteraa || target.IsFleeing || !target.IsFacing(Player) && target.IsValidTarget(W.Range))
-                                                {
-                                                    W.Cast(target.Position);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                        }
-                                        if (eready && eenabled && wready && wenabled)
-                                        {
-                                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                            if (onaa) return;
-                                            if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                            {
-                                                if (afteraa || target.IsFleeing || !target.IsFacing(Player) && target.IsValidTarget(W.Range))
-                                                {
-                                                    W.Cast(target);
-                                                    if (Player.HasBuff("riventricleavesoundtwo"))
-                                                    {
-                                                        Geometry.Circle circle = new Geometry.Circle(target.Position, Q.Range);
-                                                        foreach (var c in circle.Points.Where(c => c.DistanceToPlayer() < E.Range))
-                                                        {
-                                                            E.Cast(c);
-                                                        }
-                                                    }
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (target.DistanceToPlayer() <= checkegap)
-                                                {
-                                                    E.Cast(target);
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (Variables.GameTimeTickCount - lastEcast < 98 && Variables.GameTimeTickCount - lastEcast > 0) return;
-                                            if (qready && qenabled)
-                                            {
-                                                if (target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
-                                                {
-                                                    if (onaa) return;
-                                                    if (afteraa)
-                                                    {
-                                                        Q.Cast(target);
-                                                    }
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                                else
-                                                {
-                                                    if (onaa && !target.IsValidTarget(checkqgap)) return;
-                                                    if (target.DistanceToPlayer() > Player.GetRealAutoAttackRange() + 100)
-                                                    {
-                                                        Q.Cast(target);
-                                                    }
-                                                    else
-                                                    {
-                                                        Q.Cast(target);
-                                                    }
-                                                    DelayAction.Add(10, () => { return; });
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            E.DelayPosCast(target.Position);
                         }
                     }
                 }
             }
-            #endregion
         }
 
-        private static void AttackNearestTarget()
-        {
-            var target = GameObjects.Get<AIHeroClient>().Where(i => i.IsValidTarget() && !i.IsAlly && i.IsValidTarget(Player.GetRealAutoAttackRange() + 30)).FirstOrDefault();
-            if(target != null && target.IsValidTarget(Player.GetRealAutoAttackRange() + 30) && CanAttack)
-            {
-                Orbwalker.Attack(target);
-                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                Game.Print("Attacked");
-            }
-        }
         private static bool HaveTiamat()
         {
             return Player.CanUseItem((int)ItemId.Tiamat)
                     || Player.CanUseItem((int)ItemId.Ravenous_Hydra)
                     || Player.CanUseItem((int)ItemId.Tiamat_Melee_Only)
                     || Player.CanUseItem((int)ItemId.Ravenous_Hydra_Melee_Only);
-        }
-        
-        #region old
-        /*public static void RivenCombo()
-        {
-            AIHeroClient target = TargetSelector.GetTarget(900f);
-            if (Q.IsReady())
-            {
-                CanQ = true;
-            }
-            else CanQ = false;
-            if (W.IsReady())
-            {
-                CanW = true;
-            }
-            else CanW = false;
-            if (E.IsReady())
-            {
-                CanE = true;
-            }
-            else CanE = false;
-            if (R.IsReady())
-            {
-                CanR = true;
-                if (Player.CanUseItem((int)ItemId.Tiamat_Melee_Only) && R2())
-                {
-                    CanTiamatR2 = true;
-                }
-                else CanTiamatR2 = false;
-                if (Q.IsReady() && R2())
-                {
-                    CanR2Q = true;
-                }
-                else CanR2Q = false;
-                if (E.IsReady() && Q.IsReady() && R1())
-                {
-                    CanER1Q = true;
-                }
-                else CanER1Q = false;
-            }
-            else CanR = false;
-            if (Player.CanUseItem((int)ItemId.Tiamat_Melee_Only))
-            {
-                CanTiamat = true;
-                if (W.IsReady())
-                {
-                    CanTiamatW = true;
-                }
-                else CanTiamatW = false;
-            }
-            else CanTiamat = false;
-            if(target != null)
-            {
-                if(RMenu.ComboFlash.Active)
-                {
-                    FastCombo(target);
-                }
-                else
-                {
-                    NorCombo(target);
-                }
-            }
-        }
-        public static void NorCombo(AIHeroClient target)
-        {
-            if(CanR && RMenu.ComboR.Enabled)
-            {
-                if(R1())
-                {
-                    if(CanER1Q && target.HealthPercent <= RMenu.R1target.Value && target.IsValidTarget(Player.GetRealAutoAttackRange() + 250 + 200 + 100))
-                    {
-                        E.Cast(target.Position);
-                        DelayAction.Add(150 - Game.Ping, () => { R.Cast(target);});
-                        DelayAction.Add(160 - Game.Ping, () => { Q.Cast(target); });
-                    }
-                }
-                if(R2())
-                {
-                    if(CanR2AA && target.Health <= Player.GetAutoAttackDamage(target) + R.GetDamage(target) && target.InAutoAttackRange() && beforeaa)
-                    {
-                        R.Cast(target.Position);
-                    }
-                    else
-                    {
-                        if (target.Health < R.GetDamage(target) && R2())
-                        {
-                            R.Cast(R.GetPrediction(target).CastPosition);
-                        }
-                    }
-                    if(CanTiamatR2 && target.Health <= Player.GetAutoAttackDamage(target) + R.GetDamage(target) && target.IsValidTarget(Player.GetRealAutoAttackRange() + 100) && CanTiamat)
-                    {
-                        Player.UseItem((int)ItemId.Tiamat_Melee_Only);
-                        R.Cast(target.Position);
-                    }
-                    else
-                    {
-                        if (target.Health < R.GetDamage(target) && R2())
-                        {
-                            R.Cast(R.GetPrediction(target).CastPosition);
-                        }
-                    }
-
-                }
-            }
-            if(CanE && RMenu.ComboE.Enabled)
-            {
-                if (target.IsValidTarget(Player.GetRealAutoAttackRange() + 250 + 200))
-                {
-                    if (target.DistanceToPlayer() > 250 && (afteraa || onaa))
-                    {
-                        if (onaa)
-                        {
-                            DelayAction.Add(RMenu.Qdelayslider.Value - Game.Ping, () => {
-                                E.CastOnUnit(target);
-                            });
-                        }
-                        else
-                            E.CastOnUnit(target);
-                    }
-                }
-            }
-            if(CanW && RMenu.ComboW.Enabled && target.IsValidTarget(W.Range))
-            {
-                if(CanTiamatW && !beforeaa && target.IsValidTarget(W.Range))
-                {
-                    Player.UseItem((int)ItemId.Tiamat_Melee_Only);
-                    W.Cast(target);
-                }
-                if (onaa)
-                {
-                    DelayAction.Add(RMenu.Qdelayslider.Value - Game.Ping, () => {
-                        W.Cast(target);
-                    });
-                }
-            }
-            if(CanE && RMenu.ComboE.Enabled)
-            {
-                if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange() + 200 + 250)
-                {
-                    if (target.DistanceToPlayer() > Player.GetRealAutoAttackRange())
-                    {
-                        DelayAction.Add(RMenu.Qdelayslider.Value *2 - Game.Ping, () => {
-                            E.Cast(target.Position);
-                        });
-                    }
-                }
-            }
-            if(CanQ && RMenu.ComboQ.Enabled)
-            {
-                if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange() + 200)
-                {
-                    if (afteraa || target.DistanceToPlayer() > Player.GetRealAutoAttackRange() + 30 || onaa)
-                    {
-                        if (onaa)
-                        {
-                            DelayAction.Add(RMenu.Qdelayslider.Value - Game.Ping, () => {
-                                Q.CastOnUnit(target);
-                                if (target.InAutoAttackRange())
-                                {
-                                    Orbwalker.Attack(target);
-                                }
-                            });
-                        }
-                        if (target.DistanceToPlayer() > Player.GetRealAutoAttackRange() + 30)
-                        {
-                            Q.CastOnUnit(target);
-                            if (target.InAutoAttackRange())
-                            {
-                                Orbwalker.Attack(target);
-                            }
-                        }
-                        if (afteraa)
-                        {
-                            Q.CastOnUnit(target);
-                            if (target.InAutoAttackRange())
-                            {
-                                Orbwalker.Attack(target);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        public static void FastCombo(AIHeroClient target)
-        {
-
-        }*/
-        #endregion
-        public static bool CanQ = false;
-        public static bool CanW = false;
-        public static bool CanE = false;
-        public static bool CanR = false;
-        public static bool CanTiamat = false;
-        public static bool CanTiamatW = false;
-        public static bool CanTiamatR2 = false;
-        public static bool CanER1Q = false;
-        public static bool CanR2Q = false;
-        public static bool CanR2AA = false;
+        }       
     }
 }

@@ -518,7 +518,7 @@ namespace DominationAIO.Champions
                     W.DelayPosCast(target.Position, 100);
                     if (Q.IsReady())
                     {
-                        Q.DelayTargetCast(target, 205);
+                        Q.DelayPosCast(target.Position, 205);
                     }
                 }
                 else if (R.IsReady() && E.IsReady() && W.IsReady() && Q.IsReady() &&
@@ -526,7 +526,7 @@ namespace DominationAIO.Champions
                 {
                     E.Cast(target.Position);
                     R.DelayPosCast(target.Position, 1);
-                    Q.DelayTargetCast(target, 150);
+                    Q.DelayPosCast(target.Position, 150);
                     W.DelayPosCast(target.Position, 160);
                 }
                 else if (fl.IsReady()
@@ -548,7 +548,7 @@ namespace DominationAIO.Champions
 
                     if (Q.IsReady())
                     {
-                        Q.DelayTargetCast(target, 285);
+                        Q.DelayPosCast(target.Position, 285);
                     }
                 }
                 else if (fl.IsReady()
@@ -569,7 +569,7 @@ namespace DominationAIO.Champions
                     });
                     if (Q.IsReady())
                     {
-                        Q.DelayTargetCast(target, 285);
+                        Q.DelayPosCast(target.Position, 285);
                     }
                 }
             }
@@ -634,54 +634,58 @@ namespace DominationAIO.Champions
                 {
                     if (R1() && MenuRiven.RSettings.R1.Enabled)
                     {
-                        if (Q.IsReady() && target.IsValidTarget(Q.Range) && MenuRiven.QSettings.Qcombo.Enabled)
-                        {
-                            if (afteraa)
-                            {
-                                Q.DelayTargetCast(target);
-                            }
-                            if (!target.InAutoAttackRange() && Variables.TickCount - lastQcast > 700)
-                            {
-                                Q.DelayTargetCast(target);
-                            }
-                        }
-
-                        if (W.IsReady() && target.IsValidTarget(W.Range) && MenuRiven.WSettings.Wcombo.Enabled)
-                        {
-                            if (!Orbwalker.CanAttack())
-                            {
-                                W.DelayPosCast(target.Position);
-                            }
-
-                            if (Variables.TickCount - lastQcast > 500 && Player.IsDashing())
-                            {
-                                W.DelayPosCast(target.Position);
-                            }
-
-                            if (target.InAutoAttackRange() && afteraa)
-                            {
-                                W.DelayPosCast(target.Position);
-                            }
-
-                            if (target.IsDashing() && target.IsValidTarget(W.Range))
-                            {
-                                W.DelayPosCast(target.Position);
-                            }
-                        }
-
-                        if (E.IsReady() && target.IsValidTarget(E.Range))
-                        {
-                            if (W.IsReady() ? !target.IsValidTarget(W.Range) : !target.InAutoAttackRange())
-                            {
-                                E.DelayPosCast(target.Position);
-                            }
-                        }
+                        
 
                         if (E.IsReady() && Q.IsReady())
                         {
                             E.Cast(target.Position);
                             R.DelayPosCast(target.Position, 1);
                             Q.DelayTargetCast(target, 200);
+                        }
+                        else
+                        {
+                            if (Q.IsReady() && target.IsValidTarget(Q.Range) && MenuRiven.QSettings.Qcombo.Enabled)
+                            {
+                                if (afteraa)
+                                {
+                                    Q.DelayTargetCast(target);
+                                }
+                                if (!target.InAutoAttackRange() && Variables.TickCount - lastQcast > 700)
+                                {
+                                    Q.DelayTargetCast(target);
+                                }
+                            }
+
+                            if (W.IsReady() && target.IsValidTarget(W.Range) && MenuRiven.WSettings.Wcombo.Enabled)
+                            {
+                                if (!Orbwalker.CanAttack())
+                                {
+                                    W.DelayPosCast(target.Position);
+                                }
+
+                                if (Variables.TickCount - lastQcast > 500 && Player.IsDashing())
+                                {
+                                    W.DelayPosCast(target.Position);
+                                }
+
+                                if (afteraa)
+                                {
+                                    W.DelayPosCast(target.Position);
+                                }
+
+                                if (target.IsDashing() && target.IsValidTarget(W.Range))
+                                {
+                                    W.DelayPosCast(target.Position);
+                                }
+                            }
+
+                            if (E.IsReady() && target.IsValidTarget(E.Range))
+                            {
+                                if (W.IsReady() ? !target.IsValidTarget(W.Range) : !target.InAutoAttackRange())
+                                {
+                                    E.DelayPosCast(target.Position);
+                                }
+                            }
                         }
 
                         if(!E.IsReady() && !Q.IsReady())
@@ -715,7 +719,7 @@ namespace DominationAIO.Champions
                                 W.DelayPosCast(target.Position);
                             }
 
-                            if (target.InAutoAttackRange() && afteraa)
+                            if (afteraa)
                             {
                                 W.DelayPosCast(target.Position);
                             }
@@ -734,19 +738,19 @@ namespace DominationAIO.Champions
                             }
                         }
 
-                        if (target.Health <= R.GetDamage(target) && R.GetPrediction(target).Hitchance >= HitChance.High)
+                        if (target.Health <= R.GetDamage(target))
                         {
-                            R.DelayPosCast(R.GetPrediction(target).CastPosition);
+                            R.DelayTargetCast(target, 1);
                         }
 
-                        if (Q.IsReady() && target.InAutoAttackRange())
+                        if (Q.IsReady() && R.IsReady() &&target.IsValidTarget(Q.Range) && !onaa && Variables.TickCount - lastQcast > 700)
                         {
                             if (target.Health <= R.GetDamage(target) + Q.GetDamage(target) + Player.GetAutoAttackDamage(target))
                             {
                                 if (E.IsReady())
-                                    E.Cast(target.Position);
-                                R.DelayPosCast(R.GetPrediction(target).CastPosition, 1);
-                                Q.DelayTargetCast(target, 150);
+                                    E.DelayPosCast(target.Position);
+                                R.DelayTargetCast(target, 1);
+                                Q.DelayPosCast(target.Position, 150);
                             }
                         }
 
@@ -763,6 +767,7 @@ namespace DominationAIO.Champions
                             if (target.Health <= R.GetDamage(target) + W.GetDamage(target))
                             {
                                 R.DelayPosCast(R.GetPrediction(target).CastPosition);
+                                W.DelayPosCast(target.Position, 1);
                             }
                         }
                     }

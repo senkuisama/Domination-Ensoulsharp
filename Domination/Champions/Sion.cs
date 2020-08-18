@@ -34,7 +34,7 @@ namespace DominationAIO.Champions
 
                 if(target == null || target.IsVisible)
                 {
-                    target = TargetSelector.GetTarget(2000);
+                    target = TargetSelector.GetTarget(2000, DamageType.Physical);
                 }
 
                 if (target == null) return;

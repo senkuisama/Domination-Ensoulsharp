@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharpDX;
 
 namespace DominationAIO.Champions
 {
@@ -30,6 +31,7 @@ namespace DominationAIO.Champions
             public static MenuBool Qcombo = new MenuBool("Qcombo", "Q Combo");
             public static MenuBool QPassive = new MenuBool("QPassive", "----> Use Q When have Passive", false);
             public static MenuBool Qks = new MenuBool("Qks", "Use Q in KS");
+            public static MenuBool MoveQ = new MenuBool("MoveQ", "Mvoe After Q");
         }
         public class WSettings
         {
@@ -110,6 +112,7 @@ namespace DominationAIO.Champions
             Qmenu.Add(AkaliMenu.QSettings.Qcombo);
             Qmenu.Add(AkaliMenu.QSettings.QPassive);
             Qmenu.Add(AkaliMenu.QSettings.Qks);
+            Qmenu.Add(AkaliMenu.QSettings.MoveQ);
 
             Wmenu.Add(AkaliMenu.WSettings.Wcombo);
             Wmenu.Add(AkaliMenu.WSettings.Wmana);
@@ -147,8 +150,22 @@ namespace DominationAIO.Champions
             //
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
+            Orbwalker.OnAction += Orbwalker_OnAction;
 
             AIHeroClient.OnAggro += AIHeroClient_OnAggro;
+        }
+
+        public static bool OnAttack = false;
+        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        {
+            if(args.Type == OrbwalkerType.OnAttack)
+            {
+                OnAttack = true;
+            }
+            else
+            {
+                OnAttack = false;
+            }
         }
 
         public static bool CanUseQNow = false;
@@ -179,7 +196,7 @@ namespace DominationAIO.Champions
                 isE = false;
                 isR = false;
             }
-            if(Variables.TickCount - Last_Q > 2000)
+            if(Variables.TickCount - Last_Q > 2500)
             {
                 isQ = false;
             }
@@ -223,12 +240,12 @@ namespace DominationAIO.Champions
             }
 
 
-            if(Variables.TickCount - TimeCast > 2000)
+            if(Variables.TickCount - TimeCast > 2500)
             {
                 CastedAndHit = false;
             }
 
-            if (Variables.TickCount - TimeCast < 2000 && Player.HavePassive())
+            if (Variables.TickCount - TimeCast < 2500 && Player.HavePassive())
             {
                 CastedAndHit = false;
             }
@@ -241,10 +258,15 @@ namespace DominationAIO.Champions
             {
                 CanUseQNow = false;
             }
+
+            if (Player.HavePassive() && OnAttack)
+            {
+                CanUseQNow = true;
+            }
         }
 
         private static void AIHeroClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
-        {
+        {            
             if (sender.IsMe)
             {
                 if(args.SData.Name == "AkaliQ" || args.SData.Name.ToString().Contains("AkaliQ"))
@@ -272,8 +294,7 @@ namespace DominationAIO.Champions
 
             CheckAll();
 
-
-           
+            KS();
 
             switch (Orbwalker.ActiveMode)
             {
@@ -301,18 +322,50 @@ namespace DominationAIO.Champions
             }
         }
 
+        private static void KS()
+        {
+            var targets = TargetSelector.GetTargets(R.IsReady() ? 750 : 500);
+
+            if (targets == null) return;
+
+            foreach(var target in targets)
+            {
+                if (target == null) return;
+
+                if(target.Health <= Q.GetDamage(target) && Q.IsReady() && !Player.IsDashing() && target.IsValidTarget(500))
+                {
+                    Q.Cast(target);
+                }
+                if(target.Health <= R.GetDamage(target) && R.IsReady() && target.IsValidTarget(R.Name == "AkaliRb" ? R2.Range : R.Range))
+                {
+                    if (R.Name == "AkaliRb")
+                    {
+                        R2.Cast(target);
+                    }
+                    else
+                    {
+                        R2.Cast(target);
+                    }
+                }
+            }
+        }
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range);
+            var target = TargetSelector.GetTarget(R.IsReady() ? 750 : 600, DamageType.Magical);
 
             if (target != null)
-            {                
-                if (Q.IsReady() && CanUseQNow == true)
+            {
+                if (Variables.TickCount - TimeCast < 800 && target.IsValidTarget(560) && !Player.HavePassive() && AkaliMenu.QSettings.MoveQ.Enabled)
+                {
+                    Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +560));
+                }
+
+                if (Q.IsReady() && CanUseQNow == true && Q.GetPrediction(target).CastPosition.DistanceToPlayer() <= Q.Range)
                 {
                     if (!W.IsReady())
                     {
                         if (!Player.IsDashing() && Variables.TickCount - Last_E > 700 && Variables.TickCount - Last_R > 700)
-                            Q.Cast(target);
+                                Q.Cast(Q.GetPrediction(target).CastPosition);                        
                     }
                     else
                     {
@@ -320,8 +373,9 @@ namespace DominationAIO.Champions
                         {
                             if (target.IsValidTarget(Q.Range) && !Player.IsDashing() && Variables.TickCount - Last_E > 700 && Variables.TickCount - Last_R > 700)
                             {
-                                Q.Cast(target);
-                                W.Cast(Player.Position);
+                                Q.Cast(Q.GetPrediction(target).CastPosition);
+                                if(!Player.IsDashing())
+                                    W.Cast(target.Position);
                             }
                                 
                         }
@@ -331,7 +385,8 @@ namespace DominationAIO.Champions
 
                 if(W.IsReady() && AkaliMenu.WSettings.TargetCount.Enabled && Player.CountEnemyHeroesInRange(AkaliMenu.WSettings.TargetCount.Value) > 1)
                 {
-                    W.Cast(Player.Position);
+                    if(!Player.IsDashing())
+                        W.Cast(Player.Position);
                 }
 
                 if(Q.IsReady() && Player.Mana > 150 && Player.HealthPercent > 50)
@@ -353,13 +408,13 @@ namespace DominationAIO.Champions
                             }                               
                         }
                         
-                        if(E.Name == "AkaliEb")
+                        if(E.Name == "AkaliEb" && GameObjects.EnemyHeroes.Any(i => i.HasBuff("AkaliEMis")))
                         {
                             E.Cast(E.GetPrediction(target).CastPosition);
 
                             if (target.IsValidTarget(300))
                             {
-                                W.Cast(Player.Position);
+                                W.Cast(target.Position);
                             }
                         }
                     }
@@ -420,7 +475,7 @@ namespace DominationAIO.Champions
 
                 if (R.IsReady())
                 {
-                    if(target.Health <= R.GetDamage(target) + (39 + 15 * Player.Level))
+                    if(target.Health <= R.GetDamage(target) + (39 + 15 * Player.Level) + (Q.IsReady() ? Q.GetDamage(target) : 0))
                     {
                         if(R.Name == "AkaliRb")
                         {
@@ -432,11 +487,11 @@ namespace DominationAIO.Champions
                         }
                     }
                 }
-                if (Q.IsReady())
+                if (Q.IsReady() && Player.IsDashing() && Q.GetPrediction(target).CastPosition.DistanceToPlayer() <= Q.Range)
                 {
                     if(target.Health <= Q.GetDamage(target) + (39 + 15 * Player.Level))
                     {
-                        Q.Cast(target);
+                        Q.Cast(Q.GetPrediction(target).CastPosition);
                     }
                 }
             }           
@@ -444,7 +499,16 @@ namespace DominationAIO.Champions
 
         private static void Clear()
         {
+            var target = TargetSelector.GetTarget(500, DamageType.Magical);
 
+            if(target != null && Q.IsReady() && !Player.HavePassive() &&
+
+                ObjectManager.Get<AITurretClient>()
+                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(Player.Position) < 850 + ObjectManager.Player.BoundingRadius))
+                )
+            {
+                Q.Cast(target.Position);
+            }
         }
     }
 }

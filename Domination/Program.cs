@@ -60,6 +60,11 @@ namespace DominationAIO
                         Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;
+                    case "Akali":
+                        Akali.OnLoad();
+                        Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                        break;
                     default:
                         Game.Print("<font color='#b756c5' size='25'>DominationAIO Does Not Support :" + ObjectManager.Player.CharacterName+ "</font>");
                         Console.WriteLine("DominationAIO Does Not Support " + ObjectManager.Player.CharacterName);

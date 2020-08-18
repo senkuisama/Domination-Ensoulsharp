@@ -111,6 +111,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Akali.cs" />
     <Compile Include="Champions\Sion.cs" />
     <Compile Include="Champions\GangPlank\Barrel.cs" />
     <Compile Include="Champions\GangPlank\Config.cs" />

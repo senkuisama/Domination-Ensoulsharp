@@ -40,7 +40,7 @@ namespace DominationAIO.Champions
                 if (target == null) return;
 
 
-                if (!Activated.Enabled) return;
+                if (!Activated.Enabled && Orbwalker.ActiveMode != OrbwalkerMode.Combo) return;
                 else
                 ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, target);
 

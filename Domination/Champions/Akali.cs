@@ -31,7 +31,7 @@ namespace DominationAIO.Champions
             public static MenuBool Qcombo = new MenuBool("Qcombo", "Q Combo");
             public static MenuBool QPassive = new MenuBool("QPassive", "----> Use Q When have Passive", false);
             public static MenuBool Qks = new MenuBool("Qks", "Use Q in KS");
-            public static MenuBool MoveQ = new MenuBool("MoveQ", "Mvoe After Q");
+            public static MenuSliderButton MoveQ = new MenuSliderButton("MoveQ", "Move After Q (ms)", 1000, 0, 2000);
         }
         public class WSettings
         {
@@ -355,9 +355,18 @@ namespace DominationAIO.Champions
 
             if (target != null)
             {
-                if (Variables.TickCount - TimeCast < 800 && target.IsValidTarget(560) && !Player.HavePassive() && AkaliMenu.QSettings.MoveQ.Enabled)
+                if (Variables.TickCount - TimeCast <= AkaliMenu.QSettings.MoveQ.Value && target.IsValidTarget(570) && !Player.HavePassive() && AkaliMenu.QSettings.MoveQ.Enabled &&
+
+                !ObjectManager.Get<AITurretClient>()
+                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(target.Position.Extend(Player.Position, +570)) < 850 + ObjectManager.Player.BoundingRadius)))
                 {
-                    Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +560));
+                    Orbwalker.AttackState = false;
+                    Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +570));
+                    //Orbwalker.Move(target.Position.Extend(Player.Position, +560));
+                }
+                else
+                {
+                    Orbwalker.AttackState = true;
                 }
 
                 if (Q.IsReady() && CanUseQNow == true && Q.GetPrediction(target).CastPosition.DistanceToPlayer() <= Q.Range)
@@ -395,6 +404,7 @@ namespace DominationAIO.Champions
                 }
                 else
                 {
+                    var Epred = E.GetPrediction(target, false, -1, CollisionObjects.Minions | CollisionObjects.YasuoWall);
                     if (W.IsReady() && E.IsReady() && Player.Mana - E.Mana <= Q.Mana)
                     {
                         if(E.Name == "AkaliE")
@@ -403,14 +413,14 @@ namespace DominationAIO.Champions
 
                             if (CanUseQNow == true)
                             {
-                                E.Cast(E.GetPrediction(target).CastPosition);
-                                DelayAction.Add(1, () => { W.Cast(E.GetPrediction(target).CastPosition); });
+                                E.Cast(Epred.CastPosition);
+                                DelayAction.Add(1, () => { W.Cast(Epred.CastPosition); });
                             }                               
                         }
                         
                         if(E.Name == "AkaliEb" && GameObjects.EnemyHeroes.Any(i => i.HasBuff("AkaliEMis")))
                         {
-                            E.Cast(E.GetPrediction(target).CastPosition);
+                            E.Cast(Epred.CastPosition);
 
                             if (target.IsValidTarget(300))
                             {
@@ -436,7 +446,7 @@ namespace DominationAIO.Champions
                                 if (CanUseQNow == true)
                                     if (Variables.TickCount - Last_Q > 700)
                                     {
-                                        E.Cast(E.GetPrediction(target).CastPosition);
+                                        E.Cast(Epred.CastPosition);
                                     }
                             }
                         }
@@ -446,7 +456,7 @@ namespace DominationAIO.Champions
                             {
                                 if (Variables.TickCount - Last_Q > 700)
                                 {
-                                    E.Cast(E.GetPrediction(target).CastPosition);
+                                    E.Cast(Epred.CastPosition);
                                 }
                             }
                         }
@@ -467,7 +477,7 @@ namespace DominationAIO.Champions
                         }                       
                     }
 
-                    if(R.Name == "AkaliR" && CanUseQNow && Variables.TickCount - Last_Q > 700)
+                    if(R.Name == "AkaliR" && Variables.TickCount - Last_Q > 700)
                     {
                         R.Cast(target);
                     }
@@ -503,11 +513,23 @@ namespace DominationAIO.Champions
 
             if(target != null && Q.IsReady() && !Player.HavePassive() &&
 
-                ObjectManager.Get<AITurretClient>()
+                !ObjectManager.Get<AITurretClient>()
                     .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(Player.Position) < 850 + ObjectManager.Player.BoundingRadius))
                 )
             {
                 Q.Cast(target.Position);
+            }
+
+            var minions = GameObjects.GetMinions(500);
+
+            if (minions.Any())
+            {
+                var Qfarm = Q.GetLineFarmLocation(minions);
+
+                if (Qfarm.Position.IsValid() && AkaliMenu.ClearSettings.useQ.Enabled && AkaliMenu.ClearSettings.ClearMana.Value < Player.Mana)
+                {
+                    Q.Cast(Qfarm.Position);
+                }
             }
         }
     }

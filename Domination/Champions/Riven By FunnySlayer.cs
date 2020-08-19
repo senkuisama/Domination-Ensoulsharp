@@ -201,7 +201,7 @@ namespace DominationAIO.Champions
 
         private static Vector3 MovePos(Vector3 Startpos)
         {
-            return ObjectManager.Player.Position.Extend(Startpos, -300);
+            return ObjectManager.Player.Position.Extend(Startpos, 300);
         }
 
         private static void Drawing_OnDraw(EventArgs args)

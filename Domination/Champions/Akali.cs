@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharpDX;
+using System.Drawing;
 
 namespace DominationAIO.Champions
 {
@@ -153,18 +154,32 @@ namespace DominationAIO.Champions
             Orbwalker.OnAction += Orbwalker_OnAction;
 
             AIHeroClient.OnAggro += AIHeroClient_OnAggro;
+
+            Drawing.OnDraw += Drawing_OnDraw;
         }
 
-        public static bool OnAttack = false;
-        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        private static void Drawing_OnDraw(EventArgs args)
         {
-            if(args.Type == OrbwalkerType.OnAttack)
+            if (Player.HavePassive())
             {
-                OnAttack = true;
+                Drawing.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
             }
             else
             {
-                OnAttack = false;
+                Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
+            }           
+        }
+
+        public static bool BeforeAttack = false;
+        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        {
+            if(args.Type == OrbwalkerType.BeforeAttack)
+            {
+                BeforeAttack = true;
+            }
+            else
+            {
+                BeforeAttack = false;
             }
         }
 
@@ -259,7 +274,7 @@ namespace DominationAIO.Champions
                 CanUseQNow = false;
             }
 
-            if (Player.HavePassive() && OnAttack)
+            if (Player.HavePassive() && BeforeAttack)
             {
                 CanUseQNow = true;
             }
@@ -349,6 +364,7 @@ namespace DominationAIO.Champions
                 }
             }
         }
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(R.IsReady() ? 750 : 600, DamageType.Magical);
@@ -358,11 +374,15 @@ namespace DominationAIO.Champions
                 if (Variables.TickCount - TimeCast <= AkaliMenu.QSettings.MoveQ.Value && target.IsValidTarget(570) && !Player.HavePassive() && AkaliMenu.QSettings.MoveQ.Enabled &&
 
                 !ObjectManager.Get<AITurretClient>()
-                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(target.Position.Extend(Player.Position, +570)) < 850 + ObjectManager.Player.BoundingRadius)))
+                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(target.Position.Extend(Player.Position, +570)) < 850 + ObjectManager.Player.BoundingRadius))
+                    
+                    && !target.Position.Extend(Player.Position, +570).IsWall()
+                    && !target.Position.Extend(Player.Position, +570).IsBuilding()
+                    && target.Position.Extend(Player.Position, +570).IsValid()
+                    )
                 {
                     Orbwalker.AttackState = false;
-                    Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +570));
-                    //Orbwalker.Move(target.Position.Extend(Player.Position, +560));
+                    Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +600));
                 }
                 else
                 {

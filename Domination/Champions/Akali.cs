@@ -91,8 +91,8 @@ namespace DominationAIO.Champions
             W = new Spell(SpellSlot.W, 250);
             W.SetSkillshot(0.3f, 350f, 1200f, false, SkillshotType.Circle);
 
-            E = new Spell(SpellSlot.E, 825);
-            E.SetSkillshot(0.25f, 70f, 1200, true, SkillshotType.Line);
+            E = new Spell(SpellSlot.E, 800);
+            E.SetSkillshot(0.25f, 100f, 800, true, false,  SkillshotType.Line, HitChance.High);
 
             R = new Spell(SpellSlot.R, 675);
             R.SetTargetted(0.3f, float.MaxValue);
@@ -167,7 +167,14 @@ namespace DominationAIO.Champions
             else
             {
                 Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
-            }           
+            }
+
+            var target = Orbwalker.GetTarget() as AIHeroClient;
+
+            if(target != null && target is AIHeroClient && target.IsVisibleOnScreen)
+            {
+                Drawing.DrawCircle(target.Position, 70, System.Drawing.Color.Gold);
+            }
         }
 
         public static bool BeforeAttack = false;
@@ -265,7 +272,7 @@ namespace DominationAIO.Champions
                 CastedAndHit = false;
             }
 
-            if (CastedAndHit == false && !Player.HavePassive())
+            if (CastedAndHit == false && !Player.HavePassive() && Variables.TickCount - Last_E >= 800)
             {
                 CanUseQNow = true;
             }
@@ -274,7 +281,7 @@ namespace DominationAIO.Champions
                 CanUseQNow = false;
             }
 
-            if (Player.HavePassive() && BeforeAttack)
+            if (Player.HavePassive() && BeforeAttack && Variables.TickCount - Last_E >= 800)
             {
                 CanUseQNow = true;
             }
@@ -367,9 +374,19 @@ namespace DominationAIO.Champions
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(R.IsReady() ? 750 : 600, DamageType.Magical);
+            var target = TargetSelector.SelectedTarget;
 
-            if (target != null)
+            if(target == null || !target.IsValidTarget(750))
+            {
+                target = TargetSelector.GetTarget(R.IsReady() ? 750 : 600, DamageType.Magical);
+            }
+
+            if(target == null || target.InAutoAttackRange())
+            {
+                target = Orbwalker.GetTarget() as AIHeroClient;
+            }
+
+            if (target != null && target is AIHeroClient)
             {
                 if (Variables.TickCount - TimeCast <= AkaliMenu.QSettings.MoveQ.Value && target.IsValidTarget(570) && !Player.HavePassive() && AkaliMenu.QSettings.MoveQ.Enabled &&
 
@@ -418,7 +435,7 @@ namespace DominationAIO.Champions
                         W.Cast(Player.Position);
                 }
 
-                if(Q.IsReady() && Player.Mana > 150 && Player.HealthPercent > 50)
+                if(Q.IsReady() && Player.Mana > 150 && Player.HealthPercent > 80)
                 {
 
                 }

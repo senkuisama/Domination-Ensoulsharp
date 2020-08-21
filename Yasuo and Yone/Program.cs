@@ -2760,11 +2760,19 @@ namespace ConsoleApp
             {
                 Game.Print("Shadow Undetected");
             }*/
+
+
             QCombo(target);
             WCombo(target);
             ECombo(target);
 
-            if (R.IsReady() && YoneMenu.Rcombo.Combo_Rcombo.Enabled)
+            Rcombo(target);
+            
+        }
+
+        private static void Rcombo(AIBaseClient target)
+        {
+            try
             {
                 var targets = TargetSelector.GetTargets(1000);
                 Vector3 Rpos = Vector3.Zero;
@@ -2778,6 +2786,10 @@ namespace ConsoleApp
                 {
                     R.Cast(Rpos);
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("R.cast Error" + ex);
             }
         }
         

@@ -2599,6 +2599,11 @@ namespace ConsoleApp
             {
                 Drawing.DrawCircle(EShadowPos(), 70, Color.SkyBlue);
             }
+
+            if(Orbwalker.GetTarget() != null && Orbwalker.GetTarget() is AIHeroClient && Orbwalker.GetTarget().IsVisibleOnScreen)
+            {
+                Drawing.DrawCircle(Orbwalker.GetTarget().Position, 70, Color.Gold);
+            }
         }
 
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
@@ -2747,8 +2752,19 @@ namespace ConsoleApp
 
         private static void Yone_Combo()
         {
-            var target = TargetSelector.GetTarget(5000);
-            if (target == null) return;
+            var target = TargetSelector.SelectedTarget;
+
+            if (target == null || !target.IsValidTarget(750))
+            {
+                target = TargetSelector.GetTarget(2000, DamageType.Physical);
+            }
+
+            if (target == null || target.InAutoAttackRange())
+            {
+                target = Orbwalker.GetTarget() as AIHeroClient;
+            }
+
+            if (target == null || !(target is AIHeroClient)) return;
 
             /*if(isE2())
             if(EShadowPos() != Vector3.Zero)
@@ -2778,7 +2794,7 @@ namespace ConsoleApp
                 Vector3 Rpos = Vector3.Zero;
 
                 if (!targets.Any()) return;
-                foreach (var Rprediction in targets.Select(i => R.GetPrediction(i)).Where(i => (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount >= YoneMenu.Rcombo.Combo_Rhitcount)).OrderByDescending(i => i.AoeTargetsHitCount))
+                foreach (var Rprediction in targets.Select(i => R.GetPrediction(i)).Where(i => (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount >= YoneMenu.Rcombo.Combo_Rhitcount.ActiveValue)).OrderByDescending(i => i.AoeTargetsHitCount))
                 {
                     Rpos = Rprediction.CastPosition;
                 }

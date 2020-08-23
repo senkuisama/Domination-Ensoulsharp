@@ -374,7 +374,7 @@ namespace ConsoleApp
         #endregion
 
         private static AIHeroClient objPlayer = ObjectManager.Player;
-        private static Menu YasuoTheMenu;
+        private static Menu YasuoTheMenu = new Menu("Yasuo God Like", "Yasuo God Like", true);
         public static Menu EvadeSkillshotMenu = new Menu("EvadeSkillshot", "Evade Skillshot");
         public static bool isYasuoDashing = false;
         public static bool baa = false;
@@ -418,8 +418,7 @@ namespace ConsoleApp
             animemenu.Add(new MenuSeparator(Name, 
                 "__________________ " + Name + " __________________"))
                 .Permashow(true, Name, SharpDX.Color.Azure);
-
-            YasuoTheMenu = new Menu("Yasuo God Like", "Yasuo God Like", true);
+            
             YasuoTheMenu.Add(YasuoMenu.ChatWibu);
 
             if (YasuoMenu.ChatWibu.Enabled)
@@ -430,19 +429,7 @@ namespace ConsoleApp
                 else Game.Say("-   FunnySlayer   - God Like is Playing", true);
                 YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
             }
-
-            YasuoMenu.ChatWibu.ValueChanged += (sender, e) => {
-
-                if (YasuoMenu.ChatWibu.Enabled) {
-
-                    if (Name != "FunnySlayer")
-                        Game.Say(Name + " is playing this game", true);
-
-                    else Game.Say("-   FunnySlayer   - God Like is Playing", true);
-                    YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
-                }
-            };
-
+           
             YasuoTheMenu.Add(animemenu);            
 
             var SkillRange = new Menu("SkillRange", "Yasuo Skill Range");
@@ -513,6 +500,7 @@ namespace ConsoleApp
             YasuoTheMenu.Add(yskeys);
 
             YasuoTheMenu.Add(YasuoMenu.UseExploit).Permashow();
+            YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
 
             YasuoTheMenu.Attach();
 
@@ -536,6 +524,19 @@ namespace ConsoleApp
             Orbwalker.OnAction += Orbwalker_OnAction;
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnPlayAnimation += AIHeroClient_OnPlayAnimation;
+
+            YasuoMenu.ChatWibu.ValueChanged += (sender, e) => {
+
+                if (YasuoMenu.ChatWibu.Enabled)
+                {
+
+                    if (Name != "FunnySlayer")
+                        Game.Say(Name + " is playing this game", true);
+
+                    else Game.Say("-   FunnySlayer   - God Like is Playing", true);
+                    YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
+                }
+            };
         }
         #endregion
 
@@ -545,7 +546,11 @@ namespace ConsoleApp
         {
             if (sender.IsMe && args.Animation == "Spell3")
             {
-                isYasuoDashing = true;
+                isYasuoDashing = true;               
+            }
+
+            if (isYasuoDashing)
+            {
                 if (YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active && Q.IsReady(0))
                 {
                     foreach (var target in GameObjects.EnemyHeroes.Where(i => !i.IsDead && !i.IsAlly && i.IsVisible && i.IsValidTarget(600)))
@@ -568,7 +573,7 @@ namespace ConsoleApp
                         Q.Cast(PosExploit());
                     }
                 }
-            }           
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)

@@ -399,10 +399,12 @@ namespace DominationAIO.Champions
                     )
                 {
                     Orbwalker.AttackState = false;
-                    Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +600));
+                    Orbwalker.SetOrbwalkerPosition(target.Position.Extend(Player.Position, +600));
+                    //Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +600));
                 }
                 else
                 {
+                    Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
                     Orbwalker.AttackState = true;
                 }
 

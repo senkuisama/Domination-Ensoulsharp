@@ -35,7 +35,7 @@ namespace DominationAIO.Champions
 
     public class WEzSettings
     {
-        public static readonly MenuBool Wcombo = new MenuBool("Wcombo", "Wcombo");
+        public static readonly MenuBool Wcombo = new MenuBool("Wcombo", "W Combo");
         public static readonly MenuBool WClear = new MenuBool("WClear", "W Clear");
         public static readonly MenuBool BeforeAA = new MenuBool("BeforeAA", "Before AA");
     }

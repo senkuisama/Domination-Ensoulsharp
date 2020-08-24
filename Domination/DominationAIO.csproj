@@ -112,6 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Akali.cs" />
+    <Compile Include="Champions\Ezreal.cs" />
     <Compile Include="Champions\Sion.cs" />
     <Compile Include="Champions\GangPlank\Barrel.cs" />
     <Compile Include="Champions\GangPlank\Config.cs" />
@@ -200,6 +201,24 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SPrediction\AIHeroClientExtensions.cs" />
+    <Compile Include="SPrediction\ArcPrediction.cs" />
+    <Compile Include="SPrediction\CirclePrediction.cs" />
+    <Compile Include="SPrediction\ClipperWrapper.cs" />
+    <Compile Include="SPrediction\Collision.cs" />
+    <Compile Include="SPrediction\ConePrediction.cs" />
+    <Compile Include="SPrediction\ConfigMenu.cs" />
+    <Compile Include="SPrediction\Drawings.cs" />
+    <Compile Include="SPrediction\Geometry.cs" />
+    <Compile Include="SPrediction\LinePrediction.cs" />
+    <Compile Include="SPrediction\MinionManager.cs" />
+    <Compile Include="SPrediction\PathTracker.cs" />
+    <Compile Include="SPrediction\Prediction.cs" />
+    <Compile Include="SPrediction\RingPrediction.cs" />
+    <Compile Include="SPrediction\SpellExtensions.cs" />
+    <Compile Include="SPrediction\StasisPrediction.cs" />
+    <Compile Include="SPrediction\Utility.cs" />
+    <Compile Include="SPrediction\VectorPrediction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

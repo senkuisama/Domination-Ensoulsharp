@@ -1,18 +1,53 @@
 using System;
+using System.Net;
+using System.Diagnostics;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 using DominationAIO.Champions;
+using System.Threading.Tasks;
 
 namespace DominationAIO
 {
-    public static class Program
+    public class Program
     {
-        public static void Main(string[] args)
+        /*public async Task Updater()
         {
+            var client = new WebClient();
+            try
+            {
+                await client.DownloadFileTaskAsync("", "");
+                Console.WriteLine("Downloaded");                
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error When Downloading");
+            }
+        }*/
+
+        public static void Main(string[] args)
+        {           
             GameEvent.OnGameLoad += OnLoadingComplete;
         }
         private static void OnLoadingComplete()
         {
+            /*try
+            {
+                new Program().Updater().Wait();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error When Updating");
+            }
+
+            try
+            {
+                Process.Start("");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error When Starting");
+            }*/
+
             try
             {
                 Hacks.DisableAntiDisconnect = true;
@@ -62,6 +97,11 @@ namespace DominationAIO
                         break;
                     case "Akali":
                         Akali.OnLoad();
+                        Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                        break;
+                    case "Ezreal":
+                        Ezreal.Ezreal_Load();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;

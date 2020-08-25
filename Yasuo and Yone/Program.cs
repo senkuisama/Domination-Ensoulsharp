@@ -1954,7 +1954,8 @@ namespace ConsoleApp
 
         private static void LogicEZicZac(AIBaseClient target)
         {
-            if (target == null || target.IsValidTarget(1000)) return;
+            if (target == null || !target.IsValidTarget(1000)) return;
+
             if (!YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled) return;
 
             AIBaseClient obj1 = null;
@@ -1966,6 +1967,7 @@ namespace ConsoleApp
             AllObj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
 
             //set
+            if (AllObj.Count < 2) return;
             foreach(var aobj in AllObj)
             {
                 obj1 = aobj;

@@ -1954,6 +1954,9 @@ namespace ConsoleApp
 
         private static void LogicEZicZac(AIBaseClient target)
         {
+            // return if on auto attack
+            if (oaa || baa) return;
+
             if (target == null || !target.IsValidTarget(1000)) return;
 
             if (!YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled) return;
@@ -1993,14 +1996,14 @@ namespace ConsoleApp
                 var ziczacpos1 = PosAfterE(obj1).Extend(Epred(obj2), 475);
                 var ziczacpos2 = PosAfterE(obj2).Extend(Epred(obj1), 475);
 
-                if (ziczacpos1.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value)
+                if (ziczacpos1.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value || ziczacpos1.Distance(Epred(target)) < Epred(target).DistanceToPlayer())
                 {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || UnderTower(PosAfterE(obj1)))
+                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj1)))
                         E1.Cast(obj1);
                 }
-                if (ziczacpos2.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value)
+                if (ziczacpos2.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value || ziczacpos2.Distance(Epred(target)) < Epred(target).DistanceToPlayer())
                 {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || UnderTower(PosAfterE(obj2)))
+                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj2)))
                         E1.Cast(obj2);
                 }
             }           

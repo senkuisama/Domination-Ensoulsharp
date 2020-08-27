@@ -7,6 +7,7 @@ using EnsoulSharp.SDK.Utility;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms.VisualStyles;
 
@@ -52,6 +53,13 @@ namespace Template
             public static MenuBool Rcombo = new MenuBool("Rcombo", "R in Combo [Calculator Dmg]");
             public static MenuSlider Rheath = new MenuSlider("Rheath", "Target Heath", 60);
             public static MenuSlider Rhit = new MenuSlider("Rhit", "Hit Count", 2, 2, 5);
+        }
+
+        public class ClearSettings
+        {
+            public static MenuBool DrawMinions = new MenuBool("DrawMinions", "Draw On Minions");
+            public static MenuBool QireClear = new MenuBool("QireClear", "Q Clear");
+            public static MenuSlider QireMana = new MenuSlider("QireMana", "Min Mana to use : ", 40);
         }
         public class KeysSettings
         {
@@ -122,6 +130,13 @@ namespace Template
                 MenuSettings.RSettings.Rhit,
             };
 
+            Menu ClearMenu = new Menu("ClearMenu", "Clear Settings")
+            {
+                MenuSettings.ClearSettings.DrawMinions,
+                MenuSettings.ClearSettings.QireClear,
+                MenuSettings.ClearSettings.QireMana,
+            };
+
             Menu Keys = new Menu("Keys", "Keys");
             Keys.Add(MenuSettings.KeysSettings.TurretKey).Permashow();
             Keys.Add(MenuSettings.KeysSettings.FleeKey).Permashow();
@@ -132,6 +147,7 @@ namespace Template
             myMenu.Add(Wmenu);
             myMenu.Add(Emenu);
             myMenu.Add(Rmenu);
+            myMenu.Add(ClearMenu);
             myMenu.Add(Keys);
 
             myMenu.Attach();
@@ -139,22 +155,40 @@ namespace Template
             Game.OnUpdate += OnUpdate;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             AIHeroClient.OnBuffLose += AIHeroClient_OnBuffLose;
+            Drawing.OnDraw += Drawing_OnDraw;
         }
 
-        public static float sheenTimer;
+        public static float SheenTimer;
         private static void AIHeroClient_OnBuffLose(AIBaseClient sender, AIBaseClientBuffLoseEventArgs args)
         {
-            if(sender == objPlayer)
+            if (sender.IsAlly) Console.WriteLine(sender.CharacterName); else
             {
-                if(args.Buff.Name == "sheen" || args.Buff.Name == "TrinityForce")
-                {
-                    sheenTimer = Game.Time + 1.7f;
-                }
+                return;
+            }
+
+            if (sender.CharacterName != "Irelia") return;
+
+            if(args.Buff.Name == "sheen" || args.Buff.Name == "trinityforce")
+            {
+                SheenTimer = Variables.TickCount + 1500;
             }
         }
 
-        public static Vector3 ECatPos;
+        private static void Drawing_OnDraw(EventArgs args)
+        {
+            if (!MenuSettings.ClearSettings.DrawMinions.Enabled) return;
 
+            var minions = GameObjects.GetMinions(600).Where(i => CanQ(i)).ToList();
+
+            if (minions == null) return;
+
+            foreach(var min in minions)
+            {
+                Drawing.DrawCircle(min.Position, 70, System.Drawing.Color.Red);
+            }           
+        }
+
+        public static Vector3 ECatPos;
 
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
@@ -653,6 +687,9 @@ namespace Template
         }
         public static void Irelia_Clear()
         {
+            if (!MenuSettings.ClearSettings.QireClear.Enabled) return;
+            if (objPlayer.ManaPercent <= MenuSettings.ClearSettings.QireMana.Value) return;
+
             var mins = GameObjects.Get<AIMinionClient>().Where(i => i.Position.Distance(objPlayer.Position) <= 600 && !i.IsAlly && !i.IsDead && CanQ(i));
             if (!mins.Any()) return;
 
@@ -803,7 +840,7 @@ namespace Template
         }
 
         public static float[] QBaseDamage = { 0f, 5f, 25f, 45f, 65f, 85f };
-        public static float[] QBonusDamage = { 0f, 45f, 60f, 75f, 90f, 105f };
+        public static float[] QBonusDamage = { 0f, 55f, 75f, 95f, 115f, 135f };
 
         private static float PassiveDamage(AIBaseClient target)
         {
@@ -820,22 +857,27 @@ namespace Template
         {
             float damage = 0;
 
-            if (objPlayer.HasItem(ItemId.Sheen) && sheenTimer < Game.Time)
+            if (objPlayer.HasItem(ItemId.Sheen))
             {
                 var item = new Items.Item(ItemId.Sheen, 600);
-                if (item.IsReady && !objPlayer.HasBuff("sheen"))
+                if (item.IsReady || objPlayer.HasBuff("sheen"))
                 {
                     damage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, objPlayer.BaseAttackDamage);
                 }
             }
 
-            if (objPlayer.HasItem(ItemId.Trinity_Force) && sheenTimer < Game.Time)
+            if (objPlayer.HasItem(ItemId.Trinity_Force))
             {
                 var item = new Items.Item(ItemId.Trinity_Force, 600);
-                if (item.IsReady && !objPlayer.HasBuff("TrinityForce"))
+                if (item.IsReady || objPlayer.HasBuff("TrinityForce"))
                 {
-                    damage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, objPlayer.BaseAttackDamage) * 2f;
+                    damage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, objPlayer.BaseAttackDamage * 2f);
                 }
+            }
+
+            if(Variables.TickCount < SheenTimer)
+            {
+                damage = 0;
             }
 
             return damage;

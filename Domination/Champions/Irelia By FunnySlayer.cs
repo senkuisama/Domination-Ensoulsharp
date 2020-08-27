@@ -8,6 +8,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms.VisualStyles;
 
 namespace Template
 {
@@ -137,6 +138,19 @@ namespace Template
 
             Game.OnUpdate += OnUpdate;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+            AIHeroClient.OnBuffLose += AIHeroClient_OnBuffLose;
+        }
+
+        public static float sheenTimer;
+        private static void AIHeroClient_OnBuffLose(AIBaseClient sender, AIBaseClientBuffLoseEventArgs args)
+        {
+            if(sender == objPlayer)
+            {
+                if(args.Buff.Name == "sheen" || args.Buff.Name == "TrinityForce")
+                {
+                    sheenTimer = Game.Time + 1.7f;
+                }
+            }
         }
 
         public static Vector3 ECatPos;
@@ -787,7 +801,68 @@ namespace Template
                 }
             }
         }
-        private static double GetQDmg(AIBaseClient target)
+
+        public static float[] QBaseDamage = { 0f, 5f, 25f, 45f, 65f, 85f };
+        public static float[] QBonusDamage = { 0f, 45f, 60f, 75f, 90f, 105f };
+
+        private static float PassiveDamage(AIBaseClient target)
+        {
+            var ireliaPassiveDamage =
+                (3.235f                                      +
+                 0.765f * objPlayer.Level                    +
+                 0.04f * objPlayer.GetBonusPhysicalDamage()) *
+                objPlayer.GetBuffCount("ireliapassivestacks");
+
+            return (float)objPlayer.CalculateDamage(target, DamageType.Magical, ireliaPassiveDamage);
+        }
+
+        public static float Sheen(AIBaseClient target)
+        {
+            float damage = 0;
+
+            if (objPlayer.HasItem(ItemId.Sheen) && sheenTimer < Game.Time)
+            {
+                var item = new Items.Item(ItemId.Sheen, 600);
+                if (item.IsReady && !objPlayer.HasBuff("sheen"))
+                {
+                    damage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, objPlayer.BaseAttackDamage);
+                }
+            }
+
+            if (objPlayer.HasItem(ItemId.Trinity_Force) && sheenTimer < Game.Time)
+            {
+                var item = new Items.Item(ItemId.Trinity_Force, 600);
+                if (item.IsReady && !objPlayer.HasBuff("TrinityForce"))
+                {
+                    damage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, objPlayer.BaseAttackDamage) * 2f;
+                }
+            }
+
+            return damage;
+        }
+
+        public static float GetQDmg(AIBaseClient target)
+        {
+            var qLevel = Q.Level;
+
+            var baseDamage = QBaseDamage[qLevel] + 0.6f * objPlayer.TotalAttackDamage;
+            baseDamage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, baseDamage);
+
+            if (target is AIMinionClient && target.IsMinion && !target.IsJungle())
+            {
+                baseDamage += QBonusDamage[qLevel];
+            }
+
+            baseDamage += Sheen(target);
+
+            if (objPlayer.HasBuff("ireliapassivestacksmax"))
+            {
+                baseDamage += (objPlayer.Level - 1) * (ObjectManager.Player.Level == 1 ? 0 : 3) + 15;
+            }
+            return baseDamage;
+        }
+
+        /*private static double GetQDmg(AIBaseClient target)
         {
             double dmgQ = Q.GetDamage(target);
             double dmgSheen = 0;
@@ -851,7 +926,7 @@ namespace Template
                 Alldmg = dmgMinions + (ObjectManager.Player.TotalAttackDamage * 60 / 100) + dmgSheen;
             }
             return Q.GetDamage(target) + ObjectManager.Player.CalculateMagicDamage(target, passive) + objPlayer.CalculateDamage(target, DamageType.Physical, dmgSheen);
-        }             
+        }*/       
         public static float Qspeed()
         {
             return 1500 + objPlayer.MoveSpeed;

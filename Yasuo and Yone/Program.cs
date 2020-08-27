@@ -260,7 +260,7 @@ namespace ConsoleApp
             obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly));
             obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly));
             obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly));
-            if (CanE(target) && E.IsReady() && target.DistanceToPlayer() <= 1000 && (!Q.IsReady() || HaveQ2) && YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled)
+            if (CanE(target) && E.IsReady() && target.DistanceToPlayer() <= 1000)
             {
                 return
                 obj.Where(
@@ -685,7 +685,8 @@ namespace ConsoleApp
                 case OrbwalkerMode.LaneClear:
                     Yasuo_DoClear();
                     break;
-                case OrbwalkerMode.LastHit:
+                case OrbwalkerMode.Harass:
+                    Yasuo_DoHarass();
                     break;
             }
         }
@@ -1948,6 +1949,70 @@ namespace ConsoleApp
                                 Q.Cast(Q.GetPrediction(jl).CastPosition);
                             }
                         }
+                }
+            }
+        }
+
+        private static void Yasuo_DoHarass()
+        {
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(650));
+
+            if (targets != null)
+            {
+                foreach(var target in targets)
+                {
+                    var obj = GetNearObj(target);
+
+                    if(obj != null)
+                    {
+                        if (E.IsReady() && Q.IsReady() && (HaveQ2 || HaveQ3) &&
+                                                PosAfterE(obj).Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange && !UnderTower(PosAfterE(obj))
+                                                )
+                        {
+                            E.CastOnUnit(obj);
+                            YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active = true;
+                        }
+                        else
+                        {
+                            if (target.IsValidTarget(HaveQ3 ? Q3.Range : Q.Range) && Q.IsReady())
+                            {
+                                if (HaveQ3)
+                                {
+                                    Q3.CastIfHitchanceMinimum(target, HitChance.High);
+                                }
+                                else
+                                {
+                                    Q.CastIfHitchanceMinimum(target, HitChance.High);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (target.IsValidTarget(HaveQ3 ? Q3.Range : Q.Range) && Q.IsReady())
+                        {
+                            if (HaveQ3)
+                            {
+                                Q3.CastIfHitchanceMinimum(target, HitChance.High);
+                            }
+                            else
+                            {
+                                Q.CastIfHitchanceMinimum(target, HitChance.High);
+                            }
+                        }
+                    }
+                }
+            }
+
+            var minions = ObjectManager.Get<AIMinionClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(Q.Range) && i.Health < Q.GetDamage(i));
+            if(minions != null)
+            {
+                foreach(var min in minions)
+                {
+                    if (Q.IsReady() && !HaveQ3)
+                    {
+                        Q.Cast(min);
+                    }
                 }
             }
         }

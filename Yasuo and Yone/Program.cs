@@ -152,7 +152,7 @@ namespace ConsoleApp
         {
             public static MenuBool Yasuo_ERange = new MenuBool(",Yasuo_ERange", "Yasuo E in Combo");
             public static MenuBool Yasuo_Eziczac = new MenuBool(",Yasuo_Eziczac", "----> E zic zac");
-            public static MenuBool Yasuo_Eziczac_Qready = new MenuBool(",Yasuo_Eziczac_Qready", "----> E zic zac only when Q ready");
+            public static MenuBool Yasuo_Eziczac_Qready = new MenuBool(",Yasuo_Eziczac_Qready", "----> E zic zac only when Q not ready", true);
             public static MenuList Yasuo_EMode = new MenuList(",Yasuo_EMode", "Yasuo E Mode", new string[] { "Target Pos", "Cursor Pos", "Logic Target Gapcloser" }, 2);
             public static MenuBool ddtest = new MenuBool("ddtest", "Disable move When dash (Not recommand)", false);
         }
@@ -217,7 +217,7 @@ namespace ConsoleApp
         {
             return
                 ObjectManager.Get<AITurretClient>()
-                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius));
+                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius)) || GameObjects.EnemySpawnPoints.Any(i => i.Position.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius);
         }
         public static bool CanE(AIBaseClient t)
         {
@@ -1959,7 +1959,11 @@ namespace ConsoleApp
 
             if (target == null || !target.IsValidTarget(1000)) return;
 
+            if (UnderTower(objPlayer.Position)) return;
+
             if (!YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled) return;
+
+            if (YasuoMenu.Ecombo.Yasuo_Eziczac_Qready.Enabled && Q.IsReady()) return;
 
             AIBaseClient obj1 = null;
             AIBaseClient obj2 = null;
@@ -1967,7 +1971,8 @@ namespace ConsoleApp
 
             //search
             var AllObj = new List<AIBaseClient>();
-            AllObj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
+            AllObj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
+            AllObj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
 
             //set
             if (AllObj.Count < 2) return;
@@ -1977,40 +1982,59 @@ namespace ConsoleApp
                 foreach (var bobj in AllObj.Where(i => i.NetworkId != aobj.NetworkId))
                 {
                     obj2 = bobj;
-                }
-            }           
 
-            //ready ?
-            if(obj1.NetworkId != obj2.NetworkId && obj1 != null && obj2 != null)
-            {
-                ready = true;
-            }
-            else
-            {
-                ready = false;
-            }
+                    //ready ?
+                    if (obj1.NetworkId != obj2.NetworkId && obj1 != null && obj2 != null)
+                    {
+                        ready = true;
+                    }
+                    else
+                    {
+                        ready = false;
+                    }
 
-            //logic
-            if (ready == true)
-            {
-                var ziczacpos1 = PosAfterE(obj1).Extend(Epred(obj2), 475);
-                var ziczacpos2 = PosAfterE(obj2).Extend(Epred(obj1), 475);
+                    if((PosAfterE(obj1).Distance(obj2) < 475 && obj1.IsValidTarget(E.Range)) || (PosAfterE(obj2).Distance(obj1) < 475 && obj2.IsValidTarget(E.Range)))
+                    {
+                        ready = true;
+                    }
+                    else
+                    {
+                        ready = false;
+                    }
 
-                if (ziczacpos1.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value || ziczacpos1.Distance(Epred(target)) < Epred(target).DistanceToPlayer())
-                {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj1)))
-                        E1.Cast(obj1);
+                    //logic
+                    if (ready == true)
+                    {
+                        var ziczacpos1 = PosAfterE(obj1).Extend(Epred(obj2), 475);
+                        var ziczacpos2 = PosAfterE(obj2).Extend(Epred(obj1), 475);
+
+                        if (ziczacpos1.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value || ziczacpos1.Distance(Epred(target)) <= Epred(target).DistanceToPlayer())
+                        {
+                            //Render.Circle.DrawCircle(ziczacpos1, 100, Color.Red);
+
+                            if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj1)))
+                                if(obj1.IsValidTarget(E.Range))
+                                    E1.Cast(obj1);
+                                else return;
+                            else return;
+                        }
+                        if (ziczacpos2.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value || ziczacpos2.Distance(Epred(target)) <= Epred(target).DistanceToPlayer())
+                        {
+                            //Render.Circle.DrawCircle(ziczacpos2, 100, Color.Red);
+
+                            if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj2)))
+                                if (obj2.IsValidTarget(E.Range))
+                                    E1.Cast(obj2);
+                                else return;
+                            else return;
+                        }
+                    }
                 }
-                if (ziczacpos2.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value || ziczacpos2.Distance(Epred(target)) < Epred(target).DistanceToPlayer())
-                {
-                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj2)))
-                        E1.Cast(obj2);
-                }
-            }           
+            }                               
         }
         private static void Egaptarget(AIBaseClient target)
         {
-            if (target == null || oaa == true) return;
+            if (target == null || oaa || baa) return;
             var obj = GetNearObj(target);
             if(YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
             {

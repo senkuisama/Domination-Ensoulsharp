@@ -257,16 +257,20 @@ namespace ConsoleApp
 
 
             var obj = new List<AIBaseClient>();
-            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly));
-            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly));
-            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly));
-            if (CanE(target) && E.IsReady() && target.DistanceToPlayer() <= 1000)
+            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && CanE(i)));
+            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && CanE(i)));
+            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && CanE(i)));
+            if (CanE(target) && E.IsReady() && (!Q.IsReady() || HaveQ2))
             {
                 return
                 obj.Where(
                     i =>
                     CanE(i)
-                    && pos.Distance(PosAfterE(i)) <= 410
+                    && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= 230
+                        : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
+                        || pos.Distance(PosAfterE(i)) <= 410
+                        )
                     )
                     .MinOrDefault(i => pos.Distance(PosAfterE(i)));
             }
@@ -2129,7 +2133,7 @@ namespace ConsoleApp
                 }
                 else
                 {
-                    YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = true;
+                    //YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = true;
                 }
                 if (YasuoMenu.Yasuo_Keys.TurretKey.Active)
                 {

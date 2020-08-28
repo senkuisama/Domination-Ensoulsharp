@@ -152,7 +152,9 @@ namespace ConsoleApp
         {
             public static MenuBool Yasuo_ERange = new MenuBool(",Yasuo_ERange", "Yasuo E in Combo");
             public static MenuBool Yasuo_Eziczac = new MenuBool(",Yasuo_Eziczac", "----> E zic zac");
+            public static MenuSlider Yasuo_zizzacRange = new MenuSlider(",Yasuo_zizzacRange", "Target is Valid", 850, 0, 2000);
             public static MenuBool Yasuo_Eziczac_Qready = new MenuBool(",Yasuo_Eziczac_Qready", "----> E zic zac only when Q not ready", true);
+            public static MenuList Yasuo_EziczacMode = new MenuList(",Yasuo_EziczacMode", "Yasuo E ZZ", new string[] { "Gap obj is validable", "Target Count > 1", "Solo Mode", "Flower Dashing" }, 0);
             public static MenuList Yasuo_EMode = new MenuList(",Yasuo_EMode", "Yasuo E Mode", new string[] { "Target Pos", "Cursor Pos", "Logic Target Gapcloser" }, 2);
             public static MenuBool ddtest = new MenuBool("ddtest", "Disable move When dash (Not recommand)", false);
         }
@@ -479,7 +481,9 @@ namespace ConsoleApp
             Ecombo.Add(YasuoMenu.Ecombo.Yasuo_ERange);
             Ecombo.Add(YasuoMenu.Ecombo.Yasuo_EMode).Permashow();
             Ecombo.Add(YasuoMenu.Ecombo.Yasuo_Eziczac);
+            Ecombo.Add(YasuoMenu.Ecombo.Yasuo_zizzacRange);
             Ecombo.Add(YasuoMenu.Ecombo.Yasuo_Eziczac_Qready);
+            Ecombo.Add(YasuoMenu.Ecombo.Yasuo_EziczacMode).Permashow();
             Ecombo.Add(YasuoMenu.Ecombo.ddtest);
 
             EQcombo.Add(YasuoMenu.EQCombo.Yasuo_EQcombo);
@@ -2042,6 +2046,47 @@ namespace ConsoleApp
             var AllObj = new List<AIBaseClient>();
             AllObj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
             AllObj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
+
+            //MenuChecker
+            if (YasuoMenu.Ecombo.Yasuo_zizzacRange.Value < target.DistanceToPlayer()) return;
+
+            if(YasuoMenu.Ecombo.Yasuo_EziczacMode.Index == 0)
+            {
+                if (GetNearObj(target) == null) return;
+            }
+            if (YasuoMenu.Ecombo.Yasuo_EziczacMode.Index == 1)
+            {
+                if (objPlayer.CountEnemyHeroesInRange(YasuoMenu.Ecombo.Yasuo_zizzacRange.Value) <= 1) return;
+            }
+            if (YasuoMenu.Ecombo.Yasuo_EziczacMode.Index == 2)
+            {
+                if (
+                    !target.CanMove
+                    || !target.CanAttack
+                    ) return;
+
+                if (
+                    target.Armor < objPlayer.Armor
+                    || target.IsRanged
+                    ) return;
+
+                //Some Champion
+                if (
+                    target.CharacterName == "Shaco"
+                    || target.CharacterName == "Fizz"
+                    || target.CharacterName == "Akali"
+                    || target.CharacterName == "Camille"
+                    || target.CharacterName == "Gangplank"
+                    || target.CharacterName == "Graves"
+                    || target.CharacterName == "Hecarim"
+                    || target.CharacterName == "Katarina"
+                    || target.CharacterName == "Poppy"
+                    ) return;
+            }
+            if (YasuoMenu.Ecombo.Yasuo_EziczacMode.Index == 3)
+            {
+                //nothing happaned
+            }
 
             //set
             if (AllObj.Count < 2) return;

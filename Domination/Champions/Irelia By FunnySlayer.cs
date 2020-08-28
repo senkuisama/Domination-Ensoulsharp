@@ -158,19 +158,14 @@ namespace Template
             Drawing.OnDraw += Drawing_OnDraw;
         }
 
-        public static float SheenTimer;
+        public static float SheenTimer = 0;
         private static void AIHeroClient_OnBuffLose(AIBaseClient sender, AIBaseClientBuffLoseEventArgs args)
         {
-            if (sender.IsAlly) Console.WriteLine(sender.CharacterName); else
-            {
-                return;
-            }
-
             if (sender.CharacterName != "Irelia") return;
 
             if(args.Buff.Name == "sheen" || args.Buff.Name == "trinityforce")
             {
-                SheenTimer = Variables.TickCount + 1500;
+                SheenTimer = Variables.TickCount + 1700;
             }
         }
 
@@ -686,15 +681,16 @@ namespace Template
             }           
         }
         public static void Irelia_Clear()
-        {
+        {        
             if (!MenuSettings.ClearSettings.QireClear.Enabled) return;
             if (objPlayer.ManaPercent <= MenuSettings.ClearSettings.QireMana.Value) return;
 
-            var mins = GameObjects.Get<AIMinionClient>().Where(i => i.Position.Distance(objPlayer.Position) <= 600 && !i.IsAlly && !i.IsDead && CanQ(i));
+            var mins = ObjectManager.Get<AIMinionClient>().Where(i => i.Position.Distance(objPlayer.Position) <= 600 && !i.IsAlly && !i.IsDead && CanQ(i));
             if (!mins.Any()) return;
 
             foreach(AIMinionClient min in mins)
             {
+                Console.WriteLine(GetQDmg(min));
                 if (!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     Q.Cast(min);
             }
@@ -844,38 +840,54 @@ namespace Template
 
         private static float PassiveDamage(AIBaseClient target)
         {
-            var ireliaPassiveDamage =
-                (3.235f                                      +
-                 0.765f * objPlayer.Level                    +
-                 0.04f * objPlayer.GetBonusPhysicalDamage()) *
-                objPlayer.GetBuffCount("ireliapassivestacks");
+            var ireliaPassiveDamage = 15f;
+            ireliaPassiveDamage += (objPlayer.Level - 1) * 3;
+            ireliaPassiveDamage += 25 / 100 * objPlayer.GetBonusPhysicalDamage();
 
-            return (float)objPlayer.CalculateDamage(target, DamageType.Magical, ireliaPassiveDamage);
+
+            return ireliaPassiveDamage;
         }
 
         public static float Sheen(AIBaseClient target)
         {
             float damage = 0;
+            bool sheen = false;
+            bool trinity = false;
 
-            if (objPlayer.HasItem(ItemId.Sheen))
+            if (ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force))
             {
-                var item = new Items.Item(ItemId.Sheen, 600);
-                if (item.IsReady || objPlayer.HasBuff("sheen"))
-                {
-                    damage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, objPlayer.BaseAttackDamage);
-                }
+                trinity = false;
+                DelayAction.Add(10, () => { trinity = true; });
+            }
+            else { trinity = false; }
+            if (ObjectManager.Player.CanUseItem((int)ItemId.Sheen))
+            {
+                sheen = false;
+                DelayAction.Add(10, () => { sheen = true; });
+            }
+            else { sheen = false; }
+
+            var Sheen = new Items.Item(ItemId.Sheen, 0f);
+            if (
+                objPlayer.CanUseItem((int)ItemId.Sheen) ||
+                (Sheen.IsOwned() && Sheen.IsReady) ||
+                sheen
+                )
+            {
+                damage = objPlayer.BaseAttackDamage;
             }
 
-            if (objPlayer.HasItem(ItemId.Trinity_Force))
+            var Trinity = new Items.Item(ItemId.Trinity_Force, 0f);
+            if (
+                objPlayer.CanUseItem((int)ItemId.Trinity_Force) || 
+                (Trinity.IsOwned() && Trinity.IsReady) ||
+                trinity
+                )
             {
-                var item = new Items.Item(ItemId.Trinity_Force, 600);
-                if (item.IsReady || objPlayer.HasBuff("TrinityForce"))
-                {
-                    damage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, objPlayer.BaseAttackDamage * 2f);
-                }
+                damage = objPlayer.BaseAttackDamage * 2f;
             }
 
-            if(Variables.TickCount < SheenTimer)
+            if (Variables.TickCount < SheenTimer)
             {
                 damage = 0;
             }
@@ -885,23 +897,14 @@ namespace Template
 
         public static float GetQDmg(AIBaseClient target)
         {
-            var qLevel = Q.Level;
-
-            var baseDamage = QBaseDamage[qLevel] + 0.6f * objPlayer.TotalAttackDamage;
-            baseDamage = (float)objPlayer.CalculateDamage(target, DamageType.Physical, baseDamage);
-
-            if (target is AIMinionClient && target.IsMinion && !target.IsJungle())
-            {
-                baseDamage += QBonusDamage[qLevel];
-            }
-
-            baseDamage += Sheen(target);
-
             if (objPlayer.HasBuff("ireliapassivestacksmax"))
             {
-                baseDamage += (objPlayer.Level - 1) * (ObjectManager.Player.Level == 1 ? 0 : 3) + 15;
+                return Q.GetDamage(target) + (float)objPlayer.CalculatePhysicalDamage(target, Sheen(target)) + (float)objPlayer.CalculateMagicDamage(target, PassiveDamage(target));
             }
-            return baseDamage;
+            else
+            {
+                return Q.GetDamage(target) + (float)objPlayer.CalculatePhysicalDamage(target, Sheen(target));
+            }      
         }
 
         /*private static double GetQDmg(AIBaseClient target)
@@ -968,7 +971,7 @@ namespace Template
                 Alldmg = dmgMinions + (ObjectManager.Player.TotalAttackDamage * 60 / 100) + dmgSheen;
             }
             return Q.GetDamage(target) + ObjectManager.Player.CalculateMagicDamage(target, passive) + objPlayer.CalculateDamage(target, DamageType.Physical, dmgSheen);
-        }*/       
+        }*/
         public static float Qspeed()
         {
             return 1500 + objPlayer.MoveSpeed;

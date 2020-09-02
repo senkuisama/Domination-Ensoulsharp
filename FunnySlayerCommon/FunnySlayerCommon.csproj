@@ -4,20 +4,20 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FBDB36F2-192F-4508-83E5-2A62E4403A91}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>ConsoleApp1</RootNamespace>
-    <AssemblyName>ConsoleApp1</AssemblyName>
+    <ProjectGuid>{50846EF4-CE79-4429-B83C-AE69B58D0CDC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FunnySlayerCommon</RootNamespace>
+    <AssemblyName>FunnySlayerCommon</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <PreBuildEvent />
     <PostBuildEvent />
+    <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\Release</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -27,16 +27,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp.Sandbox">
@@ -48,25 +44,15 @@
     <Reference Include="EnsoulSharp.Wrapper">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>
     </Reference>
-    <Reference Include="FunnySlayerCommon">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\FunnySlayerCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
-    <Reference Include="SPrediction">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SPrediction.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -75,35 +61,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DaoHungAIO_Evade\BlockSpellData.cs" />
-    <Compile Include="DaoHungAIO_Evade\BlockSpellDataBase.cs" />
-    <Compile Include="DaoHungAIO_Evade\Champion.cs" />
-    <Compile Include="DaoHungAIO_Evade\Collision.cs" />
-    <Compile Include="DaoHungAIO_Evade\CollisionObjectTypes.cs" />
-    <Compile Include="DaoHungAIO_Evade\DamageBoostDatabase.cs" />
-    <Compile Include="DaoHungAIO_Evade\DetectedCollision.cs" />
-    <Compile Include="DaoHungAIO_Evade\DetectionType.cs" />
-    <Compile Include="DaoHungAIO_Evade\EvadeManager.cs" />
-    <Compile Include="DaoHungAIO_Evade\EvadeOthers.cs" />
-    <Compile Include="DaoHungAIO_Evade\EvadeSpellData.cs" />
-    <Compile Include="DaoHungAIO_Evade\EvadeSpellDatabase.cs" />
-    <Compile Include="DaoHungAIO_Evade\EvadeTargetManager.cs" />
-    <Compile Include="DaoHungAIO_Evade\FastPredResult.cs" />
-    <Compile Include="DaoHungAIO_Evade\FoundIntersection.cs" />
-    <Compile Include="DaoHungAIO_Evade\Geometry.cs" />
-    <Compile Include="DaoHungAIO_Evade\IsSafeResult.cs" />
-    <Compile Include="DaoHungAIO_Evade\SafePathResult.cs" />
-    <Compile Include="DaoHungAIO_Evade\Skillshot.cs" />
-    <Compile Include="DaoHungAIO_Evade\SkillshotDetector.cs" />
-    <Compile Include="DaoHungAIO_Evade\SkillShotType.cs" />
-    <Compile Include="DaoHungAIO_Evade\SpellData.cs" />
-    <Compile Include="DaoHungAIO_Evade\SpellDatabase.cs" />
-    <Compile Include="DaoHungAIO_Evade\Utils.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="FSPrediction\AoePrediction.cs" />
+    <Compile Include="FSPrediction\Collision.cs" />
+    <Compile Include="FSPrediction\CollisionableObjects.cs" />
+    <Compile Include="FSPrediction\HitChance.cs" />
+    <Compile Include="FSPrediction\Prediction.cs" />
+    <Compile Include="FSPrediction\PredictionInput.cs" />
+    <Compile Include="FSPrediction\PredictionOutput.cs" />
+    <Compile Include="FSPrediction\SkillshotType.cs" />
+    <Compile Include="FSPrediction\StoredPath.cs" />
+    <Compile Include="FSspell.cs" />
+    <Compile Include="FSTargetSelector.cs" />
+    <Compile Include="MenuClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

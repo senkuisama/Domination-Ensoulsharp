@@ -1,0 +1,6 @@
+﻿1>------ Rebuild All started: Project: FunnySlayerCommon, Configuration: Debug Any CPU ------
+1>C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\FunnySlayerCommon\FSPrediction\Collision.cs(61,7,61,11): warning CS0162: Unreachable code detected
+1>C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\FunnySlayerCommon\FSPrediction\StoredPath.cs(42,24,42,28): warning CS0649: Field 'StoredPath.Path' is never assigned to, and will always have its default value null
+1>C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\FunnySlayerCommon\FSPrediction\StoredPath.cs(44,14,44,18): warning CS0649: Field 'StoredPath.Tick' is never assigned to, and will always have its default value 0
+1>  FunnySlayerCommon -> C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\FunnySlayerCommon\bin\Release\FunnySlayerCommon.dll
+========== Rebuild All: 1 succeeded, 0 failed, 0 skipped ==========

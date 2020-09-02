@@ -42,7 +42,7 @@ namespace DaoHungAIO.Evade
 
         private static void OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
-            if (sender.IsValid && sender.Team == ObjectManager.Player.Team && args.SData.Name == "YasuoWMovingWall")
+            if (sender.IsValid && sender.Team == ObjectManager.Player.Team && args.SData.Name.Contains("YasuoW"))
             {
                 WallCastT = Utils.GameTimeTickCount;
                 YasuoWallCastedPos = sender.Position.ToVector2();

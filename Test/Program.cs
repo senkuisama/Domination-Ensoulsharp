@@ -75,7 +75,7 @@
 
             if (Prediction.Index == 0)
             {
-                if(FS != Vector3.Zero && FS.DistanceToPlayer() <= Q.Range && Q.IsReady() && fspred.Hitchance != FSpred.Prediction.HitChance.Collision && fspred.CollisionObjects.All(i => !(i is AIHeroClient)))
+                if(FS != Vector3.Zero && FS.DistanceToPlayer() <= Q.Range && Q.IsReady() && fspred.Hitchance >= FSpred.Prediction.HitChance.High && fspred.CollisionObjects.All(i => !(i is AIHeroClient)))
                 {
                     Q.Cast(FS);
                 }

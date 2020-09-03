@@ -201,7 +201,7 @@ namespace DominationAIO.Champions
         private static void AIHeroClient_OnAggro(AIBaseClient sender, AIBaseClientAggroEventArgs args)
         {
             
-            if (sender.IsAlly && sender.IsMelee && sender.Name == "TwilightShroud" && isQ)
+            if (sender.IsAlly && sender.IsMelee && isQ)
             {
                 TimeCast = Variables.TickCount;
                 CastedAndHit = true;

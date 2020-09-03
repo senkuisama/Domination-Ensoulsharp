@@ -220,7 +220,7 @@ namespace FSpred.Prediction
 			float num = path.PathLength();
 			if (num >= input.Delay * speed - input.RealRadius && Math.Abs(input.Speed - 3.40282347E+38f) < 1.401298E-45f)
 			{
-				float num2 = input.Delay * speed - input.RealRadius;
+				float num2 = input.Delay * speed - input.RealRadius - 15;
 				for (int i = 0; i < path.Count - 1; i++)
 				{
 					Vector2 vector = path[i];
@@ -244,7 +244,7 @@ namespace FSpred.Prediction
 			}
 			if (num >= input.Delay * speed - input.RealRadius && Math.Abs(input.Speed - 3.40282347E+38f) > 1.401298E-45f)
 			{
-				float distance = input.Delay * speed - input.RealRadius;
+				float distance = input.Delay * speed - input.RealRadius - 15;
 				if ((input.Type == SkillshotType.SkillshotLine || input.Type == SkillshotType.SkillshotCone) && input.From.DistanceSquared(input.Unit.Position) < 40000f)
 				{
 					distance = input.Delay * speed;

@@ -315,13 +315,14 @@ namespace Template
             {
                 if (target == null) return;
 
-                var OutAARange = Q_ListAIBaseClient(300, Q.Range + 1, target);
-                var InAARange = Q_ListAIBaseClient(0, 300, target);
+                var OutAARange = Q_ListAIBaseClient(200, Q.Range + 1, target);
+                var InAARange = Q_ListAIBaseClient(0, 400, target);
                 var QRange = Q_ListAIBaseClient(0, Q.Range + 1);
                 //ireliapassivestacksmax             Passive Stacks
                 //ireliamark                         E Buffs
                 if (Q.IsReady() && MenuSettings.QSettings.Qcombo.Enabled)
                 {
+                    GapCloserTargetCanKillable();
                     if (MenuSettings.QSettings.QDancing.Enabled)
                     {
                         if (CanQ(target))
@@ -701,24 +702,64 @@ namespace Template
                 ObjectManager.Get<AITurretClient>()
                     .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius + bonusrange));
         }
-        public static void QGapCloserPos(Vector3 pos)
+        public static void GapCloserTargetCanKillable()
         {
-            var objs = new List<AIBaseClient>();
-            objs.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && !i.IsAlly && CanQ(i)));
+            var target = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(2000) && CanQ(i)).MinOrDefault(i => i.DistanceToPlayer());
+            if (target == null || !Q.IsReady()) return;
 
-            if (Q.IsReady())
+            if (target.IsValidTarget(Q.Range))
             {
-                if (!objs.Any() || objs != null)
+                if(!UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                 {
-                    foreach (AIBaseClient obj in objs)
+                    Q.Cast(target);
+                }
+            }
+
+            var gapobjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(2000) && CanQ(i)).ToArray();
+            if (gapobjs.Any())
+            {
+                foreach(var obj1 in gapobjs)
+                {                   
+                    if(obj1.Distance(target) < Q.Range && obj1.IsValidTarget(Q.Range))
                     {
-                        if (obj.Position.Distance(pos) <= objPlayer.Distance(pos) || obj.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 20)
+                        if (!UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                         {
-                            if(Orbwalker.ActiveMode != OrbwalkerMode.Combo || !UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                            Q.Cast(obj);
+                            Q.Cast(obj1);
+                        }
+                    }
+
+                    if(gapobjs.Count() >= 2)
+                    {
+                        foreach(var obj2 in gapobjs.Where(i => i.IsValidTarget(Q.Range)))
+                        {
+                            if(obj1.Distance(target) < Q.Range)
+                            {
+                                if(obj2.Distance(obj1) < Q.Range)
+                                {
+                                    if (!UnderTower(obj2.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                    {
+                                        Q.Cast(obj2);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+            }
+        }
+        public static void QGapCloserPos(Vector3 pos)
+        {
+            var obj = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range) 
+            && !i.IsDead 
+            && !i.IsAlly 
+            && CanQ(i)
+            && (i.Position.Distance(pos) <= objPlayer.Distance(pos) || i.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 50)
+            ).MinOrDefault(i => i.DistanceToPlayer());
+
+            if (Q.IsReady() && !(obj == null))
+            {
+                if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                    Q.Cast(obj);
             }           
         }
         public static bool CanQ(AIBaseClient target)

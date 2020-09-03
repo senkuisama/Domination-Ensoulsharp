@@ -567,14 +567,14 @@ namespace ConsoleApp
             E1 = new Spell(SpellSlot.E, 475);
             R = new Spell(SpellSlot.R, 1400);
 
-            Q.SetSkillshot(0.15f, 55, float.MaxValue, false, false, SkillshotType.Line);
-            Q3.SetSkillshot(0.25f, 80, 1200, false, false, SkillshotType.Line);
+            Q.SetSkillshot(0.4f, 55, float.MaxValue, false, false, SkillshotType.Line);
+            Q3.SetSkillshot(0.4f, 80, 1200, false, false, SkillshotType.Line);
             E1.SetTargetted(0f, 1000f);
             E.SetSkillshot(0.3f, 175, 1000f, false, SkillshotType.Line);
 
             Flash = ObjectManager.Player.GetSpellSlot("summonerflash");
             EQFlash = new Spell(Flash, 850f);
-            EQFlash.SetSkillshot(0, 230, float.MaxValue, false, false, SkillshotType.Circle);
+            EQFlash.SetSkillshot(0, 175, float.MaxValue, false, false, SkillshotType.Circle);
 
             Orbwalker.OnAction += Orbwalker_OnAction;
             Game.OnUpdate += Game_OnUpdate;
@@ -606,16 +606,34 @@ namespace ConsoleApp
         #region Events
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (!YasuoMenu.Yasuo_Keys.WallJumpYS.Active) return;
-
-            foreach (var pos in WallJumpPos
+            if (YasuoMenu.Yasuo_Keys.WallJumpYS.Active)
+            {
+                foreach (var pos in WallJumpPos
                 //.Where(x => x.Distance(objPlayer.Position.ToVector2()) <= 1200)
                 )
-            {
-                Render.Circle.DrawCircle(pos.ToVector3(), 70, Color.FromArgb(251, 209, 0), 5);
+                {
+                    Render.Circle.DrawCircle(pos.ToVector3(), 70, Color.FromArgb(251, 209, 0), 5);
+                }
+
+                Drawing.DrawCircle(WallJumpPos.MinOrDefault(i => i.DistanceToPlayer()).ToVector3(), 70, System.Drawing.Color.White);
             }
 
-            Drawing.DrawCircle(WallJumpPos.MinOrDefault(i => i.DistanceToPlayer()).ToVector3(), 70, System.Drawing.Color.White);
+            if (objPlayer.IsDead) return;
+
+            var target = FSTargetSelector.GetFSTarget(10000);
+            if (Q.IsReady() && target != null)
+            {
+                var Q3prediction = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
+                var Qprediction = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                if (HaveQ3)
+                {
+                    Render.Circle.DrawCircle(Q3prediction.CastPosition, 10, System.Drawing.Color.Red, 10);
+                }
+                else
+                {
+                    Render.Circle.DrawCircle(Qprediction.CastPosition, 10, System.Drawing.Color.Red, 10);
+                }
+            }
         }
 
         private static void AIHeroClient_OnPlayAnimation(AIBaseClient sender, AIBaseClientPlayAnimationEventArgs args)
@@ -1905,7 +1923,7 @@ namespace ConsoleApp
                                     else
                                     {
                                         var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, min as AIHeroClient);
-                                        if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                                        if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.High)
                                         {
                                             Q3.Cast(fsQpred.CastPosition);
                                         }
@@ -1914,9 +1932,15 @@ namespace ConsoleApp
                                 else
                                 {
                                     var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, min as AIHeroClient);
-                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     {
                                         Q.Cast(fsQpred.CastPosition);
+                                    }
+
+                                    var sdkQpred = Q.GetPrediction(min);
+                                    if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
+                                    {
+                                        Q.Cast(sdkQpred.CastPosition);
                                     }
                                 }
                             }
@@ -2073,7 +2097,7 @@ namespace ConsoleApp
                                 if (HaveQ3)
                                 {
                                     var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
-                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     {
                                         Q3.Cast(fsQpred.CastPosition);
                                     }
@@ -2081,9 +2105,15 @@ namespace ConsoleApp
                                 else
                                 {
                                     var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     {
                                         Q.Cast(fsQpred.CastPosition);
+                                    }
+
+                                    var sdkQpred = Q.GetPrediction(target);
+                                    if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
+                                    {
+                                        Q.Cast(sdkQpred.CastPosition);
                                     }
                                 }
                             }
@@ -2096,7 +2126,7 @@ namespace ConsoleApp
                             if (HaveQ3)
                             {
                                 var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
-                                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                 {
                                     Q3.Cast(fsQpred.CastPosition);
                                 }
@@ -2105,7 +2135,7 @@ namespace ConsoleApp
                             else
                             {
                                 var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                 {
                                     Q.Cast(fsQpred.CastPosition);
                                 }
@@ -2114,6 +2144,11 @@ namespace ConsoleApp
                                 {
                                     Q.Cast(Qpred.CastPosition);
                                 }*/
+                                var sdkQpred = Q.GetPrediction(target);
+                                if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
+                                {
+                                    Q.Cast(sdkQpred.CastPosition);
+                                }
                             }
                         }
                     }
@@ -2360,7 +2395,7 @@ namespace ConsoleApp
                 if (oaa && target.HealthPercent > YasuoMenu.Qcombo.Yasuo_Qoa.Value) return;
 
                 var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
-                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
                 {
                     Q3.Cast(fsQpred.CastPosition);
                 }
@@ -2378,7 +2413,7 @@ namespace ConsoleApp
                 if (oaa && target.HealthPercent > YasuoMenu.Qcombo.Yasuo_Qoa.Value) return;
 
                 var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                if(fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.OutOfRange)
+                if(fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
                 {
                     Q.Cast(fsQpred.CastPosition);
                 }
@@ -2387,6 +2422,12 @@ namespace ConsoleApp
                 {
                     Q.Cast(Qpred.CastPosition);
                 }*/
+
+                var sdkQpred = Q.GetPrediction(target);
+                if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
+                {
+                    Q.Cast(sdkQpred.CastPosition);
+                }
             }
         }
         private static void CastQcircle(AIBaseClient target)
@@ -2443,10 +2484,10 @@ namespace ConsoleApp
 
                 if (isYasuoDashing && HaveQ3 && Q.IsReady() && FlashPos != Vector3.Zero)
                 {
-                    if (FlashPos.Distance(objPlayer.Position) <= 400 + 230 && FlashPos.Distance(objPlayer.Position) > 230)
+                    if (FlashPos.Distance(objPlayer.Position) <= 400 + 175 && FlashPos.Distance(objPlayer.Position) > 175)
                     {
                         //Render.Circle.DrawCircle(FlashPos, 230, System.Drawing.Color.Blue, 13);
-                        Q3.Cast(PosExploit(FSTargetSelector.GetFSTarget(3000)));
+                        Q3.Cast(PosExploit(target));
                         DelayAction.Add(100, () => { EQFlash.Cast(FlashPos); });
                     }
                 }

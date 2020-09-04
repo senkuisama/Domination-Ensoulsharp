@@ -2417,16 +2417,10 @@ namespace ConsoleApp
                 {
                     Q.Cast(fsQpred.CastPosition);
                 }
-                /*var Qpred = Q.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-                if (Qpred.Hitchance >= HitChance.High && !Qpred.CastPosition.IsZero && Qpred.CastPosition.Distance(target) <= YasuoMenu.RangeCheck.Qrange)
+                var Qpred = Q.GetPrediction(target);
+                if (Qpred.Hitchance >= HitChance.Medium && !Qpred.CastPosition.IsZero && Qpred.CastPosition.Distance(target) <= YasuoMenu.RangeCheck.Qrange)
                 {
                     Q.Cast(Qpred.CastPosition);
-                }*/
-
-                var sdkQpred = Q.GetPrediction(target);
-                if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
-                {
-                    Q.Cast(sdkQpred.CastPosition);
                 }
             }
         }

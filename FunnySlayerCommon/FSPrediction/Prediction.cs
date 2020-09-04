@@ -131,7 +131,7 @@ namespace FSpred.Prediction
 				"Very High"
 			};
 			_menu = new Menu("Prediction", "FS Prediction Hitchance", true);
-			MenuItem item = new MenuSlider("PredMaxRange", "Max Range %", 100, 70, 100);
+			item = new MenuSlider("PredMaxRange", "Max Range %", 100, 70, 100);
 			var QHitChance = new MenuList("QHitChance", "Q Hit Chance", hitchance, 1);
 			var WHitChance = new MenuList("WHitChance", "W Hit Chance", hitchance, 1);
 			var EHitChance = new MenuList("EHitChance", "E Hit Chance", hitchance, 1);
@@ -158,8 +158,8 @@ namespace FSpred.Prediction
 			{
 				Input = input
 			};
-			Vector2 vector = dashInfo.EndPos;
-			PredictionOutput positionOnPath = Prediction.GetPositionOnPath(input, new List<Vector2>
+			var vector = dashInfo.EndPos;
+			var positionOnPath = Prediction.GetPositionOnPath(input, new List<Vector2>
 			{
 				input.Unit.Position.ToVector2(),
 				vector
@@ -220,7 +220,7 @@ namespace FSpred.Prediction
 			float num = path.PathLength();
 			if (num >= input.Delay * speed - input.RealRadius && Math.Abs(input.Speed - 3.40282347E+38f) < 1.401298E-45f)
 			{
-				float num2 = input.Delay * speed - input.RealRadius - 15;
+				float num2 = input.Delay * speed - input.RealRadius;
 				for (int i = 0; i < path.Count - 1; i++)
 				{
 					Vector2 vector = path[i];
@@ -244,7 +244,7 @@ namespace FSpred.Prediction
 			}
 			if (num >= input.Delay * speed - input.RealRadius && Math.Abs(input.Speed - 3.40282347E+38f) > 1.401298E-45f)
 			{
-				float distance = input.Delay * speed - input.RealRadius - 15;
+				float distance = input.Delay * speed - input.RealRadius;
 				if ((input.Type == SkillshotType.SkillshotLine || input.Type == SkillshotType.SkillshotCone) && input.From.DistanceSquared(input.Unit.Position) < 40000f)
 				{
 					distance = input.Delay * speed;
@@ -376,13 +376,13 @@ namespace FSpred.Prediction
 		public static PredictionOutput GetPrediction(PredictionInput input, bool ft, bool checkCollision)
 		{
 			PredictionOutput predictionOutput = null;
-			if (!input.Unit.IsValidTarget(3.40282347E+38f, false))
+			if (!input.Unit.IsValidTarget(float.MaxValue, false))
 			{
 				return new PredictionOutput();
 			}
 			if (ft)
 			{
-				input.Delay += Game.Ping / 2000f + 0.05f;
+				input.Delay += Game.Ping / 2000f + 0.06f;
 				if (input.Aoe)
 				{
 					return AoePrediction.GetPrediction(input);
@@ -408,7 +408,7 @@ namespace FSpred.Prediction
 				}
 				else
 				{
-					input.Range = input.Range * (float)_menu.GetValue<MenuSlider>("PredMaxRange").Value / 100f;
+					input.Range = input.Range * item.Value / 100f;
 				}
 			}
 			if (predictionOutput == null)
@@ -548,7 +548,30 @@ namespace FSpred.Prediction
 			{
 				num /= 1.5f;
 			}
-			return Prediction.GetPositionOnPath(input, input.Unit.GetWaypoints(), num);
+			var list = input.Unit.GetWaypoints();
+			var LastMove = input.Unit.GetWaypoints().LastOrDefault();
+			if(input.Unit.IsMoving && input.Unit.IsValidTarget(input.Range) && LastMove.IsValid() & LastMove.DistanceToPlayer() <= input.Range && input.Type == SkillshotType.SkillshotLine)
+            {
+				var DistanceTarget = LastMove.Distance(input.Unit.Position);
+				var getrealmovepoint = new Geometry.Circle(input.Unit.Position, DistanceTarget);
+
+				var getlist = getrealmovepoint.Points.Where(i => DistanceTarget * DistanceTarget + input.Unit.DistanceToPlayer() * input.Unit.DistanceToPlayer() == i.DistanceToPlayer() * i.DistanceToPlayer()).ToList();
+
+				if(getlist != null)
+                {
+					list = getlist;
+                }
+                else
+                {
+					list = input.Unit.GetWaypoints();
+				}
+            }
+            else
+            {
+				list = input.Unit.GetWaypoints();
+			}
+			
+			return Prediction.GetPositionOnPath(input, list, num);
 		}
 
 		public static double UnitIsImmobileUntil(AIBaseClient unit)
@@ -559,5 +582,6 @@ namespace FSpred.Prediction
 		}
 
 		private static Menu _menu;
+		private static MenuSlider item;
 	}
 }

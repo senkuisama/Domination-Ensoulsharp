@@ -1763,7 +1763,7 @@ namespace ConsoleApp
         #region Orbwalker
         private static void Yasuo_DoCombo()
         {
-            EQFlashInCombo();
+            //EQFlashInCombo();
 
             if (YasuoMenu.Yasuo_target.Yasuo_Target_lock.Enabled)
             {

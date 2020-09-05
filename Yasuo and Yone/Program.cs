@@ -170,6 +170,7 @@ namespace ConsoleApp
             public static MenuBool Yasuo_Rcombo_EQR = new MenuBool(",Yasuo_Rcombo_EQR", "Logic EQ R");
             public static MenuBool AlwaysEQR = new MenuBool("...AlwaysEQR", "R Tornado always");
             public static MenuSlider RtargetHeath = new MenuSlider("RtargetHeath", "---> Target heath ", 70, 0, 101);
+            public static MenuSlider RDelayTime = new MenuSlider("R Delay Time (ms)", "R Delay Cast (ms)", 10);
         }
 
         public class Yasuo_Clear
@@ -194,6 +195,7 @@ namespace ConsoleApp
             public static MenuKeyBind EQFlashKey = new MenuKeyBind(",EQFlashKey", "EQ flash key", System.Windows.Forms.Keys.G, KeyBindType.Press);
 
             public static MenuKeyBind WallJumpYS = new MenuKeyBind(",WallJumpYS", "Wall Jump", System.Windows.Forms.Keys.Z, KeyBindType.Press);
+            public static MenuKeyBind ComboEQ3Flash = new MenuKeyBind(",EQ3 Flash when Combo", "EQ3 Flash when Combo [Toggle]", System.Windows.Forms.Keys.G, KeyBindType.Toggle);
 
         }
 
@@ -497,6 +499,7 @@ namespace ConsoleApp
 
             yskeys.Add(YasuoMenu.Yasuo_Keys.Yasuo_Flee).Permashow();
             yskeys.Add(YasuoMenu.Yasuo_Keys.WallJumpYS).Permashow();
+            yskeys.Add(YasuoMenu.Yasuo_Keys.ComboEQ3Flash).Permashow();
             yskeys.Add(YasuoMenu.Yasuo_Keys.EQFlashKey).Permashow();
             yskeys.Add(YasuoMenu.Yasuo_Keys.TurretKey).Permashow();
             yskeys.Add(YasuoMenu.Yasuo_Keys.Yasuo_AutoQharass).Permashow();
@@ -532,6 +535,7 @@ namespace ConsoleApp
             EQcombo.Add(YasuoMenu.EQCombo.Yasuo_EWindcombo);
 
             Rcombo.Add(YasuoMenu.Rcombo.Yasuo_Rcombo);
+            Rcombo.Add(YasuoMenu.Rcombo.RDelayTime);
             Rcombo.Add(YasuoMenu.Rcombo.Yasuo_Rcombo_EQR);
             Rcombo.Add(YasuoMenu.Rcombo.AlwaysEQR);
             Rcombo.Add(YasuoMenu.Rcombo.RtargetHeath);
@@ -1763,7 +1767,10 @@ namespace ConsoleApp
         #region Orbwalker
         private static void Yasuo_DoCombo()
         {
-            //EQFlashInCombo();
+            if (YasuoMenu.Yasuo_Keys.ComboEQ3Flash.Active)
+            {
+                EQFlashInCombo();
+            }
 
             if (YasuoMenu.Yasuo_target.Yasuo_Target_lock.Enabled)
             {
@@ -1781,7 +1788,7 @@ namespace ConsoleApp
                         if ((target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Knockback)) && R.IsReady() && target.IsValidTarget(R.Range) && YasuoMenu.Rcombo.RtargetHeath.Value >= target.HealthPercent && YasuoMenu.Rcombo.Yasuo_Rcombo.Enabled)
                         {
                             var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
-                            if ((buff.EndTime - Game.Time) * 1000 <= 7 && !YasuoMenu.Rcombo.AlwaysEQR.Enabled)
+                            if ((buff.EndTime - Game.Time) * 1000 <= YasuoMenu.Rcombo.RDelayTime.Value && !YasuoMenu.Rcombo.AlwaysEQR.Enabled)
                             {
                                 Game.Print("R accepted");
                                 R.Cast(target.Position);
@@ -2467,38 +2474,34 @@ namespace ConsoleApp
             var targets = TargetSelector.GetTargets(850);
             Vector3 FlashPos = Vector3.Zero;
 
-            if (targets == null) return;
+            if (!targets.Any()) return;
 
-            if (!Q.IsReady() || !HaveQ3) return;
+            var target = FSTargetSelector.GetFSTarget(850);
 
-            foreach(var BestTarget in targets.Where(i => 
-            FSpred.Prediction.Prediction.GetPrediction(EQFlash, i).AoeTargetsHitCount >= 3
-            && FSpred.Prediction.Prediction.GetPrediction(EQFlash, i).Hitchance >= FSpred.Prediction.HitChance.Medium
-            ))
+            foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.Medium && i.AoeTargetsHitCount >= 3).OrderByDescending(i => i.AoeTargetsHitCount))
             {
-                var pred = FSpred.Prediction.Prediction.GetPrediction(EQFlash, BestTarget);
-                FlashPos = pred.CastPosition;
-                Render.Circle.DrawCircle(pred.CastPosition, 175, System.Drawing.Color.Red);
+                FlashPos = EQprediction.CastPosition;
 
-                if(FlashPos != Vector3.Zero && pred.Hitchance >= FSpred.Prediction.HitChance.Medium)
+                if (isYasuoDashing && HaveQ3 && Q.IsReady() && FlashPos != Vector3.Zero)
                 {
-                    if (isYasuoDashing)
+                    if (FlashPos.Distance(objPlayer.Position) <= 400 + 175 && FlashPos.Distance(objPlayer.Position) >= 175)
                     {
-                        if(FlashPos.DistanceToPlayer() <= 400 + 175)
-                        {
-                            Q3.Cast(PosExploit());
-                            DelayAction.Add(20, () => { EQFlash.Cast(FlashPos); });
-                        }
+                        Q3.Cast(PosExploit(target));
+                        DelayAction.Add(50, () => { EQFlash.Cast(FlashPos); });
                     }
-                    else
+                }
+
+                if (!isYasuoDashing && HaveQ3 && Q.IsReady() && FlashPos != Vector3.Zero)
+                {
+                    if (FlashPos.Distance(objPlayer.Position) <= 400 + 175 && FlashPos.Distance(objPlayer.Position) >= 175)
                     {
-                        var obj = GameObjects.EnemyMinions.Where(i => CanE(i) && !i.IsDead).MaxOrDefault(i => PosAfterE(i).Distance(FlashPos));
-                        if(FlashPos.DistanceToPlayer() <= 400 + 175 && obj != null && E.IsReady())
+                        var objs = GameObjects.Enemy.Where(i => !i.Position.IsBuilding() && CanE(i) && i.IsValidTarget(E.Range));
+                        foreach(var obj in objs)
                         {
                             E1.Cast(obj);
                         }
                     }
-                }               
+                }
             }
         }
 
@@ -2550,7 +2553,7 @@ namespace ConsoleApp
                         }
                     }
                 }
-            }                    
+            }
         }
         #endregion
     }

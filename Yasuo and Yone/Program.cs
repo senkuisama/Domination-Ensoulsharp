@@ -1763,7 +1763,7 @@ namespace ConsoleApp
         #region Orbwalker
         private static void Yasuo_DoCombo()
         {
-            if (!Q.IsReady(0) && !E.IsReady(0) && !R.IsReady(0)) return;
+            EQFlashInCombo();
 
             if (YasuoMenu.Yasuo_target.Yasuo_Target_lock.Enabled)
             {
@@ -2460,7 +2460,48 @@ namespace ConsoleApp
                 }
             }
         }
-        
+
+        private static void EQFlashInCombo()
+        {
+            if (Flash == SpellSlot.Unknown || !EQFlash.IsReady() || !Flash.IsReady()) return;
+            var targets = TargetSelector.GetTargets(850);
+            Vector3 FlashPos = Vector3.Zero;
+
+            if (targets == null) return;
+
+            if (!Q.IsReady() || !HaveQ3) return;
+
+            foreach(var BestTarget in targets.Where(i => 
+            FSpred.Prediction.Prediction.GetPrediction(EQFlash, i).AoeTargetsHitCount >= 3
+            && FSpred.Prediction.Prediction.GetPrediction(EQFlash, i).Hitchance >= FSpred.Prediction.HitChance.Medium
+            ))
+            {
+                var pred = FSpred.Prediction.Prediction.GetPrediction(EQFlash, BestTarget);
+                FlashPos = pred.CastPosition;
+                Render.Circle.DrawCircle(pred.CastPosition, 175, System.Drawing.Color.Red);
+
+                if(FlashPos != Vector3.Zero && pred.Hitchance >= FSpred.Prediction.HitChance.Medium)
+                {
+                    if (isYasuoDashing)
+                    {
+                        if(FlashPos.DistanceToPlayer() <= 400 + 175)
+                        {
+                            Q3.Cast(PosExploit());
+                            DelayAction.Add(20, () => { EQFlash.Cast(FlashPos); });
+                        }
+                    }
+                    else
+                    {
+                        var obj = GameObjects.EnemyMinions.Where(i => CanE(i) && !i.IsDead).MaxOrDefault(i => PosAfterE(i).Distance(FlashPos));
+                        if(FlashPos.DistanceToPlayer() <= 400 + 175 && obj != null && E.IsReady())
+                        {
+                            E1.Cast(obj);
+                        }
+                    }
+                }               
+            }
+        }
+
         private static void YasuoEQFlash()
         {
             if (Flash == SpellSlot.Unknown || !EQFlash.IsReady() || !Flash.IsReady()) return;

@@ -555,7 +555,7 @@ namespace FSpred.Prediction
 				var DistanceTarget = LastMove.Distance(input.Unit.Position);
 				var getrealmovepoint = new Geometry.Circle(input.Unit.Position, DistanceTarget);
 
-				var getlist = getrealmovepoint.Points.Where(i => DistanceTarget * DistanceTarget + input.Unit.DistanceToPlayer() * input.Unit.DistanceToPlayer() == i.DistanceToPlayer() * i.DistanceToPlayer()).ToList();
+				var getlist = getrealmovepoint.Points.Where(i => i.Distance(LastMove) <= LastMove.Distance(input.Unit.Position) && DistanceTarget * DistanceTarget + input.Unit.DistanceToPlayer() * input.Unit.DistanceToPlayer() == i.DistanceToPlayer() * i.DistanceToPlayer()).ToList();
 
 				if(getlist != null)
                 {

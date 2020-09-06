@@ -29,10 +29,10 @@ namespace FSpred.Prediction
 		{
 			List<AoePrediction.PossibleTarget> list = new List<AoePrediction.PossibleTarget>();
 			var originalUnit = input.Unit;
-			var heroes = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly).ToList();
+			var heroes = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly).ToList();
 			Predicate<AIBaseClient> mach;
 			Predicate<AIBaseClient> match;
-			match = (mach = ((AIBaseClient h) => h.MemoryAddress != originalUnit.MemoryAddress && h.IsValidTarget(input.Range + 200f + input.RealRadius, true, input.RangeCheckFrom)));
+			match = (mach = ((AIBaseClient h) => h.NetworkId != originalUnit.NetworkId && h.IsValidTarget(input.Range + 200f + input.RealRadius, true, input.RangeCheckFrom)));
 			foreach (var unit in heroes.FindAll(match))
 			{
 				input.Unit = unit;

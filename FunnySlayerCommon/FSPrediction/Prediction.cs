@@ -131,7 +131,7 @@ namespace FSpred.Prediction
 				"Very High"
 			};
 			_menu = new Menu("Prediction", "FS Prediction Hitchance", true);
-			item = new MenuSlider("PredMaxRange", "Max Range %", 100, 70, 100);
+			item = new MenuSlider("PredMaxRange", "Max Range %", 100, 0, 100);
 			var QHitChance = new MenuList("QHitChance", "Q Hit Chance", hitchance, 1);
 			var WHitChance = new MenuList("WHitChance", "W Hit Chance", hitchance, 1);
 			var EHitChance = new MenuList("EHitChance", "E Hit Chance", hitchance, 1);
@@ -141,7 +141,7 @@ namespace FSpred.Prediction
 			_menu.Add(EHitChance);
 			_menu.Add(RHitChance);
 
-			Prediction._menu.Add(item);
+			_menu.Add(item);
 			_menu.Attach();
 
 			AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
@@ -220,7 +220,7 @@ namespace FSpred.Prediction
 			float num = path.PathLength();
 			if (num >= input.Delay * speed - input.RealRadius && Math.Abs(input.Speed - 3.40282347E+38f) < 1.401298E-45f)
 			{
-				float num2 = input.Delay * speed - input.RealRadius;
+				float num2 = input.Delay * speed - input.RealRadius - 20;
 				for (int i = 0; i < path.Count - 1; i++)
 				{
 					Vector2 vector = path[i];
@@ -244,7 +244,7 @@ namespace FSpred.Prediction
 			}
 			if (num >= input.Delay * speed - input.RealRadius && Math.Abs(input.Speed - 3.40282347E+38f) > 1.401298E-45f)
 			{
-				float distance = input.Delay * speed - input.RealRadius;
+				float distance = input.Delay * speed - input.RealRadius - 20;
 				if ((input.Type == SkillshotType.SkillshotLine || input.Type == SkillshotType.SkillshotCone) && input.From.DistanceSquared(input.Unit.Position) < 40000f)
 				{
 					distance = input.Delay * speed;
@@ -549,7 +549,7 @@ namespace FSpred.Prediction
 				num /= 1.5f;
 			}
 			var list = input.Unit.GetWaypoints();
-			var LastMove = input.Unit.GetWaypoints().LastOrDefault();
+			/*var LastMove = input.Unit.GetWaypoints().LastOrDefault();
 			if(input.Unit.IsMoving && input.Unit.IsValidTarget(input.Range) && LastMove.IsValid() & LastMove.DistanceToPlayer() <= input.Range && input.Type == SkillshotType.SkillshotLine)
             {
 				var DistanceTarget = LastMove.Distance(input.Unit.Position);
@@ -569,7 +569,7 @@ namespace FSpred.Prediction
             else
             {
 				list = input.Unit.GetWaypoints();
-			}
+			}*/
 			
 			return Prediction.GetPositionOnPath(input, list, num);
 		}

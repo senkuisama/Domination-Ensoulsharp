@@ -2478,7 +2478,7 @@ namespace ConsoleApp
 
             var target = FSTargetSelector.GetFSTarget(850);
 
-            foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.Medium && i.AoeTargetsHitCount >= 3).OrderByDescending(i => i.AoeTargetsHitCount))
+            foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.Medium && i.AoeTargetsHitCount >= 2).OrderByDescending(i => i.AoeTargetsHitCount))
             {
                 FlashPos = EQprediction.CastPosition;
 

@@ -96,11 +96,12 @@ namespace Template
             E2.SetSkillshot(0.25f, 5f, 1800f, false, false, SkillshotType.Line);
 
             R = new Spell(SpellSlot.R, 1000);
-            R.SetSkillshot(0.5f, 50, 1500, false, SkillshotType.Line);
+            R.SetSkillshot(0.6f, 100, 1200f, false, SkillshotType.Line);
 
             R2 = new Spell(SpellSlot.Unknown, 1000);
             R.SetSkillshot(0.25f, 300, 1500, false, SkillshotType.Line);
 
+            FSpred.Prediction.Prediction.Initialize();
             myMenu = new Menu(objPlayer.CharacterName, "Irelia The Flash", true);
 
             Menu Qmenu = new Menu("Qmenu", "Q Settings")
@@ -224,6 +225,7 @@ namespace Template
         {
             if (MenuSettings.KeysSettings.SemiE.Active && E.IsReady())
             {
+                
                 #region New E pred
                 var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead);
                 var target = TargetSelector.GetTarget(775);
@@ -251,7 +253,7 @@ namespace Template
                                 }
                             }
                         }
-                        if (objPlayer.HasBuff("IreliaE"))
+                        /*if (objPlayer.HasBuff("IreliaE"))
                         {
                             Vector3 CastPos = Vector3.Zero;
                             for (int i = 775; i > 75; i--)
@@ -278,10 +280,40 @@ namespace Template
                                     E.Cast(CastPos);
                                 }
                             }
+                        }*/
+
+                        if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
+                        {
+                            Vector2 vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
+                            if (vector2.Distance(ObjectManager.Player.Position) < E.Range)
+                            {
+                                Vector2 v3 = vector2;
+                                int slider = 775;
+                                for (int j = 50; j <= slider; j += 50)
+                                {
+                                    Vector2 vector3 = vector2.Extend(ECatPos.ToVector2(), (float)(-(float)j));
+                                    if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                    {
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        v3 = vector3;
+                                        continue;
+                                    }                                   
+                                }
+                                if (E.Cast(v3.ToVector3()))
+                                {
+                                    return;
+                                }
+                            }
                         }
                     }
                 }
                 #endregion
+                
+
+
             }
             if (MenuSettings.KeysSettings.SemiR.Active && R.IsReady())
             {
@@ -648,13 +680,48 @@ namespace Template
                 }
                 if (R.IsReady() && MenuSettings.RSettings.Rcombo.Enabled && !target.HasBuff("ireliamark"))
                 {
-                    var Rpred = R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-
-                    if (objPlayer.Position.CountEnemyHeroesInRange(800) < 2 && target.Distance(objPlayer) < 600)
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(R, target);
+                    if(pred.CastPosition != Vector3.Zero && pred.Hitchance > FSpred.Prediction.HitChance.Medium)
                     {
                         if (target.Health <= GetQDmg(target) * 3 + (W.IsReady() ? W.GetDamage(target) : 0) + (E.IsReady() ? E.GetDamage(target) : 0) + R.GetDamage(target) + 100)
                         {
-                            if (Rpred.Hitchance >= HitChance.High && Rpred.CastPosition.DistanceToPlayer() < R.Range - 200)
+                            R.Cast(pred.CastPosition);
+                        }
+                    }
+
+
+                    try
+                    {
+                        var targets = TargetSelector.GetTargets(1000);
+                        if(target != null)
+                        {
+                            foreach (var item in targets.OrderBy(i => i.Health))
+                            {
+                                var Rpred = FSpred.Prediction.Prediction.GetPrediction(R, item);
+
+                                if(Rpred.CastPosition != Vector3.Zero && Rpred.Hitchance >= FSpred.Prediction.HitChance.Medium)
+                                {
+                                    if(Rpred.AoeTargetsHitCount >= MenuSettings.RSettings.Rhit)
+                                    {
+                                        R.Cast(Rpred.CastPosition);
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("==========================================");
+                        Console.WriteLine(ex);
+                        Console.WriteLine("==========================================");
+                    }
+
+                    /*if (objPlayer.Position.CountEnemyHeroesInRange(800) < 2 && target.Distance(objPlayer) < 600)
+                    {
+                        if (target.Health <= GetQDmg(target) * 3 + (W.IsReady() ? W.GetDamage(target) : 0) + (E.IsReady() ? E.GetDamage(target) : 0) + R.GetDamage(target) + 100)
+                        {
+                            if (Rpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     R.Cast(Rpred.CastPosition);
                         }
                     }
@@ -665,7 +732,7 @@ namespace Template
                         Vector3 Rpos = Vector3.Zero;
 
                         if (!targets.Any()) return;
-                        foreach (var Rprediction in targets.Select(i => R.GetPrediction(i)).Where(i => (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount > MenuSettings.RSettings.Rhit)).OrderByDescending(i => i.AoeTargetsHitCount))
+                        foreach (var Rprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(R, i)).Where(i => (i.Hitchance >= FSpred.Prediction.HitChance.Medium && i.AoeTargetsHitCount > MenuSettings.RSettings.Rhit)).OrderByDescending(i => i.AoeTargetsHitCount))
                         {
                             Rpos = Rprediction.CastPosition;
                         }
@@ -677,7 +744,7 @@ namespace Template
                     catch (Exception ex)
                     {
                         Console.WriteLine("R.cast Error" + ex);
-                    }
+                    }*/
                 }
             }           
         }
@@ -816,32 +883,29 @@ namespace Template
                         }
                         if (MenuSettings.ESettings.ImproveE.Enabled)
                         {
-                            if (objPlayer.HasBuff("IreliaE"))
+                            if (E.IsReady() && E.Name != "IreliaE" && objPlayer.HasBuff("IreliaE") && ECatPos.IsValid())
                             {
-                                if (!target.IsValidTarget(775)) return;
-                                Vector3 CastPos = Vector3.Zero;
-                                for (int i = 775; i > 50; i--)
+                                Vector2 vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
+                                if (vector2.Distance(ObjectManager.Player.Position) < E.Range)
                                 {
-                                    if (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() <= 775)
+                                    Vector2 v3 = vector2;
+                                    int slider = 775;
+                                    for (int j = 50; j <= slider; j += 50)
                                     {
-                                        E.Delay = (
-                                            (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() - E2.GetPrediction(target).CastPosition.DistanceToPlayer()) / E.Speed + 0.25f
-                                            + ereal - 0.1f
-                                            );
+                                        Vector2 vector3 = vector2.Extend(ECatPos.ToVector2(), (float)(-(float)j));
+                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                        {
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            v3 = vector3;
+                                            continue;
+                                        }
                                     }
-
-                                    if (E.GetPrediction(target).Hitchance >= HitChance.High && E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 775)
+                                    if (E.Cast(v3.ToVector3()))
                                     {
-                                        CastPos = E.GetPrediction(target).CastPosition.Extend(ECatPos, -i);
-                                    }
-                                    else
-                                    {
-                                        CastPos = Vector3.Zero;
-                                    }
-
-                                    if (CastPos != Vector3.Zero)
-                                    {
-                                        E.Cast(CastPos);
+                                        return;
                                     }
                                 }
                             }

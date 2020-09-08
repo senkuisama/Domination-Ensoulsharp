@@ -63,6 +63,7 @@ namespace DominationAIO.Champions
         public class ESettings
         {
             public static MenuBool Ecombo = new MenuBool("Ecombo", "E Combo");
+            public static MenuBool EEvade = new MenuBool("EEvade", "E Evade");
             public static MenuBool Egapcloser = new MenuBool("Egapcloser", "E Gapcloser");
             public static MenuBool EafterAA = new MenuBool("EafterAA", "E after AA");
         }
@@ -154,6 +155,7 @@ namespace DominationAIO.Champions
             Wmenu.Add(MenuRiven.WSettings.WafterAA);
 
             Emenu.Add(MenuRiven.ESettings.Ecombo);
+            Emenu.Add(MenuRiven.ESettings.EEvade);
             Emenu.Add(MenuRiven.ESettings.EafterAA);
             Emenu.Add(MenuRiven.ESettings.Egapcloser);
 
@@ -183,12 +185,13 @@ namespace DominationAIO.Champions
             RivenMenu.Add(Rmenu);
             RivenMenu.Add(range);
             RivenMenu.Add(clear);
-
+       
             RivenMenu.Attach();
 
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnAction += Orbwalker_OnAction;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+            AIHeroClient.OnProcessSpellCast += RivenEEvade;
             Interrupter.OnInterrupterSpell += Interrupter_OnInterrupterSpell;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Dash.OnDash += Dash_OnDash;
@@ -197,17 +200,106 @@ namespace DominationAIO.Champions
 
 
         }
+        //private static Geometry.Circle SkillCirCle;
+        //private static Geometry.Rectangle SkillLine;
+        private static void RivenEEvade(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
+        {
+            if (!MenuRiven.ESettings.EEvade.Enabled) return;
+            if (!sender.IsAlly && args.Slot != SpellSlot.Unknown && (sender is AIHeroClient))
+            {
+                if (
+                        args.SData.TargetingType == SpellDataTargetType.Unit
+                        || args.SData.TargetingType == SpellDataTargetType.SelfAndUnit
+                        || args.SData.TargetingType == SpellDataTargetType.Self
+                        )
+                {
+                    Console.WriteLine("Targeted {0} : " + args.SData.Name + " ( By " + sender.CharacterName + " )", args.Slot.ToString());
+                    if (args.Target.MemoryAddress == Player.MemoryAddress && args.Time < 1.5)
+                    {
+                        if (E.IsReady())
+                        {
+                            E.Cast(Game.CursorPos);
+                            Render.Circle.DrawCircle(Game.CursorPos, 70, System.Drawing.Color.Red);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine(" False in Evade Targeted");
+                    }
+                }
+                else
+                {
+                    if (
+                        args.SData.TargetingType == SpellDataTargetType.LocationAoe
+                        || args.SData.TargetingType == SpellDataTargetType.SelfAoe
+                        )
+                    {
+                        Console.WriteLine("Circle {0} : " + args.SData.Name + " ( By " + sender.CharacterName + " )", args.Slot.ToString());
 
+                        //SkillCirCle = new Geometry.Circle(args.End, args.SData.CastRadius);
+
+                        var CastPos = (new Geometry.Circle(args.End, args.SData.CastRadius)).Points.OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
+                        if (args.End.DistanceToPlayer() < args.SData.CastRadius + 250)
+                        {
+                            if (CastPos.DistanceToPlayer() < 150 && Q.IsReady())
+                            {
+                                Q.Cast(CastPos);
+                            }
+                            else
+                            {
+                                if (E.IsReady())
+                                {
+                                    E.Cast(CastPos);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine(" False in Evade Circle");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Line {0} : " + args.SData.Name + " ( By " + sender.CharacterName + " )", args.Slot.ToString());
+
+                        //SkillLine = (new Geometry.Rectangle(args.Start, args.End, 1));
+
+                        var CastPos = (new Geometry.Rectangle(args.Start, args.End, 1)).Points.OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
+                        var EvadePos = Player.Position.Extend((new Geometry.Rectangle(args.Start, args.End, 1)).Points.MinOrDefault(i => i.DistanceToPlayer()).ToVector3(), -450);
+                        if (CastPos.DistanceToPlayer() < args.SData.CastRadius + 250)
+                        {
+                            if (CastPos.DistanceToPlayer() < 150 && Q.IsReady())
+                            {
+                                Q.Cast(EvadePos);
+                                Render.Circle.DrawCircle(EvadePos, 70, System.Drawing.Color.Red);
+                            }
+                            else
+                            {
+                                if (E.IsReady())
+                                {
+                                    E.Cast(EvadePos);
+                                    Render.Circle.DrawCircle(EvadePos, 70, System.Drawing.Color.Red);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine(" False in Evade Line");
+                        }
+                    }
+                }
+            }
+        }
 
         private static Vector3 MovePos(Vector3 Startpos)
         {
-            return ObjectManager.Player.Position.Extend(Startpos, 300);
+            return ObjectManager.Player.Position.Extend(Startpos, 500);
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (!Player.IsDead)
-            {
+            {           
                 Drawing.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Red);
                 Drawing.DrawCircle(Player.Position, 400, System.Drawing.Color.Yellow);
                 Drawing.DrawCircle(Player.Position, 900, System.Drawing.Color.Blue);
@@ -296,7 +388,7 @@ namespace DominationAIO.Champions
                
 
             if (!sender.IsMe)
-            {
+            {                            
                 if (args.SData.Name.Contains("TalonCutthroat"))
                 {
                     if (args.Target.NetworkId == Player.NetworkId)
@@ -446,8 +538,10 @@ namespace DominationAIO.Champions
         {
             if (Orbwalker.ActiveMode == OrbwalkerMode.Combo || Orbwalker.ActiveMode == OrbwalkerMode.Harass || Orbwalker.ActiveMode == OrbwalkerMode.LaneClear || Orbwalker.ActiveMode == OrbwalkerMode.LastHit || MenuRiven.BurstCombo.Active)
             {
-                if (Variables.TickCount - lastQcast >= 150 && Variables.TickCount - lastQcast <= 260 && MenuRiven.QSettings.FastQ.Enabled)
+                if (Variables.TickCount - lastQcast >= 0 && Variables.TickCount - lastQcast <= 260 && MenuRiven.QSettings.FastQ.Enabled)
                 {
+                    Orbwalker.ResetAutoAttackTimer();
+                    Game.SendEmote(EmoteId.Dance);  
                     Player.IssueOrder(GameObjectOrder.MoveTo, MovePos(Game.CursorPos));
                 }
             }

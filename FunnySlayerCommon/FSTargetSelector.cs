@@ -22,19 +22,19 @@ namespace FunnySlayerCommon
                 #region INDEX
                 if (MenuClass.GetWeight.Index == 0)
                 {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MinOrDefault(i => i.Health);
+                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health).FirstOrDefault();
                 }
                 if (MenuClass.GetWeight.Index == 01)
                 {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MinOrDefault(i => i.Armor);
+                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Armor).FirstOrDefault();
                 }
                 if (MenuClass.GetWeight.Index == 02)
                 {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MinOrDefault(i => i.Mana);
+                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Mana).FirstOrDefault();
                 }
                 if (MenuClass.GetWeight.Index == 03)
                 {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MinOrDefault(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i));
+                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i)).FirstOrDefault();
                 }
                 if (MenuClass.GetWeight.Index == 04)
                 {

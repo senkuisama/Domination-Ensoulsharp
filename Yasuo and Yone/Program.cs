@@ -584,6 +584,7 @@ namespace ConsoleApp
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnPlayAnimation += AIHeroClient_OnPlayAnimation;
             Drawing.OnDraw += Drawing_OnDraw;
+            AIHeroClient.OnDoCast += EEvade;
 
             YasuoMenu.ChatWibu.ValueChanged += (sender, e) => {
 
@@ -600,7 +601,7 @@ namespace ConsoleApp
 
             YasuoMenu.DrawObjPlayerPos.ValueChanged += DrawObjPlayerPos_ValueChanged;
         }
-
+       
         private static void DrawObjPlayerPos_ValueChanged(object sender, EventArgs e)
         {
             Game.Print(objPlayer.Position);
@@ -640,6 +641,22 @@ namespace ConsoleApp
             }
         }
 
+        private static void EEvade(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
+        {
+            if (!sender.IsAlly && args.Slot != SpellSlot.Unknown && (sender is AIHeroClient))
+
+
+
+
+            {
+
+
+
+
+
+
+            }
+        }
         private static void AIHeroClient_OnPlayAnimation(AIBaseClient sender, AIBaseClientPlayAnimationEventArgs args)
         {
             if (sender.IsMe && args.Animation == "Spell3")
@@ -2478,7 +2495,7 @@ namespace ConsoleApp
 
             var target = FSTargetSelector.GetFSTarget(850);
 
-            foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.Medium && i.AoeTargetsHitCount >= 2).OrderByDescending(i => i.AoeTargetsHitCount))
+            foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.High && i.AoeTargetsHitCount >= 1).OrderByDescending(i => i.AoeTargetsHitCount))
             {
                 FlashPos = EQprediction.CastPosition;
 

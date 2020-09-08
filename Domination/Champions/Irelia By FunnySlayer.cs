@@ -890,7 +890,7 @@ namespace Template
                                 {
                                     Vector2 v3 = vector2;
                                     int slider = 775;
-                                    for (int j = 50; j <= slider; j += 50)
+                                    for (int j = 50; j <= slider; j ++)
                                     {
                                         Vector2 vector3 = vector2.Extend(ECatPos.ToVector2(), (float)(-(float)j));
                                         if (vector3.Distance(ObjectManager.Player) >= E.Range)

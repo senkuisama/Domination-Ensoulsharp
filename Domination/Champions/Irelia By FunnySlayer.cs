@@ -3,14 +3,11 @@ using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.MenuUI.Values;
 using EnsoulSharp.SDK.Prediction;
-using EnsoulSharp.SDK.Utility;
+using FunnySlayerCommon;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Windows.Forms.VisualStyles;
-using FunnySlayerCommon;
 
 namespace Template
 {
@@ -45,7 +42,7 @@ namespace Template
         public class ESettings
         {
             public static MenuBool Ecombo = new MenuBool("Ecombo", "E in Combo");
-            public static MenuBool ImproveE = new MenuBool("ImproveE", "Improve E prediction", false); 
+            public static MenuBool ImproveE = new MenuBool("ImproveE", "Improve E prediction", false);
             public static MenuSeparator Efeedback = new MenuSeparator("Efeedback", "E logic if not good Feedback it to FunnySlayer#0348");
         }
 
@@ -104,7 +101,6 @@ namespace Template
             R2 = new Spell(SpellSlot.Unknown, 1000);
             R.SetSkillshot(0.25f, 300, 1500, false, SkillshotType.Line);
 
-            FSpred.Prediction.Prediction.Initialize();
             myMenu = new Menu(objPlayer.CharacterName, "Irelia The Flash", true);
             Menu FStarget = new Menu("FS Target", "Target Selector");
             FStarget.AddTargetSelectorMenu();
@@ -127,7 +123,7 @@ namespace Template
             {
                 MenuSettings.ESettings.Ecombo,
                 MenuSettings.ESettings.ImproveE,
-                MenuSettings.ESettings.Efeedback,               
+                MenuSettings.ESettings.Efeedback,
             };
 
             Menu Rmenu = new Menu("Rmenu", "R Settings")
@@ -164,19 +160,214 @@ namespace Template
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             AIHeroClient.OnBuffLose += AIHeroClient_OnBuffLose;
             Drawing.OnDraw += Drawing_OnDraw;
-            Drawing.OnDraw += Drawing_OnDraw1;
+            Drawing.OnDraw += DRAW_RPOS;
             Game.OnUpdate += IRELIA_LANECLEAR;
             Game.OnUpdate += IRELIA_KS;
             Game.OnUpdate += IRELIA_ECOMBO;
             Game.OnUpdate += IRELIA_RCOMBO;
+            Game.OnUpdate += IRELIA_QCOMBO;
         }
 
-        private static void Drawing_OnDraw1(EventArgs args)
+        private static void IRELIA_QCOMBO(EventArgs args)
         {
             if (objPlayer.IsDead)
                 return;
 
-            if(GetRPos1 != null)
+            if (Orbwalker.ActiveMode != OrbwalkerMode.Combo)
+                return;
+
+            if (!Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
+                return;
+
+            var targets = TargetSelector.GetTargets(3000);
+            if (targets == null)
+                return;
+
+            var target = FSTargetSelector.GetFSTarget(3000);
+            if (target == null)
+                return;
+
+            var MaxObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i) && Q.CanCast(i)).OrderByDescending(i => i.Distance(target));
+            var MinObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i) && Q.CanCast(i)).OrderBy(i => i.Distance(target));
+
+            var Heallist = new List<float>
+            {
+                0f, 12f , 14f, 16f, 18f, 20f
+            };
+
+            var Heal = Heallist[Q.Level] * 0.2f * objPlayer.TotalAttackDamage;
+
+            GapCloserTargetCanKillable();
+
+            if (CanQ(target))
+            {
+                if (objPlayer.Health <= objPlayer.MaxHealth - Heal * MaxObjs.Count() && MenuSettings.QSettings.QDancing.Enabled)
+                {
+                    if (MaxObjs != null && MinObjs != null && MaxObjs.Count() >= 2 && MinObjs.Count() >= 2)
+                    {
+                        AIBaseClient Gap = null;
+                        AIBaseClient Flee = null;
+
+                        
+                        foreach (var max in MaxObjs)
+                        {
+                            foreach (var min in MinObjs)
+                            {
+                                if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
+                                {
+                                    if(Gap.NetworkId != Flee.NetworkId)
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                if (Gap != null)
+                                {
+                                    if (max.Distance(Gap) <= Q.Range)
+                                    {
+                                        Flee = max;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    Flee = max;
+                                }
+
+                                if (Flee != null)
+                                {
+                                    if (min.Distance(Flee) <= Q.Range)
+                                    {
+                                        Gap = min;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    Gap = min;
+                                }                               
+                            }
+
+                            if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
+                            {
+                                if (Gap.NetworkId != Flee.NetworkId)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (Flee != null && Gap != null && Gap.NetworkId != Flee.NetworkId && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
+                        {
+                            if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                            {
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            QGapCloserPos(target.Position);
+                        }
+
+                    }
+                    else
+                    {
+                        QGapCloserPos(target.Position);
+                    }
+                }
+                else
+                {
+                    QGapCloserPos(target.Position);
+                }
+            }
+            else
+            {
+                foreach (var t in targets.OrderBy(i => i.Health))
+                {
+                    if (CanQ(t))
+                    {
+                        if (objPlayer.Health <= objPlayer.MaxHealth - Heal * MaxObjs.Count() && MenuSettings.QSettings.QDancing.Enabled)
+                        {
+                            if (MaxObjs != null && MinObjs != null && MaxObjs.Count() >= 2 && MinObjs.Count() >= 2)
+                            {
+                                AIBaseClient Gap = null;
+                                AIBaseClient Flee = null;
+
+
+                                foreach (var max in MaxObjs)
+                                {
+                                    foreach (var min in MinObjs)
+                                    {
+                                        if (Gap != null)
+                                        {
+                                            if (max.Distance(Gap) <= Q.Range)
+                                            {
+                                                Flee = max;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Flee = max;
+                                        }
+
+                                        if (Flee != null)
+                                        {
+                                            if (min.Distance(Flee) <= Q.Range)
+                                            {
+                                                Gap = min;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Gap = min;
+                                        }
+                                    }
+
+                                    if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                if (Flee != null && Gap != null)
+                                {
+                                    if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                    {
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    QGapCloserPos(t.Position);
+                                }
+
+                            }
+                            else
+                            {
+                                QGapCloserPos(t.Position);
+                            }
+                        }
+                        else
+                        {
+                            QGapCloserPos(t.Position);
+                        }
+                    }
+                    else
+                    {
+                        QGapCloserPos(target.Position);
+                    }
+                }
+            }
+        }
+
+        private static void DRAW_RPOS(EventArgs args)
+        {
+            if (objPlayer.IsDead)
+                return;
+
+            if (GetRPos1 != null)
             {
                 GetRPos1.Draw(System.Drawing.Color.Red, 1);
             }
@@ -210,7 +401,7 @@ namespace Template
                 GetRPos2 = null;
                 return;
             }
-                
+
             var target = FSTargetSelector.GetFSTarget(1000);
             if (target == null || target.HasBuff("ireliamark"))
                 return;
@@ -228,7 +419,7 @@ namespace Template
                 var TargetCount1 = GameObjects.EnemyHeroes.Where(i => GetRPos1.IsInside(i.Position)).Count();
                 var TargetCount2 = GameObjects.EnemyHeroes.Where(i => GetRPos2.IsInside(i.Position) && !GameObjects.EnemyHeroes.Where(a => GetRPos1.IsInside(a.Position)).Any(h => i.NetworkId == h.NetworkId)).Count();
 
-                if (TargetCount1 >= MenuSettings.RSettings.Rhit.Value 
+                if (TargetCount1 >= MenuSettings.RSettings.Rhit.Value
                     || TargetCount2 >= MenuSettings.RSettings.Rhit.Value
                     || TargetCount1 + TargetCount2 >= MenuSettings.RSettings.Rhit.Value
                     )
@@ -255,7 +446,7 @@ namespace Template
             if (!E.IsReady())
                 return;
 
-            if (E.IsReady() && MenuSettings.ESettings.Ecombo.Enabled)
+            if (MenuSettings.ESettings.Ecombo.Enabled)
             {
                 NewEPred();
             }
@@ -274,7 +465,7 @@ namespace Template
             if (minions == null)
                 return;
 
-            foreach(var min in minions)
+            foreach (var min in minions)
             {
                 if (!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                 {
@@ -303,13 +494,13 @@ namespace Template
             if (minions == null)
                 return;
 
-            foreach(var min in minions)
+            foreach (var min in minions)
             {
                 if (CanQ(min))
                 {
-                    if(!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                    if (!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     {
-                        if (Q.CastOnUnit(min))
+                        if (Q.Cast(min) == CastStates.SuccessfullyCasted || Q.CastOnUnit(min))
                             return;
                     }
                 }
@@ -319,18 +510,18 @@ namespace Template
         public static float SheenTimer = 0;
         private static void AIHeroClient_OnBuffLose(AIBaseClient sender, AIBaseClientBuffLoseEventArgs args)
         {
-            if(sender.MemoryAddress == objPlayer.MemoryAddress || sender.NetworkId == objPlayer.NetworkId || sender.IsMe)
+            if (sender.MemoryAddress == objPlayer.MemoryAddress || sender.NetworkId == objPlayer.NetworkId || sender.IsMe)
             {
-                if (args.Buff.Name == "sheen" 
-                    || args.Buff.Name == "trinityforce" 
-                    || args.Buff.Name.Contains("sheen") 
+                if (args.Buff.Name == "sheen"
+                    || args.Buff.Name == "trinityforce"
+                    || args.Buff.Name.Contains("sheen")
                     || args.Buff.Name.Contains("trinity")
                     || args.Buff.Name.Contains("iceborn")
                     || args.Buff.Name.Contains("Lich"))
                 {
                     SheenTimer = Environment.TickCount + 1700;
                 }
-            }            
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -341,10 +532,10 @@ namespace Template
 
             if (minions == null) return;
 
-            foreach(var min in minions)
+            foreach (var min in minions)
             {
                 Drawing.DrawCircle(min.Position, 70, System.Drawing.Color.Red);
-            }           
+            }
         }
 
         public static Vector3 ECatPos;
@@ -362,7 +553,7 @@ namespace Template
             if (objPlayer.IsDead || objPlayer.IsRecalling())
                 return;
 
-            if(MenuSettings.KeysSettings.FleeKey.Active)
+            if (MenuSettings.KeysSettings.FleeKey.Active)
             {
                 objPlayer.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 QGapCloserPos(Game.CursorPos);
@@ -372,23 +563,13 @@ namespace Template
             {
                 CastManual();
             }
-
-            switch (Orbwalker.ActiveMode)
-            {
-                case OrbwalkerMode.Combo:
-                    Irelia_Combo();
-                    break;
-                case OrbwalkerMode.LaneClear:
-                    Irelia_Clear();
-                    break;
-            }
         }
 
         private static void CastManual()
         {
             if (MenuSettings.KeysSettings.SemiE.Active && E.IsReady())
             {
-                
+
                 #region New E pred
                 var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead);
                 var target = TargetSelector.GetTarget(775);
@@ -416,35 +597,6 @@ namespace Template
                                 }
                             }
                         }
-                        /*if (objPlayer.HasBuff("IreliaE"))
-                        {
-                            Vector3 CastPos = Vector3.Zero;
-                            for (int i = 775; i > 75; i--)
-                            {
-                                if (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() <= 775)
-                                {
-                                    E.Delay = (
-                                        (E2.GetPrediction(target).CastPosition.Extend(ECatPos, -i).DistanceToPlayer() - E2.GetPrediction(target).CastPosition.DistanceToPlayer()) / E.Speed + 0.25f
-                                        + ereal - 0.1f
-                                        );
-                                }
-
-                                if (E.GetPrediction(target).Hitchance >= HitChance.High && E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 775)
-                                {
-                                    CastPos = E.GetPrediction(target).CastPosition.Extend(ECatPos, -i);
-                                }
-                                else
-                                {
-                                    CastPos = Vector3.Zero;
-                                }
-
-                                if (CastPos != Vector3.Zero)
-                                {
-                                    E.Cast(CastPos);
-                                }
-                            }
-                        }*/
-
                         if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
                         {
                             Vector2 vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
@@ -463,7 +615,7 @@ namespace Template
                                     {
                                         v3 = vector3;
                                         continue;
-                                    }                                   
+                                    }
                                 }
                                 if (E.Cast(v3.ToVector3()))
                                 {
@@ -474,7 +626,7 @@ namespace Template
                     }
                 }
                 #endregion
-                
+
 
 
             }
@@ -503,356 +655,7 @@ namespace Template
                 #endregion
             }
         }
-
-        public static void Irelia_Combo()
-        {
-            foreach(AIBaseClient target in GameObjects.Get<AIHeroClient>().Where(i => !i.IsDead && i.IsValidTarget(2000) && !i.IsAlly).OrderBy(i => i.Health))
-            {
-                if (target == null) return;
-
-                var OutAARange = Q_ListAIBaseClient(200, Q.Range + 1, target);
-                var InAARange = Q_ListAIBaseClient(0, 400, target);
-                var QRange = Q_ListAIBaseClient(0, Q.Range + 1);
-                //ireliapassivestacksmax             Passive Stacks
-                //ireliamark                         E Buffs
-                if (Q.IsReady() && MenuSettings.QSettings.Qcombo.Enabled)
-                {
-                    GapCloserTargetCanKillable();
-                    if (MenuSettings.QSettings.QDancing.Enabled)
-                    {
-                        if (CanQ(target))
-                        {
-                            #region Again
-                            #region Use Same Fuction
-                            if (QRange.Any() && QRange.Count >= 2)
-                            {
-                                foreach (AIBaseClient one in QRange)
-                                {
-                                    foreach (AIBaseClient two in QRange)
-                                    {
-                                        if (one.NetworkId != two.NetworkId)
-                                        {
-                                            AIBaseClient follow = null;
-                                            if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                            {
-                                                follow = two;
-                                            }
-                                            else
-                                            {
-                                                if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                {
-                                                    follow = one;
-                                                }
-                                            }
-
-                                            if (follow != null)
-                                            {
-                                                if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                    Q.Cast(follow);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            #endregion
-
-                            if (OutAARange.Any())
-                            {
-                                foreach (AIBaseClient obj in OutAARange)
-                                {
-                                    if (obj.Distance(target) <= 600)
-                                        if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                            Q.Cast(obj);
-                                }
-                            }
-                            else
-                            {
-                                if (InAARange.Any())
-                                {
-                                    foreach (AIBaseClient obj in InAARange)
-                                    {
-                                        if (obj.Distance(target) <= 600)
-                                            if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                Q.Cast(obj);
-                                    }
-                                }
-                                else
-                                {
-                                    #region Use Same Fuction
-                                    if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
-                                    {
-                                        if (QRange.Any() && QRange.Count >= 2)
-                                        {
-                                            foreach (AIBaseClient one in QRange)
-                                            {
-                                                foreach (AIBaseClient two in QRange)
-                                                {
-                                                    if (one.NetworkId != two.NetworkId)
-                                                    {
-                                                        AIBaseClient follow = null;
-                                                        if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                        {
-                                                            follow = two;
-                                                        }
-                                                        else
-                                                        {
-                                                            if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                            {
-                                                                follow = one;
-                                                            }
-                                                            else
-                                                            {
-                                                                QGapCloserPos(target.Position);
-                                                            }
-                                                        }
-
-                                                        if (follow == null)
-                                                        {
-                                                            QGapCloserPos(target.Position);
-                                                        }
-                                                        else
-                                                        {
-                                                            if (objPlayer.ManaPercent >= 15)
-                                                            {
-                                                                if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                                    Q.Cast(follow);
-                                                            }
-                                                            else
-                                                            {
-                                                                QGapCloserPos(target.Position);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            QGapCloserPos(target.Position);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        QGapCloserPos(target.Position);
-                                    }
-
-                                    #endregion
-                                }
-                            }
-                            #endregion
-
-                            if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
-                            {
-                                #region Use Same Fuction
-                                if (QRange.Any() && QRange.Count >= 2)
-                                {
-                                    foreach (AIBaseClient one in QRange)
-                                    {
-                                        foreach (AIBaseClient two in QRange)
-                                        {
-                                            if (one.NetworkId != two.NetworkId)
-                                            {
-                                                AIBaseClient follow = null;
-                                                if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                {
-                                                    follow = two;
-                                                }
-                                                else
-                                                {
-                                                    if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                    {
-                                                        follow = one;
-                                                    }
-                                                }
-
-                                                if (follow != null)
-                                                {
-                                                    if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                        Q.Cast(follow);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                #endregion
-
-                                if (OutAARange.Any())
-                                {
-                                    foreach (AIBaseClient obj in OutAARange)
-                                    {
-                                        if (obj.Distance(target) <= 600)
-                                            if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                Q.Cast(obj);
-                                    }
-                                }
-                                else
-                                {
-                                    if (InAARange.Any())
-                                    {
-                                        foreach (AIBaseClient obj in InAARange)
-                                        {
-                                            if (obj.Distance(target) <= 600)
-                                                if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                    Q.Cast(obj);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        #region Use Same Fuction
-                                        if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
-                                        {
-                                            if (QRange.Any() && QRange.Count >= 2)
-                                            {
-                                                foreach (AIBaseClient one in QRange)
-                                                {
-                                                    foreach (AIBaseClient two in QRange)
-                                                    {
-                                                        if (one.NetworkId != two.NetworkId)
-                                                        {
-                                                            AIBaseClient follow = null;
-                                                            if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                            {
-                                                                follow = two;
-                                                            }
-                                                            else
-                                                            {
-                                                                if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                                {
-                                                                    follow = one;
-                                                                }
-                                                                else
-                                                                {
-                                                                    QGapCloserPos(target.Position);
-                                                                }
-                                                            }
-
-                                                            if (follow == null)
-                                                            {
-                                                                QGapCloserPos(target.Position);
-                                                            }
-                                                            else
-                                                            {
-                                                                if (objPlayer.ManaPercent >= 15)
-                                                                {
-                                                                    if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                                        Q.Cast(follow);
-                                                                }
-                                                                else
-                                                                {
-                                                                    QGapCloserPos(target.Position);
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                QGapCloserPos(target.Position);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            QGapCloserPos(target.Position);
-                                        }
-
-                                        #endregion
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (target.DistanceToPlayer() <= Q.Range + 1)
-                                {
-                                    if (!UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                        Q.Cast(target);
-                                }
-                            }
-                        }
-
-                        if (!CanQ(target))
-                        {
-                            if (!objPlayer.HasBuff("ireliapassivestacksmax") || objPlayer.HealthPercent <= 70)
-                            {
-                                if (QRange.Any() && QRange.Count >= 2)
-                                {
-                                    foreach (AIBaseClient one in QRange)
-                                    {
-                                        foreach (AIBaseClient two in QRange)
-                                        {
-                                            if (one.NetworkId != two.NetworkId)
-                                            {
-                                                AIBaseClient follow = null;
-                                                if ((one.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || one.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && one.Position.Distance(target.Position) < two.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                {
-                                                    follow = two;
-                                                }
-                                                else
-                                                {
-                                                    if ((two.Position.Distance(target.Position) <= objPlayer.Position.Distance(target.Position) || two.Position.Distance(target.Position) <= objPlayer.GetRealAutoAttackRange()) && two.Position.Distance(target.Position) < one.Position.Distance(target.Position) && one.Position.Distance(two.Position) <= Q.Range)
-                                                    {
-                                                        follow = one;
-                                                    }
-                                                    else
-                                                    {
-                                                        QGapCloserPos(target.Position);
-                                                    }
-                                                }
-
-                                                if (follow == null)
-                                                {
-                                                    QGapCloserPos(target.Position);
-                                                }
-                                                else
-                                                {
-                                                    if (objPlayer.ManaPercent >= 15)
-                                                    {
-                                                        if (!UnderTower(follow.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                            Q.Cast(follow);
-                                                    }
-                                                    else
-                                                    {
-                                                        QGapCloserPos(target.Position);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    QGapCloserPos(target.Position);
-                                }
-                            }
-                            else
-                            {
-                                QGapCloserPos(target.Position);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        QGapCloserPos(target.Position);
-                    }
-                    
-                }               
-            }           
-        }
-        public static void Irelia_Clear()
-        {        
-            if (!MenuSettings.ClearSettings.QireClear.Enabled) return;
-            if (objPlayer.ManaPercent <= MenuSettings.ClearSettings.QireMana.Value) return;
-
-            var mins = ObjectManager.Get<AIMinionClient>().Where(i => i.Position.Distance(objPlayer.Position) <= 600 && !i.IsAlly && !i.IsDead && CanQ(i));
-            if (!mins.Any()) return;
-
-            foreach(AIMinionClient min in mins)
-            {
-                //Console.WriteLine(GetQDmg(min));
-                if (!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                    Q.Cast(min);
-            }
-        }
+             
         public static bool UnderTower(Vector3 pos, float bonusrange = 0)
         {
             return
@@ -866,7 +669,7 @@ namespace Template
 
             if (target.IsValidTarget(Q.Range))
             {
-                if(!UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                if (!UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                 {
                     Q.Cast(target);
                 }
@@ -875,9 +678,9 @@ namespace Template
             var gapobjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(2000) && CanQ(i)).ToArray();
             if (gapobjs.Any())
             {
-                foreach(var obj1 in gapobjs)
-                {                   
-                    if(obj1.Distance(target) < Q.Range && obj1.IsValidTarget(Q.Range))
+                foreach (var obj1 in gapobjs)
+                {
+                    if (obj1.Distance(target) < Q.Range && obj1.IsValidTarget(Q.Range))
                     {
                         if (!UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                         {
@@ -885,13 +688,13 @@ namespace Template
                         }
                     }
 
-                    if(gapobjs.Count() >= 2)
+                    if (gapobjs.Count() >= 2)
                     {
-                        foreach(var obj2 in gapobjs.Where(i => i.IsValidTarget(Q.Range)))
+                        foreach (var obj2 in gapobjs.Where(i => i.IsValidTarget(Q.Range)))
                         {
-                            if(obj1.Distance(target) < Q.Range)
+                            if (obj1.Distance(target) < Q.Range)
                             {
-                                if(obj2.Distance(obj1) < Q.Range)
+                                if (obj2.Distance(obj1) < Q.Range)
                                 {
                                     if (!UnderTower(obj2.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                     {
@@ -910,14 +713,15 @@ namespace Template
             && !i.IsDead
             && !i.IsAlly
             && CanQ(i)
-            && (i.Position.Distance(pos) <= objPlayer.Distance(pos) || i.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 50)
+            && (i.Position.Distance(pos) <= objPlayer.Distance(pos) + objPlayer.GetRealAutoAttackRange() || i.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 50)
             ).OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
 
             if (Q.IsReady() && obj != null)
             {
                 if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                    Q.Cast(obj);
-            }           
+                    if (Q.Cast(obj) == CastStates.SuccessfullyCasted || Q.CastOnUnit(obj))
+                        return;
+            }
         }
         public static bool CanQ(AIBaseClient target)
         {
@@ -930,7 +734,7 @@ namespace Template
         public static void NewEPred()
         {
             var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead);
-            var target = TargetSelector.GetTarget(2000);
+            var target = FSTargetSelector.GetFSTarget(2000);
             {
                 if (target == null || target.HasBuff("ireliamark")) return;
 
@@ -940,7 +744,7 @@ namespace Template
 
                     if (E.IsReady(0))
                     {
-                        if (!objPlayer.HasBuff("IreliaE"))
+                        if (E.IsReady() && E.Name == "IreliaE")
                         {
                             if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 825)
                             {
@@ -961,10 +765,10 @@ namespace Template
                             {
                                 if (objPlayer.GetDashInfo().EndPos.Distance(target) < 775)
                                 {
-                                    Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
+                                    Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 775, 50);
 
                                     {
-                                        foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 600))
+                                        foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 775))
                                         {
                                             if (E.Cast(onecircle))
                                                 return;
@@ -977,7 +781,7 @@ namespace Template
                         {
                             if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
                             {
-                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 675);
+                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 700);
                                 var v3 = vector2;
                                 for (int j = 50; j <= 900; j += 20)
                                 {
@@ -1071,7 +875,7 @@ namespace Template
 
             var Trinity = new Items.Item(ItemId.Trinity_Force, 0f);
             if (
-                objPlayer.CanUseItem((int)ItemId.Trinity_Force) || 
+                objPlayer.CanUseItem((int)ItemId.Trinity_Force) ||
                 (Trinity.IsOwned() && Trinity.IsReady) ||
                 trinity
                 )
@@ -1096,7 +900,7 @@ namespace Template
             else
             {
                 return Q.GetDamage(target) + (float)objPlayer.CalculatePhysicalDamage(target, Sheen(target));
-            }      
+            }
         }
 
         /*private static double GetQDmg(AIBaseClient target)
@@ -1167,10 +971,10 @@ namespace Template
         public static float Qspeed()
         {
             return 1500 + objPlayer.MoveSpeed;
-        }        
+        }
         public static List<AIBaseClient> Q_ListAIBaseClient(float minvalue = 0, float maxvalue = 0, AIBaseClient target = null)
         {
-            if(target == null)
+            if (target == null)
                 return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i)).ToList();
             else
                 return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i) && i.NetworkId != target.NetworkId).ToList();

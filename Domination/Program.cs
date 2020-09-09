@@ -30,6 +30,7 @@ namespace DominationAIO
         }
         private static void OnLoadingComplete()
         {
+            FSpred.Prediction.Prediction.Initialize();
             /*try
             {
                 new Program().Updater().Wait();

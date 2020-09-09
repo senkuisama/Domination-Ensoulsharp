@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms.VisualStyles;
+using FunnySlayerCommon;
 
 namespace Template
 {
@@ -67,6 +68,8 @@ namespace Template
             public static MenuKeyBind SemiE = new MenuKeyBind("SemiE", "E Using Key", System.Windows.Forms.Keys.G, KeyBindType.Press);
             public static MenuKeyBind SemiR = new MenuKeyBind("SemiR", "R Using Key", System.Windows.Forms.Keys.T, KeyBindType.Press);
             public static MenuKeyBind FleeKey = new MenuKeyBind("FleeKey", "Flee Key", System.Windows.Forms.Keys.Z, KeyBindType.Press);
+
+            public static MenuKeyBind AutoClearMinions = new MenuKeyBind("Auto Clear Minions", "Clear Minions AUTO", System.Windows.Forms.Keys.N, KeyBindType.Toggle);
         }
     }
     public class loaded
@@ -96,13 +99,16 @@ namespace Template
             E2.SetSkillshot(0.25f, 5f, 1800f, false, false, SkillshotType.Line);
 
             R = new Spell(SpellSlot.R, 1000);
-            R.SetSkillshot(0.6f, 100, 1200f, false, SkillshotType.Line);
+            R.SetSkillshot(2f, 100, 1000f, true, SkillshotType.Line);
 
             R2 = new Spell(SpellSlot.Unknown, 1000);
             R.SetSkillshot(0.25f, 300, 1500, false, SkillshotType.Line);
 
             FSpred.Prediction.Prediction.Initialize();
             myMenu = new Menu(objPlayer.CharacterName, "Irelia The Flash", true);
+            Menu FStarget = new Menu("FS Target", "Target Selector");
+            FStarget.AddTargetSelectorMenu();
+            myMenu.Add(FStarget);
 
             Menu Qmenu = new Menu("Qmenu", "Q Settings")
             {
@@ -143,6 +149,7 @@ namespace Template
             Keys.Add(MenuSettings.KeysSettings.FleeKey).Permashow();
             Keys.Add(MenuSettings.KeysSettings.SemiE).Permashow();
             Keys.Add(MenuSettings.KeysSettings.SemiR).Permashow();
+            Keys.Add(MenuSettings.KeysSettings.AutoClearMinions).Permashow();
 
             myMenu.Add(Qmenu);
             myMenu.Add(Wmenu);
@@ -157,17 +164,173 @@ namespace Template
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             AIHeroClient.OnBuffLose += AIHeroClient_OnBuffLose;
             Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnDraw += Drawing_OnDraw1;
+            Game.OnUpdate += IRELIA_LANECLEAR;
+            Game.OnUpdate += IRELIA_KS;
+            Game.OnUpdate += IRELIA_ECOMBO;
+            Game.OnUpdate += IRELIA_RCOMBO;
+        }
+
+        private static void Drawing_OnDraw1(EventArgs args)
+        {
+            if (objPlayer.IsDead)
+                return;
+
+            if(GetRPos1 != null)
+            {
+                GetRPos1.Draw(System.Drawing.Color.Red, 1);
+            }
+            if (GetRPos2 != null)
+            {
+                GetRPos2.Draw(System.Drawing.Color.Red, 1);
+            }
+        }
+
+        public static Geometry.Rectangle GetRPos1;
+        public static Geometry.Rectangle GetRPos2;
+        private static void IRELIA_RCOMBO(EventArgs args)
+        {
+            if (objPlayer.IsDead)
+            {
+                GetRPos1 = null;
+                GetRPos2 = null;
+                return;
+            }
+
+            if (Orbwalker.ActiveMode != OrbwalkerMode.Combo)
+            {
+                GetRPos1 = null;
+                GetRPos2 = null;
+                return;
+            }
+
+            if (!R.IsReady() || !MenuSettings.RSettings.Rcombo.Enabled)
+            {
+                GetRPos1 = null;
+                GetRPos2 = null;
+                return;
+            }
+                
+            var target = FSTargetSelector.GetFSTarget(1000);
+            if (target == null || target.HasBuff("ireliamark"))
+                return;
+            var pred = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
+            if (pred != null)
+            {
+                if (target.HealthPercent <= MenuSettings.RSettings.Rheath.Value)
+                {
+                    if (R.Cast(pred))
+                        return;
+                }
+                GetRPos1 = new Geometry.Rectangle(objPlayer.Position, pred.ToVector3(), 110);
+                GetRPos2 = new Geometry.Rectangle(pred, pred.Extend(objPlayer.Position, -450), 300);
+
+                var TargetCount1 = GameObjects.EnemyHeroes.Where(i => GetRPos1.IsInside(i.Position)).Count();
+                var TargetCount2 = GameObjects.EnemyHeroes.Where(i => GetRPos2.IsInside(i.Position) && !GameObjects.EnemyHeroes.Where(a => GetRPos1.IsInside(a.Position)).Any(h => i.NetworkId == h.NetworkId)).Count();
+
+                if (TargetCount1 >= MenuSettings.RSettings.Rhit.Value 
+                    || TargetCount2 >= MenuSettings.RSettings.Rhit.Value
+                    || TargetCount1 + TargetCount2 >= MenuSettings.RSettings.Rhit.Value
+                    )
+                {
+                    if (R.Cast(pred))
+                        return;
+                }
+            }
+            else
+            {
+                GetRPos1 = null;
+                GetRPos2 = null;
+            }
+        }
+
+        private static void IRELIA_ECOMBO(EventArgs args)
+        {
+            if (objPlayer.IsDead)
+                return;
+
+            if (Orbwalker.ActiveMode != OrbwalkerMode.Combo)
+                return;
+
+            if (!E.IsReady())
+                return;
+
+            if (E.IsReady() && MenuSettings.ESettings.Ecombo.Enabled)
+            {
+                NewEPred();
+            }
+        }
+
+        private static void IRELIA_KS(EventArgs args)
+        {
+            if (objPlayer.IsDead)
+                return;
+
+            if (!Q.IsReady())
+                return;
+
+            var minions = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(600)).Where(i => i.Health <= GetQDmg(i)).OrderBy(i => i.DistanceToPlayer());
+
+            if (minions == null)
+                return;
+
+            foreach(var min in minions)
+            {
+                if (!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                {
+                    if (Q.CastOnUnit(min))
+                        return;
+                }
+            }
+        }
+
+        private static void IRELIA_LANECLEAR(EventArgs args)
+        {
+            if (objPlayer.IsDead)
+                return;
+
+            if (!Q.IsReady())
+                return;
+
+            if (!MenuSettings.ClearSettings.QireClear.Enabled) return;
+            if (objPlayer.ManaPercent <= MenuSettings.ClearSettings.QireMana.Value) return;
+
+            if (Orbwalker.ActiveMode != OrbwalkerMode.LaneClear && Orbwalker.ActiveMode != OrbwalkerMode.LastHit && !MenuSettings.KeysSettings.AutoClearMinions.Active)
+                return;
+
+            var minions = GameObjects.EnemyMinions.Where(i => i.IsValidTarget(600)).OrderBy(i => i.Health);
+
+            if (minions == null)
+                return;
+
+            foreach(var min in minions)
+            {
+                if (CanQ(min))
+                {
+                    if(!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                    {
+                        if (Q.CastOnUnit(min))
+                            return;
+                    }
+                }
+            }
         }
 
         public static float SheenTimer = 0;
         private static void AIHeroClient_OnBuffLose(AIBaseClient sender, AIBaseClientBuffLoseEventArgs args)
         {
-            if (sender.CharacterName != "Irelia") return;
-
-            if(args.Buff.Name == "sheen" || args.Buff.Name == "trinityforce")
+            if(sender.MemoryAddress == objPlayer.MemoryAddress || sender.NetworkId == objPlayer.NetworkId || sender.IsMe)
             {
-                SheenTimer = Variables.TickCount + 1700;
-            }
+                if (args.Buff.Name == "sheen" 
+                    || args.Buff.Name == "trinityforce" 
+                    || args.Buff.Name.Contains("sheen") 
+                    || args.Buff.Name.Contains("trinity")
+                    || args.Buff.Name.Contains("iceborn")
+                    || args.Buff.Name.Contains("Lich"))
+                {
+                    SheenTimer = Environment.TickCount + 1700;
+                }
+            }            
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -343,7 +506,7 @@ namespace Template
 
         public static void Irelia_Combo()
         {
-            foreach(AIBaseClient target in GameObjects.Get<AIHeroClient>().Where(i => !i.IsDead && i.IsValidTarget(2000) && !i.IsAlly))
+            foreach(AIBaseClient target in GameObjects.Get<AIHeroClient>().Where(i => !i.IsDead && i.IsValidTarget(2000) && !i.IsAlly).OrderBy(i => i.Health))
             {
                 if (target == null) return;
 
@@ -672,80 +835,7 @@ namespace Template
                         QGapCloserPos(target.Position);
                     }
                     
-                }
-
-                if(E.IsReady() && MenuSettings.ESettings.Ecombo.Enabled)
-                {
-                    NewEPred();
-                }
-                if (R.IsReady() && MenuSettings.RSettings.Rcombo.Enabled && !target.HasBuff("ireliamark"))
-                {
-                    var pred = FSpred.Prediction.Prediction.GetPrediction(R, target);
-                    if(pred.CastPosition != Vector3.Zero && pred.Hitchance > FSpred.Prediction.HitChance.Medium)
-                    {
-                        if (target.Health <= GetQDmg(target) * 3 + (W.IsReady() ? W.GetDamage(target) : 0) + (E.IsReady() ? E.GetDamage(target) : 0) + R.GetDamage(target) + 100)
-                        {
-                            R.Cast(pred.CastPosition);
-                        }
-                    }
-
-
-                    try
-                    {
-                        var targets = TargetSelector.GetTargets(1000);
-                        if(target != null)
-                        {
-                            foreach (var item in targets.OrderBy(i => i.Health))
-                            {
-                                var Rpred = FSpred.Prediction.Prediction.GetPrediction(R, item);
-
-                                if(Rpred.CastPosition != Vector3.Zero && Rpred.Hitchance >= FSpred.Prediction.HitChance.Medium)
-                                {
-                                    if(Rpred.AoeTargetsHitCount >= MenuSettings.RSettings.Rhit)
-                                    {
-                                        R.Cast(Rpred.CastPosition);
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("==========================================");
-                        Console.WriteLine(ex);
-                        Console.WriteLine("==========================================");
-                    }
-
-                    /*if (objPlayer.Position.CountEnemyHeroesInRange(800) < 2 && target.Distance(objPlayer) < 600)
-                    {
-                        if (target.Health <= GetQDmg(target) * 3 + (W.IsReady() ? W.GetDamage(target) : 0) + (E.IsReady() ? E.GetDamage(target) : 0) + R.GetDamage(target) + 100)
-                        {
-                            if (Rpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                                    R.Cast(Rpred.CastPosition);
-                        }
-                    }
-
-                    try
-                    {
-                        var targets = TargetSelector.GetTargets(900);
-                        Vector3 Rpos = Vector3.Zero;
-
-                        if (!targets.Any()) return;
-                        foreach (var Rprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(R, i)).Where(i => (i.Hitchance >= FSpred.Prediction.HitChance.Medium && i.AoeTargetsHitCount > MenuSettings.RSettings.Rhit)).OrderByDescending(i => i.AoeTargetsHitCount))
-                        {
-                            Rpos = Rprediction.CastPosition;
-                        }
-                        if (Rpos != Vector3.Zero)
-                        {
-                            R.Cast(Rpos);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("R.cast Error" + ex);
-                    }*/
-                }
+                }               
             }           
         }
         public static void Irelia_Clear()
@@ -758,7 +848,7 @@ namespace Template
 
             foreach(AIMinionClient min in mins)
             {
-                Console.WriteLine(GetQDmg(min));
+                //Console.WriteLine(GetQDmg(min));
                 if (!UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     Q.Cast(min);
             }
@@ -771,7 +861,7 @@ namespace Template
         }
         public static void GapCloserTargetCanKillable()
         {
-            var target = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(2000) && CanQ(i)).MinOrDefault(i => i.DistanceToPlayer());
+            var target = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(2000) && CanQ(i)).OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
             if (target == null || !Q.IsReady()) return;
 
             if (target.IsValidTarget(Q.Range))
@@ -816,14 +906,14 @@ namespace Template
         }
         public static void QGapCloserPos(Vector3 pos)
         {
-            var obj = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range) 
-            && !i.IsDead 
-            && !i.IsAlly 
+            var obj = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range)
+            && !i.IsDead
+            && !i.IsAlly
             && CanQ(i)
             && (i.Position.Distance(pos) <= objPlayer.Distance(pos) || i.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 50)
-            ).MinOrDefault(i => i.DistanceToPlayer());
+            ).OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
 
-            if (Q.IsReady() && !(obj == null))
+            if (Q.IsReady() && obj != null)
             {
                 if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     Q.Cast(obj);
@@ -861,7 +951,8 @@ namespace Template
                                     {
                                         if (onecircle.Distance(target) > 600)
                                         {
-                                            E.Cast(onecircle);
+                                            if (E.Cast(onecircle))
+                                                return;
                                         }
                                     }
                                 }
@@ -875,7 +966,8 @@ namespace Template
                                     {
                                         foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 600))
                                         {
-                                            E.Cast(onecircle);
+                                            if (E.Cast(onecircle))
+                                                return;
                                         }
                                     }
                                 }
@@ -883,30 +975,26 @@ namespace Template
                         }
                         if (MenuSettings.ESettings.ImproveE.Enabled)
                         {
-                            if (E.IsReady() && E.Name != "IreliaE" && objPlayer.HasBuff("IreliaE") && ECatPos.IsValid())
+                            if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
                             {
-                                Vector2 vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
-                                if (vector2.Distance(ObjectManager.Player.Position) < E.Range)
+                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 675);
+                                var v3 = vector2;
+                                for (int j = 50; j <= 900; j += 20)
                                 {
-                                    Vector2 v3 = vector2;
-                                    int slider = 775;
-                                    for (int j = 50; j <= slider; j ++)
+                                    var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                    if (vector3.Distance(ObjectManager.Player) >= E.Range)
                                     {
-                                        Vector2 vector3 = vector2.Extend(ECatPos.ToVector2(), (float)(-(float)j));
-                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
-                                        {
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            v3 = vector3;
-                                            continue;
-                                        }
+                                        break;
                                     }
-                                    if (E.Cast(v3.ToVector3()))
+                                    else
                                     {
-                                        return;
+                                        v3 = vector3;
+                                        continue;
                                     }
+                                }
+                                if (E.Cast(v3.ToVector3()))
+                                {
+                                    return;
                                 }
                             }
                         }
@@ -930,7 +1018,8 @@ namespace Template
 
                                     if (castepos != Vector2.Zero)
                                     {
-                                        E.Cast(castepos);
+                                        if (E.Cast(castepos))
+                                            return;
                                     }
                                 }
                             }
@@ -961,14 +1050,12 @@ namespace Template
 
             if (ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force))
             {
-                trinity = false;
-                DelayAction.Add(10, () => { trinity = true; });
+                trinity = true;
             }
             else { trinity = false; }
             if (ObjectManager.Player.CanUseItem((int)ItemId.Sheen))
             {
-                sheen = false;
-                DelayAction.Add(10, () => { sheen = true; });
+                sheen = true;
             }
             else { sheen = false; }
 
@@ -989,10 +1076,10 @@ namespace Template
                 trinity
                 )
             {
-                damage = objPlayer.BaseAttackDamage * 2f;
+                damage = objPlayer.BaseAttackDamage * 2;
             }
 
-            if (Variables.TickCount < SheenTimer)
+            if (Environment.TickCount < SheenTimer)
             {
                 damage = 0;
             }

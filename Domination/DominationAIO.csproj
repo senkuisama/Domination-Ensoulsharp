@@ -115,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Akali.cs" />
+    <Compile Include="Champions\Brand.cs" />
     <Compile Include="Champions\Ezreal.cs" />
     <Compile Include="Champions\Sion.cs" />
     <Compile Include="Champions\GangPlank\Barrel.cs" />

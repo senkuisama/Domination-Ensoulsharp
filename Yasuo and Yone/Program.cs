@@ -274,7 +274,9 @@ namespace ConsoleApp
             obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && CanE(i)));
             if (CanE(target) && E.IsReady() && (!Q.IsReady() || HaveQ2))
             {
-                return
+                if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled)
+                {
+                    return
                 obj.Where(
                     i =>
                     CanE(i)
@@ -284,10 +286,28 @@ namespace ConsoleApp
                         || pos.Distance(PosAfterE(i)) <= 410
                         )
                     )
-                    .MinOrDefault(i => pos.Distance(PosAfterE(i)));
+                    .OrderByDescending(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
+                }
+                else
+                {
+                    return
+                obj.Where(
+                    i =>
+                    CanE(i)
+                    && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= 230
+                        : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
+                        || pos.Distance(PosAfterE(i)) <= 410
+                        )
+                    )
+                    .OrderBy(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
+                }               
             }
             else
-                return
+            {
+                if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled)
+                {
+                    return
                     obj.Where(
                         i =>
                         CanE(i)
@@ -295,7 +315,21 @@ namespace ConsoleApp
                         || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= 230
                         : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()))
                         )
-                        .MinOrDefault(i => pos.Distance(PosAfterE(i)));
+                        .OrderByDescending(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
+                }
+                else
+                {
+                    return
+                    obj.Where(
+                        i =>
+                        CanE(i)
+                        && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= 230
+                        : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()))
+                        )
+                        .OrderBy(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
+                }
+            }
         }
         #endregion
 
@@ -528,7 +562,7 @@ namespace ConsoleApp
             Ecombo.Add(YasuoMenu.Ecombo.Yasuo_Eziczac);
             Ecombo.Add(YasuoMenu.Ecombo.Yasuo_zizzacRange);
             Ecombo.Add(YasuoMenu.Ecombo.Yasuo_Eziczac_Qready);
-            Ecombo.Add(YasuoMenu.Ecombo.Yasuo_EziczacMode).Permashow();
+            Ecombo.Add(YasuoMenu.Ecombo.Yasuo_EziczacMode).Permashow(true, YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled ? YasuoMenu.Ecombo.Yasuo_EziczacMode.SelectedValue : "Disabled", SharpDX.Color.Yellow);
             Ecombo.Add(YasuoMenu.Ecombo.ddtest);
 
             EQcombo.Add(YasuoMenu.EQCombo.Yasuo_EQcombo);
@@ -740,15 +774,18 @@ namespace ConsoleApp
                         {
                             if (PosAfterE(getobj).DistanceToCursor() <= objPlayer.DistanceToCursor())
                             {
-                                E1.Cast(getobj);
+                                if (E1.Cast(getobj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(getobj))
+                                    return;
                             }
                             if (getobj.DistanceToCursor() <= 50)
                             {
-                                E1.Cast(getobj);
+                                if (E1.Cast(getobj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(getobj))
+                                    return;
                             }
                             if (getobj.DistanceToCursor() <= objPlayer.DistanceToCursor())
                             {
-                                E1.Cast(getobj);
+                                if (E1.Cast(getobj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(getobj))
+                                    return;
                             }
                         }
                     }
@@ -780,15 +817,18 @@ namespace ConsoleApp
                         {
                             if (PosAfterE(getobj).DistanceToCursor() <= objPlayer.DistanceToCursor())
                             {
-                                E1.Cast(getobj);
+                                if (E1.Cast(getobj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(getobj))
+                                    return;
                             }
                             if (getobj.DistanceToCursor() <= 50)
                             {
-                                E1.Cast(getobj);
+                                if (E1.Cast(getobj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(getobj))
+                                    return;
                             }
                             if (getobj.DistanceToCursor() <= objPlayer.DistanceToCursor())
                             {
-                                E1.Cast(getobj);
+                                if (E1.Cast(getobj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(getobj))
+                                    return;
                             }
                         }
                     }
@@ -2006,7 +2046,8 @@ namespace ConsoleApp
                     {
                         if (YasuoMenu.Yasuo_Keys.TurretKey.Active)
                         {
-                            E1.Cast(min);
+                            if (E1.Cast(min) == CastStates.SuccessfullyCasted || E1.CastOnUnit(min))
+                                return;
                         }
                         else
                         {
@@ -2014,7 +2055,8 @@ namespace ConsoleApp
 
                             else
                             {
-                                E1.Cast(min);
+                                if (E1.Cast(min) == CastStates.SuccessfullyCasted || E1.CastOnUnit(min))
+                                    return;
                             }
                         }
                     }
@@ -2031,7 +2073,8 @@ namespace ConsoleApp
                     {
                         if (YasuoMenu.Yasuo_Keys.TurretKey.Active)
                         {
-                            E1.Cast(min);
+                            if (E1.Cast(min) == CastStates.SuccessfullyCasted || E1.CastOnUnit(min))
+                                return;
                         }
                         else
                         {
@@ -2039,7 +2082,8 @@ namespace ConsoleApp
 
                             else
                             {
-                                E1.Cast(min);
+                                if (E1.Cast(min) == CastStates.SuccessfullyCasted || E1.CastOnUnit(min))
+                                    return;
                             }
                         }
                     }
@@ -2060,7 +2104,8 @@ namespace ConsoleApp
                 {
                     if(jl.IsValidTarget(YasuoMenu.RangeCheck.Erange.Value) && CanE(jl) && jl.DistanceToPlayer() > 240)
                     {
-                        E1.Cast(jl);
+                        if (E1.Cast(jl) == CastStates.SuccessfullyCasted || E1.CastOnUnit(jl))
+                            return;
                     }
                     if(Q.IsReady())
                         if (HaveQ3)
@@ -2111,8 +2156,8 @@ namespace ConsoleApp
                                                 PosAfterE(obj).Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange && !UnderTower(PosAfterE(obj))
                                                 )
                         {
-                            E.CastOnUnit(obj);
-                            YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active = true;
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active = true;
                         }
                         else
                         {
@@ -2295,8 +2340,9 @@ namespace ConsoleApp
 
                             if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj1)))
                                 if(obj1.IsValidTarget(E.Range))
-                                    E1.Cast(obj1);
-                                else return;
+                                    if (E1.Cast(obj1) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj1))
+                                        return;
+                                    else return;
                             else return;
                         }
                         if (ziczacpos2.Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value || ziczacpos2.Distance(Epred(target)) <= Epred(target).DistanceToPlayer())
@@ -2305,8 +2351,9 @@ namespace ConsoleApp
 
                             if (YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(obj2)))
                                 if (obj2.IsValidTarget(E.Range))
-                                    E1.Cast(obj2);
-                                else return;
+                                    if (E1.Cast(obj2) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj2))
+                                        return;
+                                    else return;
                             else return;
                         }
                     }
@@ -2330,17 +2377,20 @@ namespace ConsoleApp
                     {
                         if (Epred(obj).DistanceToPlayer() > 300)
                         {
-                            E1.Cast(obj);
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
                         }
                     }
                     else
                     {
-                        E1.Cast(obj);
+                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            return;
                     }
 
                     if (Epred(target).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
                     {
-                        E1.Cast(obj);
+                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            return;
                     }
                 }
                 else
@@ -2353,17 +2403,20 @@ namespace ConsoleApp
                     {
                         if(Epred(obj).DistanceToPlayer() > 300)
                         {
-                            E1.Cast(obj);
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
                         }
                     }
                     else
                     {
-                        E1.Cast(obj);
+                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            return;
                     }
 
                     if(Epred(target).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
                     {
-                        E1.Cast(obj);
+                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            return;
                     }
                 }
                 else
@@ -2374,17 +2427,20 @@ namespace ConsoleApp
                     {
                         if (E.GetPrediction(obj).CastPosition.DistanceToPlayer() > 300)
                         {
-                            E1.Cast(obj);
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
                         }
                     }
                     else
                     {
-                        E1.Cast(obj);
+                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            return;
                     }
 
                     if (Epred(target).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
                     {
-                        E1.Cast(obj);
+                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            return;
                     }
                 }                   
             }
@@ -2515,7 +2571,8 @@ namespace ConsoleApp
                         var objs = GameObjects.Enemy.Where(i => !i.Position.IsBuilding() && CanE(i) && i.IsValidTarget(E.Range));
                         foreach(var obj in objs)
                         {
-                            E1.Cast(obj);
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
                         }
                     }
                 }
@@ -2556,17 +2613,20 @@ namespace ConsoleApp
                         {
                             if (Epred(obj).DistanceToPlayer() > 300)
                             {
-                                E1.Cast(obj);
+                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                    return;
                             }
                         }
                         else
                         {
-                            E1.Cast(obj);
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
                         }
 
                         if (Epred(target).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
                         {
-                            E1.Cast(obj);
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
                         }
                     }
                 }

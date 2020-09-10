@@ -8,7 +8,7 @@ using SharpDX;
 
 namespace FSpred.Prediction
 {
-	internal static class AoePrediction
+	public static class AoePrediction
 	{
 		public static PredictionOutput GetPrediction(PredictionInput input)
 		{

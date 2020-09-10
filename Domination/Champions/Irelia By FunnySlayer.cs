@@ -671,7 +671,8 @@ namespace Template
             {
                 if (!UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                 {
-                    Q.Cast(target);
+                    if (Q.Cast(target) == CastStates.SuccessfullyCasted || Q.CastOnUnit(target))
+                        return;
                 }
             }
 
@@ -684,7 +685,8 @@ namespace Template
                     {
                         if (!UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                         {
-                            Q.Cast(obj1);
+                            if (Q.Cast(obj1) == CastStates.SuccessfullyCasted || Q.CastOnUnit(obj1))
+                                return;
                         }
                     }
 
@@ -698,7 +700,8 @@ namespace Template
                                 {
                                     if (!UnderTower(obj2.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                     {
-                                        Q.Cast(obj2);
+                                        if (Q.Cast(obj2) == CastStates.SuccessfullyCasted || Q.CastOnUnit(obj2))
+                                            return;
                                     }
                                 }
                             }
@@ -781,21 +784,23 @@ namespace Template
                         {
                             if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
                             {
-                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 700);
+                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
                                 var v3 = vector2;
-                                for (int j = 50; j <= 900; j += 20)
-                                {
-                                    var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
-                                    if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                if(vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                    for (int j = 50; j <= 900; j += 20)
                                     {
-                                        break;
+                                        var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                        {
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            v3 = vector3;
+                                            continue;
+                                        }
                                     }
-                                    else
-                                    {
-                                        v3 = vector3;
-                                        continue;
-                                    }
-                                }
+
                                 if (E.Cast(v3.ToVector3()))
                                 {
                                     return;

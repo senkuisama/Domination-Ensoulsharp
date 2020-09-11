@@ -470,6 +470,8 @@ namespace ConsoleApp
         #region Yasuo Menu
         public static void YasuoLoad()
         {
+            Game.OnUpdate += Game_OnUpdate1;
+
             var one_or_two = new Random().Next(3);
             var loli_or_waifu = "";
             switch (one_or_two)
@@ -618,8 +620,7 @@ namespace ConsoleApp
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnPlayAnimation += AIHeroClient_OnPlayAnimation;
             Drawing.OnDraw += Drawing_OnDraw;
-            AIHeroClient.OnDoCast += EEvade;
-
+            AIHeroClient.OnDoCast += EEvade;          
             YasuoMenu.ChatWibu.ValueChanged += (sender, e) => {
 
                 if (YasuoMenu.ChatWibu.Enabled)
@@ -635,7 +636,25 @@ namespace ConsoleApp
 
             YasuoMenu.DrawObjPlayerPos.ValueChanged += DrawObjPlayerPos_ValueChanged;
         }
-       
+
+        private static void Game_OnUpdate1(EventArgs args)
+        {
+            if (objPlayer.IsDead) return;
+
+            switch (Orbwalker.ActiveMode)
+            {
+                case OrbwalkerMode.Combo:
+                    Yasuo_DoCombo();
+                    break;
+                case OrbwalkerMode.LaneClear:
+                    Yasuo_DoClear();
+                    break;
+                case OrbwalkerMode.Harass:
+                    Yasuo_DoHarass();
+                    break;
+            }
+        }
+
         private static void DrawObjPlayerPos_ValueChanged(object sender, EventArgs e)
         {
             Game.Print(objPlayer.Position);
@@ -835,20 +854,7 @@ namespace ConsoleApp
                 }
 
                 YasuoEQFlash();
-            }
-
-            switch (Orbwalker.ActiveMode)
-            {
-                case OrbwalkerMode.Combo:
-                    Yasuo_DoCombo();
-                    break;
-                case OrbwalkerMode.LaneClear:
-                    Yasuo_DoClear();
-                    break;
-                case OrbwalkerMode.Harass:
-                    Yasuo_DoHarass();
-                    break;
-            }
+            }            
         }
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
@@ -2363,11 +2369,14 @@ namespace ConsoleApp
         private static void Egaptarget(AIBaseClient target)
         {
             if (target == null || oaa || baa) return;
-            var obj = GetNearObj(target);
-            if(YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
+
+            if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
             {
                 LogicEZicZac(target);
             }
+
+            var obj = GetNearObj(target);
+           
             if (obj != null && E.Level >= 1)
             {
                 if (UnderTower(objPlayer.Position) && !UnderTower(target.Position))

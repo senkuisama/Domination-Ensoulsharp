@@ -787,11 +787,15 @@ namespace Template
                                 var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
                                 var v3 = vector2;
                                 if(vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
-                                    for (int j = 50; j <= 900; j += 20)
+                                    for (int j = 50; j <= 900; j += 50)
                                     {
                                         var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
                                         if (vector3.Distance(ObjectManager.Player) >= E.Range)
                                         {
+                                            if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                            {
+                                                return;
+                                            }
                                             break;
                                         }
                                         else
@@ -799,12 +803,7 @@ namespace Template
                                             v3 = vector3;
                                             continue;
                                         }
-                                    }
-
-                                if (E.Cast(v3.ToVector3()))
-                                {
-                                    return;
-                                }
+                                    }                                
                             }
                         }
                         else

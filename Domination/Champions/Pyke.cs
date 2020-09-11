@@ -14,11 +14,6 @@ namespace Pyke_Ryū
 {
     public class Program
     {       
-        public static void Main(string[] args)
-        {
-            GameEvent.OnGameLoad += GameEvent_OnGameLoad;
-        }
-
         public static AIHeroClient Player = GameObjects.Player;
         public static Spell Q = new Spell(SpellSlot.Q, 400f);
         public static Spell E = new Spell(SpellSlot.E, 550f);
@@ -29,19 +24,18 @@ namespace Pyke_Ryū
         public static MenuBool Qpyke = new MenuBool("Q Combo", "Q Combo|Harass");
         public static MenuBool Epyke = new MenuBool("E Combo", "E Combo|Harass");
 
-        private static void GameEvent_OnGameLoad()
+        public static void GameEvent_OnGameLoad()
         {
-            Prediction.Initialize();
-
-            if(Player.CharacterName != "Pyke")
+            if(Player.CharacterName != "Pyke" || Player == null)
             {
                 return;
             }
+            R.SetSkillshot(0.5f, 100f, float.MaxValue, false, EnsoulSharp.SDK.Prediction.SkillshotType.Circle);
+            Game.OnUpdate += RKS;
 
             Q.SetSkillshot(0.25f, 55f, 2000, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             E.SetSkillshot(0.25f, 70f, 2000, false, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
-            R.SetSkillshot(0.5f, 100f, float.MaxValue, false, EnsoulSharp.SDK.Prediction.SkillshotType.Circle);
-
+            
             Q.SetCharged("PykeQ", "PykeQ", 400, 1100, 1.15f);
 
             Selector.AddTargetSelectorMenu();
@@ -52,9 +46,20 @@ namespace Pyke_Ryū
             RootPyke.Attach();
 
             Game.OnUpdate += Game_OnUpdate;
-            Drawing.OnDraw += Drawing_OnDraw;
+            Game.OnUpdate += Game_OnUpdate1;
+            Drawing.OnDraw += Drawing_OnDraw;            
+        }
 
-            Game.OnUpdate += RKS;
+        private static void Game_OnUpdate1(EventArgs args)
+        {
+            if (Q.IsCharging)
+            {
+                Orbwalker.AttackState = false;
+            }
+            else
+            {
+                Orbwalker.AttackState = true;
+            }
         }
 
         private static void RKS(EventArgs args)
@@ -107,7 +112,7 @@ namespace Pyke_Ryū
             {
                 if (Q.IsCharging)
                 {
-                    var pred = Prediction.GetPrediction(Q, targets.FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
+                    var pred = Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
                     if(pred.Hitchance >= HitChance.High)
                     {
                         Q.Cast(pred.CastPosition);
@@ -120,7 +125,7 @@ namespace Pyke_Ryū
                     {
                         Q.Cast(target);
                     }
-                    var pred = Prediction.GetPrediction(Q, targets.FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
+                    var pred = Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
                     if (pred.Hitchance >= HitChance.High)
                     {
                         Q.StartCharging();

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net;
 using System.Diagnostics;
 using EnsoulSharp;
@@ -108,6 +108,11 @@ namespace DominationAIO
                         break;
                     case "Ezreal":
                         Ezreal.Ezreal_Load();
+                        Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                        break;
+                    case "Pyke":
+                        Pyke_Ryū.Program.GameEvent_OnGameLoad();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;

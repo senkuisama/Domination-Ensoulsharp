@@ -81,7 +81,7 @@ namespace Template
         public static void OnLoad()
         {
             Q = new Spell(SpellSlot.Q, 600f);
-            Q.SetTargetted(0f, Qspeed());
+            Q.SetTargetted(0f, Qspeed());           
 
             W = new Spell(SpellSlot.W, 825f);
             W.SetCharged("IreliaW", "ireliawdefense", 800, 800, 0);
@@ -97,6 +97,7 @@ namespace Template
 
             R = new Spell(SpellSlot.R, 1000);
             R.SetSkillshot(2f, 100, 1000f, true, SkillshotType.Line);
+            
 
             R2 = new Spell(SpellSlot.Unknown, 1000);
             R.SetSkillshot(0.25f, 300, 1500, false, SkillshotType.Line);
@@ -155,17 +156,17 @@ namespace Template
             myMenu.Add(Keys);
 
             myMenu.Attach();
-
-            Game.OnUpdate += OnUpdate;
-            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+                       
             AIHeroClient.OnBuffLose += AIHeroClient_OnBuffLose;
-            Drawing.OnDraw += Drawing_OnDraw;
-            Drawing.OnDraw += DRAW_RPOS;
-            Game.OnUpdate += IRELIA_LANECLEAR;
             Game.OnUpdate += IRELIA_KS;
-            Game.OnUpdate += IRELIA_ECOMBO;
             Game.OnUpdate += IRELIA_RCOMBO;
+            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             Game.OnUpdate += IRELIA_QCOMBO;
+            Game.OnUpdate += IRELIA_ECOMBO;         
+            Game.OnUpdate += OnUpdate;
+            Drawing.OnDraw += Drawing_OnDraw;                   
+            Game.OnUpdate += IRELIA_LANECLEAR;                                           
+            Drawing.OnDraw += DRAW_RPOS;
         }
 
         private static void IRELIA_QCOMBO(EventArgs args)
@@ -183,6 +184,8 @@ namespace Template
             if (targets == null)
                 return;
 
+            GapCloserTargetCanKillable();
+
             var target = FSTargetSelector.GetFSTarget(3000);
             if (target == null)
                 return;
@@ -197,8 +200,7 @@ namespace Template
 
             var Heal = Heallist[Q.Level] * 0.2f * objPlayer.TotalAttackDamage;
 
-            GapCloserTargetCanKillable();
-
+            
             if (CanQ(target))
             {
                 if (objPlayer.Health <= objPlayer.MaxHealth - Heal * MaxObjs.Count() && MenuSettings.QSettings.QDancing.Enabled)
@@ -261,7 +263,17 @@ namespace Template
                         {
                             if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
                             {
-                                return;
+                                if (Flee != null && Gap != null && Gap.NetworkId != Flee.NetworkId && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
+                                {
+                                    if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                    {
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    QGapCloserPos(target.Position);
+                                }
                             }
                         }
                         else
@@ -335,7 +347,17 @@ namespace Template
                                 {
                                     if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
                                     {
-                                        return;
+                                        if (Flee != null && Gap != null)
+                                        {
+                                            if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                            {
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            QGapCloserPos(t.Position);
+                                        }
                                     }
                                 }
                                 else
@@ -528,13 +550,13 @@ namespace Template
         {
             if (!MenuSettings.ClearSettings.DrawMinions.Enabled) return;
 
-            var minions = GameObjects.GetMinions(600).Where(i => CanQ(i)).ToList();
+            var minions = GameObjects.GetMinions(2000).Where(i => CanQ(i)).OrderByDescending(i => i.DistanceToPlayer()).ToList();
 
             if (minions == null) return;
 
             foreach (var min in minions)
             {
-                Drawing.DrawCircle(min.Position, 70, System.Drawing.Color.Red);
+                Drawing.DrawCircle(min.Position, 70, System.Drawing.Color.White);
             }
         }
 
@@ -717,7 +739,7 @@ namespace Template
             && !i.IsAlly
             && CanQ(i)
             && (i.Position.Distance(pos) <= objPlayer.Distance(pos) + objPlayer.GetRealAutoAttackRange() || i.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 50)
-            ).OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
+            ).OrderBy(i => i.Distance(pos)).FirstOrDefault();
 
             if (Q.IsReady() && obj != null)
             {
@@ -728,65 +750,29 @@ namespace Template
         }
         public static bool CanQ(AIBaseClient target)
         {
-            if (target.Health > GetQDmg(target) && !target.HasBuff("ireliamark"))
-            {
+            if (target.Health <= GetQDmg(target) || target.HasBuff("ireliamark"))
+                return true;
+            else
                 return false;
-            }
-            else return true;
         }
         public static void NewEPred()
         {
-            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead);
             var target = FSTargetSelector.GetFSTarget(2000);
+         
             {
-                if (target == null || target.HasBuff("ireliamark")) return;
-
                 if (target != null && !target.HasBuff("ireliamark"))
                 {
                     float ereal = 0.275f + Game.Ping / 1000;
 
                     if (E.IsReady(0))
                     {
-                        if (E.IsReady() && E.Name == "IreliaE")
-                        {
-                            if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 825)
-                            {
-                                Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
-
-                                {
-                                    foreach (var onecircle in circle.Points)
-                                    {
-                                        if (onecircle.Distance(target) > 600)
-                                        {
-                                            if (E.Cast(onecircle))
-                                                return;
-                                        }
-                                    }
-                                }
-                            }
-                            if (objPlayer.IsDashing())
-                            {
-                                if (objPlayer.GetDashInfo().EndPos.Distance(target) < 775)
-                                {
-                                    Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 775, 50);
-
-                                    {
-                                        foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 775))
-                                        {
-                                            if (E.Cast(onecircle))
-                                                return;
-                                        }
-                                    }
-                                }
-                            }
-                        }
                         if (MenuSettings.ESettings.ImproveE.Enabled)
                         {
                             if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
                             {
                                 var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
                                 var v3 = vector2;
-                                if(vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
                                     for (int j = 50; j <= 900; j += 50)
                                     {
                                         var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
@@ -803,7 +789,7 @@ namespace Template
                                             v3 = vector3;
                                             continue;
                                         }
-                                    }                                
+                                    }
                             }
                         }
                         else
@@ -828,6 +814,252 @@ namespace Template
                                     {
                                         if (E.Cast(castepos))
                                             return;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (E.IsReady() && E.Name == "IreliaE")
+                        {
+                            if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 825)
+                            {
+                                Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
+
+                                {
+                                    foreach (var onecircle in circle.Points)
+                                    {
+                                        if (onecircle.Distance(target) > 600)
+                                        {
+                                            if (E.Cast(onecircle))
+                                            {
+                                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
+                                                var v3 = vector2;
+                                                if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                                    for (int j = 50; j <= 900; j += 50)
+                                                    {
+                                                        var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                                        {
+                                                            if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                            {
+                                                                return;
+                                                            }
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            v3 = vector3;
+                                                            continue;
+                                                        }
+                                                    }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (objPlayer.IsDashing())
+                            {
+                                if (objPlayer.GetDashInfo().EndPos.Distance(target) < 775)
+                                {
+                                    Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 775, 50);
+
+                                    {
+                                        foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 775))
+                                        {
+                                            if (E.Cast(onecircle))
+                                            {
+                                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
+                                                var v3 = vector2;
+                                                if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                                    for (int j = 50; j <= 900; j += 50)
+                                                    {
+                                                        var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                                        {
+                                                            if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                            {
+                                                                return;
+                                                            }
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            v3 = vector3;
+                                                            continue;
+                                                        }
+                                                    }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }                        
+                    }
+                }
+            }
+
+            if (target != null && target.HasBuff("ireliamark"))
+            {
+                var targets = TargetSelector.GetTargets(2000).Where(i => !CanQ(i)).OrderBy(i => i.Health / objPlayer.GetAutoAttackDamage(target));
+
+                if (targets != null && E.IsReady())
+                {
+                    foreach (var tg in targets)
+                    {
+                        if (MenuSettings.ESettings.ImproveE.Enabled)
+                        {
+                            if (E.Name != "IreliaE" && ECatPos.IsValid())
+                            {
+                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(tg, 600);
+                                var v3 = vector2;
+                                if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                    for (int j = 50; j <= 900; j += 50)
+                                    {
+                                        var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                        {
+                                            if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                            {
+                                                return;
+                                            }
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            v3 = vector3;
+                                            continue;
+                                        }
+                                    }
+                            }
+                        }
+                        else
+                        {
+                            if (objPlayer.HasBuff("IreliaE") && ECatPos.IsValid())
+                            {
+                                var castepos = Vector2.Zero;
+                                Geometry.Circle onecircle = new Geometry.Circle(objPlayer.Position, 725);
+                                foreach (var circle in onecircle.Points)
+                                {
+                                    E.Delay = (725 - E2.GetPrediction(tg).CastPosition.Distance(objPlayer)) / E.Speed + 0.25f + (0.3f + Game.Ping / 1000);
+                                }
+
+                                var epred = E.GetPrediction(target);
+
+                                for (int i = 10000; i > 55; i -= 50)
+                                {
+                                    if (epred.CastPosition.Extend(ECatPos, -i).ToVector2().DistanceToPlayer() <= 775)
+                                        castepos = epred.CastPosition.Extend(ECatPos, -i).ToVector2();
+
+                                    if (castepos != Vector2.Zero)
+                                    {
+                                        if (E.Cast(castepos))
+                                            return;
+                                    }
+                                }
+                            }
+                        }
+
+                        if(E.Name == "IreliaE")
+                        {
+                            var poswillE = tg.Position.Extend(target.Position, 300);
+                            if(poswillE.IsValid() && poswillE.DistanceToPlayer() <= E.Range)
+                            {
+                                if (E.Cast(poswillE))
+                                {
+                                    var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(tg, 600);
+                                    var v3 = vector2;
+                                    if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                        for (int j = 50; j <= 900; j += 50)
+                                        {
+                                            var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                            if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                            {
+                                                if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                {
+                                                    return;
+                                                }
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                v3 = vector3;
+                                                continue;
+                                            }
+                                        }
+                                }
+                            }
+                            else
+                            {
+                                if (E1.GetPrediction(tg).CastPosition.DistanceToPlayer() < 825)
+                                {
+                                    Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
+
+                                    {
+                                        foreach (var onecircle in circle.Points)
+                                        {
+                                            if (onecircle.Distance(target) > 600)
+                                            {
+                                                if (E.Cast(onecircle))
+                                                {
+                                                    var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(tg, 600);
+                                                    var v3 = vector2;
+                                                    if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                                        for (int j = 50; j <= 900; j += 50)
+                                                        {
+                                                            var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                                            if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                                            {
+                                                                if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                                {
+                                                                    return;
+                                                                }
+                                                                break;
+                                                            }
+                                                            else
+                                                            {
+                                                                v3 = vector3;
+                                                                continue;
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (objPlayer.IsDashing())
+                                {
+                                    if (objPlayer.GetDashInfo().EndPos.Distance(tg) < 775)
+                                    {
+                                        Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 775, 50);
+
+                                        {
+                                            foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 775))
+                                            {
+                                                if (E.Cast(onecircle))
+                                                {
+                                                    var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(tg, 600);
+                                                    var v3 = vector2;
+                                                    if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                                        for (int j = 50; j <= 900; j += 50)
+                                                        {
+                                                            var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                                            if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                                            {
+                                                                if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                                {
+                                                                    return;
+                                                                }
+                                                                break;
+                                                            }
+                                                            else
+                                                            {
+                                                                v3 = vector3;
+                                                                continue;
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

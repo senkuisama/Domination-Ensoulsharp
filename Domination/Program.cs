@@ -31,6 +31,9 @@ namespace DominationAIO
         private static void OnLoadingComplete()
         {
             FSpred.Prediction.Prediction.Initialize();
+
+            if (GameObjects.Player == null)
+                return;
             /*try
             {
                 new Program().Updater().Wait();

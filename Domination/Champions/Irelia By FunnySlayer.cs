@@ -32,6 +32,7 @@ namespace Template
             public static MenuBool Qcombo = new MenuBool("Qcombo", "Q in Combo [Gap_closer | KillSteal]");
             public static MenuBool QStacks = new MenuBool("QStacks", "Use Q Stack Passive Logic");
             public static MenuBool QDancing = new MenuBool("QDancing", "----> Q Dancing logic");
+            public static MenuSlider QHeath = new MenuSlider("Q heath", "When Health Percent <= ", 85);
         }
         public class WSettings
         {
@@ -112,6 +113,7 @@ namespace Template
                 MenuSettings.QSettings.Qcombo,
                 MenuSettings.QSettings.QStacks,
                 MenuSettings.QSettings.QDancing,
+                MenuSettings.QSettings.QHeath,
             };
 
             Menu Wmenu = new Menu("Wmenu", "W Settings")
@@ -203,7 +205,7 @@ namespace Template
             
             if (CanQ(target))
             {
-                if (objPlayer.Health <= objPlayer.MaxHealth - Heal * MaxObjs.Count() && MenuSettings.QSettings.QDancing.Enabled)
+                if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
                 {
                     if (MaxObjs != null && MinObjs != null && MaxObjs.Count() >= 2 && MinObjs.Count() >= 2)
                     {
@@ -298,7 +300,7 @@ namespace Template
                 {
                     if (CanQ(t))
                     {
-                        if (objPlayer.Health <= objPlayer.MaxHealth - Heal * MaxObjs.Count() && MenuSettings.QSettings.QDancing.Enabled)
+                        if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
                         {
                             if (MaxObjs != null && MinObjs != null && MaxObjs.Count() >= 2 && MinObjs.Count() >= 2)
                             {
@@ -446,8 +448,9 @@ namespace Template
                     || TargetCount1 + TargetCount2 >= MenuSettings.RSettings.Rhit.Value
                     )
                 {
-                    if (R.Cast(pred))
-                        return;
+                    if(pred.IsValid() && pred.DistanceToPlayer() <= 1000)
+                        if (R.Cast(pred))
+                            return;
                 }
             }
             else
@@ -738,7 +741,11 @@ namespace Template
             && !i.IsDead
             && !i.IsAlly
             && CanQ(i)
-            && (i.Position.Distance(pos) <= objPlayer.Distance(pos) + objPlayer.GetRealAutoAttackRange() || i.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 50)
+            && (
+            (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled) ?
+            i.Position.Distance(pos) <= objPlayer.Distance(pos) + objPlayer.GetRealAutoAttackRange() 
+            : i.Position.Distance(pos) <= objPlayer.Distance(pos)
+            || i.Position.Distance(pos) <= objPlayer.GetRealAutoAttackRange() + 50)
             ).OrderBy(i => i.Distance(pos)).FirstOrDefault();
 
             if (Q.IsReady() && obj != null)
@@ -832,15 +839,15 @@ namespace Template
                                         {
                                             if (E.Cast(onecircle))
                                             {
-                                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
-                                                var v3 = vector2;
-                                                if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                                var vector2 = FSpred.Prediction.Prediction.GetPrediction(target, 600);
+                                                var v3 = Vector2.Zero;
+                                                if (vector2.CastPosition.IsValid() && vector2.CastPosition.Distance(objPlayer.Position) < E.Range - 100)
                                                     for (int j = 50; j <= 900; j += 50)
                                                     {
-                                                        var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
-                                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                                        var vector3 = vector2.CastPosition.Extend(ECatPos.ToVector2(), -j);
+                                                        if (vector3.Distance(ObjectManager.Player) >= E.Range && v3 != Vector2.Zero)
                                                         {
-                                                            if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                            if (E.Cast(v3) || E.Cast(v3))
                                                             {
                                                                 return;
                                                             }
@@ -848,7 +855,7 @@ namespace Template
                                                         }
                                                         else
                                                         {
-                                                            v3 = vector3;
+                                                            v3 = vector3.ToVector2();
                                                             continue;
                                                         }
                                                     }

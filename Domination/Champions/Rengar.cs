@@ -704,7 +704,7 @@ namespace DominationAIO.Champions
             }
         }
         private static bool afteraa, onaa, beforeaa;
-        private static AIBaseClient OrbwalkerTarget = null;
+        //private static AIBaseClient OrbwalkerTarget = null;
         private static void CheckAA(object sender, OrbwalkerActionArgs args)
         {
             if(args.Type == OrbwalkerType.AfterAttack)
@@ -738,7 +738,7 @@ namespace DominationAIO.Champions
                 beforeaa = false;
             }
 
-            OrbwalkerTarget = (AIBaseClient)args.Target;
+            //OrbwalkerTarget = (AIBaseClient)args.Target;
         }
         private static void ClearCC(EventArgs args)
         {

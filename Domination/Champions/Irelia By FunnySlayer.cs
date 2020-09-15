@@ -44,6 +44,7 @@ namespace Template
         {
             public static MenuBool Ecombo = new MenuBool("Ecombo", "E in Combo");
             public static MenuBool ImproveE = new MenuBool("ImproveE", "Improve E prediction", false);
+            public static MenuSlider ImproveEDelay = new MenuSlider("ImproveE Delay", "Delay E prediction (Default 600)", 600, 0, 1200);
             public static MenuSeparator Efeedback = new MenuSeparator("Efeedback", "E logic if not good Feedback it to FunnySlayer#0348");
         }
 
@@ -126,6 +127,7 @@ namespace Template
             {
                 MenuSettings.ESettings.Ecombo,
                 MenuSettings.ESettings.ImproveE,
+                MenuSettings.ESettings.ImproveEDelay,
                 MenuSettings.ESettings.Efeedback,
             };
 
@@ -430,9 +432,9 @@ namespace Template
             if (target == null || target.HasBuff("ireliamark"))
                 return;
             var pred = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
-            if (pred != null)
+            if (pred != null && pred.IsValid())
             {
-                if (target.HealthPercent <= MenuSettings.RSettings.Rheath.Value)
+                if (target.HealthPercent <= MenuSettings.RSettings.Rheath.Value && pred.DistanceToPlayer() < R.Range && target.IsValidTarget(R.Range))
                 {
                     if (R.Cast(pred))
                         return;
@@ -448,7 +450,7 @@ namespace Template
                     || TargetCount1 + TargetCount2 >= MenuSettings.RSettings.Rhit.Value
                     )
                 {
-                    if(pred.IsValid() && pred.DistanceToPlayer() <= 1000)
+                    if(pred.DistanceToPlayer() <= 1000)
                         if (R.Cast(pred))
                             return;
                 }
@@ -544,7 +546,7 @@ namespace Template
                     || args.Buff.Name.Contains("iceborn")
                     || args.Buff.Name.Contains("Lich"))
                 {
-                    SheenTimer = Environment.TickCount + 1700;
+                    SheenTimer = Environment.TickCount;
                 }
             }
         }
@@ -758,7 +760,10 @@ namespace Template
         public static bool CanQ(AIBaseClient target)
         {
             if (target.Health <= GetQDmg(target) || target.HasBuff("ireliamark"))
+            {
+                Console.WriteLine(GetQDmg(target));
                 return true;
+            }              
             else
                 return false;
         }
@@ -777,7 +782,7 @@ namespace Template
                         {
                             if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
                             {
-                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
+                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, MenuSettings.ESettings.ImproveEDelay.Value);
                                 var v3 = vector2;
                                 if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
                                     for (int j = 50; j <= 900; j += 50)
@@ -1081,69 +1086,63 @@ namespace Template
 
         private static float PassiveDamage(AIBaseClient target)
         {
-            var ireliaPassiveDamage = 15f;
-            ireliaPassiveDamage += (objPlayer.Level - 1) * 3;
-            ireliaPassiveDamage += 25 / 100 * objPlayer.GetBonusPhysicalDamage();
-
+            var ireliaPassiveDamage = 15f + (float)(ObjectManager.Player.Level - 1) * 3f;
+            ireliaPassiveDamage += 0.25f * objPlayer.GetBonusPhysicalDamage();
 
             return ireliaPassiveDamage;
         }
 
-        public static float Sheen(AIBaseClient target)
+        public static float Sheen()
         {
-            float damage = 0;
-            bool sheen = false;
-            bool trinity = false;
+            if (Environment.TickCount - 1700 < SheenTimer)
+                return 0f;
 
-            if (ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force))
+            if (GameObjects.Player.CanUseItem((int)ItemId.Trinity_Force))
             {
-                trinity = true;
+                return GameObjects.Player.BaseAttackDamage * 2;
             }
-            else { trinity = false; }
-            if (ObjectManager.Player.CanUseItem((int)ItemId.Sheen))
+            if (GameObjects.Player.CanUseItem((int)ItemId.Sheen))
             {
-                sheen = true;
+                return GameObjects.Player.BaseAttackDamage;
             }
-            else { sheen = false; }
-
-            var Sheen = new Items.Item(ItemId.Sheen, 0f);
-            if (
-                objPlayer.CanUseItem((int)ItemId.Sheen) ||
-                (Sheen.IsOwned() && Sheen.IsReady) ||
-                sheen
-                )
-            {
-                damage = objPlayer.BaseAttackDamage;
-            }
-
-            var Trinity = new Items.Item(ItemId.Trinity_Force, 0f);
-            if (
-                objPlayer.CanUseItem((int)ItemId.Trinity_Force) ||
-                (Trinity.IsOwned() && Trinity.IsReady) ||
-                trinity
-                )
-            {
-                damage = objPlayer.BaseAttackDamage * 2;
-            }
-
-            if (Environment.TickCount < SheenTimer)
-            {
-                damage = 0;
-            }
-
-            return damage;
+            
+            return 0f;
         }
 
         public static float GetQDmg(AIBaseClient target)
         {
+            var Qdmg = QBaseDamage[Q.Level];
+            var Qdmgbonus = QBonusDamage[Q.Level];
+
+            //Normal Dmg
+            {
+                Qdmg += Sheen();
+                Qdmg += 0.6f * GameObjects.Player.TotalAttackDamage;
+            }
+            
+            //minion dmg
+            if (target.IsMinion && target is AIMinionClient)
+            {
+                Qdmg += Qdmgbonus;
+            }
+           
             if (objPlayer.HasBuff("ireliapassivestacksmax"))
+            {
+                return (float)objPlayer.CalculatePhysicalDamage(target, Qdmg) + (float)objPlayer.CalculateMagicDamage(target, PassiveDamage(target));
+            }
+            else
+            {
+                return (float)objPlayer.CalculatePhysicalDamage(target, Qdmg);
+            }
+            
+            /*if (objPlayer.HasBuff("ireliapassivestacksmax"))
             {
                 return Q.GetDamage(target) + (float)objPlayer.CalculatePhysicalDamage(target, Sheen(target)) + (float)objPlayer.CalculateMagicDamage(target, PassiveDamage(target));
             }
             else
             {
                 return Q.GetDamage(target) + (float)objPlayer.CalculatePhysicalDamage(target, Sheen(target));
-            }
+            }*/
         }
 
         /*private static double GetQDmg(AIBaseClient target)

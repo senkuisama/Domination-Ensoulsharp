@@ -469,9 +469,7 @@ namespace ConsoleApp
 
         #region Yasuo Menu
         public static void YasuoLoad()
-        {
-            Game.OnUpdate += Game_OnUpdate1;
-
+        {          
             var one_or_two = new Random().Next(3);
             var loli_or_waifu = "";
             switch (one_or_two)
@@ -616,11 +614,12 @@ namespace ConsoleApp
             EQFlash = new Spell(Flash, 850f);
             EQFlash.SetSkillshot(0, 175, float.MaxValue, false, false, SkillshotType.Circle);
 
+            Game.OnUpdate += Game_OnUpdate1;
             Orbwalker.OnAction += Orbwalker_OnAction;
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnPlayAnimation += AIHeroClient_OnPlayAnimation;
             Drawing.OnDraw += Drawing_OnDraw;
-            AIHeroClient.OnDoCast += EEvade;          
+            //AIHeroClient.OnDoCast += EEvade;          
             YasuoMenu.ChatWibu.ValueChanged += (sender, e) => {
 
                 if (YasuoMenu.ChatWibu.Enabled)
@@ -3224,6 +3223,9 @@ namespace ConsoleApp
 
         private static void Rcombo(AIBaseClient target)
         {
+            if (!YoneMenu.Rcombo.Combo_Rcombo.Enabled)
+                return;
+
             try
             {
                 var targets = TargetSelector.GetTargets(1000);

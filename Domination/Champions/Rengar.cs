@@ -392,8 +392,14 @@ namespace DominationAIO.Champions
                     {
                         if (target.DistanceToPlayer() > 300)
                         {
-                            var pred = FSpred.Prediction.Prediction.GetPrediction(E, target);
-                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred.CastPosition))
+                            var pred1 = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                            if (pred1.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred1.CastPosition))
+                            {
+                                return;
+                            }
+
+                            var pred2 = E.GetPrediction(target);
+                            if (pred2.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High && E.Cast(pred2.CastPosition))
                             {
                                 return;
                             }
@@ -431,8 +437,14 @@ namespace DominationAIO.Champions
                         {
                             if(target.DistanceToPlayer() > 350)
                             {
-                                var pred = FSpred.Prediction.Prediction.GetPrediction(E, target);
-                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred.CastPosition))
+                                var pred1 = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                                if (pred1.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred1.CastPosition))
+                                {
+                                    return;
+                                }
+
+                                var pred2 = E.GetPrediction(target);
+                                if (pred2.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High && E.Cast(pred2.CastPosition))
                                 {
                                     return;
                                 }
@@ -490,8 +502,14 @@ namespace DominationAIO.Champions
 
                         if (E.IsReady() && MenuRengar.ESettings.UseECombo.Enabled)
                         {
-                            var pred = FSpred.Prediction.Prediction.GetPrediction(E, target);
-                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High && Player.Mana != 4 && E.Cast(pred.CastPosition))
+                            var pred1 = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                            if (pred1.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred1.CastPosition))
+                            {
+                                return;
+                            }
+
+                            var pred2 = E.GetPrediction(target);
+                            if (pred2.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High && E.Cast(pred2.CastPosition))
                             {
                                 return;
                             }
@@ -554,8 +572,14 @@ namespace DominationAIO.Champions
                         {
                             if (target.DistanceToPlayer() > 300)
                             {
-                                var pred = FSpred.Prediction.Prediction.GetPrediction(E, target);
-                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred.CastPosition))
+                                var pred1 = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                                if (pred1.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred1.CastPosition))
+                                {
+                                    return;
+                                }
+
+                                var pred2 = E.GetPrediction(target);
+                                if (pred2.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High && E.Cast(pred2.CastPosition))
                                 {
                                     return;
                                 }
@@ -612,8 +636,14 @@ namespace DominationAIO.Champions
 
                         if (E.IsReady() && MenuRengar.ESettings.UseECombo.Enabled)
                         {
-                            var pred = FSpred.Prediction.Prediction.GetPrediction(E, target);
-                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High && Player.Mana != 4 && E.Cast(pred.CastPosition))
+                            var pred1 = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                            if (pred1.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred1.CastPosition))
+                            {
+                                return;
+                            }
+
+                            var pred2 = E.GetPrediction(target);
+                            if (pred2.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High && E.Cast(pred2.CastPosition))
                             {
                                 return;
                             }
@@ -637,8 +667,14 @@ namespace DominationAIO.Champions
                         {
                             if (target.DistanceToPlayer() > 350)
                             {
-                                var pred = FSpred.Prediction.Prediction.GetPrediction(E, target);
-                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred.CastPosition))
+                                var pred1 = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                                if (pred1.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred1.CastPosition))
+                                {
+                                    return;
+                                }
+
+                                var pred2 = E.GetPrediction(target);
+                                if (pred2.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High && E.Cast(pred2.CastPosition))
                                 {
                                     return;
                                 }
@@ -693,8 +729,14 @@ namespace DominationAIO.Champions
 
                         if (E.IsReady() && MenuRengar.ESettings.UseECombo.Enabled)
                         {
-                            var pred = FSpred.Prediction.Prediction.GetPrediction(E, target);
-                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High && E.Name == "RengarE" && E.Cast(pred.CastPosition))
+                            var pred1 = FSpred.Prediction.Prediction.GetPrediction(E, target);                           
+                            if (pred1.Hitchance >= FSpred.Prediction.HitChance.High && E.Cast(pred1.CastPosition))
+                            {
+                                return;
+                            }
+
+                            var pred2 = E.GetPrediction(target);
+                            if (pred2.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High && E.Cast(pred2.CastPosition))
                             {
                                 return;
                             }

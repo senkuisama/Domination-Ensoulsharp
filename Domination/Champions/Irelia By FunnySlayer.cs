@@ -164,9 +164,9 @@ namespace Template
             AIHeroClient.OnBuffLose += AIHeroClient_OnBuffLose;
             Game.OnUpdate += IRELIA_KS;
             Game.OnUpdate += IRELIA_RCOMBO;
-            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;          
             Game.OnUpdate += IRELIA_QCOMBO;
-            Game.OnUpdate += IRELIA_ECOMBO;         
+            Game.OnUpdate += IRELIA_ECOMBO;
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;                   
             Game.OnUpdate += IRELIA_LANECLEAR;                                           
@@ -761,15 +761,15 @@ namespace Template
         {
             if (target.Health <= GetQDmg(target) || target.HasBuff("ireliamark"))
             {
-                Console.WriteLine(GetQDmg(target));
                 return true;
             }              
             else
                 return false;
         }
-        public static void NewEPred()
+
+        private static void NewEPred()
         {
-            var target = FSTargetSelector.GetFSTarget(2000);
+            var target = FSTargetSelector.GetFSTarget(1000);
          
             {
                 if (target != null && !target.HasBuff("ireliamark"))
@@ -780,28 +780,26 @@ namespace Template
                     {
                         if (MenuSettings.ESettings.ImproveE.Enabled)
                         {
-                            if (E.IsReady() && E.Name != "IreliaE" && ECatPos.IsValid())
+                            if (E.Name != "IreliaE" && ECatPos.IsValid())
                             {
                                 var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, MenuSettings.ESettings.ImproveEDelay.Value);
-                                var v3 = vector2;
-                                if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
-                                    for (int j = 50; j <= 900; j += 50)
+                                if (vector2.IsValid())
+                                {
+                                    var RangeCheck = (objPlayer.CountEnemyHeroesInRange(1000) > 2 ? 1000 : 350);
+                                    for (float i = RangeCheck; i > 50; i -= 20)
                                     {
-                                        var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
-                                        if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                        var CastPos = vector2.Extend(ECatPos, -i);
+                                        if(CastPos.DistanceToPlayer() < E.Range)
                                         {
-                                            if (E.Cast(v3.ToVector3()) || E.Cast(v3))
-                                            {
+                                            if (E.Cast(CastPos) || E.Cast(CastPos, true))
                                                 return;
-                                            }
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            v3 = vector3;
-                                            continue;
                                         }
                                     }
+                                }
+                                else
+                                {
+                                    return;
+                                }
                             }
                         }
                         else

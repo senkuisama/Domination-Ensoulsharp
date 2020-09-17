@@ -11,6 +11,7 @@ using System.Drawing;
 using EnsoulSharp.SDK.MenuUI;
 using SharpDX;
 using EnsoulSharp.SDK.Utility;
+using FunnySlayerCommon;
 
 namespace DominationAIO.Champions
 {
@@ -36,6 +37,7 @@ namespace DominationAIO.Champions
     public class WEzSettings
     {
         public static readonly MenuBool Wcombo = new MenuBool("Wcombo", "W Combo");
+        public static readonly MenuBool Wonly = new MenuBool("W only", "Only W if can Q or AA");
         public static readonly MenuBool WClear = new MenuBool("WClear", "W Clear");
         public static readonly MenuBool BeforeAA = new MenuBool("BeforeAA", "Before AA");
     }
@@ -97,6 +99,7 @@ namespace DominationAIO.Champions
             EzQmenu.Add(QEzSettings.ClearMana);
 
             EzWmenu.Add(WEzSettings.Wcombo);
+            EzWmenu.Add(WEzSettings.Wonly);
             EzWmenu.Add(WEzSettings.WClear);
             EzWmenu.Add(WEzSettings.BeforeAA);
 
@@ -110,6 +113,9 @@ namespace DominationAIO.Champions
             EzRmenu.Add(REzSettings.BaseUlt);
 
             EzrealMenu = new Menu("EzrealMenu", "Ezreal Menu", true);
+            var TargetFS = new Menu("Target FS", "Target");
+            TargetFS.AddTargetSelectorMenu();
+            EzrealMenu.Add(TargetFS);
             EzrealMenu.Add(keys);
             EzrealMenu.Add(EzQmenu);
             EzrealMenu.Add(EzWmenu);
@@ -134,28 +140,50 @@ namespace DominationAIO.Champions
 
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnAction += Orbwalker_OnAction;
-
+            AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
             Teleport.OnTeleport += Teleport_OnTeleport;
         }
-       
+
+        private static void AIHeroClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe)
+            {
+                if (Orbwalker.IsAutoAttack(args.SData.Name))
+                {
+                    LastAfterAA = Environment.TickCount;
+                }
+                if (Orbwalker.IsSpecialAttack(args.SData.Name))
+                {
+                    LastAfterAA = Environment.TickCount;
+                }
+            }
+        }
+
         private static bool BeforeAA, OnAA, AfterAA;
+        private static int LastAfterAA = 0;
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if(args.Type == OrbwalkerType.OnAttack)
             {
                 OnAA = true;
+                BeforeAA = false;
+                AfterAA = false;
             }
             else { OnAA = false; }
 
             if (args.Type == OrbwalkerType.BeforeAttack)
             {
                 BeforeAA = true;
+                OnAA = false;
+                AfterAA = false;
             }
             else { BeforeAA = false; }
 
             if (args.Type == OrbwalkerType.AfterAttack)
             {
                 AfterAA = true;
+                OnAA = false;
+                BeforeAA = false;
             }
             else { AfterAA = false; }
         }
@@ -216,63 +244,157 @@ namespace DominationAIO.Champions
 
         private static void EzQCombo()
         {
-            var target = TargetSelector.GetTarget(Q.Range);
+            var target = FSTargetSelector.GetFSTarget(2000);
 
             if (target == null) return;
-
-            if (target == null) return;
-
+           
             if ((!OnAA || QEzSettings.QinAA.Enabled) && QEzSettings.Qcombo.Enabled)
             {
                 if (Q.IsReady())
                 {
-                    Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High);
+                    if(W.IsReady() && WEzSettings.Wcombo.Enabled && target.IsValidTarget(W.Range) && FSpred.Prediction.Prediction.GetPrediction(W, target).Hitchance >= FSpred.Prediction.HitChance.High)
+                    {
+                        var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                        //var Spred = Q.GetSPrediction(target);
+                        var Cpred = Q.GetPrediction(target);
+
+                        if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
+                            //|| Spred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
+                            || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                        {
+                            if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                            {
+                                if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                {
+                                    return;
+                                }                               
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            var RandomTarget = TargetSelector.GetTargets(Q.Range).OrderBy(i => i.Health).FirstOrDefault(i =>
+                            FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= FSpred.Prediction.HitChance.High
+                            || Q.GetSPrediction(target).HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
+                            || Q.GetPrediction(target).Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High
+                            );
+
+                            var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, RandomTarget);
+                            //var Spred = Q.GetSPrediction(RandomTarget);
+                            var Cpred = Q.GetPrediction(RandomTarget);
+
+                            if (RandomTarget != null)
+                            {
+                                if (W.IsReady() && WEzSettings.Wcombo.Enabled)
+                                {
+                                    if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
+                                        //|| Spred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
+                                        || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                                    {
+                                        if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                        {
+                                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                            {
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }                   
                 }
             }
         }
 
         private static void EzWCombo()
         {
-            var target = TargetSelector.SelectedTarget;
-
-            if (target == null ||
-                !target.IsValidTarget(W.Range) /*|| 
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.Collision ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.OutOfRange ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.Medium ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.Low ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.None ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).CastPosition.DistanceToPlayer() > Q.Range
-                */
-                )
-            {
-                target = TargetSelector.GetTarget(W.Range);
-            }
+            var target = FSTargetSelector.GetFSTarget(W.Range);
 
             if (target == null) return;
-
 
             if (OnAA) return;
 
             if (!WEzSettings.Wcombo.Enabled || !W.IsReady()) return;
 
-            /*if (WEzSettings.Wcombo.Enabled && W.IsReady())
-            { 
-                W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High);
-            }    */
-            float avgt = target.AvgMovChangeTime();
-            float movt = target.LastMovChangeTime();
-            float avgp = target.AvgPathLenght();
-            var waypoints = target.GetWaypoints();
-
-            if (LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+            if (WEzSettings.Wonly.Enabled)
             {
-                W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High);
+                if(target.DistanceToPlayer() <= Player.GetRealAutoAttackRange())
+                {
+                    if(Environment.TickCount - LastAfterAA >= (Player.AttackDelay - target.DistanceToPlayer() / W.Speed) * 1000 - W.Delay * 100)
+                    {
+                        if (Q.IsReady() && QEzSettings.Qcombo.Enabled)
+                        {
+                            var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                            //var Spred = Q.GetSPrediction(target);
+                            var Cpred = Q.GetPrediction(target);
+
+                            if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
+                                        //|| Spred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
+                                        || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                            {
+                                if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                {
+                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                    {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                return;
+                        }
+                    }
+                }
+
+                if (Q.IsReady() && QEzSettings.Qcombo.Enabled)
+                {
+                    var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                    //var Spred = Q.GetSPrediction(target);
+                    var Cpred = Q.GetPrediction(target);
+
+                    if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
+                                //|| Spred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
+                                || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                    {
+                        if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                        {
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }               
             }
-
-            if (target.InAutoAttackRange())
+            else
             {
-                W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High);
+                if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                {
+                    var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                    //var Spred = Q.GetSPrediction(target);
+                    var Cpred = Q.GetPrediction(target);
+
+                    if (Q.IsReady() && QEzSettings.Qcombo.Enabled)
+                        if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
+                                //|| Spred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
+                                || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                        {
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                            {
+                                return;
+                            }
+                        }
+                }
             }
         }
 
@@ -280,29 +402,16 @@ namespace DominationAIO.Champions
         {
             var target = TargetSelector.SelectedTarget;
 
-            /*float avgt = target.AvgMovChangeTime();
-            float movt = target.LastMovChangeTime();
-            float avgp = target.AvgPathLenght();
-            var waypoints = target.GetWaypoints();*/
-
-
             if (target == null ||
-                !target.IsValidTarget(Q.Range) /*|| 
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.Collision ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.OutOfRange ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.Medium ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.Low ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == HitChance.None ||
-                LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).CastPosition.DistanceToPlayer() > Q.Range
-                */
+                !target.IsValidTarget(Q.Range)
                 )
             {
-                target = TargetSelector.GetTarget(E.Range + Q.Range);
+                target = FSTargetSelector.GetFSTarget(E.Range + Q.Range);
             }
 
             if (target == null || !(target is AIHeroClient)) return;
 
-            if (target == null || target.HealthPercent > EEzSettings.TargetHeath.Value + 1) return;
+            if (target.HealthPercent > EEzSettings.TargetHeath.Value + 1) return;
 
             if (OnAA) return;
 
@@ -310,24 +419,7 @@ namespace DominationAIO.Champions
 
             foreach(var EPoint in EPoints.Points)
             {
-                float avgt = target.AvgMovChangeTime();
-                float movt = target.LastMovChangeTime();
-                float avgp = target.AvgPathLenght();
-                var waypoints = target.GetWaypoints();
-
-                if (EPoint != Vector2.Zero && EPoint.CountEnemyHeroesInRange(600) <= EEzSettings.TargetCount &&
-                    !ObjectManager.Get<AITurretClient>()
-                    .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(EPoint) <= 850 + ObjectManager.Player.BoundingRadius))
-                    )
-                {
-                    if (LinePrediction.GetPrediction(target, Q.Width, Q.Delay, Q.Speed, Q.Range, Q.Collision, waypoints, avgt, movt, avgp, target.LastAngleDiff(), Q.From.ToVector2(), Player.Position.ToVector2()).HitChance == EnsoulSharp.SDK.Prediction.HitChance.Collision)
-                        return;
-
-                    if (EPoint.Distance(target) < target.DistanceToPlayer() && EEzSettings.Ecombo.Enabled)
-                    {
-                        E.Cast(EPoint);
-                    }
-                }
+                
             }
         }
 
@@ -392,6 +484,10 @@ namespace DominationAIO.Champions
             {
                 Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
                 Drawing.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
+                if(FSTargetSelector.GetFSTarget(2000) != null)
+                {
+                    Drawing.DrawCircle(FSpred.Prediction.Prediction.GetPrediction(Q, FSTargetSelector.GetFSTarget(2000)).CastPosition, 20, System.Drawing.Color.White);
+                }
             }
         }
 

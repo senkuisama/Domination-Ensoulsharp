@@ -119,6 +119,7 @@
     <Compile Include="Champions\Ezreal.cs" />
     <Compile Include="Champions\Pyke.cs" />
     <Compile Include="Champions\Rengar.cs" />
+    <Compile Include="Champions\Samira.cs" />
     <Compile Include="Champions\Sion.cs" />
     <Compile Include="Champions\GangPlank\Barrel.cs" />
     <Compile Include="Champions\GangPlank\Config.cs" />

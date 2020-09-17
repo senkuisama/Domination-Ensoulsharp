@@ -294,6 +294,23 @@ namespace SPredictionMash
             }
             #endregion
 
+            #region if fs prediction selected
+            if (ConfigMenu.SelectedPrediction.Index == 2)
+            {
+                var pout = FSpred.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
+
+                if (minHit > 1)
+                    if (pout.AoeTargetsHitCount >= minHit)
+                        return s.Cast(pout.CastPosition);
+                    else return false;
+
+                if (pout.Hitchance >= FSpred.Prediction.HitChance.High)
+                    return s.Cast(pout.CastPosition);
+                else
+                    return false;
+            }
+            #endregion
+
             if (minHit > 1)
                 return SPredictionCastAoe(s, minHit);
 

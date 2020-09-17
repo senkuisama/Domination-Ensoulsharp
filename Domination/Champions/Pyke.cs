@@ -76,7 +76,12 @@ namespace Pyke_Ryū
                     var pred = Prediction.GetPrediction(R, target);
                     if(pred.Hitchance >= HitChance.High)
                     {
-                        R.Cast(pred.CastPosition);
+                        if (R.Cast(pred.CastPosition))
+                            return;
+                        else
+                        {
+                            R.Cast(pred.CastPosition);
+                        }                       
                     }
                 }
             }

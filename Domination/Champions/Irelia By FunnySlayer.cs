@@ -34,7 +34,7 @@ namespace Template
             public static MenuBool QDancing = new MenuBool("QDancing", "----> Q Dancing logic");
             public static MenuSlider QHeath = new MenuSlider("Q heath", "When Health Percent <= ", 85);
 
-            public static MenuBool CheckQDmgITems = new MenuBool("CheckItemDmg", "Q Dmg Check Items");
+            public static MenuBool CheckQDmgITems = new MenuBool("CheckItemDmg", "Q Dmg Check Items", false);
         }
         public class WSettings
         {
@@ -196,10 +196,7 @@ namespace Template
             var target = FSTargetSelector.GetFSTarget(3000);
             if (target == null)
                 return;
-
-            var MaxObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderByDescending(i => i.Distance(target));
-            var MinObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderBy(i => i.Distance(target));
-
+           
             var Heallist = new List<float>
             {
                 0f, 12f , 14f, 16f, 18f, 20f
@@ -212,6 +209,8 @@ namespace Template
             {
                 if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
                 {
+                    var MaxObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderByDescending(i => i.Distance(target));
+                    var MinObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderBy(i => i.Distance(target));
                     if (MaxObjs != null && MinObjs != null && MaxObjs.Count() >= 2 && MinObjs.Count() >= 2)
                     {
                         AIBaseClient Gap = null;
@@ -220,7 +219,15 @@ namespace Template
                         
                         foreach (var max in MaxObjs)
                         {
-                            foreach (var min in MinObjs)
+                            foreach (var min in MinObjs.Where(i => i.IsValidTarget(Q.Range)
+                                    && !i.IsDead
+                                    && !i.IsAlly
+                                    && CanQ(i)
+                                    && (
+                                    (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled) ?
+                                    i.Position.Distance(target) <= objPlayer.Distance(target) + objPlayer.GetRealAutoAttackRange()
+                                    : i.Position.Distance(target) <= objPlayer.Distance(target)
+                                    || i.Position.Distance(target) <= objPlayer.GetRealAutoAttackRange() + 50)))
                             {
                                 if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
                                 {
@@ -268,19 +275,23 @@ namespace Template
 
                         if (Flee != null && Gap != null && Gap.NetworkId != Flee.NetworkId && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
                         {
-                            if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                            if (Flee.IsValidTarget(Q.Range))
                             {
-                                if (Flee != null && Gap != null && Gap.NetworkId != Flee.NetworkId && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
+                                if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
                                 {
                                     if (Q.Cast(Gap) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Gap))
                                     {
                                         return;
                                     }
+                                    else
+                                    {
+                                        QGapCloserPos(target.Position);
+                                    }
                                 }
-                                else
-                                {
-                                    QGapCloserPos(target.Position);
-                                }
+                            }
+                            else
+                            {
+                                QGapCloserPos(target.Position);
                             }
                         }
                         else
@@ -307,6 +318,8 @@ namespace Template
                     {
                         if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
                         {
+                            var MaxObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderByDescending(i => i.Distance(t));
+                            var MinObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderBy(i => i.Distance(t));
                             if (MaxObjs != null && MinObjs != null && MaxObjs.Count() >= 2 && MinObjs.Count() >= 2)
                             {
                                 AIBaseClient Gap = null;
@@ -315,8 +328,24 @@ namespace Template
 
                                 foreach (var max in MaxObjs)
                                 {
-                                    foreach (var min in MinObjs)
+                                    foreach (var min in MinObjs.Where(i => i.IsValidTarget(Q.Range)
+                                            && !i.IsDead
+                                            && !i.IsAlly
+                                            && CanQ(i)
+                                            && (
+                                            (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled) ?
+                                            i.Position.Distance(t) <= objPlayer.Distance(t) + objPlayer.GetRealAutoAttackRange()
+                                            : i.Position.Distance(t) <= objPlayer.Distance(t)
+                                            || i.Position.Distance(t) <= objPlayer.GetRealAutoAttackRange() + 50)))
                                     {
+                                        if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
+                                        {
+                                            if (Gap.NetworkId != Flee.NetworkId)
+                                            {
+                                                break;
+                                            }
+                                        }
+
                                         if (Gap != null)
                                         {
                                             if (max.Distance(Gap) <= Q.Range)
@@ -346,41 +375,48 @@ namespace Template
 
                                     if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
                                     {
-                                        break;
+                                        if (Gap.NetworkId != Flee.NetworkId)
+                                        {
+                                            break;
+                                        }
                                     }
                                 }
 
-                                if (Flee != null && Gap != null)
+                                if (Flee != null && Gap != null && Gap.NetworkId != Flee.NetworkId && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
                                 {
-                                    if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                    if (Flee.IsValidTarget(Q.Range))
                                     {
-                                        if (Flee != null && Gap != null)
+                                        if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
                                         {
-                                            if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                            if (Q.Cast(Gap) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Gap))
                                             {
                                                 return;
                                             }
+                                            else
+                                            {
+                                                QGapCloserPos(target.Position);
+                                            }
                                         }
-                                        else
-                                        {
-                                            QGapCloserPos(t.Position);
-                                        }
+                                    }
+                                    else
+                                    {
+                                        QGapCloserPos(target.Position);
                                     }
                                 }
                                 else
                                 {
-                                    QGapCloserPos(t.Position);
+                                    QGapCloserPos(target.Position);
                                 }
 
                             }
                             else
                             {
-                                QGapCloserPos(t.Position);
+                                QGapCloserPos(target.Position);
                             }
                         }
                         else
                         {
-                            QGapCloserPos(t.Position);
+                            QGapCloserPos(target.Position);
                         }
                     }
                     else

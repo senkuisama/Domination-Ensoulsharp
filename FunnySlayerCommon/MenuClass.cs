@@ -36,7 +36,7 @@ namespace FunnySlayerCommon
                 "Melee",
         };
 
-        public static Menu ThisMenu;
+        public static Menu ThisMenu = null;
         public static MenuList SecondMenu;
         public static MenuList GetWeight = new MenuList("Get Weight", "Get Weight", TargetWeight, 0);
         public static Menu GetPriority = new Menu("Get Priority", "Get Priority");
@@ -45,37 +45,42 @@ namespace FunnySlayerCommon
      
         public static void AddTargetSelectorMenu(this Menu menu)
         {
-            ThisMenu = menu;
+            ThisMenu = new Menu("FS_Check Target", "FS_Check Target (Beta)");
             var FirstMenu = new MenuSeparator("FS Target Selector", "FS Target Selector");
-            menu.Add(FirstMenu);
+            ThisMenu.Add(FirstMenu);
             SecondMenu = new MenuList("FS Select Mode", "FS Select Mode", new string[] { "Selected", "Weight", "Priority" }, 1);
-            menu.Add(SecondMenu);
+            ThisMenu.Add(SecondMenu);
 
             var Selected = new MenuSeparator("Selected", "Selected");
             var Weight = new MenuSeparator("Weight", "Weight");
             var Priority = new MenuSeparator("Priority", "Priority");
 
-            menu.Add(Selected);
+            ThisMenu.Add(Selected);
                       
-            foreach(var t in GameObjects.AllGameObjects.ToArray())
+            foreach(var t in GameObjects.EnemyHeroes.ToArray())
             {
                 if(t is AIHeroClient && t.IsEnemy)
                 {
-                    GetPriority.Add(new MenuSlider("FS Priority " + t.Name, (t as AIHeroClient).CharacterName, (t as AIHeroClient).IsRanged ? 5 : 1, 0, 10));
+                    GetPriority.Add(new MenuSlider("FS Priority " + t.CharacterName + t.NetworkId, (t as AIHeroClient).CharacterName, (t as AIHeroClient).IsRanged ? 5 : 1, 0, 10));
                 }
             }
 
-            menu.Add(Weight);
-            menu.Add(GetWeight);
+            ThisMenu.Add(Weight);
+            ThisMenu.Add(GetWeight);
 
-            menu.Add(Priority);
-            menu.Add(GetPriority);
+            ThisMenu.Add(Priority);
+            ThisMenu.Add(GetPriority);
 
-            menu.Add(DrawTarget);
+            ThisMenu.Add(DrawTarget);
 
             Drawing.OnDraw += Drawing_OnDraw;
-        }
 
+            menu.Add(ThisMenu);
+        }
+        public static MenuSlider GetSPriority(AIHeroClient t)
+        {
+            return GetPriority.GetValue<MenuSlider>("FS Priority " + t.CharacterName + t.NetworkId);
+        }
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (DrawTarget.Enabled  && FSTargetSelector.GetFSTarget(DrawTarget.ActiveValue) != null)

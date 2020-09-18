@@ -13,79 +13,315 @@ namespace FunnySlayerCommon
     {
         public static AIHeroClient GetFSTarget(float range = 0)
         {
-            if(MenuClass.SecondMenu.Index == 0)
+            if(TargetSelector.SelectedTarget != null && TargetSelector.SelectedTarget.IsValidTarget(range))
             {
                 return TargetSelector.SelectedTarget;
             }
-            if (MenuClass.SecondMenu.Index == 1)
+            else
             {
-                #region INDEX
-                if (MenuClass.GetWeight.Index == 0)
+                if (MenuClass.SecondMenu.Index == 0)
                 {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health).FirstOrDefault();
+                    return TargetSelector.SelectedTarget;
                 }
-                if (MenuClass.GetWeight.Index == 01)
+                if (MenuClass.SecondMenu.Index == 1)
                 {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Armor).FirstOrDefault();
+                    #region INDEX
+                    if (MenuClass.GetWeight.Index == 0)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health).FirstOrDefault();
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 01)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Armor).FirstOrDefault();
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 02)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Mana).FirstOrDefault();
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 03)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i)).FirstOrDefault();
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 04)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Health);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 05)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Armor);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 06)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Mana);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 07)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i));
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 08)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => !i.CanMove);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 09)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.CanMove);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 10)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => !i.CanAttack);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 11)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.CanAttack);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 12)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.IsRanged);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    if (MenuClass.GetWeight.Index == 13)
+                    {
+                        var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.IsMelee);
+                        if (x != null)
+                        {
+                            return x;
+                        }
+                        else
+                        {
+                            var aI = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                            if (aI != null)
+                            {
+                                return x;
+                            }
+                            else
+                            {
+                                return TargetSelector.GetTarget(range);
+                            }
+                        }
+                    }
+                    #endregion
                 }
-                if (MenuClass.GetWeight.Index == 02)
+                if (MenuClass.SecondMenu.Index == 2)
                 {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Mana).FirstOrDefault();
+                    var x = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => MenuClass.GetSPriority(i).Value).LastOrDefault();
+                    if (x != null)
+                    {
+                        return x;
+                    }
+                    else
+                    {
+                        return TargetSelector.GetTarget(range);
+                    }
                 }
-                if (MenuClass.GetWeight.Index == 03)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i)).FirstOrDefault();
-                }
-                if (MenuClass.GetWeight.Index == 04)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Health);
-                }
-                if (MenuClass.GetWeight.Index == 05)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Armor);
-                }
-                if (MenuClass.GetWeight.Index == 06)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Mana);
-                }
-                if (MenuClass.GetWeight.Index == 07)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).MaxOrDefault(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i));
-                }
-                if (MenuClass.GetWeight.Index == 08)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => !i.CanMove);
-                }
-                if (MenuClass.GetWeight.Index == 09)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.CanMove);
-                }
-                if (MenuClass.GetWeight.Index == 10)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => !i.CanAttack);
-                }
-                if (MenuClass.GetWeight.Index == 11)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.CanAttack);
-                }
-                if (MenuClass.GetWeight.Index == 12)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.IsRanged);
-                }
-                if (MenuClass.GetWeight.Index == 13)
-                {
-                    return GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).FirstOrDefault(i => i.IsMelee);
-                }
-                #endregion
-            }
-            if (MenuClass.SecondMenu.Index == 2)
-            {
-                /*return GameObjects.EnemyHeroes
-                    .Where(i => i.IsValidTarget(range))
-                    .MaxOrDefault(i => MenuClass.ThisMenu["GetPriority"][i.CharacterName].GetValue<MenuSlider>().Value);*/
-                return TargetSelector.GetTarget(range);
-            }
-
+            }        
+            
             return null;
         }
     }

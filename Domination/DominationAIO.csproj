@@ -117,6 +117,7 @@
     <Compile Include="Champions\Akali.cs" />
     <Compile Include="Champions\Brand.cs" />
     <Compile Include="Champions\Ezreal.cs" />
+    <Compile Include="Champions\MasterYi.cs" />
     <Compile Include="Champions\Pyke.cs" />
     <Compile Include="Champions\Rengar.cs" />
     <Compile Include="Champions\Samira.cs" />

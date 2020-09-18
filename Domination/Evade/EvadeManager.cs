@@ -115,7 +115,7 @@ namespace DaoHungAIO.Evade
                         t.Distance(ObjectManager.Player) < DominationAIO.Common.Champion.W.Range)
                     .OrderBy(x => x.Health);
             }
-            EnsoulSharp.SDK.Events.Tick.OnTick += OnUpdate;
+            Game.OnUpdate += OnUpdate;
             SkillshotDetector.OnDeleteMissile += OnDeleteMissile;
             SkillshotDetector.OnDetectSkillshot += OnDetectSkillshot;
         }

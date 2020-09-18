@@ -15,7 +15,7 @@ using System.Drawing;
 
 namespace Yasuo_LogicHelper
 {
-    class Logichelper
+    public class Logichelper
     {
 
 

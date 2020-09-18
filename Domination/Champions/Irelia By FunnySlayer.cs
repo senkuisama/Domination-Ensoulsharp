@@ -33,6 +33,8 @@ namespace Template
             public static MenuBool QStacks = new MenuBool("QStacks", "Use Q Stack Passive Logic");
             public static MenuBool QDancing = new MenuBool("QDancing", "----> Q Dancing logic");
             public static MenuSlider QHeath = new MenuSlider("Q heath", "When Health Percent <= ", 85);
+
+            public static MenuBool CheckQDmgITems = new MenuBool("CheckItemDmg", "Q Dmg Check Items");
         }
         public class WSettings
         {
@@ -115,6 +117,7 @@ namespace Template
                 MenuSettings.QSettings.QStacks,
                 MenuSettings.QSettings.QDancing,
                 MenuSettings.QSettings.QHeath,
+                MenuSettings.QSettings.CheckQDmgITems,
             };
 
             Menu Wmenu = new Menu("Wmenu", "W Settings")
@@ -194,8 +197,8 @@ namespace Template
             if (target == null)
                 return;
 
-            var MaxObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i) && Q.CanCast(i)).OrderByDescending(i => i.Distance(target));
-            var MinObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i) && Q.CanCast(i)).OrderBy(i => i.Distance(target));
+            var MaxObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderByDescending(i => i.Distance(target));
+            var MinObjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.IsValidTarget(600) && CanQ(i, MenuSettings.QSettings.CheckQDmgITems.Enabled) && Q.CanCast(i)).OrderBy(i => i.Distance(target));
 
             var Heallist = new List<float>
             {
@@ -269,7 +272,7 @@ namespace Template
                             {
                                 if (Flee != null && Gap != null && Gap.NetworkId != Flee.NetworkId && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
                                 {
-                                    if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                    if (Q.Cast(Gap) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Gap))
                                     {
                                         return;
                                     }
@@ -757,9 +760,9 @@ namespace Template
                         return;
             }
         }
-        public static bool CanQ(AIBaseClient target)
+        public static bool CanQ(AIBaseClient target, bool CheckItems = true)
         {
-            if (target.Health <= GetQDmg(target) || target.HasBuff("ireliamark"))
+            if (target.Health <= GetQDmg(target, CheckItems) || target.HasBuff("ireliamark"))
             {
                 return true;
             }              
@@ -1107,13 +1110,14 @@ namespace Template
             return 0f;
         }
 
-        public static float GetQDmg(AIBaseClient target)
+        public static float GetQDmg(AIBaseClient target, bool CheckItem = true)
         {
             var Qdmg = QBaseDamage[Q.Level];
             var Qdmgbonus = QBonusDamage[Q.Level];
 
             //Normal Dmg
             {
+                if(CheckItem == true)
                 Qdmg += Sheen();
                 Qdmg += 0.6f * GameObjects.Player.TotalAttackDamage;
             }

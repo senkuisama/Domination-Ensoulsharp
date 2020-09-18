@@ -131,7 +131,7 @@ namespace DominationAIO.Champions
 
 
             Q = new Spell(SpellSlot.Q, 1150f);
-            Q.SetSkillshot(0.3f, 60f, 2000f, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Q.SetSkillshot(0.25f, 50f, 2000f, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             W = new Spell(SpellSlot.W, 1150f);
             W.SetSkillshot(0.3f, 60f, 1200f, false, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             E = new Spell(SpellSlot.E, 475f) { Delay = 0.65f };
@@ -400,14 +400,7 @@ namespace DominationAIO.Champions
 
         private static void EzECombo()
         {
-            var target = TargetSelector.SelectedTarget;
-
-            if (target == null ||
-                !target.IsValidTarget(Q.Range)
-                )
-            {
-                target = FSTargetSelector.GetFSTarget(E.Range + Q.Range);
-            }
+            var target = TargetSelector.GetTargets(Q.Range + E.Range).OrderBy(i => i.Health).FirstOrDefault();
 
             if (target == null || !(target is AIHeroClient)) return;
 
@@ -416,10 +409,23 @@ namespace DominationAIO.Champions
             if (OnAA) return;
 
             EnsoulSharp.SDK.Geometry.Circle EPoints = new EnsoulSharp.SDK.Geometry.Circle(Player.Position, E.Range);
-
-            foreach(var EPoint in EPoints.Points)
+            var Echeck = new Spell(SpellSlot.Unknown, 1000f);
+            Echeck.SetSkillshot(0.3f, 60f, 2000f, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            foreach (var EPoint in EPoints.Points)
             {
-                
+                if (Yasuo_LogicHelper.Logichelper.UnderTower(EPoint.ToVector3()))
+                    return;
+
+                Echeck.UpdateSourcePosition(EPoint.ToVector3(), EPoint.ToVector3());
+
+                if (FSpred.Prediction.Prediction.GetPrediction(Echeck, target).Hitchance >= FSpred.Prediction.HitChance.High && target.Distance(EPoint) < Q.Range)
+                {
+                    if (EPoint.CountEnemyHeroesInRange(Player.GetRealAutoAttackRange() + 200) <= EEzSettings.TargetCount.Value)
+                    {
+                        if (E.Cast(EPoint))
+                            return;
+                    }
+                }
             }
         }
 

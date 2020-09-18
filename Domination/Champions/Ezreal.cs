@@ -453,7 +453,7 @@ namespace DominationAIO.Champions
         {
             if (OnAA || !QEzSettings.QClear.Enabled) return;
 
-            var minions = GameObjects.Enemy.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && !i.Position.IsBuilding());
+            var minions = GameObjects.Enemy.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
             if (minions.Any())
             {
                 foreach(var minion in minions)
@@ -461,24 +461,39 @@ namespace DominationAIO.Champions
                     if(minion is AIHeroClient)
                     {
                         if (Player.ManaPercent >= QEzSettings.HarassMana.Value)
-                            Q.SPredictionCast(minion as AIHeroClient, EnsoulSharp.SDK.Prediction.HitChance.High);
+                            if(Q.SPredictionCast(minion as AIHeroClient, EnsoulSharp.SDK.Prediction.HitChance.High))
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                if (minion.Health <= Q.GetDamage(minion) || minion.Health >= Q.GetDamage(minion) + Player.GetAutoAttackDamage(minion))
+                                {
+                                    if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
+                                        Q.Cast(minion);
+                                }
+
+                                var AllyMinions = GameObjects.AllyMinions.Where(i => i.Distance(minion) < 500).OrderByDescending(i => i.Health);
+                                if (AllyMinions.Count() <= 3)
+                                {
+                                    if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
+                                        Q.Cast(minion);
+                                }
+                            }
                     }
                     else
                     {
-                        if(minion is AIMinionClient)
+                        if (minion.Health <= Q.GetDamage(minion) || minion.Health >= Q.GetDamage(minion) + Player.GetAutoAttackDamage(minion))
                         {
-                            if(minion.Health <= Q.GetDamage(minion) || minion.Health >= Q.GetDamage(minion) + Player.GetAutoAttackDamage(minion))
-                            {
-                                if(Player.ManaPercent >= QEzSettings.ClearMana.Value)
-                                    Q.Cast(minion);
-                            }
+                            if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
+                                Q.Cast(minion);
+                        }
 
-                            var AllyMinions = GameObjects.GetMinions(400, MinionTypes.All, MinionTeam.Ally);
-                            if (AllyMinions == null)
-                            {
-                                if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
-                                    Q.Cast(minion);
-                            }
+                        var AllyMinions = GameObjects.AllyMinions.Where(i => i.Distance(minion) < 500).OrderByDescending(i => i.Health);
+                        if (AllyMinions.Count() <= 3)
+                        {
+                            if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
+                                Q.Cast(minion);
                         }
                     }
                 }

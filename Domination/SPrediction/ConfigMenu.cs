@@ -53,7 +53,7 @@ namespace SPredictionMash
         {
             s_Menu = new Menu(prefMenuName, "SPrediction", false)
             {
-                new MenuList("PREDICTONLIST", "Prediction Method", new[] { "SPrediction", "Common Prediction" , "FunnySlayer Prediction"}) { Index = 0 },
+                new MenuList("PREDICTONLIST", "Prediction Method", new[] { "SPrediction", "Common Prediction" , "FunnySlayer Prediction", "Exory Prediction"}) { Index = 3 },
                 new MenuBool("SPREDWINDUP", "Check for target AA Windup", false),
                 new MenuSlider("SPREDMAXRANGEIGNORE", "Max Range Dodge Ignore (%)", 50),
                 new MenuSlider("SPREDREACTIONDELAY", "Ignore Rection Delay", 0, 0, 200),

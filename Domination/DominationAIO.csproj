@@ -98,6 +98,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="SebbyLib">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SebbyLib.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.dll</HintPath>
     </Reference>

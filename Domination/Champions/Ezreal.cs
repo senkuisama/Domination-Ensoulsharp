@@ -81,7 +81,9 @@ namespace DominationAIO.Champions
             EzRmenu = new Menu("Rmenu", "R Settings");
 
             EzSpredictionmenu = new Menu("EzSpredictionmenu", "(Sprediction)");
-
+            /*var SebbyLibMenuAttack = new Menu("OrbWalking@@", "OrbWalking @@");
+            new SebbyLib.Orbwalking.Orbwalker(SebbyLibMenuAttack);
+            EzSpredictionmenu.Add(SebbyLibMenuAttack);*/
             Prediction.Initialize(EzSpredictionmenu);
 
             var keys = new Menu("Keys", "Keys");
@@ -244,9 +246,9 @@ namespace DominationAIO.Champions
 
         private static void EzQCombo()
         {
-            var target = FSTargetSelector.GetFSTarget(2000);
-
-            if (target == null) return;
+            var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLib.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLib.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
+            if (target == null)
+                return;
            
             if ((!OnAA || QEzSettings.QinAA.Enabled) && QEzSettings.Qcombo.Enabled)
             {

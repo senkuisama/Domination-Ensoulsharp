@@ -25,7 +25,7 @@ using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.Prediction;
 
-namespace SPredictionMash
+namespace SPredictionMash1
 {
     /// <summary>
     /// StasisPrediction class

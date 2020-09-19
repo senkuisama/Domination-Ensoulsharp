@@ -1215,7 +1215,7 @@ namespace SebbyLibPorted
                     return _config.Item("AttackWards").GetValue<MenuBool>().Enabled;
                 }*/
 
-                return (_config.Item("_AttackPetsnTraps").GetValue<MenuBool>() || SPredictionMash.MinionManager.IsMinion(minion2)) &&
+                return (_config.Item("_AttackPetsnTraps").GetValue<MenuBool>() || SPredictionMash1.MinionManager.IsMinion(minion2)) &&
                        minion.SkinName != "gangplankbarrel";
             }
 

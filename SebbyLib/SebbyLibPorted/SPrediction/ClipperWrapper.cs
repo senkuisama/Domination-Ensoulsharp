@@ -24,7 +24,7 @@ using SharpDX;
 using Path = System.Collections.Generic.List<EnsoulSharp.SDK.Clipper.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<EnsoulSharp.SDK.Clipper.IntPoint>>;
 
-namespace SPredictionMash
+namespace SPredictionMash1
 {
     /// <summary>
     /// SPrediciton Clipper wrapper class

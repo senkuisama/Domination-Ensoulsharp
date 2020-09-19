@@ -22,7 +22,7 @@ using EnsoulSharp;
 
 using SharpDX;
 
-namespace SPredictionMash
+namespace SPredictionMash1
 {
     /// <summary>
     /// Necessary utilities for SPrediction

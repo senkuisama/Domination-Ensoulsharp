@@ -25,7 +25,7 @@ using EnsoulSharp.SDK;
 
 using SharpDX;
 
-namespace SPredictionMash
+namespace SPredictionMash1
 {
     /// <summary>
     /// Path Tracker class for SPrediction

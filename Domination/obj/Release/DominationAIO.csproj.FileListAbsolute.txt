@@ -1,0 +1,3 @@
+C:\Users\FunnySlayer\Desktop\A7BF9AE6\Domination-Ensoulsharp-master\Domination\obj\Release\DominationAIO.Properties.Resources.resources
+C:\Users\FunnySlayer\Desktop\A7BF9AE6\Domination-Ensoulsharp-master\Domination\obj\Release\DominationAIO.csproj.GenerateResource.Cache
+C:\Users\FunnySlayer\Desktop\A7BF9AE6\Domination-Ensoulsharp-master\Domination\obj\Release\DominationAIO.csprojResolveAssemblyReference.cache

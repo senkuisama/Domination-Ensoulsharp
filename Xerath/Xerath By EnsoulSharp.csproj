@@ -46,8 +46,8 @@
     <Reference Include="FunnySlayerCommon">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\FunnySlayerCommon.dll</HintPath>
     </Reference>
-    <Reference Include="SebbyLib">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SebbyLib.dll</HintPath>
+    <Reference Include="SebbyLibPorted">
+      <HintPath>..\..\..\EnsoulSharp\System\SebbyLibPorted.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.dll</HintPath>

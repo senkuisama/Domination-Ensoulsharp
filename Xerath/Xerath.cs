@@ -8,7 +8,7 @@
     using EnsoulSharp.SDK.MenuUI;
     using EnsoulSharp.SDK.Prediction;
     using EnsoulSharp.SDK.Utility;
-    using SebbyLib;
+    using SebbyLibPorted;
 
     using Color = System.Drawing.Color;
 
@@ -165,8 +165,8 @@
                 {
                     R.Cast(pred.CastPosition);
                 }*/
-                var pred = SebbyLib.Prediction.Prediction.GetPrediction(R, target);
-                if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
+                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                 {
                     R.Cast(pred.CastPosition);
                 }
@@ -194,8 +194,8 @@
                         W.Cast(pred.CastPosition);
                     }*/
 
-                    var pred = SebbyLib.Prediction.Prediction.GetPrediction(W, target);
-                    if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                     {
                         W.Cast(pred.CastPosition);
                     }
@@ -231,8 +231,8 @@
                 if (target != null && target.IsValidTarget(R.Range))
                 {
                     //R.Cast(target.Position);
-                    var pred = SebbyLib.Prediction.Prediction.GetPrediction(R, target);
-                    if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
+                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                     {
                         R.Cast(pred.CastPosition);
                     }
@@ -256,8 +256,8 @@
                             return;
                         }*/
 
-                        var pred = SebbyLib.Prediction.Prediction.GetPrediction(Q, target);
-                        if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                         {
                             Q.ShootChargedSpell(pred.CastPosition);
                         }
@@ -284,8 +284,8 @@
                             W.Cast(pred.CastPosition);
                             return;
                         }*/
-                        var pred = SebbyLib.Prediction.Prediction.GetPrediction(W, target);
-                        if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                         {
                             W.Cast(pred.CastPosition);
                         }
@@ -335,8 +335,8 @@
                                 W.Cast(pred.CastPosition);
                             }*/
 
-                            var pred = SebbyLib.Prediction.Prediction.GetPrediction(W, target);
-                            if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                             {
                                 W.Cast(pred.CastPosition);
                             }
@@ -376,8 +376,8 @@
                                     Q.StartCharging();
                                 }*/
 
-                                var pred = SebbyLib.Prediction.Prediction.GetPrediction(Q, target);
-                                if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                                 {
                                     Q.StartCharging();
                                 }
@@ -399,8 +399,8 @@
                             Q.ShootChargedSpell(pred.CastPosition, true);
                         }*/
 
-                        var pred = SebbyLib.Prediction.Prediction.GetPrediction(Q, target);
-                        if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                         {
                             Q.ShootChargedSpell(pred.CastPosition);
                         }
@@ -422,8 +422,8 @@
                         var target = TargetSelector.GetTarget(W.Range);
                         if (target != null && target.IsValidTarget(W.Range))
                         {
-                            var pred = SebbyLib.Prediction.Prediction.GetPrediction(W, target);
-                            if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                             {
                                 W.Cast(pred.CastPosition);
                             }
@@ -451,8 +451,8 @@
                             // slow buff = more hitchance || target too far and cant be w hit
                             if (!W.IsReady() || target.DistanceToPlayer() > 850)
                             {
-                                var pred = SebbyLib.Prediction.Prediction.GetPrediction(Q, target);
-                                if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                                 {
                                     Q.StartCharging();
                                 }
@@ -469,8 +469,8 @@
                     var target = TargetSelector.GetTarget(Q.Range);
                     if (target != null && target.IsValidTarget(Q.Range))
                     {
-                        var pred = SebbyLib.Prediction.Prediction.GetPrediction(Q, target);
-                        if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                         {
                             Q.Cast(pred.CastPosition);
                         }
@@ -690,8 +690,8 @@
 
             if (MenuWrapper.Misc.EAntiGapcloser.Enabled && E.IsReady() && args.EndPosition.DistanceToPlayer() < 250)
             {
-                var pred = SebbyLib.Prediction.Prediction.GetPrediction(E, sender);
-                if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, sender);
+                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                 {
                     E.Cast(pred.CastPosition);
                 }
@@ -717,8 +717,8 @@
 
             if (MenuWrapper.Misc.EAntiGapcloser.Enabled && E.IsReady() && args.DangerLevel >= Interrupter.DangerLevel.Medium && sender.DistanceToPlayer() < E.Range)
             {
-                var pred = SebbyLib.Prediction.Prediction.GetPrediction(E, sender);
-                if (pred.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, sender);
+                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                 {
                     E.Cast(pred.CastPosition);
                 }
@@ -740,7 +740,7 @@
             if(target != null)
             {
                 var SDKQpred = Q.GetPrediction(target);
-                var FSQpred = SebbyLib.Prediction.Prediction.GetPrediction(Q, target);
+                var FSQpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
 
                 if (!SDKQpred.CastPosition.IsZero)
                 {

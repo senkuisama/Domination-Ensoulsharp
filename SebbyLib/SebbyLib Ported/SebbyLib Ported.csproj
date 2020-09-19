@@ -35,24 +35,26 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EnsoulSharp.SDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bcecb37b3b5656dd, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="EnsoulSharp.Sandbox">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Sandbox.dll</HintPath>
+    </Reference>
+    <Reference Include="EnsoulSharp.SDK">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
-    <Reference Include="EnsoulSharp.Wrapper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a47cf8ceb3524cd7, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="EnsoulSharp.Wrapper">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX, Version=2.6.3.0, Culture=neutral, PublicKeyToken=2306ab36a61019a8, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct3D9, Version=2.6.3.0, Culture=neutral, PublicKeyToken=2306ab36a61019a8, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.Direct3D9">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
-    <Reference Include="SPrediction, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SPrediction">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SPrediction.dll</HintPath>
     </Reference>
     <Reference Include="System" />

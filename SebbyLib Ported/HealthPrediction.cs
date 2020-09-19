@@ -7,7 +7,7 @@ using EnsoulSharp;
 using EnsoulSharp.SDK;
 using SharpDX;
 
-namespace SebbyLib
+namespace SebbyLibPorted
 {
     public class HealthPrediction
     {

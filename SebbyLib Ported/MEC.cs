@@ -7,7 +7,7 @@ using SharpDX;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 
-namespace SebbyLib
+namespace SebbyLibPorted
 {
 	public static class MEC
 	{

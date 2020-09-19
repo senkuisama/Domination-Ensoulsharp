@@ -5,7 +5,7 @@ using SharpDX;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 
-namespace SebbyLib.Movement
+namespace SebbyLibPorted.Movement
 {
     public enum HitChance
     {

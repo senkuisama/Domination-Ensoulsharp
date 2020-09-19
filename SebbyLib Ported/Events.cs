@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 
-namespace SebbyLib
+namespace SebbyLibPorted
 {
     public static class Events
     {

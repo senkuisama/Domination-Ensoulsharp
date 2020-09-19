@@ -11,7 +11,7 @@ using EnsoulSharp.SDK.Utility;
 using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.MenuUI.Values;
 
-namespace SebbyLib
+namespace SebbyLibPorted
 {
     public static class Orbwalking
     {

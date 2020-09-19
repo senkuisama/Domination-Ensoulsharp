@@ -5,7 +5,7 @@ using SharpDX;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 
-namespace SebbyLib.Prediction
+namespace SebbyLibPorted.Prediction
 {
     public enum HitChance
     {

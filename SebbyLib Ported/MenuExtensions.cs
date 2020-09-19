@@ -10,7 +10,7 @@ using EnsoulSharp.SDK.MenuUI.Values;
 using SharpDX;
 using System.Drawing;
 
-namespace SebbyLib
+namespace SebbyLibPorted
 {  
     public static class MenuExtensions
     {

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SebbyLib", "SebbyLib.csproj", "{8B138FDE-D0E3-4DF0-8935-0BB353C87E5E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SebbyLib Ported", "SebbyLib Ported.csproj", "{8B138FDE-D0E3-4DF0-8935-0BB353C87E5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D3099AD8-0621-4481-82AD-7A30DD4CB78C}
+		SolutionGuid = {5C3649A7-DC06-4E4C-A75B-E4CCB8245A7F}
 	EndGlobalSection
 EndGlobal

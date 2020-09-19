@@ -246,7 +246,7 @@ namespace DominationAIO.Champions
 
         private static void EzQCombo()
         {
-            var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLib.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLib.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
+            var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
             if (target == null)
                 return;
            

@@ -314,14 +314,14 @@ namespace SPredictionMash
             #region If Exory Prediction Selected
             if (ConfigMenu.SelectedPrediction.Index == 3)
             {
-                var pout = SebbyLib.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
+                var pout = SebbyLibPorted.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
 
                 if (minHit > 1)
                     if (pout.AoeTargetsHitCount >= minHit)
                         return s.Cast(pout.CastPosition);
                     else return false;
 
-                if (pout.Hitchance >= (SebbyLib.Prediction.HitChance)hc)
+                if (pout.Hitchance >= (SebbyLibPorted.Prediction.HitChance)hc)
                     return s.Cast(pout.CastPosition);
                 else
                     return false;

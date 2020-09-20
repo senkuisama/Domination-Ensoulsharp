@@ -32,6 +32,7 @@ namespace DominationAIO.Champions
         public static readonly MenuSlider HarassMana = new MenuSlider("HarassMana", "(Harass) Min Mana : ", 60);
         public static readonly MenuBool QClear = new MenuBool("QClear", "Q Clear");
         public static readonly MenuSlider ClearMana = new MenuSlider("ClearMana", "(Clear) Min Mana : ", 40);
+        public static readonly MenuBool LastQOnly = new MenuBool("QLastHitOnly", "Only Q last hit", false);
     }
 
     public class WEzSettings
@@ -69,8 +70,9 @@ namespace DominationAIO.Champions
         public static AIHeroClient Player = ObjectManager.Player;
         public static Menu EzrealMenu;
         public static Menu EzQmenu, EzWmenu, EzEmenu, EzRmenu, EzSpredictionmenu;
+        public static Menu SebbyLibMenuAttack;
         public static Spell Q, W, E, R;
-
+      
         public static void Ezreal_Load()
         {
             Game.Print("SPrediction Ezreal");
@@ -81,9 +83,9 @@ namespace DominationAIO.Champions
             EzRmenu = new Menu("Rmenu", "R Settings");
 
             EzSpredictionmenu = new Menu("EzSpredictionmenu", "(Sprediction)");
-            /*var SebbyLibMenuAttack = new Menu("OrbWalking@@", "OrbWalking @@");
-            new SebbyLib.Orbwalking.Orbwalker(SebbyLibMenuAttack);
-            EzSpredictionmenu.Add(SebbyLibMenuAttack);*/
+            SebbyLibMenuAttack = new Menu("OrbWalking@@", "OrbWalking @@");
+            new SebbyLibPorted.Orbwalking.Orbwalker(SebbyLibMenuAttack);
+            EzSpredictionmenu.Add(SebbyLibMenuAttack);
             Prediction.Initialize(EzSpredictionmenu);
 
             var keys = new Menu("Keys", "Keys");
@@ -98,6 +100,7 @@ namespace DominationAIO.Champions
             EzQmenu.Add(QEzSettings.Qharass);
             EzQmenu.Add(QEzSettings.HarassMana);
             EzQmenu.Add(QEzSettings.QClear);
+            EzQmenu.Add(QEzSettings.LastQOnly);
             EzQmenu.Add(QEzSettings.ClearMana);
 
             EzWmenu.Add(WEzSettings.Wcombo);
@@ -128,6 +131,7 @@ namespace DominationAIO.Champions
             EzrealMenu.Add(DrawEzSettings.DrawQ);
             EzrealMenu.PermaShowText = "(Sprediction) Ezreal";
             EzrealMenu.Attach();
+            
 
             Drawing.OnDraw += Drawing_OnDraw;
 
@@ -188,31 +192,23 @@ namespace DominationAIO.Champions
                 BeforeAA = false;
             }
             else { AfterAA = false; }
-        }
-
+        }         
         private static void Game_OnUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
 
             BU();
-
-            switch (Orbwalker.ActiveMode)
+            if(Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
-                case OrbwalkerMode.Combo:
-                    EzCombo();
-                    break;
-                case OrbwalkerMode.Harass:
-                    EzHarass();
-                    break;
-                case OrbwalkerMode.LaneClear:
-                    EzClear();
-                    break;
-                case OrbwalkerMode.LastHit:
-                    break;
-
-
-                default:
-                    break;
+                EzCombo();
+            }
+            if (Orbwalker.ActiveMode == OrbwalkerMode.Harass)
+            {
+                EzHarass();
+            }
+            if (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
+            {
+                EzClear();
             }
         }
 
@@ -250,7 +246,7 @@ namespace DominationAIO.Champions
             if (target == null)
                 return;
            
-            if ((!OnAA || QEzSettings.QinAA.Enabled) && QEzSettings.Qcombo.Enabled)
+            if (((!OnAA && !BeforeAA) || QEzSettings.QinAA.Enabled) && QEzSettings.Qcombo.Enabled)
             {
                 if (Q.IsReady())
                 {
@@ -321,7 +317,7 @@ namespace DominationAIO.Champions
 
             if (target == null) return;
 
-            if (OnAA) return;
+            if (OnAA || BeforeAA) return;
 
             if (!WEzSettings.Wcombo.Enabled || !W.IsReady()) return;
 
@@ -453,49 +449,64 @@ namespace DominationAIO.Champions
 
         private static void EzClear()
         {
-            if (OnAA || !QEzSettings.QClear.Enabled) return;
+            if (OnAA || BeforeAA || !QEzSettings.QClear.Enabled) return;
 
-            var minions = GameObjects.Enemy.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
-            if (minions.Any())
+            var Minions = GameObjects.Enemy.Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
+            if (Minions == null)
+                return;
+
+            foreach(var min in Minions)
             {
-                foreach(var minion in minions)
+                if (min.IsMinion)
                 {
-                    if(minion is AIHeroClient)
+                    if(QEzSettings.ClearMana.Value <= Player.ManaPercent)
                     {
-                        if (Player.ManaPercent >= QEzSettings.HarassMana.Value)
-                            if(Q.SPredictionCast(minion as AIHeroClient, EnsoulSharp.SDK.Prediction.HitChance.High))
+                        if(min.Health >= Player.GetAutoAttackDamage(min) + 17 + Damage.GetSpellDamage(Player, min, SpellSlot.Q) || min.Health < Damage.GetSpellDamage(Player, min, SpellSlot.Q))
+                        {
+                            if (QEzSettings.LastQOnly.Enabled)
                             {
-                                return;
+                                if(min.Health < Damage.GetSpellDamage(Player, min, SpellSlot.Q))
+                                {
+                                    Q.Cast(min);
+                                }
+                                else
+                                {
+                                    var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
+                                    if (target != null)
+                                        
+
+                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                        return;
+                                }
                             }
                             else
                             {
-                                if (minion.Health <= Q.GetDamage(minion) || minion.Health >= Q.GetDamage(minion) + Player.GetAutoAttackDamage(minion))
-                                {
-                                    if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
-                                        Q.Cast(minion);
-                                }
-
-                                var AllyMinions = GameObjects.AllyMinions.Where(i => i.Distance(minion) < 500).OrderByDescending(i => i.Health);
-                                if (AllyMinions.Count() <= 3)
-                                {
-                                    if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
-                                        Q.Cast(minion);
-                                }
+                                Q.Cast(min);
                             }
-                    }
-                    else
-                    {
-                        if (minion.Health <= Q.GetDamage(minion) || minion.Health >= Q.GetDamage(minion) + Player.GetAutoAttackDamage(minion))
-                        {
-                            if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
-                                Q.Cast(minion);
                         }
-
-                        var AllyMinions = GameObjects.AllyMinions.Where(i => i.Distance(minion) < 500).OrderByDescending(i => i.Health);
-                        if (AllyMinions.Count() <= 3)
+                        else
                         {
-                            if (Player.ManaPercent >= QEzSettings.ClearMana.Value)
-                                Q.Cast(minion);
+                            var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
+                            if (target != null)
+                                
+
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                return;
+                        }
+                    }
+                }
+                else
+                {
+                    if (QEzSettings.Qharass.Enabled)
+                    {
+                        if(QEzSettings.HarassMana.Value <= Player.ManaPercent)
+                        {
+                            var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
+                            if (target != null)
+                                
+
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                return;
                         }
                     }
                 }

@@ -677,10 +677,143 @@ namespace SebbyLibPorted
 
                 _config.Add(
                     new MenuKeyBind("_StillCombo", "Combo without moving", System.Windows.Forms.Keys.N, KeyBindType.Press));
-                _config.GetValue<MenuKeyBind>("_StillCombo").ValueChanged +=
+
+                _config.Item("_StillCombo").GetValue<MenuKeyBind>().ValueChanged +=
                     (sender, args) => { Move = !_config.GetValue<MenuKeyBind>("_StillCombo").Active; };
 
-
+                _config.Item("_Orbwalk").GetValue<MenuKeyBind>().ValueChanged +=
+                    (sender, args) =>
+                    {
+                        if(_config.Item("_Orbwalk").GetValue<MenuKeyBind>().Active == true)
+                        {
+                            EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Combo;
+                        }
+                        else
+                        {
+                            if (_config.Item("_Farm").GetValue<MenuKeyBind>().Active)
+                            {
+                                EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Harass;
+                            }
+                            else
+                            {
+                                if (_config.Item("_LaneClear").GetValue<MenuKeyBind>().Active)
+                                {
+                                    EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LaneClear;
+                                }
+                                else
+                                {
+                                    if (_config.Item("_LastHit").GetValue<MenuKeyBind>().Active)
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LastHit;
+                                    }
+                                    else
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.None;
+                                    }
+                                }
+                            }
+                        }                        
+                    };
+                _config.Item("_Farm").GetValue<MenuKeyBind>().ValueChanged +=
+                    (sender, args) =>
+                    {
+                        if (_config.Item("_Farm").GetValue<MenuKeyBind>().Active == true)
+                        {
+                            EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Harass;
+                        }
+                        else
+                        {
+                            if (_config.Item("_Orbwalk").GetValue<MenuKeyBind>().Active)
+                            {
+                                EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Combo;
+                            }
+                            else
+                            {
+                                if (_config.Item("_LaneClear").GetValue<MenuKeyBind>().Active)
+                                {
+                                    EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LaneClear;
+                                }
+                                else
+                                {
+                                    if (_config.Item("_LastHit").GetValue<MenuKeyBind>().Active)
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LastHit;
+                                    }
+                                    else
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.None;
+                                    }
+                                }
+                            }
+                        }
+                    };
+                _config.Item("_LaneClear").GetValue<MenuKeyBind>().ValueChanged +=
+                    (sender, args) =>
+                    {
+                        if (_config.Item("_LaneClear").GetValue<MenuKeyBind>().Active == true)
+                        {
+                            EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LaneClear;
+                        }
+                        else
+                        {
+                            if (_config.Item("_Orbwalk").GetValue<MenuKeyBind>().Active)
+                            {
+                                EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Combo;
+                            }
+                            else
+                            {
+                                if (_config.Item("_Farm").GetValue<MenuKeyBind>().Active)
+                                {
+                                    EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Harass;
+                                }
+                                else
+                                {
+                                    if (_config.Item("_LastHit").GetValue<MenuKeyBind>().Active)
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LastHit;
+                                    }
+                                    else
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.None;
+                                    }
+                                }
+                            }
+                        }
+                    };
+                _config.Item("_LastHit").GetValue<MenuKeyBind>().ValueChanged +=
+                    (sender, args) =>
+                    {
+                        if (_config.Item("_LastHit").GetValue<MenuKeyBind>().Active == true)
+                        {
+                            EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LastHit;
+                        }
+                        else
+                        {
+                            if (_config.Item("_Orbwalk").GetValue<MenuKeyBind>().Active)
+                            {
+                                EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Combo;
+                            }
+                            else
+                            {
+                                if (_config.Item("_LaneClear").GetValue<MenuKeyBind>().Active)
+                                {
+                                    EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LaneClear;
+                                }
+                                else
+                                {
+                                    if (_config.Item("_LaneClear").GetValue<MenuKeyBind>().Active)
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.LastHit;
+                                    }
+                                    else
+                                    {
+                                        EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.None;
+                                    }
+                                }
+                            }
+                        }
+                    };
+                
                 Player = ObjectManager.Player;
                 Game.OnUpdate += GameOnOnGameUpdate;
                 //Drawing.OnDraw += DrawingOnOnDraw;

@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SPrediction;
+using SPredictionMash;
 using SharpDX;
 using EnsoulSharp.SDK.Prediction;
 using EnsoulSharp.SDK.Utility;
 using EnsoulSharp.SDK;
 
-using static SPrediction.MinionManager;
-using MinionTypes = SPrediction.MinionManager.MinionTypes;
+using static SPredictionMash.MinionManager;
+using MinionTypes = SPredictionMash.MinionManager.MinionTypes;
 using Color = System.Drawing.Color;
 using System.Text.RegularExpressions;
 using SpellDatabase = DaoHungAIO.Evade.SpellDatabase;
@@ -24,8 +24,8 @@ using FoundIntersection = DaoHungAIO.Evade.FoundIntersection;
 using EvadeManager = DaoHungAIO.Evade.EvadeManager;
 using DetectionType = DaoHungAIO.Evade.DetectionType;
 using CollisionObjectTypes = DaoHungAIO.Evade.CollisionObjectTypes;
-using MinionTeam = SPrediction.MinionManager.MinionTeam;
-using MinionOrderTypes = SPrediction.MinionManager.MinionOrderTypes;
+using MinionTeam = SPredictionMash.MinionManager.MinionTeam;
+using MinionOrderTypes = SPredictionMash.MinionManager.MinionOrderTypes;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Drawing;
@@ -281,7 +281,7 @@ namespace ConsoleApp
                     i =>
                     CanE(i)
                     && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= 230
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange + 15
                         : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
                         || pos.Distance(PosAfterE(i)) <= 410
                         )
@@ -295,7 +295,7 @@ namespace ConsoleApp
                     i =>
                     CanE(i)
                     && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= 230
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange + 15
                         : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
                         || pos.Distance(PosAfterE(i)) <= 410
                         )
@@ -312,7 +312,7 @@ namespace ConsoleApp
                         i =>
                         CanE(i)
                         && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= 230
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange + 15
                         : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()))
                         )
                         .OrderByDescending(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
@@ -459,6 +459,7 @@ namespace ConsoleApp
         private static AIHeroClient objPlayer = ObjectManager.Player;
         private static Menu YasuoTheMenu = new Menu("Yasuo God Like", "Yasuo God Like", true);
         public static Menu EvadeSkillshotMenu = new Menu("EvadeSkillshot", "Evade Skillshot");
+        private static Menu PredictionHelper = new Menu("Prediction Helper", "Helper");
         public static bool isYasuoDashing = false;
         public static bool baa = false;
         public static bool oaa = false;
@@ -469,7 +470,9 @@ namespace ConsoleApp
 
         #region Yasuo Menu
         public static void YasuoLoad()
-        {          
+        {
+            SPredictionMash.ConfigMenu.Initialize(PredictionHelper, "@@");
+            new SebbyLibPorted.Orbwalking.Orbwalker(PredictionHelper);
             var one_or_two = new Random().Next(3);
             var loli_or_waifu = "";
             switch (one_or_two)
@@ -513,6 +516,7 @@ namespace ConsoleApp
             }
            
             YasuoTheMenu.Add(animemenu);
+            YasuoTheMenu.Add(PredictionHelper);
             YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
 
             var SkillRange = new Menu("SkillRange", "Yasuo Skill Range");
@@ -1991,26 +1995,14 @@ namespace ConsoleApp
 
                                     else
                                     {
-                                        var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, min as AIHeroClient);
-                                        if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance != FSpred.Prediction.HitChance.High)
-                                        {
-                                            Q3.Cast(fsQpred.CastPosition);
-                                        }
+                                        if (Q3.SPredictionCast(min as AIHeroClient, HitChance.High))
+                                            return;
                                     }
                                 }
                                 else
                                 {
-                                    var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, min as AIHeroClient);
-                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                                    {
-                                        Q.Cast(fsQpred.CastPosition);
-                                    }
-
-                                    var sdkQpred = Q.GetPrediction(min);
-                                    if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
-                                    {
-                                        Q.Cast(sdkQpred.CastPosition);
-                                    }
+                                    if(Q.SPredictionCast(min as AIHeroClient, HitChance.High))
+                                            return;
                                 }
                             }
                         }
@@ -2162,7 +2154,10 @@ namespace ConsoleApp
                                                 )
                         {
                             if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            {
                                 YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active = true;
+                                return;
+                            }
                         }
                         else
                         {
@@ -2170,25 +2165,13 @@ namespace ConsoleApp
                             {
                                 if (HaveQ3)
                                 {
-                                    var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
-                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                                    {
-                                        Q3.Cast(fsQpred.CastPosition);
-                                    }
+                                    if (Q3.SPredictionCast(target as AIHeroClient, HitChance.High))
+                                        return;
                                 }
                                 else
                                 {
-                                    var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                                    if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                                    {
-                                        Q.Cast(fsQpred.CastPosition);
-                                    }
-
-                                    var sdkQpred = Q.GetPrediction(target);
-                                    if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
-                                    {
-                                        Q.Cast(sdkQpred.CastPosition);
-                                    }
+                                    if (Q.SPredictionCast(target as AIHeroClient, HitChance.High))
+                                        return;
                                 }
                             }
                         }
@@ -2199,30 +2182,13 @@ namespace ConsoleApp
                         {
                             if (HaveQ3)
                             {
-                                var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
-                                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                                {
-                                    Q3.Cast(fsQpred.CastPosition);
-                                }
-                                //Q3.CastIfHitchanceMinimum(target, HitChance.High);
+                                if (Q3.SPredictionCast(target as AIHeroClient, HitChance.High))
+                                    return;
                             }
                             else
                             {
-                                var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                                {
-                                    Q.Cast(fsQpred.CastPosition);
-                                }
-                                /*var Qpred = Q.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-                                if (Qpred.Hitchance >= HitChance.High && !Qpred.CastPosition.IsZero && Qpred.CastPosition.Distance(target) <= YasuoMenu.RangeCheck.Qrange)
-                                {
-                                    Q.Cast(Qpred.CastPosition);
-                                }*/
-                                var sdkQpred = Q.GetPrediction(target);
-                                if (sdkQpred.CastPosition != Vector3.Zero && sdkQpred.CastPosition.DistanceToPlayer() <= Q.Range && sdkQpred.Hitchance >= HitChance.Medium)
-                                {
-                                    Q.Cast(sdkQpred.CastPosition);
-                                }
+                                if (Q.SPredictionCast(target as AIHeroClient, HitChance.High))
+                                    return;
                             }
                         }
                     }
@@ -2482,11 +2448,8 @@ namespace ConsoleApp
                 if (!YasuoMenu.Qcombo.Yasuo_Windcombo.Enabled) return;
                 if (oaa && target.HealthPercent > YasuoMenu.Qcombo.Yasuo_Qoa.Value) return;
 
-                var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
-                if (fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q3.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                {
-                    Q3.Cast(fsQpred.CastPosition);
-                }
+                if (Q3.SPredictionCast(target as AIHeroClient, HitChance.High))
+                    return;
 
 
                 /*var Qpred = Q3.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
@@ -2500,16 +2463,8 @@ namespace ConsoleApp
                 if (!YasuoMenu.Qcombo.Yasuo_Windcombo.Enabled) return;
                 if (oaa && target.HealthPercent > YasuoMenu.Qcombo.Yasuo_Qoa.Value) return;
 
-                var fsQpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                if(fsQpred.CastPosition != Vector3.Zero && fsQpred.CastPosition.DistanceToPlayer() <= Q.Range && fsQpred.Hitchance >= FSpred.Prediction.HitChance.High)
-                {
-                    Q.Cast(fsQpred.CastPosition);
-                }
-                var Qpred = Q.GetPrediction(target);
-                if (Qpred.Hitchance >= HitChance.Medium && !Qpred.CastPosition.IsZero && Qpred.CastPosition.Distance(target) <= YasuoMenu.RangeCheck.Qrange)
-                {
-                    Q.Cast(Qpred.CastPosition);
-                }
+                if (Q.SPredictionCast(target as AIHeroClient, HitChance.High))
+                    return;
             }
         }
         private static void CastQcircle(AIBaseClient target)

@@ -331,9 +331,9 @@ namespace SebbyLibPorted.Prediction
             }
 
             //Check for collision
-            if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
+            if (checkCollision && input.Collision)
             {
-                var positions = new List<Vector3> { result.CastPosition };
+                var positions = new List<Vector3> { result.UnitPosition, result.CastPosition };
                 var originalUnit = input.Unit;
                 if (Collision.GetCollision(positions, input))
                     result.Hitchance = HitChance.Collision;
@@ -1158,7 +1158,7 @@ namespace SebbyLibPorted.Prediction
                                             Type = input.Type
                                         };
                                         minionPos = Prediction.GetPrediction(predInput2).CastPosition;
-                                        bonusRadius = 50 + (int)input.Radius;
+                                        bonusRadius = 10 + (int)input.Radius;
                                     }
 
                                     if (minionPos.ToVector2().DistanceSquared(input.From.ToVector2(), position.ToVector2(), true) <= Math.Pow((input.Radius + bonusRadius + minion.BoundingRadius), 2))

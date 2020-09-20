@@ -73,8 +73,8 @@ namespace Pyke_Ryū
             {
                 if(target.Health < R.GetDamage(target, DamageStage.Empowered) && R.IsReadyToCastOn(target))
                 {
-                    var pred = Prediction.GetPrediction(R, target);
-                    if(pred.Hitchance >= HitChance.High)
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
+                    if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                     {
                         if (R.Cast(pred.CastPosition))
                             return;
@@ -117,8 +117,8 @@ namespace Pyke_Ryū
             {
                 if (Q.IsCharging)
                 {
-                    var pred = Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
-                    if(pred.Hitchance >= HitChance.High)
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
+                    if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                     {
                         Q.Cast(pred.CastPosition);
                     }
@@ -164,8 +164,8 @@ namespace Pyke_Ryū
 
             if (E.IsReady())
             {
-                var pred = Prediction.GetPrediction(E, targets.FirstOrDefault(i => Prediction.GetPrediction(E, i).Hitchance >= HitChance.High));
-                if (pred.Hitchance >= HitChance.High)
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, targets.FirstOrDefault(i => Prediction.GetPrediction(E, i).Hitchance >= HitChance.High));
+                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                 {
                     E.Cast(pred.CastPosition);
                 }

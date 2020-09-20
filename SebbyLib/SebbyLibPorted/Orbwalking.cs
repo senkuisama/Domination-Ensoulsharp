@@ -816,8 +816,63 @@ namespace SebbyLibPorted
                 
                 Player = ObjectManager.Player;
                 Game.OnUpdate += GameOnOnGameUpdate;
-                //Drawing.OnDraw += DrawingOnOnDraw;
+                Game.OnUpdate += Game_OnUpdate;
+                Drawing.OnDraw += DrawingOnOnDraw;
                 Instances.Add(this);
+            }
+
+            private void Game_OnUpdate(EventArgs args)
+            {
+                if (ObjectManager.Player == null || Player.IsDead)
+                    return;
+                /*if (_config.Item("AACircle").GetValue<MenuColor>().Active)
+                {
+                    
+                }*/
+                Render.Circle.DrawCircle(
+                        ObjectManager.Player.Position, ObjectManager.Player.GetRealAutoAttackRange(),
+                        //System.Drawing.Color.Blue,
+                        _config.Item("_AACircle").GetValue<MenuColor>().Color.ToSystemColor(),
+                        _config.Item("_AALineWidth").GetValue<MenuSlider>().Value);
+                /*if (_config.Item("_AACircle2").GetValue<MenuColor>().Active)
+                {
+                    
+                }*/
+                foreach (var target in
+                        GameObjects.EnemyHeroes.Where(target => target.IsValidTarget(1175)))
+                {
+                    Render.Circle.DrawCircle(
+                        target.Position, target.GetRealAutoAttackRange(),
+                        //System.Drawing.Color.Blue,
+                        _config.Item("_AACircle2").GetValue<MenuColor>().Color.ToSystemColor(),
+                        _config.Item("_AALineWidth").GetValue<MenuSlider>().Value);
+                }
+
+                /*if (_config.Item("HoldZone").GetValue<MenuColor>().Active)
+                {
+                    
+                }*/
+                Render.Circle.DrawCircle(
+                        ObjectManager.Player.Position, _config.Item("_HoldPosRadius").GetValue<MenuSlider>().Value,
+                        //System.Drawing.Color.Blue,
+                        _config.Item("_HoldZone").GetValue<MenuColor>().Color.ToSystemColor(),
+                        _config.Item("_AALineWidth").GetValue<MenuSlider>().Value, true);
+                /*_config.Item("FocusMinionsOverTurrets")
+                    .PermaShowText(_config.Item("FocusMinionsOverTurrets").GetValue<MenuKeyBind>().Active);*/
+
+                if (_config.Item("_LastHitHelper").GetValue<MenuBool>())
+                {
+                    foreach (var minion in
+                        Cache.MinionsListEnemy
+                            .Where(
+                                x => x.Name.ToLower().Contains("minion") && x.IsHPBarRendered && x.IsValidTarget(1000)))
+                    {
+                        if (minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion))
+                        {
+                            Render.Circle.DrawCircle(minion.Position, 50, Color.LimeGreen);
+                        }
+                    }
+                }
             }
 
             private int FarmDelay
@@ -839,7 +894,7 @@ namespace SebbyLibPorted
             {
                 get
                 {
-                    if (_mode != OrbwalkingMode.None)
+                    /*if (_mode != OrbwalkingMode.None)
                     {
                         return _mode;
                     }
@@ -877,7 +932,7 @@ namespace SebbyLibPorted
                     if (_config.Item(CustomModeName) != null && _config.Item(CustomModeName).GetValue<MenuKeyBind>().Active)
                     {
                         return OrbwalkingMode.CustomMode;
-                    }
+                    }*/
 
                     return OrbwalkingMode.None;
                 }
@@ -942,7 +997,7 @@ namespace SebbyLibPorted
                 AttackableUnit result = null;
                 var mode = ActiveMode;
                 //Forced target
-                if (_forcedTarget.IsValidTarget() && InAutoAttackRange(_forcedTarget))
+                if (_forcedTarget.IsValidTarget() && _forcedTarget.InAutoAttackRange())
                 {
                     return _forcedTarget;
                 }
@@ -951,7 +1006,7 @@ namespace SebbyLibPorted
                     !_config.Item("_PriorizeFarm").GetValue<MenuBool>())
                 {
                     var target = TargetSelector.GetTarget(-1, DamageType.Physical);
-                    if (target != null && InAutoAttackRange(target))
+                    if (target != null && target.InAutoAttackRange())
                     {
                         return target;
                     }
@@ -963,7 +1018,7 @@ namespace SebbyLibPorted
 
                     if (enemyGangPlank != null)
                     {
-                        var barrels = Cache.GetMinions(Player.Position, 0, MinionTeam.Enemy).Where(minion => minion.Team == GameObjectTeam.Neutral && minion.SkinName == "gangplankbarrel" && minion.IsHPBarRendered && minion.IsValidTarget() && InAutoAttackRange(minion));
+                        var barrels = Cache.GetMinions(Player.Position, 0, MinionTeam.Enemy).Where(minion => minion.Team == GameObjectTeam.Neutral && minion.SkinName == "gangplankbarrel" && minion.IsHPBarRendered && minion.IsValidTarget() && minion.InAutoAttackRange());
 
                         foreach (var barrel in barrels)
                         {
@@ -1086,7 +1141,7 @@ namespace SebbyLibPorted
                 if (mode != OrbwalkingMode.LastHit)
                 {
                     var target = TargetSelector.GetTarget(-1, DamageType.Physical);
-                    if (target.IsValidTarget() && InAutoAttackRange(target))
+                    if (target.IsValidTarget() && target.InAutoAttackRange())
                     {
                         if(!ObjectManager.Player.IsUnderEnemyTurret() || mode == OrbwalkingMode.Combo)
                             return target;
@@ -1384,50 +1439,10 @@ namespace SebbyLibPorted
                 }
             }
 
-            /*private void DrawingOnOnDraw(EventArgs args)
+            private void DrawingOnOnDraw(EventArgs args)
             {
-                if (_config.Item("AACircle").GetValue<Circle>().Active)
-                {
-                    Render.Circle.DrawCircle(
-                        Player.Position, GetRealAutoAttackRange(null) + 65,
-                        _config.Item("AACircle").GetValue<Circle>().Color,
-                        _config.Item("AALineWidth").GetValue<Slider>().Value);
-                }
-                if (_config.Item("AACircle2").GetValue<Circle>().Active)
-                {
-                    foreach (var target in
-                        HeroManager.Enemies.FindAll(target => target.IsValidTarget(1175)))
-                    {
-                        Render.Circle.DrawCircle(
-                            target.Position, GetAttackRange(target), _config.Item("AACircle2").GetValue<Circle>().Color,
-                            _config.Item("AALineWidth").GetValue<Slider>().Value);
-                    }
-                }
-
-                if (_config.Item("HoldZone").GetValue<Circle>().Active)
-                {
-                    Render.Circle.DrawCircle(
-                        Player.Position, _config.Item("HoldPosRadius").GetValue<Slider>().Value,
-                        _config.Item("HoldZone").GetValue<Circle>().Color,
-                        _config.Item("AALineWidth").GetValue<Slider>().Value, true);
-                }
-                _config.Item("FocusMinionsOverTurrets")
-                    .Permashow(_config.Item("FocusMinionsOverTurrets").GetValue<KeyBind>().Active);
-
-                if (_config.Item("LastHitHelper").GetValue<bool>())
-                {
-                    foreach (var minion in
-                        Cache.MinionsListEnemy
-                            .Where(
-                                x => x.Name.ToLower().Contains("minion") && x.IsHPBarRendered && x.IsValidTarget(1000)))
-                    {
-                        if (minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion, true))
-                        {
-                            Render.Circle.DrawCircle(minion.Position, 50, Color.LimeGreen);
-                        }
-                    }
-                }
-            }*/
+                
+            }
         }
     }
 }

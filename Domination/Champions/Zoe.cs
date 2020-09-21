@@ -10,6 +10,7 @@ using EnsoulSharp.SDK;
 using SebbyLibPorted.Prediction;
 using SharpDX;
 using EnsoulSharp.SDK.Utility;
+using SPredictionMash;
 
 namespace DominationAIO.Champions
 {
@@ -34,6 +35,7 @@ namespace DominationAIO.Champions
 
             ZoeMenu = new Menu("ZoeMenu", "FunnySlayer Zoe", true);
             var ZoeHelper = new Menu("Zoe_Helper", "Helper");
+            SPredictionMash.ConfigMenu.Initialize(ZoeHelper, "Get Prediction");
             new SebbyLibPorted.Orbwalking.Orbwalker(ZoeHelper);
             ZoeMenu.Add(ZoeHelper);
             ZoeMenu.Add(Qcombo);
@@ -107,7 +109,7 @@ namespace DominationAIO.Champions
                 
                 if (Q2())
                 {
-                    var QGeometry = new Geometry.Rectangle(QClient().Position, QVector, Q.Width + 50);
+                    var QGeometry = new EnsoulSharp.SDK.Geometry.Rectangle(QClient().Position, QVector, Q.Width + 50);
 
                     if (QGeometry != null)
                     {
@@ -187,16 +189,16 @@ namespace DominationAIO.Champions
                         if (!Q2())
                         {
                             var GetCastPos = Vector3.Zero;
-                            var QGetPoss = new Geometry.Circle(GameObjects.Player.Position, 800f);
+                            var QGetPoss = new EnsoulSharp.SDK.Geometry.Circle(GameObjects.Player.Position, 800f);
                             foreach (var QGetPos in QGetPoss.Points.OrderByDescending(i => i.Distance(EclientPos)))
                             {
-                                QCollision = new Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width + 50);
+                                QCollision = new EnsoulSharp.SDK.Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width + 50);
                                 var CheckCollision = GameObjects.EnemyMinions.Any(i => i.IsValid() && !i.IsDead && QCollision.IsInside(i));
                                 if (CheckCollision == false)
                                 {
                                     //Check For Collision
                                     {
-                                        var QGeometry = new Geometry.Rectangle(QGetPos.ToVector3(), EclientPos, Q.Width * 2);
+                                        var QGeometry = new EnsoulSharp.SDK.Geometry.Rectangle(QGetPos.ToVector3(), EclientPos, Q.Width * 2);
 
                                         if (QGeometry != null)
                                         {
@@ -224,7 +226,7 @@ namespace DominationAIO.Champions
             }
         }
 
-        private static Geometry.Polygon QCollision = null;
+        private static EnsoulSharp.SDK.Geometry.Polygon QCollision = null;
         private static bool GetBool = true;
         private static void DoOrb(EventArgs args)
         {
@@ -238,17 +240,17 @@ namespace DominationAIO.Champions
             if (target == null)
                 return;
 
-            var Epred = Prediction.GetPrediction(E, target);
+            var Epred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, target);
             if (E.IsReady() && Epred.Hitchance >= HitChance.High && Ecombo.Enabled)
             {
-                if (E.Cast(Epred.CastPosition))
-                    return;
+                if (E.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                    return;                   
             }
             else
             {
                 if (Q.IsReady() && Qcombo.Enabled)
                 {
-                    var Qpred = Prediction.GetPrediction(Q, target);
+                    var Qpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
                     if (Q2())
                     {
                         if(Q2Now)
@@ -280,16 +282,16 @@ namespace DominationAIO.Champions
                         if(EDownClient() == null || EDownClient().DistanceToPlayer() > MoveRange + Q.Range)
                         {
                             var GetCastPos = Vector3.Zero;
-                            var QGetPoss = new Geometry.Circle(GameObjects.Player.Position, 800f);
+                            var QGetPoss = new EnsoulSharp.SDK.Geometry.Circle(GameObjects.Player.Position, 800f);
                             foreach (var QGetPos in QGetPoss.Points.OrderByDescending(i => i.Distance(Qpred.CastPosition)))
                             {
-                                QCollision = new Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width + 50);
+                                QCollision = new EnsoulSharp.SDK.Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width + 50);
                                 var CheckCollision = GameObjects.EnemyMinions.Any(i => i.IsValid() && !i.IsDead && QCollision.IsInside(i));
                                 if (CheckCollision == false)
                                 {
                                     //Check For Collision
                                     {
-                                        var QGeometry = new Geometry.Rectangle(QGetPos.ToVector3(), Qpred.CastPosition, Q.Width + 50);
+                                        var QGeometry = new EnsoulSharp.SDK.Geometry.Rectangle(QGetPos.ToVector3(), Qpred.CastPosition, Q.Width + 50);
 
                                         if (QGeometry != null)
                                         {

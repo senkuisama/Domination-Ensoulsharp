@@ -24,7 +24,7 @@ namespace DominationAIO.Champions
                 return;
 
             Q = new Spell(SpellSlot.Q, 800);
-            Q.SetSkillshot(0.3f, 100, 2000, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Q.SetSkillshot(0.3f, 150, 2000, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             E = new Spell(SpellSlot.E, 800);
             E.SetSkillshot(0.25f, 100, 800, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             R = new Spell(SpellSlot.R, 575);
@@ -96,9 +96,9 @@ namespace DominationAIO.Champions
             }
 
             if (R.IsReady())
-                MoveRange = GameObjects.Player.MoveSpeed * 0.7f + R.Range;
+                MoveRange = GameObjects.Player.MoveSpeed * 0.5f + R.Range;
             else
-                MoveRange = GameObjects.Player.MoveSpeed * 0.7f;
+                MoveRange = GameObjects.Player.MoveSpeed * 0.5f;
 
 
             if (QClient() != null)
@@ -107,7 +107,7 @@ namespace DominationAIO.Champions
                 
                 if (Q2())
                 {
-                    var QGeometry = new Geometry.Rectangle(QClient().Position, QVector, Q.Width);
+                    var QGeometry = new Geometry.Rectangle(QClient().Position, QVector, Q.Width + 50);
 
                     if (QGeometry != null)
                     {
@@ -190,7 +190,7 @@ namespace DominationAIO.Champions
                             var QGetPoss = new Geometry.Circle(GameObjects.Player.Position, 800f);
                             foreach (var QGetPos in QGetPoss.Points.OrderByDescending(i => i.Distance(EclientPos)))
                             {
-                                QCollision = new Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width);
+                                QCollision = new Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width + 50);
                                 var CheckCollision = GameObjects.EnemyMinions.Any(i => i.IsValid() && !i.IsDead && QCollision.IsInside(i));
                                 if (CheckCollision == false)
                                 {
@@ -251,7 +251,7 @@ namespace DominationAIO.Champions
                     var Qpred = Prediction.GetPrediction(Q, target);
                     if (Q2())
                     {
-                        if(Qpred.Hitchance != HitChance.Collision && Q2Now)
+                        if(Q2Now)
                         {
                             var CastPos = Qpred.CastPosition;
                             if(CastPos.DistanceToPlayer() > Q.Range)
@@ -283,13 +283,13 @@ namespace DominationAIO.Champions
                             var QGetPoss = new Geometry.Circle(GameObjects.Player.Position, 800f);
                             foreach (var QGetPos in QGetPoss.Points.OrderByDescending(i => i.Distance(Qpred.CastPosition)))
                             {
-                                QCollision = new Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width);
+                                QCollision = new Geometry.Rectangle(GameObjects.Player.Position.ToVector2(), QGetPos, Q.Width + 50);
                                 var CheckCollision = GameObjects.EnemyMinions.Any(i => i.IsValid() && !i.IsDead && QCollision.IsInside(i));
                                 if (CheckCollision == false)
                                 {
                                     //Check For Collision
                                     {
-                                        var QGeometry = new Geometry.Rectangle(QGetPos.ToVector3(), Qpred.CastPosition, Q.Width * 2);
+                                        var QGeometry = new Geometry.Rectangle(QGetPos.ToVector3(), Qpred.CastPosition, Q.Width + 50);
 
                                         if (QGeometry != null)
                                         {

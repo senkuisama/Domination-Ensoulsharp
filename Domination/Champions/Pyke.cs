@@ -22,6 +22,7 @@ namespace Pyke_Ryū
         public static Menu Selector = new Menu("Selector", "Target Menu");
         public static MenuBool Rpyke = new MenuBool("R Pyke", "R KS");
         public static MenuBool Qpyke = new MenuBool("Q Combo", "Q Combo|Harass");
+        public static MenuBool Wpyke = new MenuBool("W Combo", "W Combo|Harass");
         public static MenuBool Epyke = new MenuBool("E Combo", "E Combo|Harass");
 
         public static void GameEvent_OnGameLoad()
@@ -42,6 +43,7 @@ namespace Pyke_Ryū
             RootPyke.Add(Selector);
             RootPyke.Add(Rpyke);
             RootPyke.Add(Qpyke);
+            RootPyke.Add(Wpyke);
             RootPyke.Add(Epyke);           
             RootPyke.Attach();
 
@@ -73,8 +75,8 @@ namespace Pyke_Ryū
             {
                 if(target.Health < R.GetDamage(target, DamageStage.Empowered) && R.IsReadyToCastOn(target))
                 {
-                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
-                    if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(R, target);
+                    if(pred.Hitchance >= HitChance.High)
                     {
                         if (R.Cast(pred.CastPosition))
                             return;
@@ -117,8 +119,8 @@ namespace Pyke_Ryū
             {
                 if (Q.IsCharging)
                 {
-                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
-                    if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
+                    if(pred.Hitchance >= HitChance.High)
                     {
                         Q.Cast(pred.CastPosition);
                     }
@@ -140,6 +142,8 @@ namespace Pyke_Ryū
         }
         private static void CASTW()
         {
+            if (!Wpyke.Enabled)
+                return;
             var target = FSTargetSelector.GetFSTarget(2000);
             if (target == null) return;
 

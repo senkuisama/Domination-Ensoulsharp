@@ -53,7 +53,7 @@ namespace SebbyLibPorted
         {
             if (true)
             {
-                Console.WriteLine(msg);
+                //Console.WriteLine(msg);
             }
             /*if (false)
             {

@@ -166,7 +166,7 @@
                     R.Cast(pred.CastPosition);
                 }*/
                 var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
-                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                if (pred.Hitchance >= (SebbyLibPorted.Prediction.HitChance)RHitchance)
                 {
                     R.Cast(pred.CastPosition);
                 }
@@ -232,7 +232,7 @@
                 {
                     //R.Cast(target.Position);
                     var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
-                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    if (pred.Hitchance >= (SebbyLibPorted.Prediction.HitChance)RHitchance)
                     {
                         R.Cast(pred.CastPosition);
                     }
@@ -257,7 +257,7 @@
                         }*/
 
                         var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        if (pred.Hitchance >= (SebbyLibPorted.Prediction.HitChance)QHitchance)
                         {
                             Q.ShootChargedSpell(pred.CastPosition);
                         }
@@ -377,7 +377,7 @@
                                 }*/
 
                                 var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                if (pred.Hitchance >= (SebbyLibPorted.Prediction.HitChance)QHitchance)
                                 {
                                     Q.StartCharging();
                                 }
@@ -400,7 +400,7 @@
                         }*/
 
                         var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        if (pred.Hitchance >= (SebbyLibPorted.Prediction.HitChance)QHitchance)
                         {
                             Q.ShootChargedSpell(pred.CastPosition);
                         }
@@ -452,7 +452,7 @@
                             if (!W.IsReady() || target.DistanceToPlayer() > 850)
                             {
                                 var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                if (pred.Hitchance >= (SebbyLibPorted.Prediction.HitChance)QHitchance)
                                 {
                                     Q.StartCharging();
                                 }
@@ -470,7 +470,7 @@
                     if (target != null && target.IsValidTarget(Q.Range))
                     {
                         var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        if (pred.Hitchance >= (SebbyLibPorted.Prediction.HitChance)QHitchance)
                         {
                             Q.Cast(pred.CastPosition);
                         }
@@ -736,7 +736,7 @@
             {
                 return;
             }
-            var target = TargetSelector.GetTarget(10000);
+            /*var target = TargetSelector.GetTarget(10000);
             if(target != null)
             {
                 var SDKQpred = Q.GetPrediction(target);
@@ -750,17 +750,17 @@
                 {
                     Render.Circle.DrawCircle(FSQpred.CastPosition, 10, Color.Red, 10);
                 }
-            }
+            }*/
             
             if (MenuWrapper.Draw.Q.Enabled)
             {
                 if (MenuWrapper.Draw.OnlyReady.Enabled && Q.IsReady())
                 {
-                    Render.Circle.DrawCircle(GameObjects.Player.Position, Q.Range, Color.FromArgb(48, 120, 252), 1);
+                    Drawing.DrawCircle(GameObjects.Player.Position, Q.Range, Color.FromArgb(48, 120, 252));
                 }
                 else if (!MenuWrapper.Draw.OnlyReady.Enabled)
                 {
-                    Render.Circle.DrawCircle(GameObjects.Player.Position, Q.Range, Color.FromArgb(48, 120, 252), 1);
+                    Drawing.DrawCircle(GameObjects.Player.Position, Q.Range, Color.FromArgb(48, 120, 252));
                 }
             }
 

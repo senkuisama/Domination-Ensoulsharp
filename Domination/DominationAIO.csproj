@@ -167,6 +167,7 @@
     <Compile Include="Champions\Riven By FunnySlayer.cs" />
     <Compile Include="Champions\Aphelios By FunnySlayer.cs" />
     <Compile Include="Champions\Yasuo Credit Brian.cs" />
+    <Compile Include="Champions\Zoe.cs" />
     <Compile Include="Common\Logichelper.cs" />
     <Compile Include="Evade\BlockSpellData.cs" />
     <Compile Include="Evade\BlockSpellDataBase.cs" />

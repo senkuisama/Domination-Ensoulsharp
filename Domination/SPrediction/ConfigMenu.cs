@@ -51,7 +51,7 @@ namespace SPredictionMash
         /// </summary>
         public static Menu Initialize(string prefMenuName = "SPRED")
         {
-            s_Menu = new Menu(prefMenuName, "SPrediction", false)
+            s_Menu = new Menu(prefMenuName, "Get Prediction", false)
             {
                 new MenuList("PREDICTONLIST", "Prediction Method", new[] { "SPrediction", "Common Prediction" , "FunnySlayer Prediction", "Exory Prediction"}) { Index = 3 },
                 new MenuBool("SPREDWINDUP", "Check for target AA Windup", false),

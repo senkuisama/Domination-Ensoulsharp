@@ -298,12 +298,26 @@ namespace SebbyLibPorted.Prediction
                 result = GetPositionOnPath(input, input.Unit.GetWaypoints(), input.Unit.MoveSpeed);
             }
 
+            if (input.Unit is AIHeroClient && input.Radius > 1 && result.Hitchance <= HitChance.VeryHigh)
+            {
+                var moveOutWall = input.Unit.BoundingRadius + input.Radius / 2 + 10;
+                if (input.Type == SkillshotType.SkillshotCircle)
+                    moveOutWall = input.Unit.BoundingRadius;
+
+                var wallPoint = GetWallPoint(result.CastPosition, moveOutWall);
+                if (!wallPoint.IsZero)
+                {
+                    result.Hitchance = HitChance.High;
+                    result.CastPosition = wallPoint.Extend(result.CastPosition, moveOutWall);
+                }
+            }
+
             //Check if the unit position is in range
             if (Math.Abs(input.Range - float.MaxValue) > float.Epsilon)
             {
-                if (result.Hitchance >= HitChance.High &&
-                    input.RangeCheckFrom.DistanceSquared(input.Unit.Position) >
-                    Math.Pow(input.Range + input.RealRadius * 3 / 4, 2))
+                if (result.Hitchance >= HitChance.High
+                    && input.RangeCheckFrom.DistanceSquared(input.Unit.Position)
+                    > Math.Pow(input.Range + input.RealRadius * 3 / 4, 2))
                 {
                     result.Hitchance = HitChance.Medium;
                 }
@@ -313,27 +327,18 @@ namespace SebbyLibPorted.Prediction
                 {
                     result.Hitchance = HitChance.OutOfRange;
                 }
+            }
 
-                /* This does not need to be handled for the updated predictions, but left as a reference.*/
-                if (input.RangeCheckFrom.DistanceSquared(result.CastPosition) > Math.Pow(input.Range, 2))
-                {
-                    if (result.Hitchance != HitChance.OutOfRange)
-                    {
-                        result.CastPosition = input.RangeCheckFrom +
-                                              input.Range *
-                                              (result.UnitPosition - input.RangeCheckFrom).ToVector2().Normalized().ToVector3();
-                    }
-                    else
-                    {
-                        result.Hitchance = HitChance.OutOfRange;
-                    }
-                }
+            //Set hit chance
+            if (result.Hitchance == HitChance.High)
+            {
+                result = WayPointAnalysis(result, input);
             }
 
             //Check for collision
-            if (checkCollision && input.Collision)
+            if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
-                var positions = new List<Vector3> { result.UnitPosition, result.CastPosition };
+                var positions = new List<Vector3> { result.CastPosition };
                 var originalUnit = input.Unit;
                 if (Collision.GetCollision(positions, input))
                     result.Hitchance = HitChance.Collision;
@@ -367,6 +372,52 @@ namespace SebbyLibPorted.Prediction
                 OktwCommon.debug(input.Radius + " RES Ways: " + input.Unit.GetWaypoints().Count + " W " + input.Unit.IsWindingUp + " D " + distanceUnitToWaypoint + " T " + UnitTracker.GetLastNewPathTime(input.Unit) + " " + result.Hitchance);
             }
             return result;
+        }
+        internal static Vector3 GetWallPoint(Vector3 from, float range)
+        {
+            var count = 30;
+            var points = OktwCommon.CirclePoints(count, range, from);
+            Vector3 first = Vector3.Zero, last = Vector3.Zero;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (points[i].IsWall())
+                {
+                    if (first.IsZero)
+                    {
+                        if (i == count - 1)
+                        {
+                            if (!points[0].IsWall())
+                                first = points[i];
+                        }
+                        else
+                        {
+                            if (!points[i + 1].IsWall())
+                                first = points[i];
+                        }
+                    }
+                    if (last.IsZero)
+                    {
+                        if (i == 0)
+                        {
+                            if (!points[count - 1].IsWall())
+                                last = points[i];
+                        }
+                        else
+                        {
+                            if (!points[i - 1].IsWall())
+                                last = points[i];
+                        }
+                    }
+                }
+            }
+            if (!first.IsZero && !last.IsZero)
+            {
+                var finnaly = new Vector3((last.X + first.X) / 2, (last.Y + first.Y) / 2, (last.Z + first.Z) / 2);
+                return finnaly;
+            }
+            else
+                return Vector3.Zero;
         }
 
         public static bool PointInLineSegment(Vector2 segmentStart, Vector2 segmentEnd, Vector2 point)
@@ -662,7 +713,7 @@ namespace SebbyLibPorted.Prediction
 
         internal static PredictionOutput GetPositionOnPath(PredictionInput input, List<Vector2> path, float speed = -1)
         {
-            if (input.Unit.DistanceSquared(input.From) < 250 * 250)
+            if (input.Unit.DistanceSquared(input.From) < 200 * 200)
             {
                 //input.Delay /= 2;
                 speed /= 1.5f;
@@ -1125,19 +1176,26 @@ namespace SebbyLibPorted.Prediction
                             {
 
                                 var distanceFromToUnit = minion.Position.Distance(input.From);
-
-                                if (distanceFromToUnit < 10 + minion.BoundingRadius)
+                                var bOffset = minion.BoundingRadius + input.Unit.BoundingRadius;
+                                if (distanceFromToUnit < bOffset)
                                 {
-                                    /*if (MinionIsDead(input, minion, distanceFromToUnit))
+                                    if (MinionIsDead(input, minion, distanceFromToUnit))
                                         continue;
-                                    else*/
+                                    else
                                         return true;
                                 }
-                                else if (minion.Position.Distance(position) < minion.BoundingRadius + input.Radius / 2)
+                                else if (minion.Position.Distance(position) < bOffset)
                                 {
-                                    /*if (MinionIsDead(input, minion, distanceFromToUnit))
+                                    if (MinionIsDead(input, minion, distanceFromToUnit))
                                         continue;
-                                    else*/
+                                    else
+                                        return true;
+                                }
+                                else if (minion.Position.Distance(input.Unit.Position) < bOffset)
+                                {
+                                    if (MinionIsDead(input, minion, distanceFromToUnit))
+                                        continue;
+                                    else
                                         return true;
                                 }
                                 else
@@ -1158,14 +1216,14 @@ namespace SebbyLibPorted.Prediction
                                             Type = input.Type
                                         };
                                         minionPos = Prediction.GetPrediction(predInput2).CastPosition;
-                                        bonusRadius = 10 + (int)input.Radius;
+                                        bonusRadius = 50 + (int)input.Radius;
                                     }
 
                                     if (minionPos.ToVector2().DistanceSquared(input.From.ToVector2(), position.ToVector2(), true) <= Math.Pow((input.Radius + bonusRadius + minion.BoundingRadius), 2))
                                     {
-                                        /*if (MinionIsDead(input, minion, distanceFromToUnit))
+                                        if (MinionIsDead(input, minion, distanceFromToUnit))
                                             continue;
-                                        else*/
+                                        else
                                             return true;
                                     }
                                 }

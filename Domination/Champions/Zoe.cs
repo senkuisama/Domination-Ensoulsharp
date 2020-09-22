@@ -248,6 +248,10 @@ namespace DominationAIO.Champions
             }
             else
             {
+                if(QClient() != null)
+                {
+
+                }
                 if (Q.IsReady() && Qcombo.Enabled)
                 {
                     var Qpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
@@ -264,7 +268,7 @@ namespace DominationAIO.Champions
                                     {
                                         DelayAction.Add(200, () =>
                                         {
-                                            if (R.Cast(CastPos, true))
+                                            if (Qpred.Hitchance != HitChance.Collision && R.Cast(CastPos, true))
                                                 return;
                                         });
                                     }

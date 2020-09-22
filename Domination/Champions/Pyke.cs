@@ -79,11 +79,7 @@ namespace Pyke_Ryū
                     if(pred.Hitchance >= HitChance.High)
                     {
                         if (R.Cast(pred.CastPosition))
-                            return;
-                        else
-                        {
-                            R.Cast(pred.CastPosition);
-                        }                       
+                            return;                 
                     }
                 }
             }

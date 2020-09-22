@@ -44,6 +44,7 @@ namespace DominationAIO.Champions
             Rmenu.Add(BrandSettings.Heath);
 
             Menu BrandAuto = new Menu("Auto Brand", "Auto Settings");
+            BrandAuto.Add(BrandSettings.EarlyCombo);
             BrandAuto.Add(BrandSettings.QStun);
             BrandAuto.Add(BrandSettings.Whit);
             BrandAuto.Add(BrandSettings.AutoR);
@@ -100,6 +101,21 @@ namespace DominationAIO.Champions
             Game.OnUpdate += COMBOHARASS;
 
             Drawing.OnDraw += BRANDDRAWING;
+
+            Orbwalker.OnAction += Orbwalker_OnAction;
+        }
+
+        private static bool AfterAA = false;
+        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        {
+            if(args.Type == OrbwalkerType.AfterAttack)
+            {
+                AfterAA = true;
+            }
+            else
+            {
+                AfterAA = false;
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -234,27 +250,42 @@ namespace DominationAIO.Champions
             if (target == null)
                 return;
 
-            if (target.Burning())
+            if((ObjectManager.Player.Level < 3 || Q.State == SpellState.NotLearned) && BrandSettings.EarlyCombo.Enabled)
             {
-                if (BrandSettings.AcceptW.Enabled)
+                if (AfterAA)
                 {
-                    var pred = Prediction.PredictUnitPosition(target, 600);
-                    if (pred.IsValid() && pred.Distance(ME) <= W.Range)
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                    if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                     {
-                        if (W.Cast(pred))
+                        if (W.Cast(pred.CastPosition))
                             return;
                     }
                 }
             }
             else
             {
-                var pred = Prediction.PredictUnitPosition(target, 600);
-                if (pred.IsValid() && pred.Distance(ME) <= W.Range)
+                if (target.Burning())
                 {
-                    if (W.Cast(pred))
-                        return;
+                    if (BrandSettings.AcceptW.Enabled)
+                    {
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            if (W.Cast(pred.CastPosition))
+                                return;
+                        }
+                    }
                 }
-            }
+                else
+                {
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    {
+                        if (W.Cast(pred.CastPosition))
+                            return;
+                    }
+                }
+            }           
         }
         private static void DO_BRAND_E()
         {
@@ -461,6 +492,7 @@ namespace DominationAIO.Champions
         internal static MenuSlider Hit = new MenuSlider("Hit target", "Target Hit Count >= ", 2, 1, 5);
         internal static MenuSlider Heath = new MenuSlider("target Heath", "Target Heath % <= ", 60, 0, 100);
         //Auto Settings
+        internal static MenuBool EarlyCombo = new MenuBool("Early Combo", "Early Combo");
         internal static MenuBool QStun = new MenuBool("Q Stun", "Auto Q if can stun");
         internal static MenuSliderButton Whit = new MenuSliderButton("W Hit Count", "Auto W if can hit", 2, 1, 5);
         internal static MenuSliderButton AutoR = new MenuSliderButton("R auto hit", "Auto R if target hit count >=", 3, 1, 5);

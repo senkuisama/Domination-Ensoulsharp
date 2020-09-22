@@ -266,16 +266,16 @@ namespace SPredictionMash
         /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
         /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
         /// <returns>true if spell has casted</returns>
-        public static bool SPredictionCast(this Spell s, AIHeroClient t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
+        public static bool SPredictionCast(this Spell s, AIHeroClient t, HitChance hc,bool Packet = false, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
         {
             if (rangeCheckFrom == null)
                 rangeCheckFrom = ObjectManager.Player.PreviousPosition;
 
             if (t == null)
-                return s.Cast();
+                return s.Cast(Packet);
 
             if (!s.IsSkillShot)
-                return s.Cast(t) == CastStates.SuccessfullyCasted;
+                return s.Cast(t, Packet) == CastStates.SuccessfullyCasted;
 
             #region if common prediction selected
             if (ConfigMenu.SelectedPrediction.Index == 1)
@@ -284,11 +284,11 @@ namespace SPredictionMash
 
                 if (minHit > 1)
                     if (pout.AoeTargetsHitCount >= minHit)
-                        return s.Cast(pout.CastPosition);
+                        return s.Cast(pout.CastPosition, Packet);
                     else return false;
 
                 if (pout.Hitchance >= hc)
-                    return s.Cast(pout.CastPosition);
+                    return s.Cast(pout.CastPosition, Packet);
                 else
                     return false;
             }
@@ -301,11 +301,11 @@ namespace SPredictionMash
 
                 if (minHit > 1)
                     if (pout.AoeTargetsHitCount >= minHit)
-                        return s.Cast(pout.CastPosition);
+                        return s.Cast(pout.CastPosition, Packet);
                     else return false;
 
                 if (pout.Hitchance >= (FSpred.Prediction.HitChance)hc)
-                    return s.Cast(pout.CastPosition);
+                    return s.Cast(pout.CastPosition, Packet);
                 else
                     return false;
             }
@@ -318,11 +318,11 @@ namespace SPredictionMash
 
                 if (minHit > 1)
                     if (pout.AoeTargetsHitCount >= minHit)
-                        return s.Cast(pout.CastPosition);
+                        return s.Cast(pout.CastPosition, Packet);
                     else return false;
 
                 if (pout.Hitchance >= (SebbyLibPorted.Prediction.HitChance)hc)
-                    return s.Cast(pout.CastPosition);
+                    return s.Cast(pout.CastPosition, Packet);
                 else
                     return false;
             }

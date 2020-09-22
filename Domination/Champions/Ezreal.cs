@@ -408,6 +408,9 @@ namespace DominationAIO.Champions
 
         private static void EzHarass()
         {
+            if (!EzKeysSetting.HarassKey.Active)
+                return;
+
             var target = TargetSelector.SelectedTarget;
 
             if (target == null || !target.IsValidTarget(Q.Range))
@@ -430,6 +433,9 @@ namespace DominationAIO.Champions
         {
             if (OnAA || BeforeAA || !QEzSettings.QClear.Enabled) return;
 
+            if (!EzKeysSetting.FarmKey.Active)
+                return;
+
             var Minions = GameObjects.Enemy.Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
             if (Minions == null)
                 return;
@@ -438,7 +444,10 @@ namespace DominationAIO.Champions
             {
                 if (min.IsMinion)
                 {
-                    if(QEzSettings.ClearMana.Value <= Player.ManaPercent)
+                    if (!EzKeysSetting.FarmKey.Active)
+                        return;
+
+                    if (QEzSettings.ClearMana.Value <= Player.ManaPercent)
                     {
                         if(min.Health >= Player.GetAutoAttackDamage(min) + 17 + Damage.GetSpellDamage(Player, min, SpellSlot.Q) || min.Health < Damage.GetSpellDamage(Player, min, SpellSlot.Q))
                         {
@@ -476,6 +485,9 @@ namespace DominationAIO.Champions
                 }
                 else
                 {
+                    if (!EzKeysSetting.HarassKey.Active)
+                        return;
+
                     if (QEzSettings.Qharass.Enabled)
                     {
                         if(QEzSettings.HarassMana.Value <= Player.ManaPercent)

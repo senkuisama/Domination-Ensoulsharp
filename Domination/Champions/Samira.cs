@@ -131,7 +131,7 @@ namespace DominationAIO.Champions
                 {
                     if (Q.IsReady())
                     {
-                        var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(Q.Range)).OrderBy(i => i.Health);
+                        var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(Q.Range)).OrderBy(i => i.Health).ToArray();
                         if(targets != null)
                         {
                             foreach(var target in targets)
@@ -192,7 +192,38 @@ namespace DominationAIO.Champions
         {
             if (Player.IsDead || OnAA || BeforeAA || Orbwalker.ActiveMode != OrbwalkerMode.Combo)
                 return;
-            
+            if(W.IsReady() && SamiraSetMenu.WSettings.WCantAA.Enabled && LastCasted + SamiraSetMenu.Misc.AATimer.Value < Variables.TickCount)
+            {
+                if (!Player.CanAttack)
+                {
+                    var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health);
+                    if(targets != null)
+                    {
+                        if (W.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                            return;
+                    }
+                }
+                if (E.IsReady() && SamiraSetMenu.ESettings.ECombo.Enabled)
+                {
+                    var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health).ToArray();
+                    if(targets != null)
+                    {
+                        foreach(var target in targets)
+                        {
+                            if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                            {
+                                if (target.HealthPercent < 60)
+                                {
+                                    if (W.Cast())
+                                    {
+                                        EnsoulSharp.SDK.Utility.DelayAction.Add(700, () => { E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled); });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if(R.IsReady() && SamiraSetMenu.RSettings.RCombo.Enabled)
             {
                 if(Player.CountEnemyHeroesInRange(R.Range) >= SamiraSetMenu.RSettings.RCount.Value)

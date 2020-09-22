@@ -2981,6 +2981,28 @@ namespace ConsoleApp
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnAction += Orbwalker_OnAction;
             Drawing.OnDraw += Drawing_OnDraw;
+            Game.OnUpdate += Game_OnUpdate1;
+        }
+
+        private static void Game_OnUpdate1(EventArgs args)
+        {
+            if (objPlayer.IsDead) return;
+
+            if(Orbwalker.ActiveMode == OrbwalkerMode.LastHit)
+            {
+                var Minions = GameObjects.EnemyMinions.Where(i => !i.IsDead && i.IsValidTarget(Q1.Range));
+                if (Minions == null)
+                    return;
+
+                foreach(var minion in Minions.Where(i => i.Health <= objPlayer.GetSpellDamage(i, SpellSlot.Q)))
+                {
+                    if (!isQ3())
+                    {
+                        if (Q1.Cast(minion.Position))
+                            return;
+                    }
+                }
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -3082,7 +3104,7 @@ namespace ConsoleApp
         }
         private static void Yone_Clear()
         {
-            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding());
+            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
             if (Qminions != null && Q1.IsReady())
             {
                 foreach (var min in Qminions)
@@ -3113,21 +3135,38 @@ namespace ConsoleApp
                     {
                         if (isQ3())
                         {
-                            var qFarm = Q3.GetLineFarmLocation(Qminions.ToList());
-
-                            if (qFarm.MinionsHit >= 1 && !UnderTower(objPlayer.Position.Extend(qFarm.Position, 500)))
+                            if (Orbwalker.ActiveMode == OrbwalkerMode.Harass)
                             {
-                                Q3.Cast(qFarm.Position);
+                                return;
+                            }
+                            else
+                            {
+                                var qFarm = Q3.GetLineFarmLocation(Qminions.ToList());
+
+                                if (qFarm.MinionsHit >= 1 && !UnderTower(objPlayer.Position.Extend(qFarm.Position, 500)))
+                                {
+                                    Q3.Cast(qFarm.Position);
+                                }
                             }
                         }
                         else
                         {
-                            var qFarm = Q1.GetLineFarmLocation(Qminions.ToList());
-
-                            if (qFarm.MinionsHit >= 1)
+                            if (Orbwalker.ActiveMode == OrbwalkerMode.Harass)
                             {
-                                Q1.Cast(qFarm.Position);
+                                if(min.Health < objPlayer.GetSpellDamage(min, SpellSlot.Q) && min.IsValidTarget(Q1.Range))
+                                {
+                                    Q1.Cast(min.Position);
+                                }
                             }
+                            else
+                            {
+                                var qFarm = Q1.GetLineFarmLocation(Qminions.ToList());
+
+                                if (qFarm.MinionsHit >= 1)
+                                {
+                                    Q1.Cast(qFarm.Position);
+                                }
+                            }                           
                         }
                     }
                 }

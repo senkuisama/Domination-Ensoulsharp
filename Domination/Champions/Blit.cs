@@ -50,7 +50,7 @@ namespace DominationAIO.Champions
             BlitMenu.Attach();
 
             Q = new Spell(SpellSlot.Q, 1150f);
-            Q.SetSkillshot(0.25f, 140f, 1800, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Q.SetSkillshot(0.5f, 110f, 1800, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             W = new Spell(SpellSlot.W, Player.GetRealAutoAttackRange());
             E = new Spell(SpellSlot.E, Player.GetRealAutoAttackRange());
             R = new Spell(SpellSlot.R, 600);

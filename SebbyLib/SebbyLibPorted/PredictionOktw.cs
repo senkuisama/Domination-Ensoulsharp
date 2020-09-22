@@ -1128,16 +1128,16 @@ namespace SebbyLibPorted.Prediction
 
                                 if (distanceFromToUnit < 10 + minion.BoundingRadius)
                                 {
-                                    if (MinionIsDead(input, minion, distanceFromToUnit))
+                                    /*if (MinionIsDead(input, minion, distanceFromToUnit))
                                         continue;
-                                    else
+                                    else*/
                                         return true;
                                 }
-                                else if (minion.Position.Distance(position) < minion.BoundingRadius)
+                                else if (minion.Position.Distance(position) < minion.BoundingRadius + input.Radius / 2)
                                 {
-                                    if (MinionIsDead(input, minion, distanceFromToUnit))
+                                    /*if (MinionIsDead(input, minion, distanceFromToUnit))
                                         continue;
-                                    else
+                                    else*/
                                         return true;
                                 }
                                 else
@@ -1163,9 +1163,9 @@ namespace SebbyLibPorted.Prediction
 
                                     if (minionPos.ToVector2().DistanceSquared(input.From.ToVector2(), position.ToVector2(), true) <= Math.Pow((input.Radius + bonusRadius + minion.BoundingRadius), 2))
                                     {
-                                        if (MinionIsDead(input, minion, distanceFromToUnit))
+                                        /*if (MinionIsDead(input, minion, distanceFromToUnit))
                                             continue;
-                                        else
+                                        else*/
                                             return true;
                                     }
                                 }

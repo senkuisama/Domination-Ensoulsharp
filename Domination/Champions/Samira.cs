@@ -425,7 +425,18 @@ namespace DominationAIO.Champions
             var Elist = new List<int>{
                 0, 50 , 60 , 70 , 80 , 90
             };
+            var Rlist = new List<int>{
+                0, 10, 20, 30
+            };
             var EGetDmg = Player.CalculateMagicDamage(target, Elist[E.Level]);
+
+            EGetDmg += 0.2f * Player.GetBonusPhysicalDamage();
+
+            EGetDmg += Player.GetAutoAttackDamage(target);
+
+            if (Player.HasBuff("SamiraR"))
+                EGetDmg += Player.CalculatePhysicalDamage(target, (Rlist[R.Level] + 0.6f * Player.TotalAttackDamage) * 3);
+
             return (float)EGetDmg;
         }
         private static int LastCasted = 0;

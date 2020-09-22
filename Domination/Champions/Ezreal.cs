@@ -253,12 +253,7 @@ namespace DominationAIO.Champions
                     if(W.IsReady() && WEzSettings.Wcombo.Enabled && target.IsValidTarget(W.Range) && FSpred.Prediction.Prediction.GetPrediction(W, target).Hitchance >= FSpred.Prediction.HitChance.High)
                     {
                         var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                        //var Spred = Q.GetSPrediction(target);
-                        var Cpred = Q.GetPrediction(target);
-
-                        if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
-                            //|| Spred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
-                            || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                        if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                         {
                             if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
                             {
@@ -284,16 +279,12 @@ namespace DominationAIO.Champions
                             );
 
                             var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, RandomTarget);
-                            //var Spred = Q.GetSPrediction(RandomTarget);
-                            var Cpred = Q.GetPrediction(RandomTarget);
 
                             if (RandomTarget != null)
                             {
                                 if (W.IsReady() && WEzSettings.Wcombo.Enabled)
                                 {
-                                    if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
-                                        //|| Spred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
-                                        || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                                    if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     {
                                         if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
                                         {
@@ -329,21 +320,31 @@ namespace DominationAIO.Champions
                     {
                         if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
                         {
+                            if (Q.IsReady())
+                            {
+                                var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+
+                                if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                {
+                                    if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                    {
+                                        if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                        {
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
                             return;
                         }
                     }
                 }
 
-                if (Q.IsReady() && QEzSettings.Qcombo.Enabled)
+                if (Q.IsReady())
                 {
                     var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                    //var Spred = Q.GetSPrediction(target);
-                    var Cpred = Q.GetPrediction(target);
-                    var Epred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
 
-                    if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
-                                || Epred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High
-                                || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                    if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                     {
                         if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
                         {
@@ -360,19 +361,16 @@ namespace DominationAIO.Champions
                 if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
                 {
                     var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                    var Epred = Q.GetSPrediction(target);
-                    var Cpred = Q.GetPrediction(target);
 
                     if (Q.IsReady() && QEzSettings.Qcombo.Enabled)
-                        if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High
-                                || Epred.HitChance >= EnsoulSharp.SDK.Prediction.HitChance.High
-                                || Cpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                        if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                         {
                             if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
                             {
                                 return;
                             }
                         }
+                    return;
                 }
             }
         }

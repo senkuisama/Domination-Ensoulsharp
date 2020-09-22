@@ -48,13 +48,13 @@ namespace DominationAIO.Champions
 
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
-            if (!sender.IsMe && sender is AIHeroClient && !sender.IsMelee)
+            if (!sender.IsAlly && sender is AIHeroClient && sender.IsRanged && sender.IsValidTarget(W.Range + E.Range))
             {
                 if(args.Target.IsMe || args.Target.NetworkId == Player.NetworkId)
                 {
                     if(!BeforeAA && !OnAA && !Orbwalker.CanAttack())
                     {
-                        if(W.IsReady() && WCombo.Enabled && sender.IsValidTarget(W.Range + E.Range))
+                        if(W.IsReady() && WCombo.Enabled)
                         {
                             if (W.Cast())
                                 return;
@@ -111,11 +111,34 @@ namespace DominationAIO.Champions
             if (Player.HasBuff("SamiraR"))
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
+            if (Player.HasBuff("SamiraW"))
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+
             var fstarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(Q.Range);
 
             if(Orbwalker.ActiveMode <= OrbwalkerMode.Harass)
             {
-                if(QCombo.Enabled && Q.IsReady() && !Player.IsDashing())
+                if (Orbwalker.GetTarget() != null)
+                {
+                    if (ECombo.Enabled && E.IsReady())
+                    {
+                        if (!Orbwalker.CanAttack() || AfterAA)
+                        {
+                            if (Orbwalker.GetTarget().IsValidTarget(E.Range))
+                            {
+                                if (E.Cast(Orbwalker.GetTarget() as AIHeroClient) == CastStates.SuccessfullyCasted || E.CastOnUnit(Orbwalker.GetTarget() as AIHeroClient))
+                                {
+                                    if (Q.IsReady())
+                                        if (Q.Cast(new SharpDX.Vector3(5154954f, 5641561f, 45115f), true))
+                                            return;
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (QCombo.Enabled && Q.IsReady() && !Player.IsDashing())
                 {
                     var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(Q.Range / 3)).OrderBy(i => i.Health);
                     if(targets != null)
@@ -142,22 +165,7 @@ namespace DominationAIO.Champions
                         }
                     }
                 }
-
-                if(Orbwalker.GetTarget() != null)
-                {
-                    if (ECombo.Enabled && E.IsReady())
-                    {
-                        if(!Orbwalker.CanAttack() || AfterAA)
-                        {
-                            if (Orbwalker.GetTarget().IsValidTarget(E.Range))
-                            {
-                                if (E.Cast(Orbwalker.GetTarget() as AIHeroClient) == CastStates.SuccessfullyCasted || E.CastOnUnit(Orbwalker.GetTarget() as AIHeroClient))
-                                    return;
-                            }
-                        }
-                    }
-                }
-
+               
                 if (R.IsReady() && RCombo.Enabled)
                 {
                     var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(R.Range)).OrderBy(i => i.Health);
@@ -175,6 +183,7 @@ namespace DominationAIO.Champions
                                         {
                                             return;
                                         }
+                                        return;
                                     }
                                 }
                                 else

@@ -17,5 +17,7 @@ Added Akali
 
 Beta Test Zoe
 
+Added Simple Blit and Samira
+
 https://discord.gg/XEkkGNq
 ![image](https://cdn.discordapp.com/attachments/612555523589668866/724609491512852520/593690079000e.png)

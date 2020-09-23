@@ -131,6 +131,8 @@ namespace DominationAIO.Champions
                     Misc.AATimer.Value = 1500;
                     Misc.PacketCast.Enabled = false;
                     Misc.DrawQAARange.Enabled = false;
+
+                    reset.Enabled = false;
                 }
             };
         }

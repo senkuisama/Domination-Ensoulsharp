@@ -607,15 +607,6 @@ namespace DominationAIO.Champions
 
             if (Player.HasBuff("SamiraW"))
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-
-            if (Player.HasBuff("SamiraW") || Player.HasBuff("SamiraR"))
-            {
-                Orbwalker.AttackState = false;
-            }
-            else
-            {
-                Orbwalker.AttackState = true;
-            }
         }
     }
 }

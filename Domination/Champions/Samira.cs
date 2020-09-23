@@ -55,7 +55,9 @@ namespace DominationAIO.Champions
             public static MenuKeyBind QMixed = new MenuKeyBind("QMixed", "Q Harass When Clear ", System.Windows.Forms.Keys.H, KeyBindType.Toggle) { Active = true, };
             public static MenuKeyBind QClear = new MenuKeyBind("QClear", "Q Clear Minions ", System.Windows.Forms.Keys.H, KeyBindType.Toggle) { Active = true, };
             public static MenuKeyBind AllowTurret = new MenuKeyBind("AllowTurret", "Allow Turret Key [ Toggle ] ", System.Windows.Forms.Keys.T, KeyBindType.Toggle);
+            public static MenuKeyBind TurboFast = new MenuKeyBind("TurboFast", "Turbo Fastly", System.Windows.Forms.Keys.Z, KeyBindType.Toggle);
         }
+        public static MenuBool reset = new MenuBool("reset", "Reset Samira");
         public static void AddSamiraMenu(this Menu menu)
         {
             var QSamira = new Menu("Q Samira Settings", "Q Settings");
@@ -89,6 +91,7 @@ namespace DominationAIO.Champions
             KeysSamira.Add(KeysSettings.QMixed).Permashow();
             KeysSamira.Add(KeysSettings.QClear).Permashow();
             KeysSamira.Add(KeysSettings.AllowTurret).Permashow();
+            KeysSamira.Add(KeysSettings.TurboFast).Permashow(true, "Fast Combo", SharpDX.Color.Yellow);
 
             menu.Add(QSamira);
             menu.Add(WSamira);
@@ -96,6 +99,40 @@ namespace DominationAIO.Champions
             menu.Add(RSamira);
             menu.Add(MiscSamira);
             menu.Add(KeysSamira);
+            menu.Add(reset);
+
+            Game.OnUpdate += (a) =>
+            {
+                if (reset.Enabled)
+                {
+                    //Q
+                    QSettings.QBladeCombo.Enabled = true;
+                    QSettings.QBladeCombo.Enabled = true;
+                    QSettings.QManaCheck.Value = 30;
+                    //W
+                    WSettings.WCantAA.Enabled = false;
+                    WSettings.WBlock.Enabled = true;
+                    WSettings.EnemyCount.Value = 1;
+                    //E
+                    ESettings.ECombo.Enabled = true;
+                    ESettings.EQ.Enabled = true;
+                    ESettings.EW.Enabled = true;
+                    ESettings.EMinions.Active = false;
+                    ESettings.Eheath.Value = 70;
+                    ESettings.ER.Enabled = true;
+                    ESettings.EKs.Enabled = true;
+                    //ESettings.Eonly.Permashow(true);
+                    //R
+                    RSettings.RCombo.Enabled = true;
+                    RSettings.RCount.Value = 1;
+                    RSettings.AutoE.Enabled = true;
+                    //Misc
+                    Misc.WaitForAA.Enabled = true;
+                    Misc.AATimer.Value = 1500;
+                    Misc.PacketCast.Enabled = false;
+                    Misc.DrawQAARange.Enabled = false;
+                }
+            };
         }
     }
     public class Samira
@@ -216,240 +253,100 @@ namespace DominationAIO.Champions
         {
             if (Player.IsDead || OnAA || BeforeAA || Orbwalker.ActiveMode != OrbwalkerMode.Combo)
                 return;
-            if(W.IsReady() && SamiraSetMenu.WSettings.WCantAA.Enabled && LastCasted + SamiraSetMenu.Misc.AATimer.Value < Variables.TickCount)
+
+            if (SamiraSetMenu.KeysSettings.TurboFast.Active && Q.IsReady() && W.IsReady() && E.IsReady())
             {
-                if (!Player.CanAttack)
+                var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(E.Range);
+                if(target != null)
                 {
-                    var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health);
-                    if(targets != null)
+                    if (R.IsReady() && SamiraSetMenu.RSettings.RCombo.Enabled)
                     {
-                        if (W.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
-                            return;
-                    }
-                }
-                if (E.IsReady() && SamiraSetMenu.ESettings.ECombo.Enabled)
-                {
-                    var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health).ToArray();
-                    if(targets != null)
-                    {
-                        foreach(var target in targets)
+                        if (R.Cast())
                         {
-                            if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                            if (W.Cast())
                             {
-                                if (target.HealthPercent < 60)
+                                if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                 {
-                                    if (W.Cast())
+                                    if (Q.Cast())
                                     {
-                                        return;                                   
+                                        /*if (*/return;/*)*/
                                     }
                                 }
                             }
                         }
                     }
-                }
-            }
-            if(R.IsReady() && SamiraSetMenu.RSettings.RCombo.Enabled)
-            {
-                if(Player.CountEnemyHeroesInRange(R.Range) >= SamiraSetMenu.RSettings.RCount.Value)
-                {
-                    var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health);
-                    if (targets != null)
+                    if (E.IsReady() && SamiraSetMenu.ESettings.ECombo.Enabled)
                     {
-                        foreach (var t in targets)
+                        if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
                         {
-                            if (SamiraSetMenu.RSettings.AutoE.Enabled)
+                            if (target.IsValidTarget(300))
                             {
-                                if (Player.Position.Extend(t.Position, +E.Range).CountEnemyHeroesInRange(R.Range) > SamiraSetMenu.RSettings.RCount.Value)
-                                {
-                                    if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(t.Position, E.Range)))
-                                        if (E.Cast(t, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                        {
-                                            if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
-                                                return;
-                                        }
-                                }
+                                Q.Cast(target.Position);
+                                E.DelayTargetCast(target, 200);
+                                EnsoulSharp.SDK.Utility.DelayAction.Add(300, () => { W.Cast(); });
                             }
-                        }
-                    }
-
-                    var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range);
-                    if (target != null)
-                    {
-                        var Pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 1000);
-                        if(Pos.DistanceToPlayer() > R.Range)
-                        {
-                            if(E.IsReady() && SamiraSetMenu.RSettings.AutoE.Enabled)
+                            else
                             {
-                                if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                                if(Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
                                 {
-                                    if(E.Cast(target, SamiraSetMenu.Misc.PacketCast) == CastStates.SuccessfullyCasted)
+                                    if (W.Cast())
                                     {
-                                        if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                                        if (E.Cast(target) == CastStates.SuccessfullyCasted)
+                                            return;
+                                    }
+                                }
+                                else
+                                {
+                                    if(W.Cast())
+                                    {
+                                        if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                             return;
                                     }
                                 }
                             }
                         }
-                        else
-                        {
-                            if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
-                                return;
-                        }
                     }
-                }
+                }               
             }
-            if (E.IsReady() && SamiraSetMenu.ESettings.ECombo.Enabled)
+            else
             {
-                //E on Minions
+                if (R.IsReady() && SamiraSetMenu.RSettings.RCombo.Enabled)
                 {
-                    var fstarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(E.Range + Q.Range);
-                    if(fstarget != null)
+                    if (Player.CountEnemyHeroesInRange(R.Range) >= SamiraSetMenu.RSettings.RCount.Value)
                     {
-                        var minion = GameObjects.Get<AIMinionClient>().Where(i => !i.IsDead && i.IsValid() && !i.IsAlly && i.IsValidTarget(E.Range) && Player.Position.Extend(i.Position, E.Range).Distance(fstarget) < Player.Distance(fstarget)).OrderBy(i => Player.Position.Extend(i.Position, E.Range).Distance(fstarget));
-                        if(minion != null)
+                        var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health);
+                        if (targets != null)
                         {
-                            if (SamiraSetMenu.ESettings.EMinions.Active)
+                            foreach (var t in targets)
                             {
-                                foreach(var min in minion)
+                                if (SamiraSetMenu.RSettings.AutoE.Enabled)
                                 {
-                                    if(min != null)
+                                    if (Player.Position.Extend(t.Position, +E.Range).CountEnemyHeroesInRange(R.Range) > SamiraSetMenu.RSettings.RCount.Value)
                                     {
-                                        if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(min.Position, E.Range)))
-                                        {
-                                            if(fstarget.HealthPercent <= SamiraSetMenu.ESettings.Eheath.Value)
+                                        if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(t.Position, E.Range)))
+                                            if (E.Cast(t, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
                                             {
-                                                if (SamiraSetMenu.ESettings.ER.Enabled)
-                                                {
-                                                    if (R.IsReady())
-                                                    {
-                                                        if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                                            return;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                                        return;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health);
-                if(targets != null)
-                {
-                    foreach(var target in targets)
-                    {
-                        if(FSpred.Prediction.Prediction.PredictUnitPosition(target, 700).DistanceToPlayer() > E.Range)
-                        {
-                            if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                {
-                                    return;
-                                }
-                        }
-                        if(target.Health < GetEDmg(target) && SamiraSetMenu.ESettings.EKs.Enabled)
-                        {
-                            if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                {
-                                    return;
-                                }
-                        }
-                        if (Player.HasBuff("SamiraR") && SamiraSetMenu.RSettings.AutoE.Enabled)
-                        {
-                            if(Player.Position.Extend(target.Position, + E.Range).CountEnemyHeroesInRange(R.Range) > Player.CountEnemyHeroesInRange(R.Range))
-                            {
-                                if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                    {
-                                        return;
-                                    }
-                            }
-                            if (FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range + 300) != null)
-                            {
-                                var Pos = FSpred.Prediction.Prediction.PredictUnitPosition(FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range + 300), 700);
-                                var enemy = GameObjects.Enemy.Where(i => !i.IsDead && i.IsValidTarget(E.Range) && !i.Position.IsBuilding()).OrderBy(i => i.Health).OrderBy(i => i is AIHeroClient);
-                                if (enemy != null)
-                                {
-                                    foreach (var Next in enemy)
-                                    {
-                                        if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(Next.Position, E.Range)))
-                                        {
-                                            if (Player.Position.Extend(Next.Position, E.Range).Distance(Pos) < Player.Distance(Pos))
-                                            {
-                                                if (E.Cast(Next, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
                                                     return;
                                             }
-                                        }   
                                     }
                                 }
-                            }                         
-                        }
-                        if (Player.HasBuff("SamiraW") && SamiraSetMenu.ESettings.EW.Enabled)
-                        {
-                            if(Variables.TickCount > LastW + 750)
-                            {
-                                if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                    {
-                                        return;
-                                    }
                             }
                         }
-                        if (Q.IsReady() && SamiraSetMenu.ESettings.EQ.Enabled)
-                        {
-                            if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
-                                {
-                                    if (Q.Cast(new SharpDX.Vector3(45646, 546416, 45462), SamiraSetMenu.Misc.PacketCast.Enabled))
-                                        return;
-                                    return;
-                                }
-                        }
-                    }
-                }
-            }
 
-            if (Q.IsReady())
-            {
-                if(SamiraSetMenu.QSettings.QGunCombo.Enabled || SamiraSetMenu.QSettings.QBladeCombo.Enabled)
-                {
-                    var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(Q.Range);
-                    if(target != null)
-                    {
-                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                        if ((Player.IsDashing() || LastE + 700 > Variables.TickCount) && SamiraSetMenu.ESettings.EQ.Enabled)
+                        var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range);
+                        if (target != null)
                         {
-
-                        }
-                        if ((!Player.IsDashing() && LastE + 700 < Variables.TickCount))
-                        {
-                            if(pred.CastPosition.DistanceToPlayer() > Q.Range / 3)
+                            var Pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 1000);
+                            if (Pos.DistanceToPlayer() > R.Range)
                             {
-                                if (SamiraSetMenu.QSettings.QGunCombo.Enabled)
+                                if (E.IsReady() && SamiraSetMenu.RSettings.AutoE.Enabled)
                                 {
-                                    if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
-                                        return;
-                                    else
-                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, SamiraSetMenu.Misc.PacketCast.Enabled))
-                                        return;
-                                }
-                                else
-                                {
-                                    var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(Q.Range / 3)).OrderBy(i => i.Health);
-                                    if (targets != null)
+                                    if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
                                     {
-                                        foreach(var t in targets)
+                                        if (E.Cast(target, SamiraSetMenu.Misc.PacketCast) == CastStates.SuccessfullyCasted)
                                         {
-                                            if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
-                                                return;
-                                            else
-                                            if (Q.Cast(t.Position, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                            if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
                                                 return;
                                         }
                                     }
@@ -457,31 +354,232 @@ namespace DominationAIO.Champions
                             }
                             else
                             {
-                                if (!SamiraSetMenu.QSettings.QBladeCombo.Enabled)
+                                if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                                    return;
+                            }
+                        }
+                    }
+                }
+                if (E.IsReady() && SamiraSetMenu.ESettings.ECombo.Enabled)
+                {
+                    //E on Minions
+                    {
+                        var fstarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(E.Range + Q.Range);
+                        if (fstarget != null)
+                        {
+                            var minion = GameObjects.Get<AIMinionClient>().Where(i => !i.IsDead && i.IsValid() && !i.IsAlly && i.IsValidTarget(E.Range) && Player.Position.Extend(i.Position, E.Range).Distance(fstarget) < Player.Distance(fstarget)).OrderBy(i => Player.Position.Extend(i.Position, E.Range).Distance(fstarget));
+                            if (minion != null)
+                            {
+                                if (SamiraSetMenu.ESettings.EMinions.Active)
                                 {
-                                    if(pred.Hitchance != SebbyLibPorted.Prediction.HitChance.Collision)
+                                    foreach (var min in minion)
                                     {
-                                        if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
-                                            return;
-                                        else
-                                        if (Q.Cast(Player.Position.Extend(pred.CastPosition, Q.Range), SamiraSetMenu.Misc.PacketCast.Enabled))
-                                            return;
+                                        if (min != null)
+                                        {
+                                            if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(min.Position, E.Range)))
+                                            {
+                                                if (fstarget.HealthPercent <= SamiraSetMenu.ESettings.Eheath.Value)
+                                                {
+                                                    if (SamiraSetMenu.ESettings.ER.Enabled)
+                                                    {
+                                                        if (R.IsReady())
+                                                        {
+                                                            if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                                return;
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                            return;
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
-                                        return;
-                                    else
-                                    if (Q.Cast(pred.CastPosition, SamiraSetMenu.Misc.PacketCast.Enabled))
-                                        return;
                                 }
                             }
                         }
                     }
-                 
+                    var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health);
+                    if (targets != null)
+                    {
+                        foreach (var target in targets)
+                        {
+                            if (FSpred.Prediction.Prediction.PredictUnitPosition(target, 700).DistanceToPlayer() > E.Range)
+                            {
+                                if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                    {
+                                        return;
+                                    }
+                            }
+                            if (target.Health < GetEDmg(target) && SamiraSetMenu.ESettings.EKs.Enabled)
+                            {
+                                if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                    {
+                                        return;
+                                    }
+                            }
+                            if (Player.HasBuff("SamiraR") && SamiraSetMenu.RSettings.AutoE.Enabled)
+                            {
+                                if (Player.Position.Extend(target.Position, +E.Range).CountEnemyHeroesInRange(R.Range) > Player.CountEnemyHeroesInRange(R.Range))
+                                {
+                                    if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                                        if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                        {
+                                            return;
+                                        }
+                                }
+                                if (FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range + 300) != null)
+                                {
+                                    var Pos = FSpred.Prediction.Prediction.PredictUnitPosition(FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range + 300), 700);
+                                    var enemy = GameObjects.Enemy.Where(i => !i.IsDead && i.IsValidTarget(E.Range) && !i.Position.IsBuilding()).OrderBy(i => i.Health).OrderBy(i => i is AIHeroClient);
+                                    if (enemy != null)
+                                    {
+                                        foreach (var Next in enemy)
+                                        {
+                                            if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(Next.Position, E.Range)))
+                                            {
+                                                if (Player.Position.Extend(Next.Position, E.Range).Distance(Pos) < Player.Distance(Pos))
+                                                {
+                                                    if (E.Cast(Next, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                        return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (Player.HasBuff("SamiraW") && SamiraSetMenu.ESettings.EW.Enabled)
+                            {
+                                if (Variables.TickCount > LastW + 750)
+                                {
+                                    if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                                        if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                        {
+                                            return;
+                                        }
+                                }
+                            }
+                            if (Q.IsReady() && SamiraSetMenu.ESettings.EQ.Enabled)
+                            {
+                                if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                    {
+                                        if (Q.Cast(new SharpDX.Vector3(45646, 546416, 45462), SamiraSetMenu.Misc.PacketCast.Enabled))
+                                            return;
+                                        return;
+                                    }
+                            }
+                        }
+                    }
                 }
-            }
+                if (LastCasted + SamiraSetMenu.Misc.AATimer.Value <= Variables.TickCount)
+                {
+                    if (W.IsReady() && SamiraSetMenu.WSettings.WCantAA.Enabled && LastCasted + SamiraSetMenu.Misc.AATimer.Value < Variables.TickCount)
+                    {
+                        if (!Player.CanAttack || !Orbwalker.CanAttack())
+                        {
+                            var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.IsReady() ? E.Range : W.Range)).OrderBy(i => i.Health);
+                            if (targets != null)
+                            {
+                                if (W.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                                    return;
+                            }
+                        }
+                        if (E.IsReady() && SamiraSetMenu.ESettings.EW.Enabled)
+                        {
+                            var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health).ToArray();
+                            if (targets != null)
+                            {
+                                foreach (var target in targets)
+                                {
+                                    if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
+                                    {
+                                        if (target.HealthPercent < 60)
+                                        {
+                                            if (W.Cast())
+                                            {
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (Q.IsReady())
+                    {
+                        if (SamiraSetMenu.QSettings.QGunCombo.Enabled || SamiraSetMenu.QSettings.QBladeCombo.Enabled)
+                        {
+                            var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(Q.Range);
+                            if (target != null)
+                            {
+                                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                                if ((Player.IsDashing() || LastE + 700 > Variables.TickCount) && SamiraSetMenu.ESettings.EQ.Enabled)
+                                {
+
+                                }
+                                if ((!Player.IsDashing() && (LastE + 700 < Variables.TickCount || SamiraSetMenu.ESettings.EQ.Enabled)))
+                                {
+                                    if (pred.CastPosition.DistanceToPlayer() > Q.Range / 3)
+                                    {
+                                        if (SamiraSetMenu.QSettings.QGunCombo.Enabled)
+                                        {
+                                            if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
+                                                return;
+                                            else
+                                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                                return;
+                                        }
+                                        else
+                                        {
+                                            var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(Q.Range / 3)).OrderBy(i => i.Health);
+                                            if (targets != null)
+                                            {
+                                                foreach (var t in targets)
+                                                {
+                                                    if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
+                                                        return;
+                                                    else
+                                                    if (Q.Cast(t.Position, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                                        return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (!SamiraSetMenu.QSettings.QBladeCombo.Enabled)
+                                        {
+                                            if (pred.Hitchance != SebbyLibPorted.Prediction.HitChance.Collision)
+                                            {
+                                                if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
+                                                    return;
+                                                else
+                                                if (Q.Cast(Player.Position.Extend(pred.CastPosition, Q.Range), SamiraSetMenu.Misc.PacketCast.Enabled))
+                                                    return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
+                                                return;
+                                            else
+                                            if (Q.Cast(pred.CastPosition, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                                return;
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }                      
         }
         private static float GetEDmg(AIBaseClient target)
         {
@@ -532,24 +630,17 @@ namespace DominationAIO.Champions
                 }
             }
 
-            if (!sender.IsAlly && (args.Slot <= SpellSlot.R || Orbwalker.IsSpecialAttack(args.SData.Name)) && (sender is AIHeroClient))
+            if (!sender.IsAlly && (args.Slot <= SpellSlot.R || Orbwalker.IsSpecialAttack(args.SData.Name)) && sender.Type == GameObjectType.AIHeroClient)
             {
-                if (
-                       args.SData.TargetingType == SpellDataTargetType.Unit
-                       || args.SData.TargetingType == SpellDataTargetType.SelfAndUnit
-                       || args.SData.TargetingType == SpellDataTargetType.Self
-                       )
+                if (args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId || args.Target.MemoryAddress == ObjectManager.Player.MemoryAddress)
                 {
-                    if(args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId || args.Target.MemoryAddress == ObjectManager.Player.MemoryAddress)
+                    if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
                     {
-                        if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
+                        if (SamiraSetMenu.WSettings.WBlock.Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Combo && !BeforeAA && !OnAA)
                         {
-                            if (SamiraSetMenu.WSettings.WBlock.Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Combo && !BeforeAA && !OnAA)
+                            if (W.Cast())
                             {
-                                if (W.Cast())
-                                {
-                                    return;
-                                }
+                                return;
                             }
                         }
                     }
@@ -564,10 +655,10 @@ namespace DominationAIO.Champions
         {
             if(args.Type == OrbwalkerType.AfterAttack)
             {
+                LastCasted = 0;
                 AfterAA = true;
                 OnAA = false;
-                BeforeAA = false;
-                LastCasted = 0;
+                BeforeAA = false;                
             }
             else
             {
@@ -576,6 +667,7 @@ namespace DominationAIO.Champions
 
             if (args.Type == OrbwalkerType.OnAttack)
             {
+                LastCasted = 0;
                 AfterAA = false;
                 OnAA = true;
                 BeforeAA = false;
@@ -607,6 +699,25 @@ namespace DominationAIO.Champions
 
             if (Player.HasBuff("SamiraW"))
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+
+            if (SamiraSetMenu.ESettings.EKs.Enabled)
+            {
+                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(E.Range) && !i.IsDead).OrderBy(i => i.Health);
+                if(targets != null)
+                    foreach(var target in targets)
+                    {
+                        if(target != null)
+                        {
+                            if(target.Health <= GetEDmg(target))
+                            {
+                                if(!UnderTower(Player.Position.Extend(target.Position, E.Range)) || SamiraSetMenu.KeysSettings.AllowTurret.Active){
+                                    if (E.Cast(target) == CastStates.SuccessfullyCasted)
+                                        return;
+                                }
+                            }
+                        }
+                    }
+            }
         }
     }
 }

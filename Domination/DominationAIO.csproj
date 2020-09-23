@@ -93,13 +93,13 @@
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>
     </Reference>
     <Reference Include="FunnySlayerCommon">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\FunnySlayerCommon.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\EnsoulSharp\System\FunnySlayerCommon.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLibPorted">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SebbyLibPorted.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\EnsoulSharp\System\SebbyLibPorted.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.dll</HintPath>

@@ -31,6 +31,10 @@ namespace DominationAIO.Champions
             public static MenuBool ECombo = new MenuBool("ECombo", "E Combo");
             public static MenuBool EQ = new MenuBool("EQ", "Cast Q when E", false);
             public static MenuBool EW = new MenuBool("EW", "EW Combo");
+            public static MenuKeyBind EMinions = new MenuKeyBind("EMinions", "Accept E on Minion", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
+            public static MenuSeparator Eonly = new MenuSeparator("Eonly", "But Only When");
+            public static MenuSlider Eheath = new MenuSlider("E Heath", "Target Heath % <= ", 50, 0, 100);
+            public static MenuBool ER = new MenuBool("E R", "R Is In Ready");
             public static MenuBool EKs = new MenuBool("E Ks", "E Ks");
         }
         public static class RSettings
@@ -42,8 +46,9 @@ namespace DominationAIO.Champions
         public static class Misc
         {
             public static MenuBool WaitForAA = new MenuBool("Waitting For AA", "Waiting For AA");
-            public static MenuSlider AATimer = new MenuSlider("AATimer", "ÄA Timer", 1000, 0, 2000);
+            public static MenuSlider AATimer = new MenuSlider("AATimer", "ÄA Timer", 1500, 0, 2500);
             public static MenuBool PacketCast = new MenuBool("PacketCast", "Packet Cast");
+            public static MenuBool DrawQAARange = new MenuBool("DrawQAA Range", "Draw AA & Q Range");
         }
         public static class KeysSettings
         {
@@ -66,6 +71,10 @@ namespace DominationAIO.Champions
             ESamira.Add(ESettings.ECombo);
             ESamira.Add(ESettings.EQ);
             ESamira.Add(ESettings.EW);
+            ESamira.Add(ESettings.EMinions).Permashow(true, "Allow E Minions", SharpDX.Color.Red);
+            ESamira.Add(ESettings.Eonly);
+            ESamira.Add(ESettings.Eheath);
+            ESamira.Add(ESettings.ER);
             ESamira.Add(ESettings.EKs);
             var RSamira = new Menu("R Samira Settings", "R Settings");
             RSamira.Add(RSettings.RCombo);
@@ -75,6 +84,7 @@ namespace DominationAIO.Champions
             MiscSamira.Add(Misc.WaitForAA);
             MiscSamira.Add(Misc.AATimer);
             MiscSamira.Add(Misc.PacketCast);
+            MiscSamira.Add(Misc.DrawQAARange);
             var KeysSamira = new Menu("Keys Samira Settings", "Keys Settings");
             KeysSamira.Add(KeysSettings.QMixed).Permashow();
             KeysSamira.Add(KeysSettings.QClear).Permashow();
@@ -118,6 +128,20 @@ namespace DominationAIO.Champions
             Orbwalker.OnAction += Orbwalker_OnAction;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             Game.OnUpdate += Game_OnUpdate;
+
+            Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private static void Drawing_OnDraw(EventArgs args)
+        {
+            if (!Player.IsDead)
+            {
+                if (SamiraSetMenu.Misc.DrawQAARange.Enabled)
+                {
+                    Drawing.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
+                    Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
+                }
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -216,7 +240,7 @@ namespace DominationAIO.Champions
                                 {
                                     if (W.Cast())
                                     {
-                                        EnsoulSharp.SDK.Utility.DelayAction.Add(700, () => { E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled); });
+                                        return;                                   
                                     }
                                 }
                             }
@@ -276,6 +300,45 @@ namespace DominationAIO.Champions
             }
             if (E.IsReady() && SamiraSetMenu.ESettings.ECombo.Enabled)
             {
+                //E on Minions
+                {
+                    var fstarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(E.Range + Q.Range);
+                    if(fstarget != null)
+                    {
+                        var minion = GameObjects.Get<AIMinionClient>().Where(i => !i.IsDead && i.IsValid() && !i.IsAlly && i.IsValidTarget(E.Range) && Player.Position.Extend(i.Position, E.Range).Distance(fstarget) < Player.Distance(fstarget)).OrderBy(i => Player.Position.Extend(i.Position, E.Range).Distance(fstarget));
+                        if(minion != null)
+                        {
+                            if (SamiraSetMenu.ESettings.EMinions.Active)
+                            {
+                                foreach(var min in minion)
+                                {
+                                    if(min != null)
+                                    {
+                                        if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(min.Position, E.Range)))
+                                        {
+                                            if(fstarget.HealthPercent <= SamiraSetMenu.ESettings.Eheath.Value)
+                                            {
+                                                if (SamiraSetMenu.ESettings.ER.Enabled)
+                                                {
+                                                    if (R.IsReady())
+                                                    {
+                                                        if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                            return;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                        return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.Range)).OrderBy(i => i.Health);
                 if(targets != null)
                 {
@@ -329,7 +392,7 @@ namespace DominationAIO.Champions
                         }
                         if (Player.HasBuff("SamiraW") && SamiraSetMenu.ESettings.EW.Enabled)
                         {
-                            if(Variables.TickCount > LastW + 600)
+                            if(Variables.TickCount > LastW + 750)
                             {
                                 if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
                                     if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
@@ -434,7 +497,7 @@ namespace DominationAIO.Champions
 
             EGetDmg += Player.GetAutoAttackDamage(target);
 
-            if (Player.HasBuff("SamiraR"))
+            if (Player.HasBuff("SamiraR") || R.IsReady())
                 EGetDmg += Player.CalculatePhysicalDamage(target, (Rlist[R.Level] + 0.6f * Player.TotalAttackDamage) * 3);
 
             return (float)EGetDmg;
@@ -468,20 +531,28 @@ namespace DominationAIO.Champions
                     LastAttack = Variables.TickCount;
                 }
             }
-            else
+
+            if (!sender.IsAlly && (args.Slot <= SpellSlot.R || Orbwalker.IsSpecialAttack(args.SData.Name)) && (sender is AIHeroClient))
             {
-                if (args.Target != null && args.Target.IsMe && sender != null && sender.IsRanged && args.Slot >= SpellSlot.R)
+                if (
+                       args.SData.TargetingType == SpellDataTargetType.Unit
+                       || args.SData.TargetingType == SpellDataTargetType.SelfAndUnit
+                       || args.SData.TargetingType == SpellDataTargetType.Self
+                       )
                 {
-                    if(TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
+                    if(args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId || args.Target.MemoryAddress == ObjectManager.Player.MemoryAddress)
                     {
-                        if (SamiraSetMenu.WSettings.WBlock.Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
+                        if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
                         {
-                            if (W.Cast())
+                            if (SamiraSetMenu.WSettings.WBlock.Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Combo && !BeforeAA && !OnAA)
                             {
-                                return;
+                                if (W.Cast())
+                                {
+                                    return;
+                                }
                             }
                         }
-                    }                   
+                    }
                 }
             }
         }
@@ -536,6 +607,15 @@ namespace DominationAIO.Champions
 
             if (Player.HasBuff("SamiraW"))
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+
+            if (Player.HasBuff("SamiraW") || Player.HasBuff("SamiraR"))
+            {
+                Orbwalker.AttackState = false;
+            }
+            else
+            {
+                Orbwalker.AttackState = true;
+            }
         }
     }
 }

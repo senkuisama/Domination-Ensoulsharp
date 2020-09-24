@@ -58,11 +58,11 @@ namespace DominationAIO
                 if (Hacks.DisableAntiDisconnect == false) Hacks.DisableAntiDisconnect = true;
                 switch (GameObjects.Player.CharacterName)
                 {
-                    case "Aphelios":
+                    /*case "Aphelios":
                         Champions.Aphelios.loaded.OnLoad();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
-                        break;
+                        break;*/
                     case "Blitzcrank":
                         Blit.Load();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");

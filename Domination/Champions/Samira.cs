@@ -115,7 +115,7 @@ namespace DominationAIO.Champions
                     WSettings.EnemyCount.Value = 1;
                     //E
                     ESettings.ECombo.Enabled = true;
-                    ESettings.EQ.Enabled = true;
+                    ESettings.EQ.Enabled = false;
                     ESettings.EW.Enabled = true;
                     ESettings.EMinions.Active = false;
                     ESettings.Eheath.Value = 70;
@@ -608,7 +608,7 @@ namespace DominationAIO.Champions
         private static int LastAttack = 0;
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
-            if (sender == null || !sender.IsValid() || !(sender is AIHeroClient) || args == null)
+            if (sender == null || !sender.IsValid() || args == null)
                 return;
 
             if (sender.IsMe)
@@ -634,19 +634,22 @@ namespace DominationAIO.Champions
 
             if (!sender.IsAlly && (args.Slot <= SpellSlot.R || Orbwalker.IsSpecialAttack(args.SData.Name)) && sender.Type == GameObjectType.AIHeroClient)
             {
-                if (args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId || args.Target.MemoryAddress == ObjectManager.Player.MemoryAddress)
+                if(args.Target != null)
                 {
-                    if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
+                    if (args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId || args.Target.MemoryAddress == ObjectManager.Player.MemoryAddress)
                     {
-                        if (SamiraSetMenu.WSettings.WBlock.Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Combo && !BeforeAA && !OnAA)
+                        if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
                         {
-                            if (W.Cast())
+                            if (SamiraSetMenu.WSettings.WBlock.Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Combo && !BeforeAA && !OnAA)
                             {
-                                return;
+                                if (W.Cast())
+                                {
+                                    return;
+                                }
                             }
                         }
                     }
-                }
+                }                
             }
         }
 

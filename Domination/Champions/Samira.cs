@@ -167,8 +167,29 @@ namespace DominationAIO.Champions
             Orbwalker.OnAction += Orbwalker_OnAction;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             Game.OnUpdate += Game_OnUpdate;
-
+            Game.OnUpdate += JungleClear;
             Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private static void JungleClear(EventArgs args)
+        {
+            if (Player.IsDead)
+                return;
+
+            if (Orbwalker.ActiveMode != OrbwalkerMode.LaneClear)
+                return;
+
+            var minions = GameObjects.Jungle.Where(i => i != null &&!i.IsDead && i.IsValidTarget(Q.Range));
+            if(minions != null)
+            {
+                foreach(var min in minions)
+                {
+                    if (Q.IsReady() && SamiraSetMenu.QSettings.QManaCheck < Player.ManaPercent)
+                    {
+                        Q.Cast(min.Position);
+                    }
+                }
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -261,6 +282,30 @@ namespace DominationAIO.Champions
                 var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(E.Range);
                 if(target != null)
                 {
+                    if (AfterAA)
+                    {
+                        W.Cast();
+                        E.Cast(target);
+                        if (target.IsValidTarget(300))
+                        {
+                            Q.Cast(target.Position);
+                        }
+                        else
+                        {
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                            {
+                                if (E.Cast(target) == CastStates.SuccessfullyCasted)
+                                    if (W.Cast())
+                                        return;
+                            }
+                            else
+                            {
+                                if (E.Cast(target) == CastStates.SuccessfullyCasted)
+                                    if (W.Cast())
+                                        return;
+                            }
+                        }
+                    }
                     if (R.IsReady() && SamiraSetMenu.RSettings.RCombo.Enabled)
                     {
                         if (R.Cast())
@@ -620,6 +665,7 @@ namespace DominationAIO.Champions
                 if(args.Slot == SpellSlot.E)
                 {
                     LastE = Variables.TickCount;
+                    Orbwalker.ResetAutoAttackTimer();
                 }
                 if (args.Slot == SpellSlot.W)
                 {
@@ -702,7 +748,7 @@ namespace DominationAIO.Champions
             if (Player.HasBuff("SamiraR"))
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
-            if (Player.HasBuff("SamiraW"))
+            if (Player.HasBuff("SamiraW") && LastE < LastW)
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
             if (SamiraSetMenu.ESettings.EKs.Enabled)

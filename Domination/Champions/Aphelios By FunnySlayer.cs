@@ -9,952 +9,2128 @@ using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.MenuUI.Values;
 using EnsoulSharp.SDK.Prediction;
 using EnsoulSharp.SDK.Utility;
+using FunnySlayerCommon;
 
 namespace DominationAIO.Champions.Aphelios
 {
-    internal class Program
+    internal static class MenuSettings
     {
-        /*private static void Main(string[] args)
+        public static MenuSeparator secsec = new MenuSeparator("secsec", "_____________________________________");
+        public static MenuSeparator secsec1 = new MenuSeparator("secsec1", "_____________________________________");
+        public static class OutAARange
         {
-            GameEvent.OnGameLoad += OnGameLoad;
-        }*/
-        private static void OnGameLoad()
+            public static MenuSlider Calibrum = new MenuSlider("OUT AA Range Calibrum", "Calibrum", 5, 0, 5);
+            public static MenuSlider Severum = new MenuSlider("OUT AA Range Severum", "Severum", 3, 0, 5);
+            public static MenuSlider Gravitum = new MenuSlider("OUT AA Range Gravitum", "Gravitum", 4, 0, 5);
+            public static MenuSlider Infernum = new MenuSlider("OUT AA Range Infernum", "Infernum", 2, 0, 5);
+            public static MenuSlider Crescendum = new MenuSlider("OUT AA Range Crescendum", "Crescendum", 1, 0, 5);
+        }
+        public static class Closer
         {
-            if (ObjectManager.Player.CharacterName != "Aphelios")
+            public static MenuSlider Calibrum = new MenuSlider("Closer Calibrum", "Calibrum", 1, 0, 5);
+            public static MenuSlider Severum = new MenuSlider("Closer Severum", "Severum", 3, 0, 5);
+            public static MenuSlider Gravitum = new MenuSlider("Closer Gravitum", "Gravitum", 4, 0, 5);
+            public static MenuSlider Infernum = new MenuSlider("Closer Infernum", "Infernum", 2, 0, 5);
+            public static MenuSlider Crescendum = new MenuSlider("Closer Crescendum", "Crescendum", 5, 0, 5);
+        }
+        public static class LowHp
+        {
+            public static MenuSlider Calibrum = new MenuSlider("LowHp Calibrum", "Calibrum", 1, 0, 5);
+            public static MenuSlider Severum = new MenuSlider("LowHp Severum", "Severum", 5, 0, 5);
+            public static MenuSlider Gravitum = new MenuSlider("LowHp Gravitum", "Gravitum", 4, 0, 5);
+            public static MenuSlider Infernum = new MenuSlider("LowHp Infernum", "Infernum", 2, 0, 5);
+            public static MenuSlider Crescendum = new MenuSlider("LowHp Crescendum", "Crescendum", 3, 0, 5);
+        }
+        public static class RGun
+        {
+            public static MenuSlider Calibrum = new MenuSlider("RGun Calibrum", "Calibrum", 1, 0, 5);
+            public static MenuSlider Severum = new MenuSlider("RGun Severum", "Severum", 5, 0, 5);
+            public static MenuSlider Gravitum = new MenuSlider("RGun Gravitum", "Gravitum", 4, 0, 5);
+            public static MenuSlider Infernum = new MenuSlider("RGun Infernum", "Infernum", 2, 0, 5);
+            public static MenuSlider Crescendum = new MenuSlider("RGun Crescendum", "Crescendum", 3, 0, 5);
+        }
+        public static class SelectedGun
+        {
+            public static MenuSlider Calibrum = new MenuSlider("LowHp Calibrum", "Calibrum", 2, 0, 5);
+            public static MenuSlider Severum = new MenuSlider("LowHp Severum", "Severum", 1, 0, 5);
+            public static MenuSlider Gravitum = new MenuSlider("LowHp Gravitum", "Gravitum", 3, 0, 5);
+            public static MenuSlider Infernum = new MenuSlider("LowHp Infernum", "Infernum", 5, 0, 5);
+            public static MenuSlider Crescendum = new MenuSlider("LowHp Crescendum", "Crescendum", 4, 0, 5);
+        }
+
+        public static class Combo
+        {
+            public static MenuBool QCombo = new MenuBool("Q.Combo", "Q.Combo");
+            public static MenuBool WCombo = new MenuBool("W.Combo", "W.Combo");
+            public static MenuBool RCombo = new MenuBool("R.Combo", "R.Combo");
+        }
+
+        public static void AddApheliosMenu(this Menu menu)
+        {
+            if (menu == null)
                 return;
 
-            loaded.OnLoad();
+            var getgun = new Menu("get_aphelios_best_gun", "Get Best Gun");
+            //Out AA Range
+            var GunOutAARange = new Menu("Best Gun Out AA Range", "Out Of AA Range");
+            GunOutAARange.Add(secsec);
+            GunOutAARange.Add(OutAARange.Calibrum);
+            GunOutAARange.Add(OutAARange.Severum);
+            GunOutAARange.Add(OutAARange.Gravitum);
+            GunOutAARange.Add(OutAARange.Infernum);
+            GunOutAARange.Add(OutAARange.Crescendum);
+            GunOutAARange.Add(secsec1);
+            //Closer
+            var GunCloser = new Menu("Best Gun Closer", "Closer");
+            GunCloser.Add(secsec);
+            GunCloser.Add(Closer.Calibrum);
+            GunCloser.Add(Closer.Severum);
+            GunCloser.Add(Closer.Gravitum);
+            GunCloser.Add(Closer.Infernum);
+            GunCloser.Add(Closer.Crescendum);
+            GunCloser.Add(secsec1);
+            //LowHp
+            var GunLowHp = new Menu("Best Gun Low Hp", "Low Hp");
+            GunLowHp.Add(secsec);
+            GunLowHp.Add(LowHp.Calibrum);
+            GunLowHp.Add(LowHp.Severum);
+            GunLowHp.Add(LowHp.Gravitum);
+            GunLowHp.Add(LowHp.Infernum);
+            GunLowHp.Add(LowHp.Crescendum);
+            GunLowHp.Add(secsec1);
+            //R Gun
+            var GunR = new Menu("Best Gun R Gun", "R Gun");
+            GunR.Add(secsec);
+            GunR.Add(RGun.Calibrum);
+            GunR.Add(RGun.Severum);
+            GunR.Add(RGun.Gravitum);
+            GunR.Add(RGun.Infernum);
+            GunR.Add(RGun.Crescendum);
+            GunR.Add(secsec1);
+            //Selected
+            var GunSelected = new Menu("Best Gun Selected", "Selected");
+            GunSelected.Add(secsec);
+            GunSelected.Add(SelectedGun.Calibrum);
+            GunSelected.Add(SelectedGun.Severum);
+            GunSelected.Add(SelectedGun.Gravitum);
+            GunSelected.Add(SelectedGun.Infernum);
+            GunSelected.Add(SelectedGun.Crescendum);
+            GunSelected.Add(secsec1);
+
+            getgun.Add(GunOutAARange);
+            getgun.Add(GunCloser);
+            getgun.Add(GunLowHp);
+            getgun.Add(GunR);
+            getgun.Add(GunSelected);
+            var helper = new Menu("Get Helper", "Get Helper");
+            helper.AddTargetSelectorMenu();
+            SPredictionMash.ConfigMenu.Initialize(helper, "Get Help pls");
+            new SebbyLibPorted.Orbwalking.Orbwalker(helper);
+            menu.Add(helper);
+            menu.Add(getgun);
+            menu.Add(secsec);
+            menu.Add(Combo.QCombo);
+            menu.Add(Combo.WCombo);
+            menu.Add(Combo.RCombo);
+            menu.Add(secsec1);
+
+            Game.OnUpdate += WQ;
+            Game.OnUpdate += WOutAARange;
+            Game.OnUpdate += WLowHp;
+            Game.OnUpdate += WCloser;
+            Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.OnAction += Orbwalker_OnAction;
+            Game.OnUpdate += GetChecker;
+            Game.OnUpdate += QCombo;
         }
-    }
-    internal class MenuSettings
-    {
-        public static MenuSeparator secsec = new MenuSeparator("secsec", "________________________________________________");
-        public class Combo
+
+        private static void Game_OnUpdate(EventArgs args)
         {
-            public static MenuSeparator comboSeparator = new MenuSeparator("comboSeparator", "Combo Settings");
-            public static MenuBool Qcombo = new MenuBool("Qcombo", "Use Q in combo");
-            public static MenuBool Calibrum = new MenuBool("Calibrum", "^  Use Q Calibrum in combo");
-            public static MenuBool Severum = new MenuBool("Severum", "^  Use Q Severum in combo");
-            public static MenuBool Gravitum = new MenuBool("Gravitum", "^  Use Q Gravitum in combo");
-            public static MenuBool Infernum = new MenuBool("Infernum", "^  Use Q Infernum in combo");
-            public static MenuBool Crescendum = new MenuBool("Crescendum", "^  Use Q Crescendum in combo");
-            public static MenuBool Wcombo = new MenuBool("Wcombo", "Use W in combo");
-            public static MenuBool Rcombo = new MenuBool("Rcombo", "Use R on combo");
-            public static MenuSlider Rheath = new MenuSlider("Rheath", "^  If target heath <= %", 40);
-            public static MenuSlider Rhit = new MenuSlider("Rhit", "^  If target hit count >=", 3, 0, 5);
-        }
-        public class Harass
-        {
-            public static MenuSeparator harassSeparator = new MenuSeparator("harassSeparator", "Harass Settings");
-            public static MenuBool Qharass = new MenuBool("Qharass", "Use Q in harass");
-            public static MenuBool Calibrum = new MenuBool("Qharass", "^  Use Q Calibrum in harass");
-            public static MenuBool Severum = new MenuBool("Qharass", "^  Use Q Severum in harass");
-            public static MenuBool Gravitum = new MenuBool("Qharass", "^  Use Q Gravitum in harass");
-            public static MenuBool Infernum = new MenuBool("Qharass", "^  Use Q Infernum in harass");
-            public static MenuBool Crescendum = new MenuBool("Qharass", "^  Use Q Crescendum in harass");
-            public static MenuBool Wharass = new MenuBool("Wharass", "Use W in harass");
-            public static MenuSlider ManaHarass = new MenuSlider("ManaHarass", "|| Only 'Harass' if mana >=", 30);
-        }
-        public class LaneClear
-        {
-            public static MenuSeparator laneClearSeperator = new MenuSeparator("laneClearSeperator", "Lane Clear Settings");
-            public static MenuBool QLaneClear = new MenuBool("Qharass", "Use Q in LaneClear");
-            public static MenuBool Calibrum = new MenuBool("Qharass", "^  Use Q Calibrum in LaneClear");
-            public static MenuBool Severum = new MenuBool("Qharass", "^  Use Q Severum in LaneClear");
-            public static MenuBool Gravitum = new MenuBool("Qharass", "^  Use Q Gravitum in LaneClear");
-            public static MenuBool Infernum = new MenuBool("Qharass", "^  Use Q Infernum in LaneClear");
-            public static MenuBool Crescendum = new MenuBool("Qharass", "^  Use Q Crescendum in LaneClear");
-            public static MenuBool WLaneClear = new MenuBool("Wharass", "Use W in LaneClear");
-            public static MenuSlider ManaLaneClear = new MenuSlider("ManaLaneClear", "|| Only 'Lane Clear' if mana >=", 30);
-        }
-
-        public class JungleClear
-        {
-            public static MenuSeparator jungleClearSeparator    = new MenuSeparator("jungleClearSeparator", "Jungle Clear Settings");
-            public static MenuBool QJungleClear = new MenuBool("Qharass", "Use Q in JungleClear");
-            public static MenuBool Calibrum = new MenuBool("Qharass", "^  Use Q Calibrum in JungleClear");
-            public static MenuBool Severum = new MenuBool("Qharass", "^  Use Q Severum in JungleClear");
-            public static MenuBool Gravitum = new MenuBool("Qharass", "^  Use Q Gravitum in JungleClear");
-            public static MenuBool Infernum = new MenuBool("Qharass", "^  Use Q Infernum in JungleClear");
-            public static MenuBool Crescendum = new MenuBool("Qharass", "^  Use Q Crescendum in JungleClear");
-            public static MenuBool WJungleClear = new MenuBool("Wharass", "Use W in JungleClear");
-            public static MenuSlider ManaJungleClear = new MenuSlider("ManaJungleClear", "|| Only 'Jungle Clear' is mana >=", 30);
-        }
-    }
-    public class loaded
-    {
-        private static AIHeroClient objPlayer = ObjectManager.Player;
-        private static AIHeroClient Player = ObjectManager.Player;
-        private static Menu Amenu;
-        private static Spell W, R;
-        private static Spell Calibrum, Severum, Gravitum, Infernum, Crescendum;
-
-
-        private static bool Q1isready, Q2isready, Q3isready, Q4isready, Q5isready;
-        private static bool R1isready, R2isready, R3isready, R4isready, R5isready;
-
-        private static float lastCalibrum, lastSeverum, lastGravitum, lastInfernum, lastCrescendum;
-        private static float lastW, lastR;
-
-        private static bool beforeaa, onaa, afteraa;
-
-        private static SpellSlot summonerIgnite;
-
-        public static void OnLoad()
-        {
-            Calibrum = new Spell(SpellSlot.Q, 1450f);
-            Severum = new Spell(SpellSlot.Q, 550f);
-            Gravitum = new Spell(SpellSlot.Q);
-            Infernum = new Spell(SpellSlot.Q, 650f);
-            Crescendum = new Spell(SpellSlot.Q, 475f);
-
-            W = new Spell(SpellSlot.W);
-            R = new Spell(SpellSlot.R, 1300f);
-
-            Calibrum.SetSkillshot(0.3f, 90f, 1850f, true, SkillshotType.Line);
-            Severum.SetTargetted(0.3f, float.MaxValue);
-
-            Infernum.SetSkillshot(0.3f, 1.35f, float.MaxValue, true, SkillshotType.Cone);
-            Crescendum.SetSkillshot(0.3f, 575, float.MaxValue, false, SkillshotType.Circle);
-
-            R.SetSkillshot(0.5f, 110f, 2050f, true, SkillshotType.Line);
-
-            Game.Print("<font color='#1dff00' size='25'>Aphelios The MachineGun loaded</font>");
-
-            #region Menu Init
-
-            Amenu = new Menu(objPlayer.CharacterName, "Aphelios The MachineGun", true);
-
-            var comboMenu = new Menu("comboMenu", "Combo")
-            {
-                MenuSettings.Combo.comboSeparator,
-                MenuSettings.secsec,
-                MenuSettings.Combo.Qcombo,
-                MenuSettings.Combo.Calibrum,
-                MenuSettings.Combo.Severum,
-                MenuSettings.Combo.Gravitum,
-                MenuSettings.Combo.Infernum,
-                MenuSettings.Combo.Crescendum,
-                MenuSettings.Combo.Wcombo,
-                MenuSettings.Combo.Rcombo,
-                MenuSettings.Combo.Rheath,
-                MenuSettings.Combo.Rhit
-            };
-            Amenu.Add(comboMenu);
-
-            /*var harassMenu = new Menu("harassMenu", "Harass")
-            {
-                MenuSettings.Harass.harassSeparator,
-                MenuSettings.secsec,
-                MenuSettings.Harass.Qharass,
-                MenuSettings.Harass.Calibrum,
-                MenuSettings.Harass.Severum,
-                MenuSettings.Harass.Gravitum,
-                MenuSettings.Harass.Infernum,
-                MenuSettings.Harass.Crescendum,
-                MenuSettings.Harass.Wharass,
-                MenuSettings.Harass.ManaHarass
-            };
-            Amenu.Add(harassMenu);
-
-            var laneClearMenu = new Menu("laneClearMenu", "Lane Clear")
-            {
-                MenuSettings.LaneClear.laneClearSeperator,
-                MenuSettings.secsec,
-                MenuSettings.LaneClear.QLaneClear,
-                MenuSettings.LaneClear.Calibrum,
-                MenuSettings.LaneClear.Severum,
-                MenuSettings.LaneClear.Gravitum,
-                MenuSettings.LaneClear.Infernum,
-                MenuSettings.LaneClear.Crescendum,
-                MenuSettings.LaneClear.WLaneClear,
-                MenuSettings.LaneClear.ManaLaneClear
-            };
-            Amenu.Add(laneClearMenu);
-
-            var jungleClearMenu = new Menu("jungleClearMenu", "Jungle Clear")
-            {
-                MenuSettings.JungleClear.jungleClearSeparator,
-                MenuSettings.secsec,
-                MenuSettings.JungleClear.QJungleClear,
-                MenuSettings.JungleClear.Calibrum,
-                MenuSettings.JungleClear.Severum,
-                MenuSettings.JungleClear.Gravitum,
-                MenuSettings.JungleClear.Infernum,
-                MenuSettings.JungleClear.Crescendum,
-                MenuSettings.JungleClear.WJungleClear,
-                MenuSettings.JungleClear.ManaJungleClear
-            };
-            Amenu.Add(jungleClearMenu);*/
-
-            Amenu.Attach();
-
-            #endregion
-
-            Game.OnUpdate                    += OnUpdate;
-            Orbwalker.OnAction              += OnAction;
-            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
-        }
-              
-        private static void OnUpdate(EventArgs args)
-        {
-            if (objPlayer.IsDead || objPlayer.IsRecalling())
+            if (!Combo.WCombo.Enabled)
                 return;
-            if (MenuGUI.IsChatOpen || MenuGUI.IsShopOpen)
+            if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
                 return;
-            CheckAll();
-            switch (Orbwalker.ActiveMode)
+
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
             {
-                case OrbwalkerMode.Combo:
-                        SimpleCombo();
-                    break;
-                case OrbwalkerMode.Harass:
-                    if (MenuSettings.Harass.ManaHarass.Value < Player.Mana)
-                        SimpleCombo();
-                    break;
-                case OrbwalkerMode.LaneClear:
-                    if (MenuSettings.LaneClear.ManaLaneClear.Value < Player.Mana)
-                        SimpleLaneClear();
-                    break;
-                case OrbwalkerMode.LastHit:
-                    break;
-            }
-        }
-
-        #region Orbwalker Modes
-        private static void CheckAll()
-        {
-            if (R.IsReady())
-            {
-                if (Player.HasBuff("ApheliosOffHandBuffCalibrum") || Player.HasBuff("ApheliosCalibrumManager"))
-                {
-                    R1isready = true;
-                }
-                else
-                {
-                    R1isready = false;
-                }
-
-                if (Player.HasBuff("ApheliosOffHandBuffSevernum") || Player.HasBuff("ApheliosSevernumManager"))
-                {
-                    R2isready = true;
-                }
-                else
-                {
-                    R2isready = false;
-                }
-
-                if (Player.HasBuff("ApheliosOffHandBuffGravitum") || Player.HasBuff("ApheliosGravitumManager"))
-                {
-                    R3isready = true;
-                }
-                else
-                {
-                    R3isready = false;
-                }
-
-                if (Player.HasBuff("ApheliosOffHandBuffInfernum") || Player.HasBuff("ApheliosInfernumManager"))
-                {
-                    R4isready = true;
-                }
-                else
-                {
-                    R4isready = false;
-                }
-
-                if (Player.HasBuff("ApheliosOffHandBuffCrescendum") || Player.HasBuff("ApheliosCrescendumManager"))
-                {
-                    R5isready = true;
-                }
-                else
-                {
-                    R5isready = false;
-                }
+                return;
             }
 
-            //Check Q
-                if (Game.Time * 1000 - lastCalibrum >= Q1Delay() * 1000)
-                {
-                    Q1isready = true;
-                }
-                else
-                {
-                    Q1isready = false;
-                }
+            if (Orbwalker.ActiveMode > OrbwalkerMode.Harass)
+                return;
 
-                if (Game.Time * 1000 - lastSeverum >= Q2Delay() * 1000)
-                {
-                    Q2isready = true;
-                }
-                else
-                {
-                    Q2isready = false;
-                }
+            if (OutOfAARangeOfGun || CloseOfAARangeOfGun || LowhpOfGun)
+                return;
 
-                if (Game.Time * 1000 - lastGravitum >= Q3Delay() * 1000)
-                {
-                    Q3isready = true;
-                }
-                else
-                {
-                    Q3isready = false;
-                }
+            var target = FSTargetSelector.GetFSTarget(ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange());
 
-                if (Game.Time * 1000 - lastInfernum >= Q4Delay() * 1000)
+            if (target != null && ObjectManager.Player.HealthPercent >= 40 && target.DistanceToPlayer() > (ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange()) / 1.5f)
+            {
+                if (ObjectManager.Player.HasBuff(loaded.CalibrumOff))
                 {
-                    Q4isready = true;
-                }
-                else
-                {
-                    Q4isready = false;
-                }
-
-                if (Game.Time * 1000 - lastCrescendum >= Q4Delay() * 1000)
-                {
-                    Q5isready = true;
-                }
-                else
-                {
-                    Q5isready = false;
-                }
-        }
-        private static float Q1Delay()
-        {
-            var Delay = 10F;
-            if (Player.Level > 1 && Player.Level < 3)
-            {
-                Delay = 10F;
-            }
-            if (Player.Level >= 3 && Player.Level < 5)
-            {
-                Delay = 9.6f;
-            }
-            if (Player.Level >= 5 && Player.Level < 7)
-            {
-                Delay = 9.3f;
-            }
-            if (Player.Level >= 7 && Player.Level < 9)
-            {
-                Delay = 9f;
-            }
-            if (Player.Level >= 9 && Player.Level < 11)
-            {
-                Delay = 8.6f;
-            }
-            if (Player.Level >= 11 && Player.Level < 13)
-            {
-                Delay = 8.3f;
-            }
-            if (Player.Level >= 13)
-            {
-                Delay = 8f;
-            }
-            var RealDelay = Delay + Delay * Player.PercentCooldownMod - Game.Ping / 1000;
-            return RealDelay;
-        }
-        private static float Q2Delay()
-        {
-            var Delay = 10F;
-            if (Player.Level > 1 && Player.Level < 3)
-            {
-                Delay = 10F;
-            }
-            if (Player.Level >= 3 && Player.Level < 5)
-            {
-                Delay = 10F;
-            }
-            if (Player.Level >= 5 && Player.Level < 7)
-            {
-                Delay = 9;
-            }
-            if (Player.Level >= 7 && Player.Level < 9)
-            {
-                Delay = 9;
-            }
-            if (Player.Level >= 9 && Player.Level < 11)
-            {
-                Delay = 8;
-            }
-            if (Player.Level >= 11 && Player.Level < 13)
-            {
-                Delay = 8;
-            }
-            if (Player.Level >= 13)
-            {
-                Delay = 7;
-            }
-            var RealDelay = Delay + Delay * Player.PercentCooldownMod - Game.Ping / 1000;
-            return RealDelay;
-        }
-        private static float Q3Delay()
-        {
-            var Delay = 12f;
-            if (Player.Level > 1 && Player.Level < 3)
-            {
-                Delay = 12f;
-            }
-            if (Player.Level >= 3 && Player.Level < 5)
-            {
-                Delay = 11.5f;
-            }
-            if (Player.Level >= 5 && Player.Level < 7)
-            {
-                Delay = 11.2f;
-            }
-            if (Player.Level >= 7 && Player.Level < 9)
-            {
-                Delay = 10.9f;
-            }
-            if (Player.Level >= 9 && Player.Level < 11)
-            {
-                Delay = 10.5f;
-            }
-            if (Player.Level >= 11 && Player.Level < 13)
-            {
-                Delay = 10.2f;
-            }
-            if (Player.Level >= 13)
-            {
-                Delay = 9.9f;
-            }
-            var RealDelay = Delay + Delay * Player.PercentCooldownMod - Game.Ping / 1000;
-            return RealDelay;
-        }
-        private static float Q4Delay()
-        {
-            var Delay = 9f;
-            if (Player.Level > 1 && Player.Level < 3)
-            {
-                Delay = 9f;
-            }
-            if (Player.Level >= 3 && Player.Level < 5)
-            {
-                Delay = 8.6f;
-            }
-            if (Player.Level >= 5 && Player.Level < 7)
-            {
-                Delay = 8.3f;
-            }
-            if (Player.Level >= 7 && Player.Level < 9)
-            {
-                Delay = 8f;
-            }
-            if (Player.Level >= 9 && Player.Level < 11)
-            {
-                Delay = 7.6f;
-            }
-            if (Player.Level >= 11 && Player.Level < 13)
-            {
-                Delay = 7.3f;
-            }
-            if (Player.Level >= 13)
-            {
-                Delay = 7f;
-            }
-            var RealDelay = Delay + Delay * Player.PercentCooldownMod - Game.Ping / 1000;
-            return RealDelay;
-        }
-        private static float Q5Delay()
-        {
-            var Delay = 9f;
-            if (Player.Level > 1 && Player.Level < 3)
-            {
-                Delay = 9f;
-            }
-            if (Player.Level >= 3 && Player.Level < 5)
-            {
-                Delay = 8.5f;
-            }
-            if (Player.Level >= 5 && Player.Level < 7)
-            {
-                Delay = 8.2f;
-            }
-            if (Player.Level >= 7 && Player.Level < 9)
-            {
-                Delay = 7.9f;
-            }
-            if (Player.Level >= 9 && Player.Level < 11)
-            {
-                Delay = 7.5f;
-            }
-            if (Player.Level >= 11 && Player.Level < 13)
-            {
-                Delay = 7.2f;
-            }
-            if (Player.Level >= 13)
-            {
-                Delay = 6.9f;
-            }
-            var RealDelay = Delay + Delay * Player.PercentCooldownMod - Game.Ping / 1000;
-            return RealDelay;
-        }
-        private static void SimpleCombo()
-        {
-            foreach (var target in GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(100000)))
-            {
-                var target1 = TargetSelector.GetTarget(100000);
-                if (target != null || target1 != null)
-                {
-                    if (MenuSettings.Combo.Qcombo.Enabled)
+                    var Value = SelectedGun.Calibrum.Value;
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
                     {
-                        if (Calibrum.IsReady())
+                        if (Value > SelectedGun.Calibrum.Value)
                         {
-                            if (Player.HasBuff("ApheliosCalibrumManager"))
-                            {
-                                CastQCalibrum(target);
-                            }
-                            if (Player.HasBuff("ApheliosSeverumManager"))
-                            {
-                                CastQSeverum(target);
-                            }
-                            if (Player.HasBuff("ApheliosGravitumManager"))
-                            {
-                                CastQGravitum(target);
-                            }
-                            if (Player.HasBuff("ApheliosInfernumManager"))
-                            {
-                                CastQInfernum(target);
-                            }
-                            if (Player.HasBuff("ApheliosCrescendumManager"))
-                            {
-                                CastQCrescendum(target);
-                            }
-                        }
-                    }
-                    if (Orbwalker.ActiveMode == OrbwalkerMode.Combo && MenuSettings.Combo.Rcombo.Enabled)
-                    {
-                        if (R4isready)
-                        {
-                            if (R.IsReady())
-                                if (Player.HasBuff("ApheliosInfernumManager"))
-                                {
-                                    CastR(target1);
-                                }
-                                else
-                                {
-                                    if (!onaa)
-                                        W.Cast(target);
-                                    CastR(target1);
-                                }
-                        }
-                        else
-                        {
-                            if (R.IsReady())
-                                CastR(target1);
-                        }
-                    }
-                    if (MenuSettings.Combo.Wcombo.Enabled)
-                    {
-                        if (Player.HasBuff("ApheliosOffHandBuffCalibrum") && target1.DistanceToPlayer() > 550)
-                        {
-                            if (!onaa)
-                                W.Cast(target1);
-                        }
-                        if (Player.HasBuff("ApheliosOffHandBuffGravitum") && target1.DistanceToPlayer() > 550)
-                        {
-                            if (!Player.HasBuff("ApheliosCalibrumManager") || !Player.HasBuff("ApheliosOffHandBuffCalibrum"))
-                            {
-                                if (!onaa)
-                                    W.Cast(target1);
-                            }
-                        }
-                    }
-                    if (target.HasBuff("aphelioscalibrumbonusrangebuff"))
-                    {
-                        Orbwalker.Attack(target);
-                    }
-
-                    if (MenuSettings.Combo.Qcombo.Enabled)
-                    {
-                        if (Q1isready && target1.IsValidTarget(Calibrum.Range))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffCalibrum"))
-                            {
-                                if (!Calibrum.IsReady() && !onaa)
-                                    W.Cast(target);
-                                CastQCalibrum(target1);
-                            }
-                            if (Player.HasBuff("ApheliosCalibrumManager"))
-                            {
-                                CastQCalibrum(target1);
-                            }
-                        }
-
-                        if (Q2isready && target1.IsValidTarget(objPlayer.GetRealAutoAttackRange()))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffSeverum"))
-                            {
-                                if (!Calibrum.IsReady() && !onaa)
-                                    W.Cast(target);
-                                CastQSeverum(target1);
-                            }
-                            if (Player.HasBuff("ApheliosSeverumManager"))
-                            {
-                                CastQSeverum(target1);
-                            }
-                        }
-
-                        if (Q3isready)
-                        {
-                            if (target1.IsValidTarget(550) || target1.HasBuff("ApheliosGravitumDebuff"))
-                            {
-                                if (Player.HasBuff("ApheliosOffHandBuffGravitum"))
-                                {
-                                    if (!Calibrum.IsReady() && !onaa)
-                                        W.Cast(target);
-                                    CastQGravitum(target);
-                                }
-                                if (Player.HasBuff("ApheliosGravitumManager"))
-                                {
-                                    CastQGravitum(target);
-                                }
-                            }
-                        }
-
-                        if (Q4isready && target1.IsValidTarget(Infernum.Range))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffInfernum"))
-                            {
-                                if (!Calibrum.IsReady() && !onaa)
-                                    W.Cast(target);
-                                CastQInfernum(target1);
-                            }
-                            if (Player.HasBuff("ApheliosInfernumManager"))
-                            {
-                                CastQInfernum(target1);
-                            }
-                        }
-
-                        if (Q5isready && target1.IsValidTarget(Crescendum.Range + 100))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffCrescendum"))
-                            {
-                                if (!Calibrum.IsReady() && !onaa)
-                                    W.Cast(target);
-                                CastQCrescendum(target1);
-                            }
-                            if (Player.HasBuff("ApheliosCrescendumManager"))
-                            {
-                                CastQCrescendum(target1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void SimpleLaneClear()
-        {
-            foreach (var target in GameObjects.Jungle.Where(x => x.IsValidTarget(100000)))
-            {
-                if (target != null)
-                {
-                    if (MenuSettings.Combo.Qcombo.Enabled)
-                    {
-                        if (Calibrum.IsReady())
-                        {
-                            if (Player.HasBuff("ApheliosCalibrumManager"))
-                            {
-                                CastQCalibrum(target);
-                            }
-                            if (Player.HasBuff("ApheliosSeverummManager"))
-                            {
-                                CastQSeverum(target);
-                            }
-                            if (Player.HasBuff("ApheliosGravitumManager"))
-                            {
-                                CastQGravitum(target);
-                            }
-                            if (Player.HasBuff("ApheliosInfernumManager"))
-                            {
-                                CastQInfernum(target);
-                            }
-                            if (Player.HasBuff("ApheliosCrescendumManager"))
-                            {
-                                CastQCrescendum(target);
-                            }
-                        }
-                    }
-                    if (Orbwalker.ActiveMode == OrbwalkerMode.Combo && MenuSettings.Combo.Rcombo.Enabled)
-                    {
-                        if (R4isready)
-                        {
-                            if (R.IsReady())
-                                if (Player.HasBuff("ApheliosInfernumManager"))
-                                {
-                                    CastR(target);
-                                }
-                                else
-                                {
-                                    W.Cast(target);
-                                    CastR(target);
-                                }
-                        }
-                        else
-                        {
-                            if (R.IsReady())
-                                CastR(target);
-                        }
-                    }
-                    if (MenuSettings.Combo.Wcombo.Enabled)
-                    {
-                        if (Player.HasBuff("ApheliosOffHandBuffCalibrum") && target.DistanceToPlayer() > 550)
-                        {
-                            W.Cast(target);
-                        }
-                        if (Player.HasBuff("ApheliosOffHandBuffGravitum") && target.DistanceToPlayer() > 550)
-                        {
-                            if (!Player.HasBuff("ApheliosCalibrumManager") || !Player.HasBuff("ApheliosOffHandBuffCalibrum"))
-                            {
-                                W.Cast(target);
-                            }
-                        }
-                    }
-                    if (target.HasBuff("aphelioscalibrumbonusrangebuff"))
-                    {
-                        Orbwalker.Attack(target);
-                    }
-
-                    if (MenuSettings.Combo.Qcombo.Enabled)
-                    {
-                        if (Q1isready && target.IsValidTarget(Calibrum.Range))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffCalibrum"))
-                            {
-                                if (!Calibrum.IsReady())
-                                    W.Cast(target);
-                                CastQCalibrum(target);
-                            }
-                            if (Player.HasBuff("ApheliosCalibrumManager"))
-                            {
-                                CastQCalibrum(target);
-                            }
-                        }
-
-                        if (Q2isready && target.IsValidTarget(objPlayer.GetRealAutoAttackRange()))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffSeverum"))
-                            {
-                                if (!Calibrum.IsReady())
-                                    W.Cast(target);
-                                CastQSeverum(target);
-                            }
-                            if (Player.HasBuff("ApheliosSeverumManager"))
-                            {
-                                CastQSeverum(target);
-                            }
-                        }
-
-                        if (Q3isready)
-                        {
-                            if (target.IsValidTarget(550) || target.HasBuff("ApheliosGravitumDebuff"))
-                            {
-                                if (Player.HasBuff("ApheliosOffHandBuffGravitum"))
-                                {
-                                    if (!Calibrum.IsReady())
-                                        W.Cast(target);
-                                    CastQGravitum(target);
-                                }
-                                if (Player.HasBuff("ApheliosGravitumManager"))
-                                {
-                                    CastQGravitum(target);
-                                }
-                            }
-                        }
-
-                        if (Q4isready && target.IsValidTarget(Infernum.Range))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffInfernum"))
-                            {
-                                if (!Calibrum.IsReady())
-                                    W.Cast(target);
-                                CastQInfernum(target);
-                            }
-                            if (Player.HasBuff("ApheliosInfernumManager"))
-                            {
-                                CastQInfernum(target);
-                            }
-                        }
-
-                        if (Q5isready && target.IsValidTarget(Crescendum.Range + 100))
-                        {
-                            if (Player.HasBuff("ApheliosOffHandBuffCrescendum"))
-                            {
-                                if (!Calibrum.IsReady())
-                                    W.Cast(target);
-                                CastQCrescendum(target);
-                            }
-                            if (Player.HasBuff("ApheliosCrescendumManager"))
-                            {
-                                CastQCrescendum(target);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        private static void CastQCalibrum(AIBaseClient target)
-        {
-            var Qpred = Calibrum.GetPrediction(target, false, -1, CollisionObjects.YasuoWall
-                                                                | CollisionObjects.Minions);
-            if (Calibrum.IsReady())
-                if (Q1isready && target != null && target.IsValidTarget(Calibrum.Range))
-                {
-                    if (Qpred.Hitchance >= HitChance.High && Qpred.CastPosition.DistanceToPlayer() < Calibrum.Range)
-                    {
-                        if (!onaa || !beforeaa)
-                            if (MenuSettings.Combo.Calibrum.Enabled)
-                                Calibrum.Cast(Qpred.CastPosition);
-                    }
-                }
-        }
-        private static void CastQSeverum(AIBaseClient target)
-        {
-            if (target.IsValidTarget(550) && Severum.IsReady())
-            {
-                if (MenuSettings.Combo.Severum.Enabled)
-                    Severum.Cast(target);
-            }
-        }
-        private static void CastQGravitum(AIBaseClient target)
-        {
-            if (Gravitum.IsReady())
-                if (Q3isready && target != null && target.IsValidTarget(R.Range))
-                {
-                    if (target.HasBuff("ApheliosGravitumDebuff"))
-                    {
-                        if (!onaa || !beforeaa)
-                            if (MenuSettings.Combo.Gravitum.Enabled)
-                                Gravitum.Cast(target);
-                    }
-                }
-        }
-        private static void CastQInfernum(AIBaseClient target)
-        {
-            var Qpred = Infernum.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-            if (Infernum.IsReady())
-                if (Q4isready && target != null && target.IsValidTarget(Infernum.Range))
-                {
-                    if (Qpred.Hitchance >= HitChance.High && Qpred.CastPosition.DistanceToPlayer() < Infernum.Range)
-                    {
-                        if (!onaa || !beforeaa)
-                            if (MenuSettings.Combo.Infernum.Enabled)
-                                Infernum.Cast(Qpred.CastPosition);
-                    }
-                }
-        }
-        private static void CastQCrescendum(AIBaseClient target)
-        {
-            if (Crescendum.IsReady())
-                if (Q5isready && target != null && target.IsValidTarget(700))
-                {
-                    if (!onaa || !beforeaa)
-                    {
-                        if (MenuSettings.Combo.Crescendum.Enabled)
-                            Crescendum.Cast(target.Position);
-                    }
-                }
-        }
-        private static void CastR(AIBaseClient target)
-        {
-            var Rpred = R.GetPrediction(target, false, -1, CollisionObjects.YasuoWall);
-            if (R.IsReady() && target != null && target.IsValidTarget(R.Range))
-            {
-                if (Rpred.Hitchance >= HitChance.High && Rpred.CastPosition.DistanceToPlayer() < R.Range)
-                {
-                    if (!onaa || !beforeaa)
-                    {
-                        if (target.HealthPercent <= MenuSettings.Combo.Rheath.Value)
-                        {
-                            R.Cast(Rpred.CastPosition);
-                        }
-                        try
-                        {
-                            var targets = GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(R.Range)).ToArray();
-                            var castPos = Vector3.Zero;
-
-                            if (!targets.Any())
-                            {
+                            if (loaded.W.Cast())
                                 return;
-                            }
-
-                            foreach (var pred in
-                                targets.Select(i => R.GetPrediction(i, false, -1, CollisionObjects.Heroes
-                                                         | CollisionObjects.YasuoWall))
-                                    .Where(
-                                        i => i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount >= MenuSettings.Combo.Rhit.Value)
-                                    .OrderByDescending(i => i.AoeTargetsHitCount))
-                            {
-                                castPos = pred.CastPosition;
-                                break;
-                            }
-
-                            if (castPos != Vector3.Zero && castPos.DistanceToPlayer() <= R.Range)
-                            {
-                                R.Cast(castPos);
-                            }
-
                         }
-                        catch (Exception ex)
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                    {
+                        if (Value > SelectedGun.Severum.Value)
                         {
-                            Console.WriteLine("R hit : " + ex);
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                    {
+                        if (Value > SelectedGun.Gravitum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                    {
+                        if (Value > SelectedGun.Infernum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                    {
+                        if (Value > SelectedGun.Crescendum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                }
+                if (ObjectManager.Player.HasBuff(loaded.SeverumOff))
+                {
+                    var Value = SelectedGun.Severum.Value;
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                    {
+                        if (Value > SelectedGun.Calibrum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                    {
+                        if (Value > SelectedGun.Severum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                    {
+                        if (Value > SelectedGun.Gravitum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                    {
+                        if (Value > SelectedGun.Infernum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                    {
+                        if (Value > SelectedGun.Crescendum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                }
+                if (ObjectManager.Player.HasBuff(loaded.GravitumOff))
+                {
+                    var Value = SelectedGun.Gravitum.Value;
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                    {
+                        if (Value > SelectedGun.Calibrum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                    {
+                        if (Value > SelectedGun.Severum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                    {
+                        if (Value > SelectedGun.Gravitum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                    {
+                        if (Value > SelectedGun.Infernum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                    {
+                        if (Value > SelectedGun.Crescendum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                }
+                if (ObjectManager.Player.HasBuff(loaded.InfernumOff))
+                {
+                    var Value = SelectedGun.Infernum.Value;
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                    {
+                        if (Value > SelectedGun.Calibrum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                    {
+                        if (Value > SelectedGun.Severum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                    {
+                        if (Value > SelectedGun.Gravitum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                    {
+                        if (Value > SelectedGun.Infernum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                    {
+                        if (Value > SelectedGun.Crescendum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                }
+                if (ObjectManager.Player.HasBuff(loaded.CrescendumOff))
+                {
+                    var Value = SelectedGun.Crescendum.Value;
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                    {
+                        if (Value > SelectedGun.Calibrum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                    {
+                        if (Value > SelectedGun.Severum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                    {
+                        if (Value > SelectedGun.Gravitum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                    {
+                        if (Value > SelectedGun.Infernum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                    {
+                        if (Value > SelectedGun.Crescendum.Value)
+                        {
+                            if (loaded.W.Cast())
+                                return;
+                        }
+                    }
+                }
+                SelectedOfGun = true;
+            }
+            else
+            {
+                SelectedOfGun = false;
+            }          
+        }
+
+        private static void QCombo(EventArgs args)
+        {
+            if (!Combo.QCombo.Enabled)
+                return;
+            if (Orbwalker.ActiveMode > OrbwalkerMode.Harass)
+                return;
+
+            if (ObjectManager.Player.IsDead)
+                return;
+
+            var target = FSTargetSelector.GetFSTarget(loaded.Q1.Range);
+            if (target == null)
+            {
+                return;
+            }
+
+            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && loaded.Q1.IsReady())
+            {
+                var temptargets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health);
+                if(temptargets != null)
+                {
+                    foreach(var temp in temptargets)
+                    {
+                        if(temp != null)
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, temp);
+                            if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            {
+                                if (loaded.Q1.Cast(pred.CastPosition))
+                                    return;
+                            }
+                        }
+                    }
+                }
+            }
+            if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && loaded.Q2.IsReady())
+            {
+                var targets = TargetSelector.GetTarget(550f);
+                if (targets != null)
+                    if (loaded.Q2.Cast())
+                        return;
+            }
+            if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && loaded.Q3.IsReady())
+            {
+                var targets = TargetSelector.GetTargets(loaded.Q3.Range);
+                if (targets != null && targets.Any(i => i.HasBuff(loaded.GravitumDebuff)))
+                    if (loaded.Q3.Cast())
+                        return;
+            }
+            if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && loaded.Q4.IsReady())
+            {
+                var temptargets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(loaded.Q4.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health);
+                if (temptargets != null)
+                {
+                    foreach (var temp in temptargets)
+                    {
+                        if (temp != null)
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q4, temp);
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            {
+                                if (loaded.Q4.Cast(pred.CastPosition))
+                                    return;
+                            }
+                        }
+                    }
+                }
+            }
+            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && loaded.Q5.IsReady())
+            {
+                var temptargets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(600) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health);
+                if (temptargets != null)
+                {
+                    foreach (var temp in temptargets)
+                    {
+                        if (temp != null)
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q5, temp);
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            {
+                                if (loaded.Q5.Cast(pred.CastPosition))
+                                    return;
+                            }
                         }
                     }
                 }
             }
         }
 
-        #endregion
+        private static void WCloser(EventArgs args)
+        {
+            if (!Combo.WCombo.Enabled)
+                return;
+            if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
+                return;
 
-        #region Events
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            {
+                return;
+            }
 
-        private static void OnAction(object sender, OrbwalkerActionArgs args)
+            if (Orbwalker.ActiveMode > OrbwalkerMode.Harass)
+                return;
+
+            var target = FSTargetSelector.GetFSTarget(ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange());
+            if (target == null)
+            {
+                return;
+            }
+
+            if(ObjectManager.Player.HealthPercent >= 40 && target.IsValidTarget((ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange()) / 1.5f) && !LowhpOfGun && !SelectedOfGun && !OutOfAARangeOfGun)
+            {
+                CloseOfAARangeOfGun = true;
+                //Calibrum
+                if (ObjectManager.Player.HasBuff(loaded.CalibrumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (Closer.Calibrum.Value > Closer.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (Closer.Calibrum.Value > Closer.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (Closer.Calibrum.Value > Closer.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (Closer.Calibrum.Value > Closer.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Severum
+                if (ObjectManager.Player.HasBuff(loaded.SeverumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (Closer.Severum.Value > Closer.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (Closer.Severum.Value > Closer.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (Closer.Severum.Value > Closer.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (Closer.Severum.Value > Closer.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Gravitum
+                if (ObjectManager.Player.HasBuff(loaded.GravitumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (Closer.Gravitum.Value > Closer.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (Closer.Gravitum.Value > Closer.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (Closer.Gravitum.Value > Closer.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (Closer.Gravitum.Value > Closer.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Infernum
+                if (ObjectManager.Player.HasBuff(loaded.InfernumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (Closer.Infernum.Value > Closer.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (Closer.Infernum.Value > Closer.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (Closer.Infernum.Value > Closer.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (Closer.Infernum.Value > Closer.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Crescendum
+                if (ObjectManager.Player.HasBuff(loaded.CrescendumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (Closer.Crescendum.Value > Closer.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (Closer.Crescendum.Value > Closer.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (Closer.Crescendum.Value > Closer.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (Closer.Crescendum.Value > Closer.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+
+            }
+            else
+            {
+                CloseOfAARangeOfGun = false;
+            }
+        }
+
+        private static bool OutOfAARangeOfGun = false;
+        private static bool CloseOfAARangeOfGun = false;
+        private static bool LowhpOfGun = false;
+        private static bool SelectedOfGun = false;  
+
+        private static void WLowHp(EventArgs args)
+        {
+            if (!Combo.WCombo.Enabled)
+                return;
+            if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
+                return;
+
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            {
+                return;
+            }
+
+            if (Orbwalker.ActiveMode > OrbwalkerMode.Harass)
+                return;
+
+            var target = FSTargetSelector.GetFSTarget(ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange());
+            if (target == null)
+            {
+                return;
+            }
+
+            if(ObjectManager.Player.HealthPercent < 40 && target.InAutoAttackRange() && !SelectedOfGun && !CloseOfAARangeOfGun && !OutOfAARangeOfGun)
+            {
+                LowhpOfGun = true;
+                //Calibrum
+                if (ObjectManager.Player.HasBuff(loaded.CalibrumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (LowHp.Calibrum.Value > LowHp.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (LowHp.Calibrum.Value > LowHp.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (LowHp.Calibrum.Value > LowHp.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (LowHp.Calibrum.Value > LowHp.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Severum
+                if (ObjectManager.Player.HasBuff(loaded.SeverumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (LowHp.Severum.Value > LowHp.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (LowHp.Severum.Value > LowHp.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (LowHp.Severum.Value > LowHp.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (LowHp.Severum.Value > LowHp.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Gravitum
+                if (ObjectManager.Player.HasBuff(loaded.GravitumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (LowHp.Gravitum.Value > LowHp.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (LowHp.Gravitum.Value > LowHp.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (LowHp.Gravitum.Value > LowHp.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (LowHp.Gravitum.Value > LowHp.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Infernum
+                if (ObjectManager.Player.HasBuff(loaded.InfernumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (LowHp.Infernum.Value > LowHp.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (LowHp.Infernum.Value > LowHp.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (LowHp.Infernum.Value > LowHp.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (LowHp.Infernum.Value > LowHp.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Crescendum
+                if (ObjectManager.Player.HasBuff(loaded.CrescendumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (LowHp.Crescendum.Value > LowHp.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (LowHp.Crescendum.Value > LowHp.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (LowHp.Crescendum.Value > LowHp.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (LowHp.Crescendum.Value > LowHp.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+            }
+            else
+            {
+                LowhpOfGun = false; 
+            }
+        }
+
+        private static bool W1 = true;
+        private static bool W2 = true;
+        private static bool W3 = true;
+        private static bool W4 = true;
+        private static bool W5 = true;
+        private static void GetChecker(EventArgs args)
+        {
+            var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(float.MaxValue));
+            if(target != null)
+            {
+                if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                {
+                    if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High) && loaded.Q2.IsReady())
+                    {
+                        W1 = false;
+                    }else
+                        W1 = true;
+                }
+                if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                {
+                    if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) && loaded.Q2.IsReady())
+                    {
+                        W2 = false;
+                    }
+                    else
+                        W2 = true;
+                }
+                if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                {
+                    if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) && loaded.Q3.IsReady())
+                    {
+                        W3 = false;
+                    }
+                    else
+                        W3 = true;
+                }
+                if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                {
+                    if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) && loaded.Q4.IsReady())
+                    {
+                        W4 = false;
+                    }
+                    else
+                        W4 = true;
+                }
+                if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                {
+                    if (!target.Any(i => i.IsValidTarget(loaded.Q5.Range + 200)) && loaded.Q5.IsReady())
+                    {
+                        W5 = false;
+                    }
+                    else
+                        W5 = true;
+                }
+            }          
+        }
+
+        private static void WOutAARange(EventArgs args)
+        {
+            if (!Combo.WCombo.Enabled)
+                return;
+            if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
+                return;
+
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            {
+                return;
+            }
+
+            if (Orbwalker.ActiveMode > OrbwalkerMode.Harass)
+                return;
+
+            var target = FSTargetSelector.GetFSTarget(ObjectManager.Player.GetRealAutoAttackRange() + 600);
+            if(target == null)
+            {
+                return;
+            }
+
+            if ((target.DistanceToPlayer() > (ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange())) && !SelectedOfGun && !CloseOfAARangeOfGun && !LowhpOfGun)
+            {
+                OutOfAARangeOfGun = true;
+                //Calibrum
+                if (ObjectManager.Player.HasBuff(loaded.CalibrumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (OutAARange.Calibrum.Value > OutAARange.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (OutAARange.Calibrum.Value > OutAARange.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (OutAARange.Calibrum.Value > OutAARange.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (OutAARange.Calibrum.Value > OutAARange.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Severum
+                if (ObjectManager.Player.HasBuff(loaded.SeverumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if(OutAARange.Severum.Value > OutAARange.Calibrum.Value)
+                            if (loaded.W.Cast())
+                            return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (OutAARange.Severum.Value > OutAARange.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (OutAARange.Severum.Value > OutAARange.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (OutAARange.Severum.Value > OutAARange.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Gravitum
+                if (ObjectManager.Player.HasBuff(loaded.GravitumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (OutAARange.Gravitum.Value > OutAARange.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (OutAARange.Gravitum.Value > OutAARange.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (OutAARange.Gravitum.Value > OutAARange.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (OutAARange.Gravitum.Value > OutAARange.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Infernum
+                if (ObjectManager.Player.HasBuff(loaded.InfernumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (OutAARange.Infernum.Value > OutAARange.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (OutAARange.Infernum.Value > OutAARange.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (OutAARange.Infernum.Value > OutAARange.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn) && W5)
+                    {
+                        if (OutAARange.Infernum.Value > OutAARange.Crescendum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+                //Crescendum
+                if (ObjectManager.Player.HasBuff(loaded.CrescendumOff))
+                {
+                    if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && W2)
+                    {
+                        if (OutAARange.Crescendum.Value > OutAARange.Severum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && W3)
+                    {
+                        if (OutAARange.Crescendum.Value > OutAARange.Gravitum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.InfernumOn) && W4)
+                    {
+                        if (OutAARange.Crescendum.Value > OutAARange.Infernum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                    if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && W1)
+                    {
+                        if (OutAARange.Crescendum.Value > OutAARange.Calibrum.Value)
+                            if (loaded.W.Cast())
+                                return;
+                    }
+                }
+            }
+            else
+            {
+                OutOfAARangeOfGun = false;
+            }
+        }
+
+        private static bool BeforeAA;
+        private static bool OnAA;
+        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if (args.Type == OrbwalkerType.BeforeAttack)
             {
-                beforeaa = true;
-            }
-            else beforeaa = false;
-
-            if (args.Type == OrbwalkerType.AfterAttack)
-            {
-                afteraa = true;
-            }
-            else afteraa = false;
-
+                BeforeAA = true;
+                OnAA = false;
+            } else
+                BeforeAA = false;
             if (args.Type == OrbwalkerType.OnAttack)
             {
-                onaa = true;
+                OnAA = true;
+                BeforeAA = false;
             }
-            else onaa = false;
+            else
+                OnAA = false;
         }
 
+        private static void WQ(EventArgs args)
+        {
+            if (!Combo.WCombo.Enabled)
+                return;
+            if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
+                return;
+
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            {
+                return;
+            }
+
+            if (Orbwalker.ActiveMode > OrbwalkerMode.Harass)
+                return;
+
+            if (ObjectManager.Player.Mana < 60)
+                return;
+            var fstarget = FSTargetSelector.GetFSTarget(loaded.Q1.Range);
+            if(fstarget != null)
+            {
+                if (fstarget.DistanceToPlayer() > (ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange()))
+                    return;
+
+                if (fstarget.DistanceToPlayer() < (ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange()))
+                {
+                    //Q1
+                    if (loaded.Q1Ready && ObjectManager.Player.HasBuff(loaded.CalibrumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
+                    //Q2
+                    if (loaded.Q2Ready && ObjectManager.Player.HasBuff(loaded.SeverumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q2.Range));
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q2.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
+                    //Q3
+                    if (loaded.Q3Ready && ObjectManager.Player.HasBuff(loaded.GravitumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff));
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q1.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
+                    //Q4
+                    if (loaded.Q4Ready && ObjectManager.Player.HasBuff(loaded.InfernumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q4.Range));
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q2.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    //Q4
+                    if (loaded.Q5Ready && ObjectManager.Player.HasBuff(loaded.CrescendumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(600));
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q2.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    //Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                }
+                /*else
+                {
+                    //Q1
+                    if (loaded.Q1Ready && ObjectManager.Player.HasBuff(loaded.CalibrumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+ 
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CalibrumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
+                    //Q2
+                    if (loaded.Q2Ready && ObjectManager.Player.HasBuff(loaded.SeverumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q2.Range));
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q2.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.SeverumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
+                    //Q3
+                    if (loaded.Q3Ready && ObjectManager.Player.HasBuff(loaded.GravitumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff));
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q1.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.GravitumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
+                    //Q4
+                    if (loaded.Q4Ready && ObjectManager.Player.HasBuff(loaded.InfernumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.IsValidTarget(loaded.Q4.Range));
+                        if (target != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q2.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(600)) || !loaded.Q5.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.InfernumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    //Q5
+                    if (loaded.Q5Ready && ObjectManager.Player.HasBuff(loaded.CrescendumOff))
+                    {
+                        var target = GameObjects.EnemyHeroes.Where(i => i != null && !i.IsDead && i.DistanceToPlayer() < 600);
+                        if (target.Where(i => i.DistanceToPlayer() < 600) != null)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.Collision) || !loaded.Q2.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q2.Range)) || !loaded.Q2.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q4.Range)) || !loaded.Q4.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (!target.Any(i => i.IsValidTarget(loaded.Q3.Range) && i.HasBuff(loaded.GravitumDebuff)) || !loaded.Q3.IsReady())
+                                {
+                                    Game.Print("Cast W on WQ logic : " + loaded.CrescendumOff);
+                                    if (loaded.W.Cast())
+                                        return;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                }*/
+            }            
+        }
+    }
+    
+    public class loaded
+    {
+        public static string CalibrumOff = "ApheliosOffHandBuffCalibrum";
+        public static string CalibrumOn = "ApheliosCalibrumManager";
+        public static string SeverumOff = "ApheliosOffHandBuffSeverum";
+        public static string SeverumOn = "ApheliosSeverumManager";
+        public static string GravitumOff = "ApheliosOffHandBuffGravitum";
+        public static string GravitumOn = "ApheliosGravitumManager";
+        public static string InfernumOff = "ApheliosOffHandBuffInfernum";
+        public static string InfernumOn = "ApheliosInfernumManager";
+        public static string CrescendumOff = "ApheliosOffHandBuffCrescendum";
+        public static string CrescendumOn = "ApheliosCrescendumManager";
+        public static string CalibrumDebuff = "aphelioscalibrumbonusrangebuff";
+        public static string GravitumDebuff = "ApheliosGravitumDebuff";
+        public static Menu MAphelios = new Menu("Aphelios", "FunnySlayer Aphelios", true);
+        private static AIHeroClient Player => ObjectManager.Player;
+        public static Spell Q1 = new Spell(SpellSlot.Q);
+        public static Spell Q2 = new Spell(SpellSlot.Q);
+        public static Spell Q3 = new Spell(SpellSlot.Q);
+        public static Spell Q4 = new Spell(SpellSlot.Q);
+        public static Spell Q5 = new Spell(SpellSlot.Q);
+        public static Spell W = new Spell(SpellSlot.W);
+        public static Spell R = new Spell(SpellSlot.R);
+        public static void OnLoad()
+        {
+            W.Range = float.MaxValue;
+            R.Range = 1300;
+            R.SetSkillshot(0.6f, 150, 2000f, false, SkillshotType.Line);
+            Q1.Range = 1450f;
+            Q2.Range = 550f;
+            Q3.Range = float.MaxValue;
+            Q4.Range = 650f;
+            Q5.Range = 475f;
+            Q1.SetSkillshot(0.4f, 100, 1850f, true, SkillshotType.Line);
+            Q2.SetTargetted(0.25f, float.MaxValue);
+            Q4.SetSkillshot(0.4f, 300, float.MaxValue, false, SkillshotType.Line);
+            Q5.SetSkillshot(1f, 500, float.MaxValue, false, SkillshotType.Circle);
+            Game.Print("<font color='#1dff00' size='25'>Aphelios The MachineGun loaded</font>");
+            MAphelios.AddApheliosMenu();
+            MAphelios.Attach();
+            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+            Game.OnUpdate += CheckQReady;
+            Game.OnUpdate += CheckRGun;
+            Game.OnUpdate += CheckQGUn;
+            Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private static void Drawing_OnDraw(EventArgs args)
+        {
+            if (Player.IsDead)
+                return;
+
+            if(DrawRange != float.MaxValue)
+            {
+                Render.Circle.DrawCircle(Player.Position, DrawRange, System.Drawing.Color.Red, 5);
+            }
+            var mana = Player.Mana < 60;
+            var pos = Drawing.WorldToScreen(Player.Position);
+            Drawing.DrawText(pos.X, pos.Y + 20, Q1Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Calibrum");
+            Drawing.DrawText(pos.X, pos.Y + 40, Q2Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Severum");
+            Drawing.DrawText(pos.X, pos.Y + 60, Q3Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Gravitum");
+            Drawing.DrawText(pos.X, pos.Y + 80, Q4Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Infernum");
+            Drawing.DrawText(pos.X, pos.Y + 100, Q5Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Crescendum");
+        }
+        private static float DrawRange = float.MaxValue;
+        private static void CheckQGUn(EventArgs args)
+        {
+            if (Player.HasBuff(CalibrumOn))
+            {
+                DrawRange = Q1.Range;
+            }
+            else
+            {
+                if (Player.HasBuff(SeverumOn))
+                {
+                    DrawRange = Q2.Range;
+                }
+                else
+                {
+                    if (Player.HasBuff(GravitumOn))
+                    {
+                        DrawRange = Q3.Range;
+                    }
+                    else
+                    {
+                        if (Player.HasBuff(InfernumOn))
+                        {
+                            DrawRange = Q4.Range;
+                        }
+                        else
+                        {
+                            if (Player.HasBuff(CrescendumOn))
+                            {
+                                DrawRange = Q5.Range;
+                            }
+                        }
+                    }
+                }
+            }        
+        }
+
+        public static bool R1Ready = false;
+        public static bool R2Ready = false;
+        public static bool R3Ready = false;
+        public static bool R4Ready = false;
+        public static bool R5Ready = false;
+        private static void CheckRGun(EventArgs args)
+        {
+            if (Player.Level == 1 || Player.Mana < 100)
+                return;
+
+            if (R.IsReady())
+            {
+                if(Player.HasBuff(CalibrumOff) || Player.HasBuff(CalibrumOn))
+                {
+                    R1Ready = true;
+                }
+                else
+                {
+                    R1Ready = false;
+                }
+                if (Player.HasBuff(SeverumOff) || Player.HasBuff(SeverumOn))
+                {
+                    R2Ready = true;
+                }
+                else
+                {
+                    R2Ready = false;
+                }
+                if (Player.HasBuff(GravitumOff) || Player.HasBuff(GravitumOn))
+                {
+                    R3Ready = true;
+                }
+                else
+                {
+                    R3Ready = false;
+                }
+                if (Player.HasBuff(InfernumOff) || Player.HasBuff(InfernumOn))
+                {
+                    R4Ready = true;
+                }
+                else
+                {
+                    R4Ready = false;
+                }
+                if (Player.HasBuff(CrescendumOff) || Player.HasBuff(CrescendumOn))
+                {
+                    R5Ready = true;
+                }
+                else
+                {
+                    R5Ready = false;
+                }
+            }
+        }
+
+        public static bool Q1Ready = false;
+        public static bool Q2Ready = false;
+        public static bool Q3Ready = false;
+        public static bool Q4Ready = false;
+        public static bool Q5Ready = false;
+        private static void CheckQReady(EventArgs args)
+        {
+            if (Player.Level == 1 || Player.Mana < 60)
+                return;
+
+            if(Variables.TickCount >= lastCalibrum + GetQ1CD() * 1000)
+            {
+                Q1Ready = true;
+            }
+            else
+            {
+                Q1Ready = false;
+            }
+            if (Variables.TickCount >= lastSeverum + GetQ2CD() * 1000)
+            {
+                Q2Ready = true;
+            }
+            else
+            {
+                Q2Ready = false;
+            }
+            if (Variables.TickCount >= lastGravitum + GetQ3CD() * 1000)
+            {
+                Q3Ready = true;
+            }
+            else
+            {
+                Q3Ready = false;
+            }
+            if (Variables.TickCount >= lastInfernum + GetQ4CD() * 1000)
+            {
+                Q4Ready = true;
+            }
+            else
+            {
+                Q4Ready = false;
+            }
+            if (Variables.TickCount >= lastCrescendum + GetQ5CD() * 1000)
+            {
+                Q5Ready = true;
+            }
+            else
+            {
+                Q5Ready = false;
+            }
+        }
+
+        public static int lastCalibrum = 0;
+        public static int lastSeverum = 0;
+        public static int lastGravitum = 0;
+        public static int lastInfernum = 0;
+        public static int lastCrescendum = 0;
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
+            if (sender == null || args == null)
+                return;
+
             if (sender.IsMe)
             {
                 if (args.SData.Name == "ApheliosCalibrumQ")
                 {
-                    lastCalibrum = Variables.GameTimeTickCount;
+                    lastCalibrum = Variables.TickCount;
                 }
                 if (args.SData.Name == "ApheliosSeverumQ")
                 {
-                    lastSeverum = Variables.GameTimeTickCount;
+                    lastSeverum = Variables.TickCount;
                 }
                 if (args.SData.Name == "ApheliosGravitumQ")
                 {
-                    lastGravitum = Variables.GameTimeTickCount;
+                    lastGravitum = Variables.TickCount;
                 }
                 if (args.SData.Name == "ApheliosInfernumQ")
                 {
-                    lastInfernum = Variables.GameTimeTickCount;
+                    lastInfernum = Variables.TickCount;
                 }
                 if (args.SData.Name == "ApheliosCrescendumQ")
                 {
-                    lastCrescendum = Variables.GameTimeTickCount;
+                    lastCrescendum = Variables.TickCount;
                 }
             }
         }
-        #endregion
+        private static int PlayerLevel()
+        {
+            if (ObjectManager.Player == null)
+                return 0;
+
+            if (ObjectManager.Player.Level >= 13)
+                return 7;
+
+            if (ObjectManager.Player.Level >= 11)
+                return 6;
+
+            if (ObjectManager.Player.Level >= 9)
+                return 5;
+
+            if (ObjectManager.Player.Level >= 7)
+                return 4;
+
+            if (ObjectManager.Player.Level >= 5)
+                return 3;
+
+            if (ObjectManager.Player.Level >= 3)
+                return 2;
+
+            if (ObjectManager.Player.Level > 1)
+                return 1;
+
+            return 0;
+        }
+
+        private static float GetQ1CD()
+        {
+            if (Player.Level == 1)
+                return float.MaxValue;
+
+            var array = new float[]
+            {
+                float.MaxValue, 10f, 9.67f, 9.33f, 9f, 8.67f, 8.33f, 8f
+            };
+
+            return array[PlayerLevel()] 
+                + array[PlayerLevel()] * Player.PercentCooldownMod 
+                - Game.Ping / 1000;
+        }
+        private static float GetQ2CD()
+        {
+            if (Player.Level == 1)
+                return float.MaxValue;
+
+            var array = new float[]
+            {
+                float.MaxValue, 10f, 9.67f, 9.33f, 9f, 8.67f, 8.33f, 8f
+            };
+
+            return array[PlayerLevel()] 
+                + array[PlayerLevel()] * Player.PercentCooldownMod 
+                - Game.Ping / 1000;
+        }
+        private static float GetQ3CD()
+        {
+            if (Player.Level == 1)
+                return float.MaxValue;
+
+            var array = new float[]
+            {
+                float.MaxValue, 12f, 11.67f, 11.33f, 11f, 10.67f, 10.33f, 10f
+            };
+
+            return array[PlayerLevel()] 
+                + array[PlayerLevel()] * Player.PercentCooldownMod 
+                - Game.Ping / 1000;
+        }
+        private static float GetQ4CD()
+        {
+            if (Player.Level == 1)
+                return float.MaxValue;
+
+            var array = new float[]
+            {
+                float.MaxValue, 9f, 8.5f, 8f, 7.5f, 7f, 6.5f, 6f
+            };
+
+            return array[PlayerLevel()] 
+                + array[PlayerLevel()] * Player.PercentCooldownMod 
+                - Game.Ping / 1000;
+        }
+        private static float GetQ5CD()
+        {
+            if (Player.Level == 1)
+                return float.MaxValue;
+
+            var array = new float[]
+            {
+                float.MaxValue, 9f, 8.5f, 8f, 7.5f, 7f, 6.5f, 6f
+            };
+
+            return array[PlayerLevel()] 
+                + array[PlayerLevel()] * Player.PercentCooldownMod 
+                - Game.Ping / 1000;
+        }
     }
 }

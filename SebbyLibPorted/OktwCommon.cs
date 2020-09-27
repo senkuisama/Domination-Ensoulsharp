@@ -51,10 +51,10 @@ namespace SebbyLibPorted
 
         public static void debug(string msg)
         {
-            /*if (true)
+            if (true)
             {
-                Console.WriteLine(msg);
-            }*/
+                //Console.WriteLine(msg);
+            }
             /*if (false)
             {
                 Game.Print(msg);

@@ -26,7 +26,7 @@ using EnsoulSharp.SDK.Prediction;
 
 using SharpDX;
 
-namespace SPredictionMash
+namespace SPredictionMash1
 {
     /// <summary>
     /// Arc Prediction class
@@ -154,7 +154,7 @@ namespace SPredictionMash
 
                         float multp = (testPos.Distance(senderPos) / 875.0f);
 
-                        var dianaArc = new SPredictionMash.Geometry.Polygon(
+                        var dianaArc = new SPredictionMash1.Geometry.Polygon(
                                         ClipperWrapper.DefineArc(senderPos - new Vector2(875 / 2f, 20), testPos, (float)Math.PI * multp, 410, 200 * multp),
                                         ClipperWrapper.DefineArc(senderPos - new Vector2(875 / 2f, 20), testPos, (float)Math.PI * multp, 410, 320 * multp));
 
@@ -195,7 +195,7 @@ namespace SPredictionMash
                 {
                     float multp = (result.CastPosition.Distance(from) / 875.0f);
 
-                    var spellHitBox = new SPredictionMash.Geometry.Polygon(
+                    var spellHitBox = new SPredictionMash1.Geometry.Polygon(
                                             ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), result.CastPosition, (float)Math.PI * multp, 410, 200 * multp),
                                             ClipperWrapper.DefineArc(from - new Vector2(875 / 2f, 20), result.CastPosition, (float)Math.PI * multp, 410, 320 * multp));
 

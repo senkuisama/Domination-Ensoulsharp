@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8B138FDE-D0E3-4DF0-8935-0BB353C87E5E}</ProjectGuid>
+    <ProjectGuid>{9D3A313B-FC34-4CD5-952A-D6E65D6911D1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SebbyLibPorted</RootNamespace>
     <AssemblyName>SebbyLibPorted</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
     <PreBuildEvent />
     <PostBuildEvent />
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\Release</OutputPath>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,25 +36,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp.Sandbox">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Sandbox.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\EnsoulSharp.Sandbox.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.SDK">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.SDK.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.Wrapper">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX, Version=2.6.3.0, Culture=neutral, PublicKeyToken=2306ab36a61019a8, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Downloads\EnsoulSharp\System\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct3D9, Version=2.6.3.0, Culture=neutral, PublicKeyToken=2306ab36a61019a8, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Downloads\EnsoulSharp\System\SharpDX.Direct3D9.dll</HintPath>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -98,19 +89,5 @@
     <Compile Include="SPrediction\Utility.cs" />
     <Compile Include="SPrediction\VectorPrediction.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\..\..\..\EnsoulSharp\System\EnsoulSharp.SDK.dll" />
-    <Analyzer Include="..\..\..\..\EnsoulSharp\System\EnsoulSharp.Wrapper.dll" />
-    <Analyzer Include="..\..\..\..\EnsoulSharp\System\SharpDX.Direct3D9.dll" />
-    <Analyzer Include="..\..\..\..\EnsoulSharp\System\SharpDX.dll" />
-    <Analyzer Include="..\..\..\..\EnsoulSharp\System\SPrediction.dll" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

@@ -1,8 +1,0 @@
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\bin\Release\SebbyLibPorted.dll
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\bin\Release\SebbyLibPorted.pdb
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\bin\Release\Newtonsoft.Json.dll
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\obj\Debug\SebbyLib Ported.csprojAssemblyReference.cache
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\obj\Debug\SebbyLib Ported.csproj.CoreCompileInputs.cache
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\obj\Debug\SebbyLib Ported.csproj.CopyComplete
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\obj\Debug\SebbyLibPorted.dll
-C:\Users\FunnySlayer\Desktop\onekey-master\onekey-master\SebbyLib\SebbyLib Ported\obj\Debug\SebbyLibPorted.pdb

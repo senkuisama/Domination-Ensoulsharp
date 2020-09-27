@@ -25,7 +25,7 @@ using EnsoulSharp.SDK.Prediction;
 
 using SharpDX;
 
-namespace SPredictionMash
+namespace SPredictionMash1
 {
     /// <summary>
     /// Vector prediction class

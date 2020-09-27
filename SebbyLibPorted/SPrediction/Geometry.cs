@@ -24,7 +24,7 @@ using EnsoulSharp.SDK;
 
 using SharpDX;
 
-namespace SPredictionMash
+namespace SPredictionMash1
 {
     /// <summary>
     /// SPrediction Geometry class

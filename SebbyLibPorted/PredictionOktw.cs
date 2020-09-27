@@ -124,7 +124,7 @@ namespace SebbyLibPorted.Prediction
 
         internal float RealRadius
         {
-            get { return UseBoundingRadius ? Radius + Unit.BoundingRadius   : Radius; }
+            get { return UseBoundingRadius ? Radius + Unit.BoundingRadius : Radius; }
         }
     }
 
@@ -249,7 +249,7 @@ namespace SebbyLibPorted.Prediction
         {
             return GetPrediction(input, true, true);
         }
-       
+
         internal static PredictionOutput GetPrediction(PredictionInput input, bool ft, bool checkCollision)
         {
             PredictionOutput result = null;
@@ -437,7 +437,7 @@ namespace SebbyLibPorted.Prediction
             if (distanceFromToWaypoint <= distanceFromToUnit && distanceFromToUnit > input.Range - fixRange)
             {
                 result.Hitchance = HitChance.Medium;
-                return result; 
+                return result;
             }
 
             if (distanceUnitToWaypoint > 0)
@@ -491,7 +491,7 @@ namespace SebbyLibPorted.Prediction
 
             if (input.Unit.GetWaypoints().Count == 1)
             {
-                if(UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d && totalDelay < 0.7 )
+                if (UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d && totalDelay < 0.7)
                 {
                     OktwCommon.debug("PRED: AA try");
                     result.Hitchance = HitChance.VeryHigh;
@@ -512,7 +512,7 @@ namespace SebbyLibPorted.Prediction
                 {
                     OktwCommon.debug("PRED: STOP LOGIC");
                     result.Hitchance = HitChance.VeryHigh;
-                        return result;
+                    return result;
                 }
             }
 
@@ -545,7 +545,7 @@ namespace SebbyLibPorted.Prediction
                 return result;
             }
 
-            
+
 
             // LONG CLICK DETECTION ///////////////////////////////////////////////////////////////////////////////////
 
@@ -576,7 +576,7 @@ namespace SebbyLibPorted.Prediction
                     return result;
                 }
             }
-           
+
             //Program.debug("PRED: NO DETECTION");
             return result;
         }
@@ -1131,7 +1131,7 @@ namespace SebbyLibPorted.Prediction
                                     /*if (MinionIsDead(input, minion, distanceFromToUnit))
                                         continue;
                                     else*/
-                                        return true;
+                                    return true;
                                 }
 
                                 if (minion.Position.Distance(position) < minion.BoundingRadius)
@@ -1139,7 +1139,7 @@ namespace SebbyLibPorted.Prediction
                                     /*if (MinionIsDead(input, minion, distanceFromToUnit))
                                         continue;
                                     else*/
-                                        return true;
+                                    return true;
                                 }
 
                                 var minionPos = minion.Position;
@@ -1307,13 +1307,13 @@ namespace SebbyLibPorted.Prediction
                     UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).AaTick = Variables.TickCount;
                 else
                 {
-                    
+
                     var foundSpell = spells.Find(x => args.SData.Name.ToLower() == x.name.ToLower());
                     if (foundSpell != null)
                     {
                         UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).SpecialSpellFinishTick = Variables.TickCount + (int)(foundSpell.duration * 1000);
                     }
-                    else if(sender.IsWindingUp || !sender.CanMove)
+                    else if (sender.IsWindingUp || !sender.CanMove)
                     {
                         UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).SpecialSpellFinishTick = Variables.TickCount + 100;
                     }

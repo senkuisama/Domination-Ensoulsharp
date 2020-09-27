@@ -19,7 +19,7 @@
 using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.MenuUI.Values;
 
-namespace SPredictionMash1
+namespace SPredictionMash
 {
     /// <summary>
     /// SPrediction Config Menu class

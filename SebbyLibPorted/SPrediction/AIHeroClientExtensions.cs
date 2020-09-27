@@ -21,7 +21,7 @@ using System.Runtime.CompilerServices;
 
 using EnsoulSharp;
 
-namespace SPredictionMash1
+namespace SPredictionMash
 {
     /// <summary>
     /// AIHeroClient extensions for SPrediction

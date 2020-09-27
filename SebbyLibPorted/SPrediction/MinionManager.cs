@@ -6,7 +6,7 @@ using EnsoulSharp.SDK;
 
 using SharpDX;
 
-namespace SPredictionMash1
+namespace SPredictionMash
 {
     public class MinionManager
     {

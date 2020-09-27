@@ -23,7 +23,7 @@ using EnsoulSharp.SDK;
 
 using SharpDX;
 
-namespace SPredictionMash1
+namespace SPredictionMash
 {
     /// <summary>
     /// SPrediction Drawings class

@@ -1831,11 +1831,46 @@ namespace DominationAIO.Champions.Aphelios
             Game.Print("<font color='#1dff00' size='25'>Aphelios The MachineGun loaded</font>");
             MAphelios.AddApheliosMenu();
             MAphelios.Attach();
+
+            Game.OnUpdate += Game_OnUpdate;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             Game.OnUpdate += CheckQReady;
             Game.OnUpdate += CheckRGun;
             Game.OnUpdate += CheckQGUn;
             Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            if (Player.IsDead)
+                return;
+
+            if (!R.IsReady() || !MenuSettings.Combo.RCombo.Enabled)
+                return;
+
+            var Rspell = new Spell(SpellSlot.Unknown, 1300);
+            Rspell.SetSkillshot(0.6f, 250f, 2000f, false, SkillshotType.Circle);
+            var target = FSTargetSelector.GetFSTarget(1300);
+            if(target != null)
+            {
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Rspell, target);
+                if(pred != null)
+                {
+                    if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    {
+                        if(pred.AoeTargetsHitCount > 1)
+                        {
+                            if (R.Cast(pred.CastPosition))
+                                return;
+                        }
+                        if(target.HealthPercent <= 50)
+                        {
+                            if (R.Cast(pred.CastPosition))
+                                return;
+                        }
+                    }
+                }
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)

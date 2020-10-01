@@ -23,6 +23,7 @@ namespace DominationAIO.Champions
         public static class WSettings
         {
             public static MenuBool WBlock = new MenuBool("WBlock", "W Block Attack");
+            public static MenuBool WonlyBlockIncombo = new MenuBool("WonlyBlockIncombo", "Block AA in Combo only");
             public static MenuBool WCantAA = new MenuBool("WCantAA", "W if cant AA");
             public static MenuSlider EnemyCount = new MenuSlider("Enemy Count", "Targets Count >= ", 1, 1, 5);
         }
@@ -67,6 +68,7 @@ namespace DominationAIO.Champions
             QSamira.Add(QSettings.QManaCheck);
             var WSamira = new Menu("W Samira Settings", "W Settings");
             WSamira.Add(WSettings.WBlock);
+            WSamira.Add(WSettings.WonlyBlockIncombo);
             WSamira.Add(WSettings.WCantAA);
             WSamira.Add(WSettings.EnemyCount);
             var ESamira = new Menu("E Samira Settings", "E Settings");
@@ -686,7 +688,7 @@ namespace DominationAIO.Champions
                     {
                         if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
                         {
-                            if (SamiraSetMenu.WSettings.WBlock.Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Combo && !BeforeAA && !OnAA)
+                            if (SamiraSetMenu.WSettings.WBlock.Enabled && (Orbwalker.ActiveMode == OrbwalkerMode.Combo || !SamiraSetMenu.WSettings.WonlyBlockIncombo) && !BeforeAA && !OnAA)
                             {
                                 if (W.Cast())
                                 {

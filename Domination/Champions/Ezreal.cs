@@ -233,22 +233,52 @@ namespace DominationAIO.Champions
         }
         private static void EzCombo()
         {
-            EzWCombo(); 
+            if (Player.IsDashing())
+                return;
 
-            if(!Player.IsDashing())
+            if (OnAA || BeforeAA)
+                return;
+
+            var targetss = ObjectManager.Get<AIHeroClient>().Where(i => i != null
+            && !i.IsDead
+            && !i.IsAlly
+            && SebbyLibPorted.Prediction.Prediction.GetPrediction(W, i) != null
+            && SebbyLibPorted.Prediction.Prediction.GetPrediction(W, i).CastPosition.IsValid()
+            && SebbyLibPorted.Prediction.Prediction.GetPrediction(W, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).ToList();
+            if (W.IsReady() && targetss != null && targetss.Any() && targetss.Count() >= 1)
+            {
+                foreach(var target in targetss)
+                {
+                    if(target != null)
+                    {
+                        var Qpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                        if(Q.IsReady() && Qpred != null && Qpred.CastPosition.IsValid() && Qpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            EzQCombo();
+                        }
+                        else
+                        {
+                            EzWCombo();
+                        }
+                    }
+                }
+            }
+            else
+            {
                 EzQCombo();
 
-            if (EEzSettings.Ecombo.Enabled && E.IsReady())
-                EzECombo();
+                if (EEzSettings.Ecombo.Enabled && E.IsReady())
+                    EzECombo();
+            }                                 
         }
 
         private static void EzQCombo()
         {
-            var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
+            var target = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsAlly && i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
             if (target == null)
                 return;
            
-            if (((!OnAA && !BeforeAA) || QEzSettings.QinAA.Enabled) && QEzSettings.Qcombo.Enabled)
+            if (QEzSettings.Qcombo.Enabled)
             {
                 if (Q.IsReady())
                 {
@@ -266,7 +296,7 @@ namespace DominationAIO.Champions
                             }
                         }
                     }
-                    else
+                    if(!W.IsReady() || !WEzSettings.Wcombo.Enabled || SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target).Hitchance < SebbyLibPorted.Prediction.HitChance.Medium)
                     {
                         if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
                         {
@@ -314,7 +344,7 @@ namespace DominationAIO.Champions
 
             if (WEzSettings.Wonly.Enabled)
             {
-                if(target.InAutoAttackRange())
+                if(target.DistanceToPlayer() < Player.GetRealAutoAttackRange() - 60)
                 {
                     if(Environment.TickCount - LastAfterAA >= (Player.AttackDelay - target.DistanceToPlayer() / W.Speed) * 1000 - W.Delay * 100 || Orbwalker.CanAttack())
                     {

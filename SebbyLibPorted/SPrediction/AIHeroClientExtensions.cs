@@ -1,6 +1,6 @@
 ﻿/*
  Copyright 2015 - 2015 SPrediction
- Obj_AI_HeroExtensions.cs is part of SPrediction
+ AIHeroClientExtensions.cs is part of SPrediction
  
  SPrediction is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

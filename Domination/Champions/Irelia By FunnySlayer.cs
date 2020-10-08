@@ -187,7 +187,7 @@ namespace Template
             if (!Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
                 return;
 
-            var targets = TargetSelector.GetTargets(3000);
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i!= null && !i.IsDead && !i.IsAlly && i.IsValidTarget(3000));
             if (targets == null)
                 return;
 
@@ -555,7 +555,7 @@ namespace Template
             if (Orbwalker.ActiveMode != OrbwalkerMode.LaneClear && Orbwalker.ActiveMode != OrbwalkerMode.LastHit && !MenuSettings.KeysSettings.AutoClearMinions.Active)
                 return;
 
-            var minions = GameObjects.EnemyMinions.Where(i => i.IsValidTarget(600)).OrderBy(i => i.Health);
+            var minions = ObjectManager.Get<AIMinionClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(600)).OrderBy(i => i.Health);
 
             if (minions == null)
                 return;
@@ -778,7 +778,7 @@ namespace Template
         }
         public static void QGapCloserPos(Vector3 pos)
         {
-            var obj = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range)
+            var obj = ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(Q.Range)
             && !i.IsDead
             && !i.IsAlly
             && CanQ(i)
@@ -1131,14 +1131,13 @@ namespace Template
 
         public static float Sheen()
         {
-            if (Environment.TickCount - 1700 < SheenTimer)
-                return 0f;
-
-            if (GameObjects.Player.CanUseItem((int)ItemId.Trinity_Force))
+            if (GameObjects.Player.CanUseItem((int)ItemId.Trinity_Force) 
+                && ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force))
             {
                 return GameObjects.Player.BaseAttackDamage * 2;
             }
-            if (GameObjects.Player.CanUseItem((int)ItemId.Sheen))
+            if (GameObjects.Player.CanUseItem((int)ItemId.Sheen) 
+                && ObjectManager.Player.CanUseItem((int)ItemId.Sheen))
             {
                 return GameObjects.Player.BaseAttackDamage;
             }
@@ -1148,7 +1147,29 @@ namespace Template
 
         public static float GetQDmg(AIBaseClient target, bool CheckItem = true)
         {
-            var Qdmg = QBaseDamage[Q.Level];
+            if (target == null)
+                return 0f;
+
+            int level = Q.Level;
+            if (level == 0)
+            {
+                return 0f;
+            }
+            var normaldmg = 5f + (level - 1) * 20f + ObjectManager.Player.TotalAttackDamage * 0.6f;
+            if (target.IsMinion)
+            {
+                normaldmg += 55f + (float)(level - 1) * 20f;
+            }
+            var passivedmg = 0f;
+            if (objPlayer.HasBuff("ireliapassivestacksmax"))
+            {
+                passivedmg = 15f + (ObjectManager.Player.Level - 1) * 3f + ObjectManager.Player.GetBonusPhysicalDamage() * 0.25f;
+                passivedmg = (float)EnsoulSharp.SDK.Damage.CalculateMagicDamage(ObjectManager.Player, target, (double)passivedmg);
+            }
+            normaldmg += Sheen();
+
+            return (float)EnsoulSharp.SDK.Damage.CalculatePhysicalDamage(ObjectManager.Player, target, normaldmg) + passivedmg;
+            /*var Qdmg = QBaseDamage[Q.Level];
             var Qdmgbonus = QBonusDamage[Q.Level];
 
             //Normal Dmg
@@ -1171,7 +1192,7 @@ namespace Template
             else
             {
                 return (float)objPlayer.CalculatePhysicalDamage(target, Qdmg);
-            }
+            }*/
             
             /*if (objPlayer.HasBuff("ireliapassivestacksmax"))
             {
@@ -1255,9 +1276,9 @@ namespace Template
         public static List<AIBaseClient> Q_ListAIBaseClient(float minvalue = 0, float maxvalue = 0, AIBaseClient target = null)
         {
             if (target == null)
-                return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i)).ToList();
+                return ObjectManager.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i)).ToList();
             else
-                return GameObjects.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i) && i.NetworkId != target.NetworkId).ToList();
+                return ObjectManager.Get<AIBaseClient>().Where(i => !i.IsDead && i.IsValidTarget(maxvalue) && (minvalue != 0 ? i.DistanceToPlayer() >= minvalue : i.IsValidTarget(maxvalue)) && !i.IsAlly && CanQ(i) && i.NetworkId != target.NetworkId).ToList();
         }
     }
 }

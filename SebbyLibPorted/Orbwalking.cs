@@ -18,7 +18,7 @@ namespace SebbyLibPorted
         public delegate void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target);
 
         public delegate void BeforeAttackEvenH(BeforeAttackEventArgs args);
- 
+
         public delegate void OnAttackEvenH(AttackableUnit unit, AttackableUnit target);
 
         public delegate void OnNonKillableMinionH(AttackableUnit minion);
@@ -27,7 +27,7 @@ namespace SebbyLibPorted
 
         public enum OrbwalkingMode
         {
-            LastHit,Mixed,LaneClear,Combo,Freeze,CustomMode,None
+            LastHit, Mixed, LaneClear, Combo, Freeze, CustomMode, None
         }
 
         private static readonly string[] AttackResets =
@@ -128,9 +128,9 @@ namespace SebbyLibPorted
         private static void AIBaseClient_OnDelete(GameObject sender, EventArgs args)
         {
             var missile = sender as MissileClient;
-            if(DelayOnFire != 0 && missile != null && Player.AttackDelay > 1 / 2f)
+            if (DelayOnFire != 0 && missile != null && Player.AttackDelay > 1 / 2f)
             {
-                if(missile.SpellCaster.IsMe && EnsoulSharp.SDK.Orbwalker.IsAutoAttack(missile.SData.Name) &&  (DelayOnFireId == (int)missile.TargetID || DelayOnFireId == (int)missile.TargetNetID))
+                if (missile.SpellCaster.IsMe && EnsoulSharp.SDK.Orbwalker.IsAutoAttack(missile.SData.Name) && (DelayOnFireId == (int)missile.TargetID || DelayOnFireId == (int)missile.TargetNetID))
                 {
                     var x = Variables.TickCount - DelayOnFire;
 
@@ -261,11 +261,11 @@ namespace SebbyLibPorted
 
             var myRange = GetRealAutoAttackRange(target);
             var hero = target as AIHeroClient;
-            if(hero!= null)
+            if (hero != null)
             {
                 return
                 Vector2.DistanceSquared(
-                   Prediction.Prediction.GetPrediction(hero, 0).CastPosition.ToVector2(),  Player.Position.ToVector2()) <= myRange * myRange;
+                   Prediction.Prediction.GetPrediction(hero, 0).CastPosition.ToVector2(), Player.Position.ToVector2()) <= myRange * myRange;
             }
 
 
@@ -648,7 +648,7 @@ namespace SebbyLibPorted
 
                 var sebbyFix = new Menu("_Sebby FIX", "Sebby FIX");
 
-                sebbyFix.Add(new MenuSlider("_DamageAdjust", "Adjust last hit auto attack damage").SetValue(new Slider(0,-100, 100)));
+                sebbyFix.Add(new MenuSlider("_DamageAdjust", "Adjust last hit auto attack damage").SetValue(new Slider(0, -100, 100)));
                 sebbyFix.Add(new MenuBool("_PassiveDmg", "Last hit include passive damage", true).SetValue(true));
 
                 _config.Add(sebbyFix);
@@ -659,7 +659,7 @@ namespace SebbyLibPorted
                 _config.Add(
                     new MenuSlider("_ExtraWindup", "Extra windup time").SetValue(new Slider(80, 0, 200)));
                 _config.Add(new MenuSlider("_FarmDelay", "Farm delay").SetValue(new Slider(0, 0, 200)));
-                
+
                 /*Load the menu*/
                 _config.Add(
                     new MenuKeyBind("_LastHit", "Last hit", System.Windows.Forms.Keys.X, KeyBindType.Press));
@@ -684,7 +684,7 @@ namespace SebbyLibPorted
                 _config.Item("_Orbwalk").GetValue<MenuKeyBind>().ValueChanged +=
                     (sender, args) =>
                     {
-                        if(_config.Item("_Orbwalk").GetValue<MenuKeyBind>().Active == true)
+                        if (_config.Item("_Orbwalk").GetValue<MenuKeyBind>().Active == true)
                         {
                             EnsoulSharp.SDK.Orbwalker.ActiveMode = OrbwalkerMode.Combo;
                         }
@@ -712,7 +712,7 @@ namespace SebbyLibPorted
                                     }
                                 }
                             }
-                        }                        
+                        }
                     };
                 _config.Item("_Farm").GetValue<MenuKeyBind>().ValueChanged +=
                     (sender, args) =>
@@ -813,7 +813,7 @@ namespace SebbyLibPorted
                             }
                         }
                     };
-                
+
                 Player = ObjectManager.Player;
                 Game.OnUpdate += GameOnOnGameUpdate;
                 Game.OnUpdate += Game_OnUpdate;
@@ -976,10 +976,10 @@ namespace SebbyLibPorted
 
             public bool ShouldWait()
             {
-                var attackCalc = (int)(Player.AttackDelay * 1000 * 1.6) + Game.Ping / 2 + 1000 * 500 / (int)GetMyProjectileSpeed() ;
+                var attackCalc = (int)(Player.AttackDelay * 1000 * 1.6) + Game.Ping / 2 + 1000 * 500 / (int)GetMyProjectileSpeed();
                 return
-                    MinionListAA.Any( 
-                        minion =>HealthPrediction.LaneClearHealthPrediction(minion, attackCalc, FarmDelay) <= Player.GetAutoAttackDamage(minion));
+                    MinionListAA.Any(
+                        minion => HealthPrediction.LaneClearHealthPrediction(minion, attackCalc, FarmDelay) <= Player.GetAutoAttackDamage(minion));
             }
 
             private bool ShouldWaitUnderTurret(AIMinionClient noneKillableMinion)
@@ -987,9 +987,9 @@ namespace SebbyLibPorted
                 var attackCalc = (int)(Player.AttackDelay * 1000 + (Player.IsMelee ? Player.AttackCastDelay * 1000 : Player.AttackCastDelay * 1000 +
                                                1000 * (Player.AttackRange + 2 * Player.BoundingRadius) / Player.BasicAttack.MissileSpeed));
                 return
-                    MinionListAA.Any( minion =>
-                                (noneKillableMinion != null ? noneKillableMinion.NetworkId != minion.NetworkId : true) &&
-                                HealthPrediction.LaneClearHealthPrediction( minion, attackCalc , FarmDelay) <= Player.GetAutoAttackDamage(minion));
+                    MinionListAA.Any(minion =>
+                               (noneKillableMinion != null ? noneKillableMinion.NetworkId != minion.NetworkId : true) &&
+                               HealthPrediction.LaneClearHealthPrediction(minion, attackCalc, FarmDelay) <= Player.GetAutoAttackDamage(minion));
             }
 
             public virtual AttackableUnit GetTarget()
@@ -1012,7 +1012,7 @@ namespace SebbyLibPorted
                     }
                 }
 
-                if (_config.Item("_AttackBarrel").GetValue<MenuBool>()  &&( (mode == OrbwalkingMode.LaneClear || mode == OrbwalkingMode.Mixed || mode == OrbwalkingMode.LastHit || mode == OrbwalkingMode.Freeze)))
+                if (_config.Item("_AttackBarrel").GetValue<MenuBool>() && ((mode == OrbwalkingMode.LaneClear || mode == OrbwalkingMode.Mixed || mode == OrbwalkingMode.LastHit || mode == OrbwalkingMode.Freeze)))
                 {
                     var enemyGangPlank = GameObjects.EnemyHeroes.FirstOrDefault(e => e.CharacterName.Equals("gangplank", StringComparison.InvariantCultureIgnoreCase));
 
@@ -1027,7 +1027,7 @@ namespace SebbyLibPorted
 
                             var t = (int)(Player.AttackCastDelay * 1000) + Game.Ping / 2 + 1000 * (int)Math.Max(0, Player.Distance(barrel) - Player.BoundingRadius) / (int)GetMyProjectileSpeed();
 
-                            var barrelBuff = barrel.Buffs.FirstOrDefault(b => b.Name.Equals( "gangplankebarrelactive", StringComparison.InvariantCultureIgnoreCase));
+                            var barrelBuff = barrel.Buffs.FirstOrDefault(b => b.Name.Equals("gangplankebarrelactive", StringComparison.InvariantCultureIgnoreCase));
 
                             if (barrelBuff != null && barrel.Health <= 2f)
                             {
@@ -1041,7 +1041,7 @@ namespace SebbyLibPorted
 
                         if (barrels.Any())
                             return null;
-                        
+
                     }
                 }
 
@@ -1058,18 +1058,18 @@ namespace SebbyLibPorted
                             if (!ShouldAttackMinion(minion))
                                 continue;
 
-                            var t = (int)(Player.AttackCastDelay * 1000) + BrainFarmInt + Game.Ping / 2 + 1000 * (int)Math.Max(0, Player.Position.Distance(minion.Position)- Player.BoundingRadius) / (int)GetMyProjectileSpeed();
+                            var t = (int)(Player.AttackCastDelay * 1000) + BrainFarmInt + Game.Ping / 2 + 1000 * (int)Math.Max(0, Player.Position.Distance(minion.Position) - Player.BoundingRadius) / (int)GetMyProjectileSpeed();
 
                             if (mode == OrbwalkingMode.Freeze)
                             {
                                 t += 200 + Game.Ping / 2;
                             }
-                            
+
                             var predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay);
 
-                            
+
                             var damage = Player.CalculatePhysicalDamage(minion, _config.Item("_PassiveDmg", true).GetValue<MenuBool>()) + _config.Item("DamageAdjust").GetValue<MenuSlider>().Value;
-                            
+
 
                             var killable = predHealth <= damage;
 
@@ -1089,7 +1089,7 @@ namespace SebbyLibPorted
                                     DelayOnFireId = (int)minion.NetworkId;
                                 }
 
-                                if (predHealth <= 0 )
+                                if (predHealth <= 0)
                                 {
                                     if (HealthPrediction.GetHealthPrediction(minion, t - 50, FarmDelay) > 0)
                                     {
@@ -1143,7 +1143,7 @@ namespace SebbyLibPorted
                     var target = TargetSelector.GetTarget(-1, DamageType.Physical);
                     if (target.IsValidTarget() && target.InAutoAttackRange())
                     {
-                        if(!ObjectManager.Player.IsUnderEnemyTurret() || mode == OrbwalkingMode.Combo)
+                        if (!ObjectManager.Player.IsUnderEnemyTurret() || mode == OrbwalkingMode.Combo)
                             return target;
                     }
                 }
@@ -1169,7 +1169,7 @@ namespace SebbyLibPorted
                 {
                     var closestTower =
                         ObjectManager.Get<AITurretClient>().MinOrDefault(t => t.IsAlly &&
-                        (t.Name.Contains("L_03_A") || t.Name.Contains("L_02_A") || t.Name.Contains("C_04_A") || t.Name.Contains("C_05_A") || t.Name.Contains("R_02_A") || t.Name.Contains("R_03_A")) 
+                        (t.Name.Contains("L_03_A") || t.Name.Contains("L_02_A") || t.Name.Contains("C_04_A") || t.Name.Contains("C_05_A") || t.Name.Contains("R_02_A") || t.Name.Contains("R_03_A"))
                         && !t.IsDead ? Player.DistanceSquared(t) : float.MaxValue);
 
                     if (closestTower != null && Player.DistanceSquared(closestTower) < 1500 * 1500)
@@ -1177,7 +1177,7 @@ namespace SebbyLibPorted
                         AIMinionClient farmUnderTurretMinion = null;
                         AIMinionClient noneKillableMinion = null;
                         // return all the minions underturret in auto attack range
-                        var minions = MinionListAA.Where(minion => 
+                        var minions = MinionListAA.Where(minion =>
                             closestTower.DistanceSquared(minion) < 900 * 900)
                             .OrderByDescending(minion => minion.SkinName.Contains("Siege"))
                             .ThenBy(minion => minion.SkinName.Contains("Super"))
@@ -1427,7 +1427,7 @@ namespace SebbyLibPorted
                     }
                     MinionListAA = Cache.GetMinions(Player.Position, 0);
                     var target = GetTarget();
-                     
+
                     Orbwalk(
                         target, _orbwalkingPoint.ToVector2().IsValid() ? _orbwalkingPoint : Game.CursorPos,
                         _config.Item("_ExtraWindup").GetValue<MenuSlider>().Value,
@@ -1441,7 +1441,7 @@ namespace SebbyLibPorted
 
             private void DrawingOnOnDraw(EventArgs args)
             {
-                
+
             }
         }
     }

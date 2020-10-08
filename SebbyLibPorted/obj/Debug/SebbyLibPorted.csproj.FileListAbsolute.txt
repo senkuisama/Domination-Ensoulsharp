@@ -1,0 +1,13 @@
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\SebbyLibPorted.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\SebbyLibPorted.pdb
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\EnsoulSharp.Sandbox.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\EnsoulSharp.SDK.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\EnsoulSharp.Wrapper.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\SharpDX.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\Newtonsoft.Json.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\obj\Debug\SebbyLibPorted.csprojAssemblyReference.cache
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\obj\Debug\SebbyLibPorted.csproj.CoreCompileInputs.cache
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\obj\Debug\SebbyLibPorted.csproj.CopyComplete
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\obj\Debug\SebbyLibPorted.dll
+C:\Users\FunnySlayer\Desktop\Domination-Ensoulsharp-master\Domination-Ensoulsharp-master\SebbyLib - Copy\SebbyLibPorted\obj\Debug\SebbyLibPorted.pdb

@@ -18,7 +18,7 @@ namespace DominationAIO.Champions
         {
             public static MenuBool useq = new MenuBool("useq", "Use Combo Q");
             public static MenuBool useqafteraa = new MenuBool("useqafteraa", "--- Only if after aa", false);
-            public static MenuSlider useqminion = new MenuSlider("useqminion", "Max Minions to use Q", 3, 1, 5);
+            public static MenuSlider useqminion = new MenuSlider("useqminion", "Max Minions to use Q", 3, 1, 20);
 
             public static MenuBool usew = new MenuBool("usew", "Use Combo W");
             public static MenuBool usewout = new MenuBool("usewout", "--- Only if target is out of aa range");
@@ -72,7 +72,7 @@ namespace DominationAIO.Champions
                 E = new Spell(SpellSlot.E);
                 R = new Spell(SpellSlot.R, 1500);
                 Q.SetTargetted(0.25f, 1800);
-                W.SetSkillshot(0.4f, 100, 1750, true, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+                W.SetSkillshot(0.4f, 100, 1750, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             }
         }
         public class setmenu

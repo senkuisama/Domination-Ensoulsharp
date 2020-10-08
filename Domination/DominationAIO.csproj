@@ -99,7 +99,7 @@
       <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLibPorted">
-      <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\SebbyLibPorted.dll</HintPath>
+      <HintPath>..\SebbyLib - Copy\SebbyLibPorted\bin\Release\SebbyLibPorted.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\SharpDX.dll</HintPath>
@@ -168,6 +168,7 @@
     <Compile Include="Champions\PRADAVayneReborn\Program.cs" />
     <Compile Include="Champions\Riven By FunnySlayer.cs" />
     <Compile Include="Champions\Aphelios By FunnySlayer.cs" />
+    <Compile Include="Champions\URF_Lucian.cs" />
     <Compile Include="Champions\Yasuo Credit Brian.cs" />
     <Compile Include="Champions\Zoe.cs" />
     <Compile Include="Common\Logichelper.cs" />

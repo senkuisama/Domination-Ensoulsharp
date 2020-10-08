@@ -187,7 +187,7 @@ namespace Template
             if (!Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
                 return;
 
-            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i!= null && !i.IsDead && !i.IsAlly && i.IsValidTarget(3000));
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i!= null && !i.IsDead && !i.IsAlly && i.IsValidTarget(3000)).OrderBy(i => i.Distance(ObjectManager.Player));
             if (targets == null)
                 return;
 
@@ -1131,6 +1131,9 @@ namespace Template
 
         public static float Sheen()
         {
+            if (Variables.TickCount < SheenTimer + 1600)
+                return 0f;
+
             if (GameObjects.Player.CanUseItem((int)ItemId.Trinity_Force) 
                 && ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force))
             {

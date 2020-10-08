@@ -239,20 +239,19 @@ namespace DominationAIO.Champions
             if (OnAA || BeforeAA)
                 return;
 
-            var targetss = ObjectManager.Get<AIHeroClient>().Where(i => i != null
+            var targetss = ObjectManager.Get<AIHeroClient>().Where(i => 
+            i != null
             && !i.IsDead
-            && !i.IsAlly
-            && SebbyLibPorted.Prediction.Prediction.GetPrediction(W, i) != null
-            && SebbyLibPorted.Prediction.Prediction.GetPrediction(W, i).CastPosition.IsValid()
-            && SebbyLibPorted.Prediction.Prediction.GetPrediction(W, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).ToList();
-            if (W.IsReady() && targetss != null && targetss.Any() && targetss.Count() >= 1)
+            && !i.IsAlly            
+            && SebbyLibPorted.Prediction.Prediction.GetPrediction(W, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health);
+            if (W.IsReady() && targetss != null && targetss.Any())
             {
                 foreach(var target in targetss)
                 {
                     if(target != null)
                     {
                         var Qpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                        if(Q.IsReady() && Qpred != null && Qpred.CastPosition.IsValid() && Qpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        if(Q.IsReady() && Qpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                         {
                             EzQCombo();
                         }

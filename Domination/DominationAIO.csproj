@@ -99,7 +99,7 @@
       <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLibPorted">
-      <HintPath>..\SebbyLib - Copy\SebbyLibPorted\bin\Release\SebbyLibPorted.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\SebbyLibPorted.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Users\FunnySlayer\Downloads\EnsoulSharp\System\SharpDX.dll</HintPath>

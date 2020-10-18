@@ -43,11 +43,11 @@ namespace DominationAIO.Champions.Aphelios
         }
         public static class RGun
         {
-            public static MenuSlider Calibrum = new MenuSlider("RGun Calibrum", "Calibrum", 1, 0, 5);
-            public static MenuSlider Severum = new MenuSlider("RGun Severum", "Severum", 5, 0, 5);
+            public static MenuSlider Calibrum = new MenuSlider("RGun Calibrum", "Calibrum", 3, 0, 5);
+            public static MenuSlider Severum = new MenuSlider("RGun Severum", "Severum", 1, 0, 5);
             public static MenuSlider Gravitum = new MenuSlider("RGun Gravitum", "Gravitum", 4, 0, 5);
-            public static MenuSlider Infernum = new MenuSlider("RGun Infernum", "Infernum", 2, 0, 5);
-            public static MenuSlider Crescendum = new MenuSlider("RGun Crescendum", "Crescendum", 3, 0, 5);
+            public static MenuSlider Infernum = new MenuSlider("RGun Infernum", "Infernum", 5, 0, 5);
+            public static MenuSlider Crescendum = new MenuSlider("RGun Crescendum", "Crescendum", 2, 0, 5);
         }
         public static class SelectedGun
         {
@@ -63,6 +63,38 @@ namespace DominationAIO.Champions.Aphelios
             public static MenuBool QCombo = new MenuBool("Q.Combo", "Q.Combo");
             public static MenuBool WCombo = new MenuBool("W.Combo", "W.Combo");
             public static MenuBool RCombo = new MenuBool("R.Combo", "R.Combo");
+        }
+        public static class RSet
+        {
+            public static MenuSeparator R1 = new MenuSeparator("RSet 1", "Calibrum R Settings");
+            public static MenuSeparator R2 = new MenuSeparator("RSet 2", "Severum R Settings");
+            public static MenuSeparator R3 = new MenuSeparator("RSet 3", "Gravitum R Settings");
+            public static MenuSeparator R4 = new MenuSeparator("RSet 4", "Infernum R Settings");
+            public static MenuSeparator R5 = new MenuSeparator("RSet 5", "Crescendum R Settings");
+
+            public static MenuBool useR1 = new MenuBool("Use R1", "Use");
+            public static MenuBool useR2 = new MenuBool("Use R2", "Use");
+            public static MenuBool useR3 = new MenuBool("Use R3", "Use");
+            public static MenuBool useR4 = new MenuBool("Use R4", "Use");
+            public static MenuBool useR5 = new MenuBool("Use R5", "Use");
+
+            //R1
+            public static MenuBool onlyOutAA = new MenuBool("R1Set_onlyOutAA", "Only Out AA Range");
+            public static MenuBool CanKill = new MenuBool("R1Set_CanKill", "Can Kill (R dmg + AA dmg)");
+
+            //R2
+            public static MenuBool InAARange = new MenuBool("R2Set_InAARange", "Only When Target in AA");
+            public static MenuSlider PlayerHeath = new MenuSlider("R2Set_PlayerHeath", "When Player Heath <= %", 30, 0, 100);
+
+            //R3
+            public static MenuSlider R3Hit = new MenuSlider("R3Set_R3Hit", "When Hit >= heroes", 3, 1, 5);
+            public static MenuBool InteruptIfCan = new MenuBool("R3Set_Interupt", "Interupt If Can");
+
+            //R4
+            public static MenuBool DmgCalculatorLogic = new MenuBool("R4Set_Dmg", "Calculator Dmg");
+
+            //R5
+            public static MenuBool WhenTooClose = new MenuBool("When Too Close", "Target Very close or target in gapcloser");
         }
 
         public static void AddApheliosMenu(this Menu menu)
@@ -132,8 +164,37 @@ namespace DominationAIO.Champions.Aphelios
             menu.Add(Combo.QCombo);
             menu.Add(Combo.WCombo);
             menu.Add(Combo.RCombo);
+
+            var RHelp = new Menu("RHelp...", "R Helper");
+            RHelp.Add(secsec);
+            RHelp.Add(RSet.R1);
+            RHelp.Add(RSet.useR1);
+            RHelp.Add(RSet.onlyOutAA);
+            RHelp.Add(RSet.CanKill);
+
+            RHelp.Add(RSet.R2);
+            RHelp.Add(RSet.useR2);
+            RHelp.Add(RSet.InAARange);
+            RHelp.Add(RSet.PlayerHeath);
+
+            RHelp.Add(RSet.R3);
+            RHelp.Add(RSet.useR3);
+            RHelp.Add(RSet.R3Hit);
+            RHelp.Add(RSet.InteruptIfCan);
+
+            RHelp.Add(RSet.R4);
+            RHelp.Add(RSet.useR4);
+            RHelp.Add(RSet.DmgCalculatorLogic);
+
+            RHelp.Add(RSet.R5);
+            RHelp.Add(RSet.useR5);
+            RHelp.Add(RSet.WhenTooClose);
+            RHelp.Add(secsec1);
+
+            menu.Add(RHelp);
             menu.Add(secsec1);
 
+            Game.OnUpdate += R;
             Game.OnUpdate += WQ;
             Game.OnUpdate += WOutAARange;
             Game.OnUpdate += WLowHp;
@@ -142,6 +203,712 @@ namespace DominationAIO.Champions.Aphelios
             Orbwalker.OnAction += Orbwalker_OnAction;
             Game.OnUpdate += GetChecker;
             Game.OnUpdate += QCombo;
+        }
+
+        private static void R(EventArgs args)
+        {
+            if (ObjectManager.Player.IsDead)
+            {
+                return;
+            }
+
+            if (!Combo.RCombo.Enabled)
+            {
+                return;
+            }
+
+            if (OnAA || BeforeAA)
+            {
+                return;
+            }
+
+            if (Orbwalker.ActiveMode != OrbwalkerMode.Combo)
+            {
+                //Console.WriteLine("Not Combo");
+                return;
+            }
+
+            if (!loaded.R.IsReady())
+            {
+                return;
+            }
+
+            var tempspell = new Spell(SpellSlot.Unknown, 1300);
+            tempspell.SetSkillshot(0.6f, 150, 2000f, false, SkillshotType.Circle);
+                               
+            var target = FSTargetSelector.GetFSTarget(1300);
+            if (target == null)
+            {
+                //Console.WriteLine("Null target");
+                return;
+            }
+
+            {
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target, true);
+                Game.Print(pred.AoeTargetsHitCount);
+            }
+
+            if (target.Health < loaded.R.GetDamage(target))
+            {
+                if (loaded.R4Ready)
+                {
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    {
+                        if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                        {
+                            if (loaded.R.Cast(pred.CastPosition))
+                                return;
+                        }
+                        else
+                        {
+                            if (loaded.W.Cast())
+                                if (loaded.R.Cast(pred.CastPosition))
+                                    return;
+                        }
+                    }
+                }
+                else
+                {
+                    if (loaded.R5Ready)
+                    {
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (loaded.R.Cast(pred.CastPosition))
+                                    return;
+                            }
+                            else
+                            {
+                                if (loaded.W.Cast())
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (loaded.R1Ready)
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            {
+                                if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                                {
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                                }
+                                else
+                                {
+                                    if (loaded.W.Cast())
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (loaded.R3Ready)
+                            {
+                                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                {
+                                    if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                                    {
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                    }
+                                    else
+                                    {
+                                        if (loaded.W.Cast())
+                                            if (loaded.R.Cast(pred.CastPosition))
+                                                return;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (loaded.R2Ready)
+                                {
+                                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                    {
+                                        if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                                        {
+                                            if (loaded.R.Cast(pred.CastPosition))
+                                                return;
+                                        }
+                                        else
+                                        {
+                                            if (loaded.W.Cast())
+                                                if (loaded.R.Cast(pred.CastPosition))
+                                                    return;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                    {
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            var realrange = ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange();
+
+            {
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                {
+                    if(pred.AoeTargetsHitCount >= 3 || pred.CastPosition.CountEnemyHeroesInRange(350) >= 3)
+                    {
+                        if (loaded.R4Ready)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                            {
+                                if (loaded.R.Cast(pred.CastPosition))
+                                    return;
+                            }
+                            else
+                            {
+                                if (loaded.W.Cast())
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                            }
+                        }
+                        else
+                        {
+                            if (loaded.R3Ready)
+                            {
+                                if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                                {
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                                }
+                                else
+                                {
+                                    if (loaded.W.Cast())
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                }
+                            }
+                            else
+                            {
+                                if (loaded.R5Ready)
+                                {
+                                    if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                                    {
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                    }
+                                    else
+                                    {
+                                        if (loaded.W.Cast())
+                                            if (loaded.R.Cast(pred.CastPosition))
+                                                return;
+                                    }
+                                }
+                                else
+                                {
+                                    if (loaded.R1Ready)
+                                    {
+                                        if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                                        {
+                                            if (loaded.R.Cast(pred.CastPosition))
+                                                return;
+                                        }
+                                        else
+                                        {
+                                            if (loaded.W.Cast())
+                                                if (loaded.R.Cast(pred.CastPosition))
+                                                    return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            #region Test
+            if (loaded.R1Ready)
+            {
+
+            }
+            else
+            {
+                if (loaded.R2Ready)
+                {
+
+                }
+                else
+                {
+                    if (loaded.R3Ready)
+                    {
+
+                    }
+                    else
+                    {
+                        if (loaded.R4Ready)
+                        {
+
+                        }
+                        else
+                        {
+                            if (loaded.R5Ready)
+                            {
+
+                            }
+                            else
+                            {
+                                //return;
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            if (loaded.R1Ready && RSet.useR1.Enabled && RSet.CanKill.Enabled)
+            {               
+                if(target.Distance(ObjectManager.Player) >= realrange)
+                {
+                    var dmg = loaded.R.GetDamage(target);
+                    if(dmg > 0)
+                    {
+                        if(target.Health <= dmg + ObjectManager.Player.GetAutoAttackDamage(target))
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            {
+                                if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
+                                {
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                                }
+                                else
+                                {
+                                    if (loaded.W.Cast())
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (loaded.R1Ready)
+                {
+                    //No needed
+                }
+                if (loaded.R2Ready)
+                {
+                    //Always off
+                }
+                if (loaded.R3Ready)
+                {
+                    //Some time
+                }
+                if (loaded.R4Ready)
+                {
+                    //Usally cast
+                }
+                if (loaded.R5Ready)
+                {
+                    //Logic
+                }
+            }
+
+            if(loaded.R2Ready && loaded.R3Ready)
+            {
+                if(target.Health <= 40)
+                {
+                    if (RSet.useR3.Enabled)
+                    {
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
+                            {
+                                if (loaded.R.Cast(pred.CastPosition))
+                                    return;
+                            }
+                            else
+                            {
+                                if (loaded.W.Cast())
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
+                            {
+                                if (loaded.R.Cast(pred.CastPosition))
+                                    return;
+                            }
+                            else
+                            {
+                                if (loaded.W.Cast())
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                            }
+                        }
+                    }                    
+                }
+            }
+
+            if (loaded.R2Ready)
+            {
+                if (loaded.R1Ready)
+                {
+
+                }
+                if (loaded.R2Ready)
+                {
+
+                }
+                if (loaded.R3Ready)
+                {
+
+                }
+                if (loaded.R4Ready)
+                {
+
+                }
+                if (loaded.R5Ready)
+                {
+
+                }
+            }
+
+            if (loaded.R3Ready)
+            {
+                if (loaded.R1Ready)
+                {
+
+                }
+                if (loaded.R2Ready)
+                {
+
+                }
+                if (loaded.R3Ready)
+                {
+
+                }
+                if (loaded.R4Ready)
+                {
+
+                }
+                if (loaded.R5Ready)
+                {
+
+                }
+            }
+
+            if (loaded.R4Ready && RSet.useR4.Enabled)
+            {
+                var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(1300)
+                && SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+
+                if(targets != null)
+                {
+                    foreach(var t in targets.OrderBy(i => i.Health))
+                    {
+                        if(t != null)
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, t, true);
+                            Game.Print(pred.AoeTargetsHitCount);
+                            if (pred.AoeTargetsHitCount >= 1)
+                            {
+                                if (pred.AoeTargetsHit != null)
+                                {
+                                    foreach (var t2 in pred.AoeTargetsHit.OrderBy(i => i.Health))
+                                    {
+                                        if (t2 != null)
+                                        {
+                                            if (t2.Health < ObjectManager.Player.GetAutoAttackDamage(t2) * pred.AoeTargetsHitCount + EnsoulSharp.SDK.Damage.GetSpellDamage(ObjectManager.Player, t2, SpellSlot.R))
+                                            {
+                                                if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                                                {
+                                                    if (loaded.R.Cast(pred.CastPosition))
+                                                        return;
+                                                }
+                                                else
+                                                {
+                                                    if (loaded.W.Cast())
+                                                        if (loaded.R.Cast(pred.CastPosition))
+                                                            return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (pred.AoeTargetsHitCount >= 3)
+                            {
+                                if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
+                                {
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                                }
+                                else
+                                {
+                                    if (loaded.W.Cast())
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (loaded.R1Ready)
+                {
+
+                }
+                if (loaded.R2Ready)
+                {
+
+                }
+                if (loaded.R3Ready)
+                {
+
+                }
+                if (loaded.R4Ready)
+                {
+
+                }
+                if (loaded.R5Ready)
+                {
+
+                }
+            }
+
+            if (loaded.R5Ready && RSet.useR5.Enabled)
+            {
+                if (RSet.WhenTooClose.Enabled && ObjectManager.Player.CountEnemyHeroesInRange(realrange) > 2)
+                {
+                    if (loaded.R1Ready)
+                    {
+                        if(target.Health < EnsoulSharp.SDK.Damage.GetSpellDamage(ObjectManager.Player, target, SpellSlot.R) + ObjectManager.Player.GetAutoAttackDamage(target) && !target.InAutoAttackRange())
+                        {
+
+                        }
+                        else
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                            if(pred != null && pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            {
+                                if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                                {
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                                }
+                                else
+                                {
+                                    if(loaded.W.Cast())
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                }                               
+                            }
+                            else
+                            {
+                                var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(1300)
+                                && SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+                                if(targets != null && targets.Any())
+                                {
+                                    foreach(var t in targets.OrderBy(i => i.Health))
+                                    {
+                                        if(t != null)
+                                        {
+                                            if(SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, t).Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                            {
+                                                if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                                                {
+                                                    if (loaded.R.Cast(pred.CastPosition))
+                                                        return;
+                                                }
+                                                else
+                                                {
+                                                    if (loaded.W.Cast())
+                                                        if (loaded.R.Cast(pred.CastPosition))
+                                                            return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (loaded.R2Ready)
+                    {
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred != null && pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (loaded.R.Cast(pred.CastPosition))
+                                    return;
+                            }
+                            else
+                            {
+                                if (loaded.W.Cast())
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                            }
+                        }
+                        else
+                        {
+                            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(1300)
+                            && SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+                            if (targets != null && targets.Any())
+                            {
+                                foreach (var t in targets.OrderBy(i => i.Health))
+                                {
+                                    if (t != null)
+                                    {
+                                        if (SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, t).Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                        {
+                                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                                            {
+                                                if (loaded.R.Cast(pred.CastPosition))
+                                                    return;
+                                            }
+                                            else
+                                            {
+                                                if (loaded.W.Cast())
+                                                    if (loaded.R.Cast(pred.CastPosition))
+                                                        return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (loaded.R3Ready)
+                    {
+                        if (target.IsValidTarget(realrange))
+                        {
+
+                        }
+                        else
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                            if (pred != null && pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            {
+                                if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                                {
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                                }
+                                else
+                                {
+                                    if (loaded.W.Cast())
+                                        if (loaded.R.Cast(pred.CastPosition))
+                                            return;
+                                }
+                            }
+                            else
+                            {
+                                var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(1300)
+                                && SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+                                if (targets != null && targets.Any())
+                                {
+                                    foreach (var t in targets.OrderBy(i => i.Health))
+                                    {
+                                        if (t != null)
+                                        {
+                                            if (SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, t).Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                            {
+                                                if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                                                {
+                                                    if (loaded.R.Cast(pred.CastPosition))
+                                                        return;
+                                                }
+                                                else
+                                                {
+                                                    if (loaded.W.Cast())
+                                                        if (loaded.R.Cast(pred.CastPosition))
+                                                            return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (loaded.R4Ready)
+                    {
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred != null && pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                            {
+                                if (loaded.R.Cast(pred.CastPosition))
+                                    return;
+                            }
+                            else
+                            {
+                                if (loaded.W.Cast())
+                                    if (loaded.R.Cast(pred.CastPosition))
+                                        return;
+                            }
+                        }
+                        else
+                        {
+                            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(1300)
+                            && SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+                            if (targets != null && targets.Any())
+                            {
+                                foreach (var t in targets.OrderBy(i => i.Health))
+                                {
+                                    if (t != null)
+                                    {
+                                        if (SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, t).Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                        {
+                                            if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
+                                            {
+                                                if (loaded.R.Cast(pred.CastPosition))
+                                                    return;
+                                            }
+                                            else
+                                            {
+                                                if (loaded.W.Cast())
+                                                    if (loaded.R.Cast(pred.CastPosition))
+                                                        return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (loaded.R5Ready)
+                    {
+
+                    }
+                }               
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -1832,7 +2599,7 @@ namespace DominationAIO.Champions.Aphelios
             MAphelios.AddApheliosMenu();
             MAphelios.Attach();
 
-            Game.OnUpdate += Game_OnUpdate;
+            //Game.OnUpdate += Game_OnUpdate;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             Game.OnUpdate += CheckQReady;
             Game.OnUpdate += CheckRGun;
@@ -1840,7 +2607,7 @@ namespace DominationAIO.Champions.Aphelios
             Drawing.OnDraw += Drawing_OnDraw;
         }
 
-        private static void Game_OnUpdate(EventArgs args)
+        /*private static void Game_OnUpdate(EventArgs args)
         {
             if (Player.IsDead)
                 return;
@@ -1871,24 +2638,29 @@ namespace DominationAIO.Champions.Aphelios
                     }
                 }
             }
-        }
+        }*/
 
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (Player.IsDead)
                 return;
-
+            if(Orbwalker.GetTarget() != null)
+            {
+                var targetpos = Drawing.WorldToScreen(Orbwalker.GetTarget().Position);
+                Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X + 15, targetpos.Y - 15), 5f, System.Drawing.Color.White);
+                Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X - 15, targetpos.Y - 15), 5f, System.Drawing.Color.White);
+            }
             if(DrawRange != float.MaxValue)
             {
                 Render.Circle.DrawCircle(Player.Position, DrawRange, System.Drawing.Color.Red, 5);
             }
             var mana = Player.Mana < 60;
             var pos = Drawing.WorldToScreen(Player.Position);
-            Drawing.DrawText(pos.X, pos.Y + 20, Q1Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Calibrum");
-            Drawing.DrawText(pos.X, pos.Y + 40, Q2Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Severum");
-            Drawing.DrawText(pos.X, pos.Y + 60, Q3Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Gravitum");
-            Drawing.DrawText(pos.X, pos.Y + 80, Q4Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Infernum");
-            Drawing.DrawText(pos.X, pos.Y + 100, Q5Ready ? System.Drawing.Color.Green : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Crescendum");
+            Drawing.DrawText(pos.X - 20, pos.Y + 20, Q1Ready ? (!R1Ready ? System.Drawing.Color.Green : System.Drawing.Color.Yellow) : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Calibrum");
+            Drawing.DrawText(pos.X - 20, pos.Y + 40, Q2Ready ? (!R2Ready ? System.Drawing.Color.Green : System.Drawing.Color.Yellow) : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Severum");
+            Drawing.DrawText(pos.X - 20, pos.Y + 60, Q3Ready ? (!R3Ready ? System.Drawing.Color.Green : System.Drawing.Color.Yellow) : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Gravitum");
+            Drawing.DrawText(pos.X - 20, pos.Y + 80, Q4Ready ? (!R4Ready ? System.Drawing.Color.Green : System.Drawing.Color.Yellow) : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Infernum");
+            Drawing.DrawText(pos.X - 20, pos.Y + 100, Q5Ready ? (!R5Ready ? System.Drawing.Color.Green : System.Drawing.Color.Yellow) : System.Drawing.Color.Red, mana ? "Mana Not Enough" : "Crescendum");
         }
         private static float DrawRange = float.MaxValue;
         private static void CheckQGUn(EventArgs args)

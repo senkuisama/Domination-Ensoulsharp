@@ -72,7 +72,7 @@ namespace DominationAIO.Champions
                 E = new Spell(SpellSlot.E);
                 R = new Spell(SpellSlot.R, 1500);
                 Q.SetTargetted(0.25f, 1800);
-                W.SetSkillshot(0.4f, 100, 1750, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+                W.SetSkillshot(0.4f, 120, 1750, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             }
         }
         public class setmenu
@@ -169,8 +169,8 @@ namespace DominationAIO.Champions
                     {
                         if (target.Health <= W.GetDamage(target))
                         {
-                            var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
-                            if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                            var wpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                            if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                             {
                                 if (!oa && !ba) W.Cast(wpred.CastPosition);
                             }
@@ -195,17 +195,18 @@ namespace DominationAIO.Champions
                         }
                         if (menuclass.combo.usew.Enabled && W.IsReady(0) && target.IsValidTarget(W.Range))
                         {
-                            var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
+                            var wpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                            //var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
                             if (menuclass.combo.usewout.Enabled)
                             {
-                                if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                                if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                                 {
                                     if (!oa && !ba && target.DistanceToPlayer() > ObjectManager.Player.GetRealAutoAttackRange()) W.Cast(wpred.CastPosition);
                                 }
                             }
                             else
                             {
-                                if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                                if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                                 {
                                     if (!oa && !ba) W.Cast(wpred.CastPosition);
                                 }
@@ -258,8 +259,8 @@ namespace DominationAIO.Champions
                         }
                         if (menuclass.harass.usew.Enabled && W.IsReady(0) && target.IsValidTarget(W.Range))
                         {
-                            var wpred = W.GetPrediction(target, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
-                            if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                            var wpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
+                            if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                             {
                                 if (!oa && !ba) W.Cast(wpred.CastPosition);
                             }

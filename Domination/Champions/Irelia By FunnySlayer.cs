@@ -30,6 +30,7 @@ namespace Template
         public class QSettings
         {
             public static MenuBool Qcombo = new MenuBool("Qcombo", "Q in Combo [Gap_closer | KillSteal]");
+            public static MenuList QListComboMode = new MenuList("QListComboMode", "Q List Combo Mode", new string[] {" Gapcloser Logic ", " Dancing Logic ", " High Logic ","Extream Logic"}, 1);
             public static MenuBool QStacks = new MenuBool("QStacks", "Use Q Stack Passive Logic");
             public static MenuBool QDancing = new MenuBool("QDancing", "----> Q Dancing logic");
             public static MenuSlider QHeath = new MenuSlider("Q heath", "When Health Percent <= ", 85);
@@ -46,7 +47,7 @@ namespace Template
         {
             public static MenuBool Ecombo = new MenuBool("Ecombo", "E in Combo");
             public static MenuBool ImproveE = new MenuBool("ImproveE", "Improve E prediction", false);
-            public static MenuSlider ImproveEDelay = new MenuSlider("ImproveE Delay", "Delay E prediction (Default 600)", 600, 0, 1200);
+            public static MenuSlider ImproveEDelay = new MenuSlider("ImproveE Delay", "Delay E prediction (Default 600)", 1150, 400, 1400);
             public static MenuSeparator Efeedback = new MenuSeparator("Efeedback", "E logic if not good Feedback it to FunnySlayer#0348");
         }
 
@@ -114,6 +115,7 @@ namespace Template
             Menu Qmenu = new Menu("Qmenu", "Q Settings")
             {
                 MenuSettings.QSettings.Qcombo,
+                MenuSettings.QSettings.QListComboMode,
                 MenuSettings.QSettings.QStacks,
                 MenuSettings.QSettings.QDancing,
                 MenuSettings.QSettings.QHeath,
@@ -204,7 +206,43 @@ namespace Template
 
             var Heal = Heallist[Q.Level] * 0.2f * objPlayer.TotalAttackDamage;
 
-            
+            if(MenuSettings.QSettings.QListComboMode.Index == 0)
+            {
+                GapcloserLogic(target);
+            }
+            if (MenuSettings.QSettings.QListComboMode.Index == 1)
+            {
+                DancingLogic(target);
+            }
+            if (MenuSettings.QSettings.QListComboMode.Index == 2)
+            {
+                HighLogic(target);
+            }
+            if (MenuSettings.QSettings.QListComboMode.Index == 3)
+            {
+                ExtreamLogic(target);
+            }            
+        }
+        private static void GapcloserLogic(AIBaseClient target)
+        {
+            if (target == null)
+                return;
+
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(3000)).OrderBy(i => i.Distance(ObjectManager.Player));
+            if (targets == null)
+                return;
+
+            QGapCloserPos(target.Position);
+        }
+        private static void DancingLogic(AIBaseClient target)
+        {
+            if (target == null)
+                return;
+
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(3000)).OrderBy(i => i.Distance(ObjectManager.Player)).ThenBy(i => i.Health);
+            if (targets == null)
+                return;
+
             if (CanQ(target))
             {
                 if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
@@ -216,7 +254,7 @@ namespace Template
                         AIBaseClient Gap = null;
                         AIBaseClient Flee = null;
 
-                        
+
                         foreach (var max in MaxObjs)
                         {
                             foreach (var min in MinObjs.Where(i => i.IsValidTarget(Q.Range)
@@ -231,7 +269,7 @@ namespace Template
                             {
                                 if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
                                 {
-                                    if(Gap.NetworkId != Flee.NetworkId)
+                                    if (Gap.NetworkId != Flee.NetworkId)
                                     {
                                         break;
                                     }
@@ -261,7 +299,8 @@ namespace Template
                                 else
                                 {
                                     Gap = min;
-                                }                               
+                                    continue;
+                                }
                             }
 
                             if (Gap != null && Flee != null && Vector3.Distance(Gap.Position, Flee.Position) <= Q.Range)
@@ -277,16 +316,23 @@ namespace Template
                         {
                             if (Flee.IsValidTarget(Q.Range))
                             {
-                                if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                if (!UnderTower(Flee.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                 {
-                                    if (Q.Cast(Gap) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Gap))
+                                    if (Q.Cast(Flee) == CastStates.SuccessfullyCasted)
                                     {
-                                        return;
+                                        if (Q.Cast(Gap) == CastStates.SuccessfullyCasted)
+                                        {
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            QGapCloserPos(target.Position);
+                                        }
                                     }
-                                    else
-                                    {
-                                        QGapCloserPos(target.Position);
-                                    }
+                                }
+                                else
+                                {
+                                    QGapCloserPos(target.Position);
                                 }
                             }
                             else
@@ -298,7 +344,6 @@ namespace Template
                         {
                             QGapCloserPos(target.Position);
                         }
-
                     }
                     else
                     {
@@ -370,6 +415,7 @@ namespace Template
                                         else
                                         {
                                             Gap = min;
+                                            continue;
                                         }
                                     }
 
@@ -386,42 +432,474 @@ namespace Template
                                 {
                                     if (Flee.IsValidTarget(Q.Range))
                                     {
-                                        if (Q.Cast(Flee) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Flee))
+                                        if (!UnderTower(Flee.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                         {
-                                            if (Q.Cast(Gap) == CastStates.SuccessfullyCasted || Q.CastOnUnit(Gap))
+                                            if (Q.Cast(Flee) == CastStates.SuccessfullyCasted)
                                             {
-                                                return;
-                                            }
-                                            else
-                                            {
-                                                QGapCloserPos(target.Position);
+                                                if (Q.Cast(Gap) == CastStates.SuccessfullyCasted)
+                                                {
+                                                    return;
+                                                }
+                                                else
+                                                {
+                                                    QGapCloserPos(target.Position);
+                                                    continue;
+                                                }
                                             }
                                         }
+                                        else
+                                        {
+                                            QGapCloserPos(target.Position);
+                                            continue;
+                                        }                                                
                                     }
                                     else
                                     {
                                         QGapCloserPos(target.Position);
+                                        continue;
                                     }
                                 }
                                 else
                                 {
                                     QGapCloserPos(target.Position);
+                                    continue;
                                 }
 
                             }
                             else
                             {
                                 QGapCloserPos(target.Position);
+                                continue;
                             }
                         }
                         else
                         {
                             QGapCloserPos(target.Position);
+                            continue;
                         }
                     }
                     else
                     {
                         QGapCloserPos(target.Position);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        private static void HighLogic(AIBaseClient target)
+        {
+            if (target == null)
+                return;
+
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(3000)).OrderBy(i => i.Distance(ObjectManager.Player)).ThenBy(i => i.Health);
+            if (targets == null)
+                return;
+
+            if (CanQ(target))
+            {
+                if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
+                {
+                    var objs = ObjectManager.Get<AIBaseClient>().Where(i => i != null 
+                    && !i.IsDead 
+                    && i.IsEnemy 
+                    && !i.IsAlly
+                    && CanQ(i)
+                    && i.MaxHealth > 10
+                    && i.Distance(target) < Q.Range
+                    && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                        .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(target));
+                    
+                    if (objs != null)
+                    {
+                        foreach(var obj in objs)
+                        {
+                            if(obj != null)
+                            {
+                                if(obj.Distance(target) < Q.Range)
+                                {
+                                    if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                    {
+                                        if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                            return;
+                                    }
+                                    else
+                                    {
+                                        QGapCloserPos(target.Position);
+                                        continue;
+                                    }    
+                                }
+                                else
+                                {
+                                    QGapCloserPos(target.Position);
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                QGapCloserPos(target.Position);
+                                continue;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        QGapCloserPos(target.Position);                        
+                    }
+                }
+                else
+                {
+                    QGapCloserPos(target.Position);
+                }
+            }
+            else
+            {
+                foreach (var t in targets.OrderBy(i => i.Health))
+                {
+                    if (CanQ(t))
+                    {
+                        if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
+                        {
+                            var objs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
+                            && !i.IsDead
+                            && i.IsEnemy
+                            && !i.IsAlly
+                            && CanQ(i)
+                            && i.MaxHealth > 10
+                            && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                                .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(t));
+
+
+                            if (objs != null)
+                            {
+                                foreach (var obj in objs)
+                                {
+                                    if (obj != null)
+                                    {
+                                        if (obj.Distance(t) < Q.Range)
+                                        {
+                                            if(!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                            {
+                                                if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                    return;
+                                            }
+                                            else
+                                            {
+                                                QGapCloserPos(target.Position);
+                                                continue;
+                                            }                                           
+                                        }
+                                        else
+                                        {
+                                            QGapCloserPos(target.Position);
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        QGapCloserPos(target.Position);
+                                        continue;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                QGapCloserPos(target.Position);
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            QGapCloserPos(target.Position);
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        var newobjs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
+                            && !i.IsDead
+                            && i.IsEnemy
+                            && !i.IsAlly
+                            && CanQ(i)
+                            && i.MaxHealth > 10
+                            && i.Distance(target) < objPlayer.GetRealAutoAttackRange()
+                            && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                                .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(target));
+
+                        var objs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
+                            && !i.IsDead
+                            && i.IsEnemy
+                            && !i.IsAlly
+                            && CanQ(i)
+                            && i.MaxHealth > 10
+                            && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                                .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(t));
+
+                        if (newobjs != null && objs != null)
+                        {
+                            foreach (var obj in objs)
+                            {
+                                if (obj != null)
+                                {
+                                    if (obj.Distance(t) < Q.Range)
+                                    {
+                                        if(UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                        {
+                                            if (objPlayer.Spellbook.CastSpell(SpellSlot.Q, obj) || Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                return;
+                                        }
+                                        else
+                                        {
+                                            QGapCloserPos(target.Position);
+                                            continue;
+                                        }                                        
+                                    }
+                                    else
+                                    {
+                                        QGapCloserPos(target.Position);
+                                        continue;
+                                    }
+                                }
+                                else
+                                {
+                                    QGapCloserPos(target.Position);
+                                    continue;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            QGapCloserPos(target.Position);
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void ExtreamLogic(AIBaseClient target)
+        {
+            if (target == null)
+                return;
+
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(3000)).OrderBy(i => i.Distance(ObjectManager.Player)).ThenBy(i => i.Health);
+            if (targets == null)
+                return;
+
+            if (CanQ(target))
+            {
+                if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
+                {
+                    var objs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
+                    && !i.IsDead
+                    && i.IsEnemy
+                    && !i.IsAlly
+                    && i.Distance(target) < objPlayer.GetRealAutoAttackRange() + 50
+                    && CanQ(i)
+                    && i.MaxHealth > 10
+                    && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                        .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(target));
+
+                    if (objs != null)
+                    {
+                        if(objs.ToList().Count > 1 || objs.Count() > 1)
+                        {
+                            foreach(var obj in objs.ThenByDescending(i => i.Distance(target)))
+                            {
+                                if(obj != null)
+                                {
+                                    var tempobjs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
+                                    && !i.IsDead
+                                    && i.IsEnemy
+                                    && !i.IsAlly
+                                    && i.Distance(obj) < Q.Range
+                                    && CanQ(i)
+                                    && i.MaxHealth > 10
+                                    && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                                        .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(obj));
+
+                                    if(tempobjs != null)
+                                    {
+                                        foreach(var tempobj in tempobjs)
+                                        {
+                                            if(tempobj != null)
+                                            {
+                                                if(!UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                {
+                                                    if (Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
+                                                    {
+                                                        EnsoulSharp.SDK.Utility.DelayAction.Add(100, () =>
+                                                        {
+                                                            if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                                return;
+                                                        });
+                                                    }
+                                                    else
+                                                    {
+                                                        HighLogic(target);
+                                                        continue;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    HighLogic(target);
+                                                    continue;
+                                                }                                                 
+                                            }
+                                            else
+                                            {
+                                                HighLogic(target);
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        HighLogic(target);
+                                        continue;
+                                    }
+                                }
+                                else
+                                {
+                                    HighLogic(target);
+                                    continue;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(objs.Count() == 1 || objs.ToList().Count == 1)
+                            {
+                                HighLogic(target);
+                            }
+                            else
+                            {
+                                QGapCloserPos(target.Position);
+                            }
+                        }                       
+                    }
+                    else
+                    {
+                        HighLogic(target);
+                    }
+                }
+                else
+                {
+                    HighLogic(target);
+                }
+            }
+            else
+            {
+                foreach (var t in targets.OrderBy(i => i.Health))
+                {
+                    if (CanQ(t))
+                    {
+                        if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value && MenuSettings.QSettings.QDancing.Enabled)
+                        {
+                            var objs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
+                            && !i.IsDead
+                            && i.IsEnemy
+                            && !i.IsAlly
+                            && i.Distance(t) < objPlayer.GetRealAutoAttackRange() + 50
+                            && CanQ(i)
+                            && i.MaxHealth > 10
+                            && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                                .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(t));
+
+                            if (objs != null)
+                            {
+                                if (objs.ToList().Count > 1 || objs.Count() > 1)
+                                {
+                                    foreach (var obj in objs.ThenByDescending(i => i.Distance(t)))
+                                    {
+                                        if (obj != null)
+                                        {
+                                            var tempobjs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
+                                            && !i.IsDead
+                                            && i.IsEnemy
+                                            && !i.IsAlly
+                                            && i.Distance(obj) < Q.Range
+                                            && CanQ(i)
+                                            && i.MaxHealth > 10
+                                            && (i.Type == GameObjectType.AIMinionClient || i.Type == GameObjectType.AIHeroClient))
+                                                .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(obj));
+
+                                            if (tempobjs != null)
+                                            {
+                                                foreach (var tempobj in tempobjs)
+                                                {
+                                                    if (tempobj != null)
+                                                    {
+                                                        if (!UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                        {
+                                                            if (Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
+                                                            {
+                                                                EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
+                                                                {
+                                                                    if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                                        return;
+                                                                });
+                                                            }
+                                                            else
+                                                            {
+                                                                HighLogic(target);
+                                                                continue;
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            HighLogic(target);
+                                                        }    
+                                                    }
+                                                    else
+                                                    {
+                                                        HighLogic(target);
+                                                        continue;
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                HighLogic(target);
+                                                continue;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            HighLogic(target);
+                                            continue;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (objs.Count() == 1 || objs.ToList().Count == 1)
+                                    {
+                                        HighLogic(t);
+                                    }
+                                    else
+                                    {
+                                        QGapCloserPos(target.Position);
+                                        continue;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                HighLogic(target);
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            HighLogic(target);
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        HighLogic(target);
+                        continue;
                     }
                 }
             }
@@ -611,6 +1089,14 @@ namespace Template
             if (sender.IsMe && args.SData.Name == "IreliaEMissile")
             {
                 ECatPos = args.End;
+            }
+
+            if(sender.IsMe && args.Slot != SpellSlot.Unknown)
+            {
+                if(args.Slot <= SpellSlot.R)
+                {
+                    //ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                }
             }
         }
         private static void OnUpdate(EventArgs args)
@@ -821,10 +1307,25 @@ namespace Template
                         {
                             if (E.Name != "IreliaE" && ECatPos.IsValid())
                             {
-                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, MenuSettings.ESettings.ImproveEDelay.Value);
-                                if (vector2.IsValid())
+                                /*var Epred = SebbyLibPorted.Prediction.Prediction.GetPrediction(target, MenuSettings.ESettings.ImproveEDelay.Value / 1000);
+                                if (Epred.CastPosition.IsValid() && Epred.CastPosition.DistanceToPlayer() <= E.Range)
                                 {
                                     var RangeCheck = (objPlayer.CountEnemyHeroesInRange(1000) > 2 ? 1000 : 350);
+                                    for (float i = RangeCheck; i > 50; i -= 20)
+                                    {
+                                        var CastPos = Epred.CastPosition.Extend(ECatPos, -i);
+                                        if (CastPos.DistanceToPlayer() < E.Range)
+                                        {
+                                            if (E.Cast(CastPos) || E.Cast(CastPos, true))
+                                                return;
+                                        }
+                                    }
+                                }*/
+
+                                var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, MenuSettings.ESettings.ImproveEDelay.Value);
+                                if (E.Name != "IreliaE" && vector2.IsValid())
+                                {
+                                    var RangeCheck = (objPlayer.CountEnemyHeroesInRange(1000) > 2 ? 1000 : 300);
                                     for (float i = RangeCheck; i > 50; i -= 20)
                                     {
                                         var CastPos = vector2.Extend(ECatPos, -i);
@@ -833,11 +1334,90 @@ namespace Template
                                             if (E.Cast(CastPos) || E.Cast(CastPos, true))
                                                 return;
                                         }
+                                        else
+                                        {
+                                            continue;
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     return;
+                                }
+                            }
+                            else
+                            {
+                                if (E1.GetPrediction(target).CastPosition.DistanceToPlayer() < 800)
+                                {
+                                    Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 600, 50);
+
+                                    {
+                                        foreach (var onecircle in circle.Points)
+                                        {
+                                            if (onecircle.Distance(target) > 600)
+                                            {
+                                                if (E.Cast(onecircle))
+                                                {
+                                                    var vector2 = FSpred.Prediction.Prediction.GetPrediction(target, 600);
+                                                    var v3 = Vector2.Zero;
+                                                    if (vector2.CastPosition.IsValid() && vector2.CastPosition.Distance(objPlayer.Position) < E.Range - 100)
+                                                        for (int j = 50; j <= 900; j += 50)
+                                                        {
+                                                            var vector3 = vector2.CastPosition.Extend(ECatPos.ToVector2(), -j);
+                                                            if (vector3.Distance(ObjectManager.Player) >= E.Range && v3 != Vector2.Zero)
+                                                            {
+                                                                if (E.Cast(v3) || E.Cast(v3))
+                                                                {
+                                                                    return;
+                                                                }
+                                                                break;
+                                                            }
+                                                            else
+                                                            {
+                                                                v3 = vector3.ToVector2();
+                                                                continue;
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (objPlayer.IsDashing())
+                                {
+                                    if (objPlayer.GetDashInfo().EndPos.Distance(target) < 775)
+                                    {
+                                        Geometry.Circle circle = new Geometry.Circle(objPlayer.Position, 775, 50);
+
+                                        {
+                                            foreach (var onecircle in circle.Points.Where(i => i.Distance(target) > 775))
+                                            {
+                                                if (E.Cast(onecircle))
+                                                {
+                                                    var vector2 = FSpred.Prediction.Prediction.PredictUnitPosition(target, 600);
+                                                    var v3 = vector2;
+                                                    if (vector2.IsValid() && vector2.Distance(objPlayer.Position.ToVector2()) < E.Range - 100)
+                                                        for (int j = 50; j <= 900; j += 50)
+                                                        {
+                                                            var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
+                                                            if (vector3.Distance(ObjectManager.Player) >= E.Range)
+                                                            {
+                                                                if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                                {
+                                                                    return;
+                                                                }
+                                                                break;
+                                                            }
+                                                            else
+                                                            {
+                                                                v3 = vector3;
+                                                                continue;
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1169,7 +1749,8 @@ namespace Template
                 passivedmg = 15f + (ObjectManager.Player.Level - 1) * 3f + ObjectManager.Player.GetBonusPhysicalDamage() * 0.25f;
                 passivedmg = (float)EnsoulSharp.SDK.Damage.CalculateMagicDamage(ObjectManager.Player, target, (double)passivedmg);
             }
-            normaldmg += Sheen();
+            if (CheckItem == true)
+                normaldmg += Sheen();
 
             return (float)EnsoulSharp.SDK.Damage.CalculatePhysicalDamage(ObjectManager.Player, target, normaldmg) + passivedmg;
             /*var Qdmg = QBaseDamage[Q.Level];

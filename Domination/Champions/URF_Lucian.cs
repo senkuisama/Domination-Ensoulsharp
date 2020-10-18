@@ -32,7 +32,7 @@ namespace DominationAIO.Champions
             E = new Spell(SpellSlot.E, 425f);
 
             LMenu.AddMenu();
-            new SebbyLibPorted.Orbwalking.Orbwalker(LucianMain);
+            //new SebbyLibPorted.Orbwalking.Orbwalker(LucianMain);
             DelayAction.Add(5000, () =>
             {
                 LucianMain.Attach();
@@ -63,7 +63,7 @@ namespace DominationAIO.Champions
             if (Player.IsDead)
                 return;
 
-            var dashPos = Player.PreviousPosition.Extend(Game.CursorPos, 200);
+            var dashPos = Player.PreviousPosition.Extend(Game.CursorPos, 250);
 
             if (E.IsReady() && Orbwalker.GetTarget() as AIHeroClient != null && LMenu.ESettings.ECombo.Enabled)
             {

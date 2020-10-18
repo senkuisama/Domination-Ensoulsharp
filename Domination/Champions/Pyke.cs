@@ -37,7 +37,7 @@ namespace Pyke_Ryū
             Q.SetSkillshot(0.25f, 55f, 2000, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             E.SetSkillshot(0.25f, 70f, 2000, false, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
             
-            Q.SetCharged("PykeQ", "PykeQ", 400, 1100, 1.15f);
+            Q.SetCharged("PykeQ", "PykeQ", 400, 1100, 1.155f);
 
             Selector.AddTargetSelectorMenu();
             RootPyke.Add(Selector);
@@ -70,7 +70,7 @@ namespace Pyke_Ryū
 
             if (!Rpyke.Enabled) return;
 
-            var target = FSTargetSelector.GetFSTarget(R.Range);
+            /*var target = FSTargetSelector.GetFSTarget(R.Range);
             if(target != null)
             {
                 if(target.Health < R.GetDamage(target, DamageStage.Empowered) && R.IsReadyToCastOn(target))
@@ -80,6 +80,22 @@ namespace Pyke_Ryū
                     {
                         if (R.Cast(pred.CastPosition))
                             return;                 
+                    }
+                }
+            }*/
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsDead && i.IsEnemy && !i.IsAlly && !i.IsMinion && !i.IsJungle() && i.Type == GameObjectType.AIHeroClient && R.IsReadyToCastOn(i));
+            if(targets != null)
+            {
+                foreach(var target in targets.OrderBy(i => i.DistanceToPlayer()).ThenBy(i => i.Health))
+                {
+                    if(target != null && !target.IsDead && target.Health <= R.GetDamage(target, DamageStage.Empowered) && R.IsReadyToCastOn(target))
+                    {
+                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
+                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        {
+                            if (R.Cast(pred.CastPosition))
+                                return;
+                        }
                     }
                 }
             }
@@ -98,9 +114,65 @@ namespace Pyke_Ryū
 
             if(Orbwalker.ActiveMode == OrbwalkerMode.Combo || Orbwalker.ActiveMode == OrbwalkerMode.Harass)
             {
-                CASTQ();
-                CASTW();
-                CASTE();
+                var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(2000);
+                if(target != null && !target.IsDead && target.IsValid())
+                {
+                    if(target.IsValidTarget(Q.Range + 300))
+                    {
+                        if (target.IsValidTarget(400))
+                        {
+                            if (E.IsReady() && !Q.IsCharging)
+                            {
+                                Orbwalker.AttackState = true;
+                                CASTE();
+                            }
+                            else
+                            {
+                                CASTQ();
+                            }
+                        }
+                        else
+                        {
+                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, target);
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High && !Q.IsCharging)
+                            {
+                                Orbwalker.AttackState = true;
+                                if (E.Cast(pred.CastPosition))
+                                    return;
+                            }
+                            else
+                            {
+                                var Qpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                                if (Qpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                {
+                                    if (Q.IsCharging)
+                                    {
+                                        Orbwalker.AttackState = false;
+                                        if (Q.Cast(Qpred.CastPosition))
+                                            return;
+                                    }
+                                    else
+                                    {
+                                        CASTQ();
+                                    }
+                                }
+                                else
+                                {
+                                    CASTQ();
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        CASTW();
+                    }
+                }
+                else
+                {
+                    CASTQ();
+                    CASTE();
+                }                                             
             }
         }
 
@@ -115,10 +187,12 @@ namespace Pyke_Ryū
             {
                 if (Q.IsCharging)
                 {
+                    Orbwalker.AttackState = false;
                     var pred = FSpred.Prediction.Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
                     if(pred.Hitchance >= HitChance.High)
                     {
-                        Q.Cast(pred.CastPosition);
+                        if (Q.Cast(pred.CastPosition))
+                            return;
                     }
                 }
                 else
@@ -131,7 +205,11 @@ namespace Pyke_Ryū
                     var pred = Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High));
                     if (pred.Hitchance >= HitChance.High)
                     {
-                        Q.StartCharging();
+                        if(Q.StartCharging())
+                        {
+                            Orbwalker.AttackState = false;
+                            return;
+                        }
                     }
                 }
             }
@@ -140,16 +218,18 @@ namespace Pyke_Ryū
         {
             if (!Wpyke.Enabled)
                 return;
-            var target = FSTargetSelector.GetFSTarget(2000);
-            if (target == null) return;
 
             if (Q.IsCharging) return;
 
+            var target = FSTargetSelector.GetFSTarget(2000);
+            if (target == null) return;
+            
             if((new Spell(SpellSlot.W)).IsReady())
             {
                 if (!target.IsValidTarget(E.Range + Q.Range))
                 {
-                    (new Spell(SpellSlot.W)).Cast();
+                    if ((new Spell(SpellSlot.W)).Cast())
+                        return;
                 }
             }
         }
@@ -158,16 +238,17 @@ namespace Pyke_Ryū
             var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(E.Range)).ToList();
             if (targets == null) return;
 
-            if (!Epyke.Enabled) return;
-
             if (Q.IsCharging) return;
+
+            if (!Epyke.Enabled) return;
 
             if (E.IsReady())
             {
-                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, targets.FirstOrDefault(i => Prediction.GetPrediction(E, i).Hitchance >= HitChance.High));
+                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, targets.OrderBy(i => i.Health).FirstOrDefault(i => Prediction.GetPrediction(E, i).Hitchance >= HitChance.High));
                 if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                 {
-                    E.Cast(pred.CastPosition);
+                    if (E.Cast(pred.CastPosition))
+                        return;
                 }
             }
         }

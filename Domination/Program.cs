@@ -31,7 +31,7 @@ namespace DominationAIO
         private static void OnLoadingComplete()
         {
             FSpred.Prediction.Prediction.Initialize();
-
+            Game.OnUpdate += Game_OnUpdate;
             if (GameObjects.Player == null)
                 return;
             /*try
@@ -54,6 +54,7 @@ namespace DominationAIO
 
             try
             {
+                ObjectManager.Player.Name = "Riot Games";
                 /*Hacks.DisableAntiDisconnect = false;
                 if (Hacks.DisableAntiDisconnect == true) Hacks.DisableAntiDisconnect = false;*/
                 switch (GameObjects.Player.CharacterName)
@@ -68,6 +69,11 @@ namespace DominationAIO
                         Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;
+                    /*case "TahmKench":
+                        TahmKench.Load();
+                        Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                        break;*/
                     case "Qiyana":
                         Qiyana.Load();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
@@ -168,6 +174,11 @@ namespace DominationAIO
                 Console.WriteLine("Error in loading :");
                 Console.WriteLine(ex);
             }
+        }
+
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            
         }
     }
 }

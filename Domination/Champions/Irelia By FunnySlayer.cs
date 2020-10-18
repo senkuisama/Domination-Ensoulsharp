@@ -643,7 +643,7 @@ namespace Template
                                 {
                                     if (obj.Distance(t) < Q.Range)
                                     {
-                                        if(UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                        if(!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                         {
                                             if (objPlayer.Spellbook.CastSpell(SpellSlot.Q, obj) || Q.Cast(obj) == CastStates.SuccessfullyCasted)
                                                 return;

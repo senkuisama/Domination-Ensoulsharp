@@ -516,24 +516,32 @@ namespace Template
                         {
                             if(obj != null)
                             {
-                                if(obj.Distance(target) < Q.Range)
+                                if (obj.IsValidTarget(Q.Range))
                                 {
-                                    if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                    if (obj.Distance(target) < Q.Range)
                                     {
-                                        if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                            return;
+                                        if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                        {
+                                            if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                return;
+                                        }
+                                        else
+                                        {
+                                            QGapCloserPos(target.Position);
+                                            continue;
+                                        }
                                     }
                                     else
                                     {
                                         QGapCloserPos(target.Position);
                                         continue;
-                                    }    
+                                    }
                                 }
                                 else
                                 {
                                     QGapCloserPos(target.Position);
                                     continue;
-                                }
+                                }   
                             }
                             else
                             {
@@ -576,24 +584,32 @@ namespace Template
                                 {
                                     if (obj != null)
                                     {
-                                        if (obj.Distance(t) < Q.Range)
+                                        if (obj.IsValidTarget(Q.Range))
                                         {
-                                            if(!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                            if (obj.Distance(t) < Q.Range)
                                             {
-                                                if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                    return;
+                                                if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                {
+                                                    if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                        return;
+                                                }
+                                                else
+                                                {
+                                                    QGapCloserPos(target.Position);
+                                                    continue;
+                                                }
                                             }
                                             else
                                             {
                                                 QGapCloserPos(target.Position);
                                                 continue;
-                                            }                                           
+                                            }
                                         }
                                         else
                                         {
                                             QGapCloserPos(target.Position);
                                             continue;
-                                        }
+                                        }                                            
                                     }
                                     else
                                     {
@@ -641,24 +657,32 @@ namespace Template
                             {
                                 if (obj != null)
                                 {
-                                    if (obj.Distance(t) < Q.Range)
+                                    if (obj.IsValidTarget(Q.Range))
                                     {
-                                        if(!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                        if (obj.Distance(t) < Q.Range)
                                         {
-                                            if (objPlayer.Spellbook.CastSpell(SpellSlot.Q, obj) || Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                return;
+                                            if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                            {
+                                                if (objPlayer.Spellbook.CastSpell(SpellSlot.Q, obj) || Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                    return;
+                                            }
+                                            else
+                                            {
+                                                QGapCloserPos(target.Position);
+                                                continue;
+                                            }
                                         }
                                         else
                                         {
                                             QGapCloserPos(target.Position);
                                             continue;
-                                        }                                        
+                                        }
                                     }
                                     else
                                     {
                                         QGapCloserPos(target.Position);
                                         continue;
-                                    }
+                                    }   
                                 }
                                 else
                                 {
@@ -724,15 +748,23 @@ namespace Template
                                         {
                                             if(tempobj != null)
                                             {
-                                                if(!UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                if (tempobj.IsValidTarget(Q.Range))
                                                 {
-                                                    if (Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
+                                                    if (!UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                                     {
-                                                        EnsoulSharp.SDK.Utility.DelayAction.Add(100, () =>
+                                                        if (Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
                                                         {
-                                                            if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                                return;
-                                                        });
+                                                            EnsoulSharp.SDK.Utility.DelayAction.Add(100, () =>
+                                                            {
+                                                                if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                                    return;
+                                                            });
+                                                        }
+                                                        else
+                                                        {
+                                                            HighLogic(target);
+                                                            continue;
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -744,7 +776,7 @@ namespace Template
                                                 {
                                                     HighLogic(target);
                                                     continue;
-                                                }                                                 
+                                                }                                              
                                             }
                                             else
                                             {
@@ -830,26 +862,34 @@ namespace Template
                                                 {
                                                     if (tempobj != null)
                                                     {
-                                                        if (!UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                                                        if (tempobj.IsValidTarget(Q.Range))
                                                         {
-                                                            if (Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
+                                                            if (!UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                                             {
-                                                                EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
+                                                                if (Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
                                                                 {
-                                                                    if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                                        return;
-                                                                });
+                                                                    EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
+                                                                    {
+                                                                        if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                                            return;
+                                                                    });
+                                                                }
+                                                                else
+                                                                {
+                                                                    HighLogic(target);
+                                                                    continue;
+                                                                }
                                                             }
                                                             else
                                                             {
                                                                 HighLogic(target);
-                                                                continue;
                                                             }
                                                         }
                                                         else
                                                         {
                                                             HighLogic(target);
-                                                        }    
+                                                            continue;
+                                                        }  
                                                     }
                                                     else
                                                     {

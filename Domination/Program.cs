@@ -31,8 +31,8 @@ namespace DominationAIO
         private static void OnLoadingComplete()
         {
             FSpred.Prediction.Prediction.Initialize();
-            Game.OnUpdate += Game_OnUpdate;
-            if (GameObjects.Player == null)
+            //Game.OnUpdate += Game_OnUpdate;
+            if (ObjectManager.Player == null)
                 return;
             /*try
             {
@@ -54,7 +54,7 @@ namespace DominationAIO
 
             try
             {
-                ObjectManager.Player.Name = "Riot Games";
+                //ObjectManager.Player.Name = "Riot Games";
                 /*Hacks.DisableAntiDisconnect = false;
                 if (Hacks.DisableAntiDisconnect == true) Hacks.DisableAntiDisconnect = false;*/
                 switch (GameObjects.Player.CharacterName)
@@ -165,8 +165,8 @@ namespace DominationAIO
                         Console.WriteLine("DominationAIO Does Not Support " + ObjectManager.Player.CharacterName);
                         break;                   
                 }
-                skinhack.OnLoad(); 
-                Troll_Chat_xD.Program.OnLoad();
+                //skinhack.OnLoad(); 
+                //Troll_Chat_xD.Program.OnLoad();
             }
             catch (Exception ex)
             {

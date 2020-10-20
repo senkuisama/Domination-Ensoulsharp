@@ -552,7 +552,7 @@ namespace Template
                     }
                     else
                     {
-                        QGapCloserPos(target.Position);                        
+                        QGapCloserPos(target.Position);  
                     }
                 }
                 else
@@ -663,7 +663,7 @@ namespace Template
                                         {
                                             if (!UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                             {
-                                                if (objPlayer.Spellbook.CastSpell(SpellSlot.Q, obj) || Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
                                                     return;
                                             }
                                             else
@@ -754,7 +754,7 @@ namespace Template
                                                     {
                                                         if (Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
                                                         {
-                                                            EnsoulSharp.SDK.Utility.DelayAction.Add(100, () =>
+                                                            EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
                                                             {
                                                                 if (Q.Cast(obj) == CastStates.SuccessfullyCasted)
                                                                     return;
@@ -883,6 +883,7 @@ namespace Template
                                                             else
                                                             {
                                                                 HighLogic(target);
+                                                                continue;
                                                             }
                                                         }
                                                         else
@@ -916,6 +917,7 @@ namespace Template
                                     if (objs.Count() == 1 || objs.ToList().Count == 1)
                                     {
                                         HighLogic(t);
+                                        continue;
                                     }
                                     else
                                     {
@@ -950,14 +952,17 @@ namespace Template
             if (objPlayer.IsDead)
                 return;
 
-            /*if (GetRPos1 != null)
+            if (R.IsReady())
             {
-                GetRPos1.Draw(System.Drawing.Color.Red, 1);
-            }
-            if (GetRPos2 != null)
-            {
-                GetRPos2.Draw(System.Drawing.Color.Red, 1);
-            }*/
+                if (GetRPos1 != null)
+                {
+                    GetRPos1.Draw(System.Drawing.Color.Red, 1);
+                }
+                if (GetRPos2 != null)
+                {
+                    GetRPos2.Draw(System.Drawing.Color.Red, 1);
+                }
+            }            
         }
 
         public static Geometry.Rectangle GetRPos1;
@@ -1370,7 +1375,7 @@ namespace Template
                                             var poscast = pos.Extend(ECatPos, -i);
                                             if (poscast.IsValid() && poscast.Distance(ObjectManager.Player.Position) < 775)
                                             {
-                                                if (ObjectManager.Player.Spellbook.CastSpell(SpellSlot.E, poscast))
+                                                if (E.Cast(poscast))
                                                     return;
                                             }
                                             else
@@ -1404,7 +1409,7 @@ namespace Template
                                             var pos = pred.CastPosition.Extend(ECatPos, -i);
                                             if (pos.IsValid() && pos.Distance(ObjectManager.Player.Position) < 775)
                                             {
-                                                if (ObjectManager.Player.Spellbook.CastSpell(SpellSlot.E, pos))
+                                                if (E.Cast(pos))
                                                     return;
                                             }
                                             else
@@ -1494,7 +1499,7 @@ namespace Template
                                                         var vector3 = vector2.CastPosition.Extend(ECatPos.ToVector2(), -j);
                                                         if (vector3.Distance(ObjectManager.Player) >= E.Range && v3 != Vector2.Zero)
                                                         {
-                                                            if (E.Cast(v3) || E.Cast(v3))
+                                                            if (E.Cast(v3))
                                                             {
                                                                 return;
                                                             }
@@ -1530,7 +1535,7 @@ namespace Template
                                                         var vector3 = vector2.Extend(ECatPos.ToVector2(), -j);
                                                         if (vector3.Distance(ObjectManager.Player) >= E.Range)
                                                         {
-                                                            if (E.Cast(v3.ToVector3()) || E.Cast(v3))
+                                                            if (E.Cast(v3.ToVector3()))
                                                             {
                                                                 return;
                                                             }

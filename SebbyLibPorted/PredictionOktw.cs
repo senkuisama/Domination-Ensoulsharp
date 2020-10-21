@@ -241,6 +241,10 @@ namespace SebbyLibPorted.Prediction
                 RangeCheckFrom = spell.RangeCheckFrom,
                 From = spell.From
             };
+            if(SpellInput.Aoe == true)
+            {
+                AoePrediction.GetPrediction(SpellInput);
+            }
             return GetPrediction(SpellInput);
         }
 
@@ -378,7 +382,8 @@ namespace SebbyLibPorted.Prediction
             }
             // CAN'T MOVE SPELLS ///////////////////////////////////////////////////////////////////////////////////
 
-            if (UnitTracker.GetSpecialSpellEndTime(input.Unit) > 100 || input.Unit.HasBuff("Recall") || (UnitTracker.GetLastStopMoveTime(input.Unit) < 100))
+            if (//UnitTracker.GetSpecialSpellEndTime(input.Unit) > 100 || 
+                input.Unit.HasBuff("Recall") || (UnitTracker.GetLastStopMoveTime(input.Unit) < 100))
             {
                 //OktwCommon.debug("CAN'T MOVE SPELLS");
                 result.Hitchance = HitChance.VeryHigh;
@@ -844,7 +849,7 @@ namespace SebbyLibPorted.Prediction
 
     }
 
-    internal static class AoePrediction
+    public static class AoePrediction
     {
         public static PredictionOutput GetPrediction(PredictionInput input)
         {
@@ -1341,9 +1346,16 @@ namespace SebbyLibPorted.Prediction
         private static void AIHeroClient_OnNewPath(AIBaseClient sender, AIBaseClientNewPathEventArgs args)
         {
             if (sender is AIHeroClient)
-            {
-
+            {               
                 var item = UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId);
+
+                if (UnitTrackerInfoList == null || item == null || args.Path.Last() == Vector3.Zero)
+                {
+                    /*if(args.Path.First() != Vector3.Zero)
+                        item.PathBank.Add(new PathInfo() { Position = args.Path.First().ToVector2(), Time = Variables.TickCount });*/
+                    return;
+                }
+
                 if (args.Path.Count() == 1) // STOP MOVE DETECTION
                     item.StopMoveTick = Variables.TickCount;
 
@@ -1357,6 +1369,9 @@ namespace SebbyLibPorted.Prediction
 
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
+            if (UnitTrackerInfoList == null)
+                return;
+
             if (sender is AIHeroClient)
             {
                 if (Orbwalker.IsAutoAttack(args.SData.Name))
@@ -1422,18 +1437,30 @@ namespace SebbyLibPorted.Prediction
         public static double GetSpecialSpellEndTime(AIBaseClient unit)
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+
+            if (TrackerUnit == null)
+                return Variables.TickCount;
+
             return TrackerUnit.SpecialSpellFinishTick - Variables.TickCount;
         }
 
         public static double GetLastAutoAttackTime(AIBaseClient unit)
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+
+            if (TrackerUnit == null)
+                return Variables.TickCount;
+
             return Variables.TickCount - TrackerUnit.AaTick;
         }
 
         public static double GetLastNewPathTime(AIBaseClient unit)
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+
+            if (TrackerUnit == null)
+                return Variables.TickCount;
+
             return Variables.TickCount - TrackerUnit.NewPathTick;
         }
 
@@ -1441,12 +1468,18 @@ namespace SebbyLibPorted.Prediction
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
 
+            if (TrackerUnit == null)
+                return Variables.TickCount;
+
             return Variables.TickCount - TrackerUnit.LastInvisableTick;
         }
 
         public static double GetLastStopMoveTime(AIBaseClient unit)
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+
+            if (TrackerUnit == null)
+                return Variables.TickCount;
 
             return Variables.TickCount - TrackerUnit.StopMoveTick;
         }

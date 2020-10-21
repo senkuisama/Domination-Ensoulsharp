@@ -593,7 +593,7 @@ namespace SebbyLibPorted
             /// <summary>
             ///     The orbalker mode
             /// </summary>
-            private OrbwalkingMode _mode = OrbwalkingMode.None;
+            private static OrbwalkingMode _mode = OrbwalkingMode.None;
 
             /// <summary>
             ///     The orbwalking point
@@ -890,7 +890,7 @@ namespace SebbyLibPorted
                 get { return _config.Item("_LimitAttackSpeed").GetValue<MenuBool>().Enabled; }
             }
 
-            public OrbwalkingMode ActiveMode
+            public static OrbwalkingMode ActiveMode
             {
                 get
                 {
@@ -1427,6 +1427,7 @@ namespace SebbyLibPorted
                     }
                     MinionListAA = Cache.GetMinions(Player.Position, 0);
                     var target = GetTarget();
+                    if(target != null)
 
                     Orbwalk(
                         target, _orbwalkingPoint.ToVector2().IsValid() ? _orbwalkingPoint : Game.CursorPos,

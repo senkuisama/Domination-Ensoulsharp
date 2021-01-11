@@ -4,7 +4,6 @@ using System.Linq;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
 using SharpDX;
 
 namespace FSpred.Prediction

@@ -1,5 +1,5 @@
 ﻿using EnsoulSharp;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +18,11 @@ namespace DominationAIO.Champions
     #region EzrealMenu
     public class EzKeysSetting
     {
-        public static readonly MenuKeyBind SemiRKey = new MenuKeyBind("SemiRKey", "R Using Key [Type : Press]", System.Windows.Forms.Keys.T, KeyBindType.Press);
-        public static readonly MenuKeyBind FarmKey = new MenuKeyBind("FarmKey", "Spell Farming [Type : Toggle]", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
-        public static readonly MenuKeyBind HarassKey = new MenuKeyBind("HarassKey", "Harass When Farm [Type : Toggle]", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
-        public static readonly MenuKeyBind Stacks = new MenuKeyBind("Stacks", "Stacks Q [Type : Toggle]", System.Windows.Forms.Keys.M, KeyBindType.Toggle);
-        public static readonly MenuKeyBind Flee = new MenuKeyBind("Flee", "Flee [Type : Press]", System.Windows.Forms.Keys.Z, KeyBindType.Press);
+        public static readonly MenuKeyBind SemiRKey = new MenuKeyBind("SemiRKey", "R Using Key [Type : Press]", Keys.T, KeyBindType.Press);
+        public static readonly MenuKeyBind FarmKey = new MenuKeyBind("FarmKey", "Spell Farming [Type : Toggle]", Keys.A, KeyBindType.Toggle);
+        public static readonly MenuKeyBind HarassKey = new MenuKeyBind("HarassKey", "Harass When Farm [Type : Toggle]", Keys.A, KeyBindType.Toggle);
+        public static readonly MenuKeyBind Stacks = new MenuKeyBind("Stacks", "Stacks Q [Type : Toggle]", Keys.M, KeyBindType.Toggle);
+        public static readonly MenuKeyBind Flee = new MenuKeyBind("Flee", "Flee [Type : Press]", Keys.Z, KeyBindType.Press);
     }
     public class QEzSettings
     {
@@ -87,7 +87,7 @@ namespace DominationAIO.Champions
             SebbyLibMenuAttack = new Menu("OrbWalking@@", "OrbWalking @@");
             new SebbyLibPorted.Orbwalking.Orbwalker(SebbyLibMenuAttack);
             EzSpredictionmenu.Add(SebbyLibMenuAttack);
-            Prediction.Initialize(EzSpredictionmenu);
+            SPredictionMash.Prediction.Initialize(EzSpredictionmenu);
 
             var keys = new Menu("Keys", "Keys");
             keys.Add(EzKeysSetting.SemiRKey).Permashow();
@@ -131,7 +131,7 @@ namespace DominationAIO.Champions
             EzrealMenu.Add(EzSpredictionmenu);
             EzrealMenu.Add(DrawEzSettings.DrawQ);
             EzrealMenu.Add(PacketCast);
-            EzrealMenu.PermaShowText = "(Sprediction) Ezreal";
+            EzrealMenu.PermasShowText = "(Sprediction) Ezreal";
             EzrealMenu.Attach();
             
 
@@ -139,17 +139,46 @@ namespace DominationAIO.Champions
 
 
             Q = new Spell(SpellSlot.Q, 1150f);
-            Q.SetSkillshot(0.25f, 50f, 2000f, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Q.SetSkillshot(0.25f, 50f, 2000f, true, SpellType.Line);
             W = new Spell(SpellSlot.W, 1150f);
-            W.SetSkillshot(0.3f, 60f, 1200f, false, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            W.SetSkillshot(0.3f, 60f, 1200f, false, SpellType.Line);
             E = new Spell(SpellSlot.E, 475f) { Delay = 0.65f };
             R = new Spell(SpellSlot.R, 20000f);
-            R.SetSkillshot(1.10f, 160f, 2000f, false, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            R.SetSkillshot(1.10f, 160f, 2000f, false, SpellType.Line);
 
             Game.OnUpdate += Game_OnUpdate;
-            Orbwalker.OnAction += Orbwalker_OnAction;
+            //Orbwalker.OnAction += Orbwalker_OnAction;
             AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
-            Teleport.OnTeleport += Teleport_OnTeleport;
+            //Teleport.OnTeleport += Teleport_OnTeleport;
+            Teleport.OnTeleport += Teleport_OnTeleport1;
+        }
+
+        private static void Teleport_OnTeleport1(AttackableUnit sender, Teleport.TeleportEventArgs args)
+        {
+            if (sender.IsValid && sender is AIHeroClient)
+            {
+
+                if (args.Type == Teleport.TeleportType.Recall)
+                {
+                    if (args.Status == Teleport.TeleportStatus.Start)
+                    {
+                        RecalFinished = false;
+                        RecalStartTime = Variables.TickCount;
+                        RecalEndTime = args.Duration;
+                        RecallTarget = args.Source;
+                    }
+
+                    if (args.Status == Teleport.TeleportStatus.Abort)
+                    {
+                        RecalFinished = true;
+                    }
+
+                    if (args.Status == Teleport.TeleportStatus.Finish)
+                    {
+                        RecalFinished = true;
+                    }
+                }
+            }
         }
 
         private static void AIHeroClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
@@ -160,15 +189,15 @@ namespace DominationAIO.Champions
                 {
                     LastAfterAA = Environment.TickCount;
                 }
-                if (Orbwalker.IsSpecialAttack(args.SData.Name))
+                if (Orbwalker.IsAutoAttack(args.SData.Name))
                 {
                     LastAfterAA = Environment.TickCount;
                 }
             }
         }
-
-        private static bool BeforeAA, OnAA, AfterAA;
         private static int LastAfterAA = 0;
+        /*private static bool BeforeAA, OnAA, AfterAA;
+        
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if(args.Type == OrbwalkerType.OnAttack)
@@ -194,7 +223,7 @@ namespace DominationAIO.Champions
                 BeforeAA = false;
             }
             else { AfterAA = false; }
-        }         
+        }*/
         private static void Game_OnUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
@@ -227,7 +256,7 @@ namespace DominationAIO.Champions
 
                 if(RHitTime >= RecalEndTime - (Variables.TickCount - RecalStartTime) && RHitTime <= RecalEndTime - (Variables.TickCount - RecalStartTime) + 1000)
                 {
-                    R.Cast(GameObjects.EnemySpawnPoints.FirstOrDefault(i => i.IsValid).Position, PacketCast);
+                    R.Cast(GameObjects.EnemySpawnPoints.FirstOrDefault(i => i.IsValid).Position);
                 }
             }
         }
@@ -236,7 +265,7 @@ namespace DominationAIO.Champions
             if (Player.IsDashing())
                 return;
 
-            if (OnAA || BeforeAA)
+            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA)
                 return;
 
             var targetss = ObjectManager.Get<AIHeroClient>().Where(i => 
@@ -286,9 +315,9 @@ namespace DominationAIO.Champions
                         var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
                         if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                         {
-                            if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                            if (W.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                             {
-                                if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                                if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                 {
                                     return;
                                 }                               
@@ -297,7 +326,7 @@ namespace DominationAIO.Champions
                     }
                     if(!W.IsReady() || !WEzSettings.Wcombo.Enabled || SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target).Hitchance < SebbyLibPorted.Prediction.HitChance.Medium)
                     {
-                        if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                        if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                         {
                             return;
                         }
@@ -315,9 +344,9 @@ namespace DominationAIO.Champions
                                 {
                                     if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     {
-                                        if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                                        if (W.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                         {
-                                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                             {
                                                 return;
                                             }
@@ -337,7 +366,7 @@ namespace DominationAIO.Champions
 
             if (target == null) return;
 
-            if (OnAA || BeforeAA) return;
+            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA) return;
 
             if (!WEzSettings.Wcombo.Enabled || !W.IsReady()) return;
 
@@ -347,7 +376,7 @@ namespace DominationAIO.Champions
                 {
                     if(Environment.TickCount - LastAfterAA >= (Player.AttackDelay - target.DistanceToPlayer() / W.Speed) * 1000 - W.Delay * 100 || Orbwalker.CanAttack())
                     {
-                        if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                        if (W.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                         {
                             if (Q.IsReady())
                             {
@@ -355,7 +384,7 @@ namespace DominationAIO.Champions
 
                                 if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                                 {
-                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                     {
                                         return;
                                     }
@@ -372,9 +401,9 @@ namespace DominationAIO.Champions
 
                     if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                     {
-                        if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                        if (W.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                         {
-                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                             {
                                 return;
                             }
@@ -384,14 +413,14 @@ namespace DominationAIO.Champions
             }
             else
             {
-                if (W.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                if (W.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                 {
                     var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
 
                     if (Q.IsReady() && QEzSettings.Qcombo.Enabled)
                         if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
                         {
-                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                             {
                                 return;
                             }
@@ -409,11 +438,11 @@ namespace DominationAIO.Champions
 
             if (target.HealthPercent > EEzSettings.TargetHeath.Value + 1) return;
 
-            if (OnAA) return;
+            if (FunnySlayerCommon.OnAction.OnAA) return;
 
             EnsoulSharp.SDK.Geometry.Circle EPoints = new EnsoulSharp.SDK.Geometry.Circle(Player.Position, E.Range);
             var Echeck = new Spell(SpellSlot.Unknown, 1000f);
-            Echeck.SetSkillshot(0.3f, 60f, 2000f, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Echeck.SetSkillshot(0.3f, 60f, 2000f, true, SpellType.Line);
             foreach (var EPoint in EPoints.Points)
             {
                 if (Yasuo_LogicHelper.Logichelper.UnderTower(EPoint.ToVector3()))
@@ -425,7 +454,7 @@ namespace DominationAIO.Champions
                 {
                     if (EPoint.CountEnemyHeroesInRange(Player.GetRealAutoAttackRange() + 200) <= EEzSettings.TargetCount.Value)
                     {
-                        if (E.Cast(EPoint, PacketCast))
+                        if (E.Cast(EPoint))
                             return;
                     }
                 }
@@ -457,7 +486,7 @@ namespace DominationAIO.Champions
 
         private static void EzClear()
         {
-            if (OnAA || BeforeAA || !QEzSettings.QClear.Enabled) return;
+            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA || !QEzSettings.QClear.Enabled) return;
 
             if (!EzKeysSetting.FarmKey.Active)
                 return;
@@ -468,7 +497,7 @@ namespace DominationAIO.Champions
 
             foreach(var min in Minions)
             {
-                if (min.IsMinion)
+                if (min.IsMinion())
                 {
                     if (!EzKeysSetting.FarmKey.Active)
                         return;
@@ -481,7 +510,7 @@ namespace DominationAIO.Champions
                             {
                                 if(min.Health < Damage.GetSpellDamage(Player, min, SpellSlot.Q))
                                 {
-                                    Q.Cast(min, PacketCast);
+                                    Q.Cast(min);
                                 }
                                 else
                                 {
@@ -489,13 +518,13 @@ namespace DominationAIO.Champions
                                     if (target != null)
                                         
 
-                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                         return;
                                 }
                             }
                             else
                             {
-                                Q.Cast(min, PacketCast);
+                                Q.Cast(min);
                             }
                         }
                         else
@@ -504,7 +533,7 @@ namespace DominationAIO.Champions
                             if (target != null)
                                 
 
-                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                 return;
                         }
                     }
@@ -522,7 +551,7 @@ namespace DominationAIO.Champions
                             if (target != null)
                                 
 
-                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, PacketCast))
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                 return;
                         }
                     }

@@ -79,7 +79,7 @@ namespace DominationAIO.Champions
                     }
                     else
                     {
-                        var obj = GameObjects.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead).OrderBy(i => i.Health).LastOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
+                        var obj = ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead).OrderBy(i => i.Health).LastOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
                         if (obj != null)
                         {
                             if (Q.Cast(obj) == CastStates.SuccessfullyCasted || Q.CastOnUnit(obj))
@@ -112,7 +112,7 @@ namespace DominationAIO.Champions
                 }
                 else
                 {
-                    var obj = GameObjects.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead).OrderBy(i => i.Health).LastOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
+                    var obj = ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead).OrderBy(i => i.Health).LastOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
                     if (obj != null)
                     {
                         if (Q.Cast(obj) == CastStates.SuccessfullyCasted || Q.CastOnUnit(obj))
@@ -145,7 +145,7 @@ namespace DominationAIO.Champions
                 }
                 else
                 {
-                    var obj = GameObjects.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead).OrderBy(i => i.Health).LastOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
+                    var obj = ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead).OrderBy(i => i.Health).LastOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
                     if (obj != null)
                     {
                         if (Q.Cast(obj) == CastStates.SuccessfullyCasted || Q.CastOnUnit(obj))

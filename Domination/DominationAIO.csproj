@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <CscToolPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\Roslyn</CscToolPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -82,33 +83,32 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EnsoulSharp.Sandbox">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Sandbox.dll</HintPath>
+    <Reference Include="EnsoulSharp">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
     </Reference>
-    <Reference Include="EnsoulSharp.SDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bcecb37b3b5656dd, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.SDK.dll</HintPath>
-    </Reference>
-    <Reference Include="EnsoulSharp.Wrapper">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\EnsoulSharp.Wrapper.dll</HintPath>
+    <Reference Include="EnsoulSharp.SDK">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="FunnySlayerCommon">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\FunnySlayerCommon.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\FunnySlayerCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\Newtonsoft.Json.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLibPorted">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SebbyLibPorted.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SebbyLibPorted.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
-    <Reference Include="SPrediction">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\System\SPrediction.dll</HintPath>
+    <Reference Include="SharpDX.Mathematics">
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -123,8 +123,6 @@
     <Compile Include="Champions\Ezreal.cs" />
     <Compile Include="Champions\MasterYi.cs" />
     <Compile Include="Champions\Pyke.cs" />
-    <Compile Include="Champions\Qiyana.cs" />
-    <Compile Include="Champions\Rengar.cs" />
     <Compile Include="Champions\Samira.cs" />
     <Compile Include="Champions\Sion.cs" />
     <Compile Include="Champions\GangPlank\Barrel.cs" />
@@ -134,43 +132,6 @@
     <Compile Include="Champions\GangPlank\Program.cs" />
     <Compile Include="Champions\GangPlank\version.cs" />
     <Compile Include="Champions\Kaisa By FunnySlayer.cs" />
-    <Compile Include="Champions\Irelia By FunnySlayer.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Logic.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Menu.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Notifications.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\PRADALoader.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyInitializer\Spells.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\AntiAssasins.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\Interrupter.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\Jungle.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\OnGapcloser.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\E\OnUpdate.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\OnDraw.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\OnProcessSpellcast.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\OnUpdate.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Others\SkinHack.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\AfterAttack.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\BeforeAttack.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnAttack.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnCastSpell.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnGapcloser.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnProcessSpellCast.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\OnUpdate.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\Q\Tumble.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\R\BeforeAttack.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyLogic\R\OnCastSpell.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyCache.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyExtensions.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyGeometry.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyLists.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MySpellDb.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\MyUtils\MyWizard.cs" />
-    <Compile Include="Champions\PRADAVayneReborn\Program.cs" />
-    <Compile Include="Champions\Riven By FunnySlayer.cs" />
-    <Compile Include="Champions\Aphelios By FunnySlayer.cs" />
-    <Compile Include="Champions\TahmKench.cs" />
-    <Compile Include="Champions\URF_Lucian.cs" />
-    <Compile Include="Champions\Yasuo Credit Brian.cs" />
     <Compile Include="Champions\Zoe.cs" />
     <Compile Include="Common\Logichelper.cs" />
     <Compile Include="Evade\BlockSpellData.cs" />
@@ -210,6 +171,14 @@
     <Compile Include="Champions\Troll Chat xD\Program.cs" />
     <Compile Include="Champions\skinhack.cs" />
     <Compile Include="Common\YasuoSpellDatabase.cs" />
+    <Compile Include="NewPlugins\Irelia\Helper.cs" />
+    <Compile Include="NewPlugins\Irelia\EventsIrelia.cs" />
+    <Compile Include="NewPlugins\Irelia\Irelia.cs" />
+    <Compile Include="NewPlugins\Irelia\LogicE.cs" />
+    <Compile Include="NewPlugins\Irelia\LogicQ.cs" />
+    <Compile Include="NewPlugins\Irelia\LogicR.cs" />
+    <Compile Include="NewPlugins\Irelia\MenuIrelia.cs" />
+    <Compile Include="NewPlugins\Vayne\MyVayne.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

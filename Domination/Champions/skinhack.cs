@@ -2,8 +2,7 @@
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.Utils;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
-using EnsoulSharp.SDK.Prediction;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,19 +20,15 @@ namespace DominationAIO.Champions
         {
             try
             {
-                Game.Print("SkinHack v1.0.1");
-                Game.Print("Thanks for help 011110001");
-                Game.Print("Creator: emredeger");
-
                 menu = new Menu("skinhack", "SkinHack", true);
 
                 var champs = menu.Add(new Menu("Champions", "Champions"));
                 var allies = champs.Add(new Menu("Allies", "Allies"));
                 var enemies = champs.Add(new Menu("Enemies", "Enemies"));
-
-                foreach (var hero in GameObjects.Heroes.Where(h => !h.CharacterName.Equals("Ezreal")))
+                ObjectManager.Player.SetSkin(1);
+                foreach (var hero in GameObjects.Heroes)
                 {
-                    var champMenu = new Menu(hero.CharacterName, hero.CharacterName);
+                    var champMenu = new Menu(hero.CharacterName + hero.NetworkId + hero.Name, hero.CharacterName);
                     champMenu.Add(new MenuSlider("SkinIndex", "Skin Index", 1, 1, 50));
                     champMenu.GetValue<MenuSlider>("SkinIndex").ValueChanged += (s, e) =>
                     {

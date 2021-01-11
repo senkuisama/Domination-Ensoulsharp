@@ -68,7 +68,7 @@ namespace FSpred.Prediction
 				}
 				while (list.Count > 1)
 				{
-					var mec = MEC.GetMec((from h in list
+					var mec = Mec.GetMec((from h in list
 					select h.Position).ToList<Vector2>());
 					if (mec.Radius <= input.RealRadius - 10f && Vector2.DistanceSquared(mec.Center, input.RangeCheckFrom.ToVector2()) < input.Range * input.Range)
 					{

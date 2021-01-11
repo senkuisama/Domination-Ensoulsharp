@@ -2,8 +2,7 @@
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.Utility;
-using EnsoulSharp.SDK.Prediction;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +47,7 @@ namespace DominationAIO.Champions
             public static MenuBool E2 = new MenuBool("E2", "----> E2");
             public class E2Use
             {
-                public static MenuKeyBind TurretE2 = new MenuKeyBind("TurretE2", "Use on turret [Type: Toggle]", System.Windows.Forms.Keys.T, KeyBindType.Toggle) { Active = false };
+                public static MenuKeyBind TurretE2 = new MenuKeyBind("TurretE2", "Use on turret [Type: Toggle]", Keys.T, KeyBindType.Toggle) { Active = false };
                 public static MenuSlider TargetHeath = new MenuSlider("TargetHeath", "Target Heath <= %", 50, 0, 101);
                 public static MenuSlider CountAlly = new MenuSlider("CountAlly", "Ally in 600 form target Count", 1, 0, 4);
                 public static MenuSlider E2mana = new MenuSlider("E2mana", "Energy > ", (int)ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost, 0, (int)ObjectManager.Player.MaxMana);
@@ -58,7 +57,7 @@ namespace DominationAIO.Champions
 
         public class RSettings
         {
-            public static MenuKeyBind Rcombo = new MenuKeyBind("Rcombo", "R Combo [Type: Toggle]", System.Windows.Forms.Keys.G, KeyBindType.Toggle);
+            public static MenuKeyBind Rcombo = new MenuKeyBind("Rcombo", "R Combo [Type: Toggle]", Keys.G, KeyBindType.Toggle);
             public static MenuBool RPassive = new MenuBool("RPassive", "----> Use R When have Passive", false);
         }
 
@@ -86,19 +85,19 @@ namespace DominationAIO.Champions
             // Check Spell
             //
             Q = new Spell(SpellSlot.Q, 500);
-            Q.SetSkillshot(0.25f, 70f, 1200f, false, SkillshotType.Cone);
+            Q.SetSkillshot(0.25f, 70f, 1200f, false, SpellType.Cone);
 
             W = new Spell(SpellSlot.W, 250);
-            W.SetSkillshot(0.3f, 350f, 1200f, false, SkillshotType.Circle);
+            W.SetSkillshot(0.3f, 350f, 1200f, false, SpellType.Circle);
 
             E = new Spell(SpellSlot.E, 800);
-            E.SetSkillshot(0.25f, 100f, 800, true, false,  SkillshotType.Line, HitChance.High);
+            E.SetSkillshot(0.25f, 100f, 800, true, SpellType.Line, HitChance.High);
 
             R = new Spell(SpellSlot.R, 675);
             R.SetTargetted(0.3f, float.MaxValue);
 
             R2 = new Spell(SpellSlot.R, 750);
-            R2.SetSkillshot(0.125f, 80f, float.MaxValue, false, SkillshotType.Line);
+            R2.SetSkillshot(0.125f, 80f, float.MaxValue, false, SpellType.Line);
 
             //
             // Check Menu
@@ -151,7 +150,7 @@ namespace DominationAIO.Champions
             //
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
-            Orbwalker.OnAction += Orbwalker_OnAction;
+            //Orbwalker.OnAction += Orbwalker_OnAction;
 
             AIHeroClient.OnAggro += AIHeroClient_OnAggro;
 
@@ -177,7 +176,7 @@ namespace DominationAIO.Champions
             }
         }
 
-        public static bool BeforeAttack = false;
+        /*public static bool BeforeAttack = false;
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if(args.Type == OrbwalkerType.BeforeAttack)
@@ -188,7 +187,7 @@ namespace DominationAIO.Champions
             {
                 BeforeAttack = false;
             }
-        }
+        }*/
 
         public static bool CanUseQNow = false;
         public static bool CastedAndHit = false;
@@ -281,7 +280,7 @@ namespace DominationAIO.Champions
                 CanUseQNow = false;
             }
 
-            if (Player.HavePassive() && BeforeAttack && Variables.TickCount - Last_E >= 800)
+            if (Player.HavePassive() && FunnySlayerCommon.OnAction.BeforeAA && Variables.TickCount - Last_E >= 800)
             {
                 CanUseQNow = true;
             }
@@ -324,13 +323,13 @@ namespace DominationAIO.Champions
                     if (Player.HasBuff("akaliwstealth"))
                     {
                         if(!Player.HavePassive())
-                            Orbwalker.AttackState = false;
+                            Orbwalker.AttackEnabled = false;
                         else
-                            Orbwalker.AttackState = true;
+                            Orbwalker.AttackEnabled = true;
                     }
                     else
                     {
-                        Orbwalker.AttackState = true;
+                        Orbwalker.AttackEnabled = true;
                     }
                     Combo();
                     break;
@@ -338,8 +337,8 @@ namespace DominationAIO.Champions
                     Clear();
                     break;
                 default:
-                    Orbwalker.AttackState = true;
-                    Orbwalker.MovementState = true;
+                    Orbwalker.AttackEnabled = true;
+                    Orbwalker.MoveEnabled = true;
                     break;
             }
         }
@@ -398,14 +397,14 @@ namespace DominationAIO.Champions
                     && target.Position.Extend(Player.Position, +570).IsValid()
                     )
                 {
-                    Orbwalker.AttackState = false;
+                    Orbwalker.AttackEnabled = false;
                     Orbwalker.SetOrbwalkerPosition(target.Position.Extend(Player.Position, +600));
                     //Player.IssueOrder(GameObjectOrder.MoveTo, target.Position.Extend(Player.Position, +600));
                 }
                 else
                 {
                     Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
-                    Orbwalker.AttackState = true;
+                    Orbwalker.AttackEnabled = true;
                 }
 
                 if (Q.IsReady() && CanUseQNow == true && Q.GetPrediction(target).CastPosition.DistanceToPlayer() <= Q.Range)
@@ -443,7 +442,7 @@ namespace DominationAIO.Champions
                 }
                 else
                 {
-                    var Epred = E.GetPrediction(target, false, -1, CollisionObjects.Minions | CollisionObjects.YasuoWall);
+                    var Epred = E.GetPrediction(target, false, -1, new CollisionObjects[] { CollisionObjects.Minions, CollisionObjects.YasuoWall});
                     if (W.IsReady() && E.IsReady() && Player.Mana - E.Mana <= Q.Mana)
                     {
                         if(E.Name == "AkaliE")

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using FSpred.Prediction;
 
 namespace DominationAIO.Champions
@@ -102,10 +102,10 @@ namespace DominationAIO.Champions
 
             Drawing.OnDraw += BRANDDRAWING;
 
-            Orbwalker.OnAction += Orbwalker_OnAction;
+            //Orbwalker.OnAction += Orbwalker_OnAction;
         }
 
-        private static bool AfterAA = false;
+        /*private static bool AfterAA = false;
         private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if(args.Type == OrbwalkerType.AfterAttack)
@@ -116,7 +116,7 @@ namespace DominationAIO.Champions
             {
                 AfterAA = false;
             }
-        }
+        }*/
 
         private static void Game_OnUpdate(EventArgs args)
         {
@@ -130,9 +130,9 @@ namespace DominationAIO.Champions
                     RPoly = null;
             }
             //Poly
-            Q.Range = 1000f; Q.Delay = 0.25f; Q.Width = 55f; Q.Speed = 1600f; Q.Collision = true; Q.Type = EnsoulSharp.SDK.Prediction.SkillshotType.Line;
+            Q.Range = 1000f; Q.Delay = 0.25f; Q.Width = 55f; Q.Speed = 1600f; Q.Collision = true; Q.Type = SpellType.Line;
             //Q
-            W.Range = 900f; W.Delay = 0.75f; W.Width = 200f; W.Speed = float.MaxValue; W.Collision = false; W.Type = EnsoulSharp.SDK.Prediction.SkillshotType.Circle;
+            W.Range = 900f; W.Delay = 0.75f; W.Width = 200f; W.Speed = float.MaxValue; W.Collision = false; W.Type = SpellType.Circle;
             //W
             E.Range = 675f; E.SetTargetted(0.25f, float.MaxValue);
             //E
@@ -208,8 +208,8 @@ namespace DominationAIO.Champions
             {
                 if (BrandSettings.AcceptQ.Enabled)
                 {
-                    var pred = Prediction.GetPrediction(Q, target);
-                    if(pred != null && pred.Hitchance >= HitChance.High)
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                    if(pred != null && pred.Hitchance >= FSpred.Prediction.HitChance.High)
                     {
                         if (Q.Cast(pred.CastPosition))
                         {
@@ -226,8 +226,8 @@ namespace DominationAIO.Champions
             {
                 if (!BrandSettings.OnlyStun.Enabled)
                 {
-                    var pred = Prediction.GetPrediction(Q, target);
-                    if (pred != null && pred.Hitchance >= HitChance.High)
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                    if (pred != null && pred.Hitchance >= FSpred.Prediction.HitChance.High)
                     {
                         if (Q.Cast(pred.CastPosition))
                         {
@@ -252,7 +252,7 @@ namespace DominationAIO.Champions
 
             if((ObjectManager.Player.Level < 3 || Q.State == SpellState.NotLearned) && BrandSettings.EarlyCombo.Enabled)
             {
-                if (AfterAA)
+                if (FunnySlayerCommon.OnAction.AfterAA)
                 {
                     var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
                     if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
@@ -431,8 +431,8 @@ namespace DominationAIO.Champions
                 if (target == null)
                     return;
 
-                var pred = Prediction.GetPrediction(W, target);
-                if(pred != null && pred.Hitchance >= HitChance.High)
+                var pred = FSpred.Prediction.Prediction.GetPrediction(W, target);
+                if(pred != null && pred.Hitchance >= FSpred.Prediction.HitChance.High)
                 {
                     WPoly = new Geometry.Circle(pred.CastPosition, 260f);
                     var targethit = GameObjects.EnemyHeroes.Where(i => WPoly.IsInside(i.Position));
@@ -459,12 +459,12 @@ namespace DominationAIO.Champions
             if (targets == null)
                 return;
 
-            var target = targets.FirstOrDefault(i => Prediction.GetPrediction(Q, i).Hitchance >= HitChance.High);
+            var target = targets.FirstOrDefault(i => FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= FSpred.Prediction.HitChance.High);
             if (target == null)
                 return;
 
-            var pred = Prediction.GetPrediction(Q, target);
-            if(pred != null && pred.Hitchance >= HitChance.High)
+            var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+            if(pred != null && pred.Hitchance >= FSpred.Prediction.HitChance.High)
             {
                 if (Q.Cast(pred.CastPosition))
                     return;

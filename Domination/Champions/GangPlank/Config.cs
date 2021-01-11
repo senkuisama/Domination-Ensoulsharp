@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 
 namespace e.Motion_Gangplank
 {
@@ -23,10 +23,10 @@ namespace e.Motion_Gangplank
 
             //Key
             Menu keyMenu = new Menu("Key","key");
-            keyMenu.Add(new MenuKeyBind("key.q", "Semi-Automatic Q", System.Windows.Forms.Keys.Q, KeyBindType.Press));
+            keyMenu.Add(new MenuKeyBind("key.q", "Semi-Automatic Q", Keys.Q, KeyBindType.Press));
             keyMenu.Add(new MenuList("key.emode", "Semi Automatic E Mode", new[] { "Never use", "Place Connecting Barrel", "Place Connecting Barrel + Explode" }, 0));
-            keyMenu.Add(new MenuKeyBind("key.e", "Semi-Automatic E", System.Windows.Forms.Keys.A, KeyBindType.Press));
-            keyMenu.Add(new MenuKeyBind("key.r", "Semi-Automatic R", System.Windows.Forms.Keys.Z, KeyBindType.Press));
+            keyMenu.Add(new MenuKeyBind("key.e", "Semi-Automatic E", Keys.A, KeyBindType.Press));
+            keyMenu.Add(new MenuKeyBind("key.r", "Semi-Automatic R", Keys.Z, KeyBindType.Press));
             Menu.Add(keyMenu);
            
             //Combo

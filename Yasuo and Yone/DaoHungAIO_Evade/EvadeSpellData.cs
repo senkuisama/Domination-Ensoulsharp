@@ -21,7 +21,8 @@ namespace DaoHungAIO.Evade
     #region
 
     using EnsoulSharp;
-    using EnsoulSharp.SDK.MenuUI.Values;
+    using EnsoulSharp.SDK.MenuUI;
+
 
     #endregion
 
@@ -70,10 +71,10 @@ namespace DaoHungAIO.Evade
         }
 
         public bool Enabled => EvadeManager.EvadeSpellMenu["Enabled" + Slot] == null || 
-            EvadeManager.EvadeSpellMenu["Enabled" + Slot];
+            EvadeManager.EvadeSpellMenu["Enabled" + Slot].GetValue<MenuBool>().Enabled;
 
         public bool Tower => EvadeManager.EvadeSpellMenu["Tower" + Slot] == null ||
-            EvadeManager.EvadeSpellMenu["Tower" + Slot];
+            EvadeManager.EvadeSpellMenu["Tower" + Slot].GetValue<MenuBool>().Enabled;
 
         public bool IsReady()
         {

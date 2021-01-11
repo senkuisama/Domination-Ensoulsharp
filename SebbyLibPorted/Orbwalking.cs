@@ -9,7 +9,7 @@ using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.Utility;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 
 namespace SebbyLibPorted
 {
@@ -130,7 +130,7 @@ namespace SebbyLibPorted
             var missile = sender as MissileClient;
             if (DelayOnFire != 0 && missile != null && Player.AttackDelay > 1 / 2f)
             {
-                if (missile.SpellCaster.IsMe && EnsoulSharp.SDK.Orbwalker.IsAutoAttack(missile.SData.Name) && (DelayOnFireId == (int)missile.TargetID || DelayOnFireId == (int)missile.TargetNetID))
+                if (missile.SpellCaster.IsMe && EnsoulSharp.SDK.Orbwalker.IsAutoAttack(missile.SData.Name) && (DelayOnFireId == (int)missile.NetworkId || DelayOnFireId == (int)missile.Target.NetworkId))
                 {
                     var x = Variables.TickCount - DelayOnFire;
 
@@ -356,7 +356,7 @@ namespace SebbyLibPorted
 
             if (playerPosition.DistanceSquared(position) < holdAreaRadius * holdAreaRadius)
             {
-                if (Player.Path.PathLength() > 0)
+                if (Player.Path.Length > 0)
                 {
                     Player.IssueOrder(GameObjectOrder.Stop, playerPosition);
                     LastMoveCommandPosition = playerPosition;
@@ -378,7 +378,7 @@ namespace SebbyLibPorted
             {
                 var movePath = Player.GetPath(point);
 
-                if (movePath.PathLength() > 1)
+                if (movePath.Length > 1)
                 {
                     var v1 = currentPath[1] - currentPath[0];
                     var v2 = movePath[1] - movePath[0];
@@ -641,7 +641,7 @@ namespace SebbyLibPorted
                 misc.Add(
                     new MenuBool("_LimitAttackSpeed", "Don't kite if Attack Speed > 2.5").SetValue(false));
                 misc.Add(
-                    new MenuKeyBind("_FocusMinionsOverTurrets", "Focus minions over objectives", System.Windows.Forms.Keys.M, KeyBindType.Toggle));
+                    new MenuKeyBind("_FocusMinionsOverTurrets", "Focus minions over objectives", Keys.M, KeyBindType.Toggle));
 
                 _config.Add(misc);
 
@@ -662,21 +662,21 @@ namespace SebbyLibPorted
 
                 /*Load the menu*/
                 _config.Add(
-                    new MenuKeyBind("_LastHit", "Last hit", System.Windows.Forms.Keys.X, KeyBindType.Press));
+                    new MenuKeyBind("_LastHit", "Last hit", Keys.X, KeyBindType.Press));
 
-                _config.Add(new MenuKeyBind("_Farm", "Mixed", System.Windows.Forms.Keys.C, KeyBindType.Press));
-
-                _config.Add(
-                    new MenuKeyBind("_Freeze", "Freeze", System.Windows.Forms.Keys.N, KeyBindType.Press));
+                _config.Add(new MenuKeyBind("_Farm", "Mixed", Keys.C, KeyBindType.Press));
 
                 _config.Add(
-                    new MenuKeyBind("_LaneClear", "LaneClear", System.Windows.Forms.Keys.V, KeyBindType.Press));
+                    new MenuKeyBind("_Freeze", "Freeze", Keys.N, KeyBindType.Press));
 
                 _config.Add(
-                    new MenuKeyBind("_Orbwalk", "Combo", System.Windows.Forms.Keys.Space, KeyBindType.Press));
+                    new MenuKeyBind("_LaneClear", "LaneClear", Keys.V, KeyBindType.Press));
 
                 _config.Add(
-                    new MenuKeyBind("_StillCombo", "Combo without moving", System.Windows.Forms.Keys.N, KeyBindType.Press));
+                    new MenuKeyBind("_Orbwalk", "Combo", Keys.Space, KeyBindType.Press));
+
+                _config.Add(
+                    new MenuKeyBind("_StillCombo", "Combo without moving", Keys.N, KeyBindType.Press));
 
                 _config.Item("_StillCombo").GetValue<MenuKeyBind>().ValueChanged +=
                     (sender, args) => { Move = !_config.GetValue<MenuKeyBind>("_StillCombo").Active; };
@@ -860,12 +860,12 @@ namespace SebbyLibPorted
                 /*_config.Item("FocusMinionsOverTurrets")
                     .PermaShowText(_config.Item("FocusMinionsOverTurrets").GetValue<MenuKeyBind>().Active);*/
 
-                if (_config.Item("_LastHitHelper").GetValue<MenuBool>())
+                if (_config.Item("_LastHitHelper").GetValue<MenuBool>().Enabled)
                 {
                     foreach (var minion in
                         Cache.MinionsListEnemy
                             .Where(
-                                x => x.Name.ToLower().Contains("minion") && x.IsHPBarRendered && x.IsValidTarget(1000)))
+                                x => x.Name.ToLower().Contains("minion") && x.IsValidTarget() && x.IsValidTarget(1000)))
                     {
                         if (minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion))
                         {
@@ -950,7 +950,7 @@ namespace SebbyLibPorted
                 if (_config.Item(name) == null)
                 {
                     _config.AddItem(
-                        new MenuKeyBind(name, displayname, (System.Windows.Forms.Keys)key, KeyBindType.Press));
+                        new MenuKeyBind(name, displayname, (Keys)key, KeyBindType.Press));
                 }
             }
 
@@ -1003,7 +1003,7 @@ namespace SebbyLibPorted
                 }
 
                 if ((mode == OrbwalkingMode.Mixed || mode == OrbwalkingMode.LaneClear) &&
-                    !_config.Item("_PriorizeFarm").GetValue<MenuBool>())
+                    !_config.Item("_PriorizeFarm").GetValue<MenuBool>().Enabled)
                 {
                     var target = TargetSelector.GetTarget(-1, DamageType.Physical);
                     if (target != null && target.InAutoAttackRange())
@@ -1012,13 +1012,13 @@ namespace SebbyLibPorted
                     }
                 }
 
-                if (_config.Item("_AttackBarrel").GetValue<MenuBool>() && ((mode == OrbwalkingMode.LaneClear || mode == OrbwalkingMode.Mixed || mode == OrbwalkingMode.LastHit || mode == OrbwalkingMode.Freeze)))
+                if (_config.Item("_AttackBarrel").GetValue<MenuBool>().Enabled && ((mode == OrbwalkingMode.LaneClear || mode == OrbwalkingMode.Mixed || mode == OrbwalkingMode.LastHit || mode == OrbwalkingMode.Freeze)))
                 {
                     var enemyGangPlank = GameObjects.EnemyHeroes.FirstOrDefault(e => e.CharacterName.Equals("gangplank", StringComparison.InvariantCultureIgnoreCase));
 
                     if (enemyGangPlank != null)
                     {
-                        var barrels = Cache.GetMinions(Player.Position, 0, MinionTeam.Enemy).Where(minion => minion.Team == GameObjectTeam.Neutral && minion.SkinName == "gangplankbarrel" && minion.IsHPBarRendered && minion.IsValidTarget() && minion.InAutoAttackRange());
+                        var barrels = Cache.GetMinions(Player.Position, 0, MinionTeam.Enemy).Where(minion => minion.Team == GameObjectTeam.Neutral && minion.SkinName == "gangplankbarrel" && minion.IsValidTarget() && minion.IsValidTarget() && minion.InAutoAttackRange());
 
                         foreach (var barrel in barrels)
                         {
@@ -1068,7 +1068,7 @@ namespace SebbyLibPorted
                             var predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay);
 
 
-                            var damage = Player.CalculatePhysicalDamage(minion, _config.Item("_PassiveDmg", true).GetValue<MenuBool>()) + _config.Item("DamageAdjust").GetValue<MenuSlider>().Value;
+                            var damage = Player.CalculatePhysicalDamage(minion, 0) + _config.Item("DamageAdjust").GetValue<MenuSlider>().Value;
 
 
                             var killable = predHealth <= damage;
@@ -1153,7 +1153,7 @@ namespace SebbyLibPorted
                 {
                     var jminions = Cache.GetMinions(Player.Position, 0, MinionTeam.All);
 
-                    result = _config.Item("_Smallminionsprio").GetValue<MenuBool>()
+                    result = _config.Item("_Smallminionsprio").GetValue<MenuBool>().Enabled
                         ? jminions.MinOrDefault(mob => mob.MaxHealth)
                         : jminions.MaxOrDefault(mob => mob.MaxHealth);
 
@@ -1394,8 +1394,8 @@ namespace SebbyLibPorted
 
                 if (minion.Team == GameObjectTeam.Neutral && includeBarrel)
                 {
-                    return _config.Item("_AttackBarrel").GetValue<MenuBool>() &&
-                           minion.SkinName == "gangplankbarrel" && minion.IsHPBarRendered;
+                    return _config.Item("_AttackBarrel").GetValue<MenuBool>().Enabled &&
+                           minion.SkinName == "gangplankbarrel" && minion.IsValidTarget();
                 }
                 var minion2 = minion as AIMinionClient;
                 /*if ()
@@ -1403,7 +1403,7 @@ namespace SebbyLibPorted
                     return _config.Item("AttackWards").GetValue<MenuBool>().Enabled;
                 }*/
 
-                return (_config.Item("_AttackPetsnTraps").GetValue<MenuBool>() || SPredictionMash1.MinionManager.IsMinion(minion2)) &&
+                return (_config.Item("_AttackPetsnTraps").GetValue<MenuBool>().Enabled || SPredictionMash1.MinionManager.IsMinion(minion2)) &&
                        minion.SkinName != "gangplankbarrel";
             }
 

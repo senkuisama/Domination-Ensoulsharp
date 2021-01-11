@@ -339,7 +339,7 @@ namespace SebbyLibPorted
             return points;
         }
 
-        private static void Game_OnWndProc(GameWndProcEventArgs args)
+        private static void Game_OnWndProc(GameWndEventArgs args)
         {
             if (args.Msg == 123 && blockMove)
             {
@@ -391,7 +391,7 @@ namespace SebbyLibPorted
                 if (!YasuoInGame)
                     return;
 
-                if (!sender.IsEnemy || sender.IsMinion || Orbwalker.IsAutoAttack(args.SData.Name) || sender.Type != GameObjectType.AIHeroClient)
+                if (sender.IsAlly == true || sender.IsMinion() || Orbwalker.IsAutoAttack(args.SData.Name) || sender.Type != GameObjectType.AIHeroClient)
                     return;
 
                 if (args.SData.Name == "YasuoWMovingWall")

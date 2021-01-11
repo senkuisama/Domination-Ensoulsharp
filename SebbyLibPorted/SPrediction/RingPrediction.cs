@@ -20,7 +20,6 @@ using System.Collections.Generic;
 
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.Prediction;
 
 using SharpDX;
 

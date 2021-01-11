@@ -1,6 +1,6 @@
 ﻿/*
  Copyright 2015 - 2015 SPrediction
- AIHeroClientExtensions.cs is part of SPrediction
+ Obj_AI_HeroExtensions.cs is part of SPrediction
  
  SPrediction is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace SPredictionMash1
         public static int MovImmobileTime(this AIHeroClient t)
         {
             Prediction.AssertInitializationMode();
-            return PathTracker.EnemyInfo[t.NetworkId].IsStopped ? Environment.TickCount - PathTracker.EnemyInfo[t.NetworkId].StopTick : 0;
+            return PathTracker.EnemyInfo[(uint)t.NetworkId].IsStopped ? Environment.TickCount - PathTracker.EnemyInfo[(uint)t.NetworkId].StopTick : 0;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace SPredictionMash1
         public static int LastMovChangeTime(this AIHeroClient t)
         {
             Prediction.AssertInitializationMode();
-            return Environment.TickCount - PathTracker.EnemyInfo[t.NetworkId].LastWaypointTick;
+            return Environment.TickCount - PathTracker.EnemyInfo[(uint)t.NetworkId].LastWaypointTick;
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace SPredictionMash1
         public static float AvgMovChangeTime(this AIHeroClient t)
         {
             Prediction.AssertInitializationMode();
-            return PathTracker.EnemyInfo[t.NetworkId].AvgTick + ConfigMenu.IgnoreReactionDelay;
+            return PathTracker.EnemyInfo[(uint)t.NetworkId].AvgTick + ConfigMenu.IgnoreReactionDelay;
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace SPredictionMash1
         public static float AvgPathLenght(this AIHeroClient t)
         {
             Prediction.AssertInitializationMode();
-            return PathTracker.EnemyInfo[t.NetworkId].AvgPathLenght;
+            return PathTracker.EnemyInfo[(uint)t.NetworkId].AvgPathLenght;
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace SPredictionMash1
         public static float LastAngleDiff(this AIHeroClient t)
         {
             Prediction.AssertInitializationMode();
-            return PathTracker.EnemyInfo[t.NetworkId].LastAngleDiff;
+            return PathTracker.EnemyInfo[(uint)t.NetworkId].LastAngleDiff;
         }
     }
 }

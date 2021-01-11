@@ -8,10 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.MenuUI.Values;
+using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.Utility;
 using SharpDX;
-using SharpDX.Direct3D;
 using Color = System.Drawing.Color;
 
 namespace e.Motion_Gangplank
@@ -178,7 +177,7 @@ namespace e.Motion_Gangplank
             }
             if (Config.Menu["Killsteal"]["killsteal.r"].GetValue<MenuBool>().Enabled && Config.Menu["Key"]["key.r"].GetValue<MenuKeyBind>().Active && R.IsReady() && UltimateToBeUsed && UltimateTarget != null)
             {
-                R.Cast(SPrediction.Prediction.GetFastUnitPosition(UltimateTarget,150));
+                R.Cast(SPredictionMash.Prediction.GetFastUnitPosition(UltimateTarget,150));
             }
         }
 
@@ -291,7 +290,7 @@ namespace e.Motion_Gangplank
 
         private static void Harass()
         {           
-            if (Q.IsReady() && Config.Menu["Harass"]["harass.q"].GetValue<MenuBool>() && Orbwalker.ActiveMode == OrbwalkerMode.Harass)
+            if (Q.IsReady() && Config.Menu["Harass"]["harass.q"].GetValue<MenuBool>().Enabled && Orbwalker.ActiveMode == OrbwalkerMode.Harass)
             {
                 AIHeroClient target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                 if (target != null)
@@ -304,7 +303,7 @@ namespace e.Motion_Gangplank
         private static void AutoE()
         {
             //Auto E - Static List
-            if (Config.Menu["Miscellanious"]["misc.autoE"].GetValue<MenuBool>() && E.IsReady() && E.Instance.Ammo > 1 && !AllBarrel.Any(b => b.GetBarrel().Distance(Player) <= 1200))
+            if (Config.Menu["Miscellanious"]["misc.autoE"].GetValue<MenuBool>().Enabled && E.IsReady() && E.Instance.Ammo > 1 && !AllBarrel.Any(b => b.GetBarrel().Distance(Player) <= 1200))
             {
                 AIHeroClient target = TargetSelector.GetTarget(1400,DamageType.Physical);
                 List<Vector2> possiblePositions = BarrelPositions.Where(pos => pos.Distance(Player) <= E.Range).ToList();
@@ -326,7 +325,7 @@ namespace e.Motion_Gangplank
 
         private static void DrawE()
         {            
-            if (E.IsReady() && Config.Menu["Drawings"]["drawings.ex"].GetValue<MenuBool>())
+            if (E.IsReady() && Config.Menu["Drawings"]["drawings.ex"].GetValue<MenuBool>().Enabled)
             {
                 float lowest = 1600;
                 Vector3 bPos = Vector3.Zero;
@@ -350,7 +349,7 @@ namespace e.Motion_Gangplank
         {
             if ((Player.Position.Distance(new Vector3(394, 461, 171)) <= 1000 ||
                  Player.Position.Distance(new Vector3(14340, 14391, 170)) <= 1000) &&
-                Player.GetBuffCount("gangplankbilgewatertoken") >= 500 && Config.Menu["Drawings"]["drawings.warning"].GetValue<MenuBool>())
+                Player.GetBuffCount("gangplankbilgewatertoken") >= 500 && Config.Menu["Drawings"]["drawings.warning"].GetValue<MenuBool>().Enabled)
             {
                 Drawing.DrawText(200,200,Color.Red,"Don't forget to buy Ultimate Upgrade with Silver Serpents");
             }
@@ -407,7 +406,7 @@ namespace e.Motion_Gangplank
             //    }
             //}
             //Config.Menu["Combo"]["combo.qe"].GetValue<MenuBool>()
-            if (Config.Menu["Combo"]["combo.aae"].GetValue<MenuBool>() && Orbwalker.CanAttack())
+            if (Config.Menu["Combo"]["combo.aae"].GetValue<MenuBool>().Enabled && Orbwalker.CanAttack())
             {
                 List<Barrel> barrelsInAutoAttackRange = AllBarrel.Where(b => b.GetBarrel().Distance(Player) <= ObjectManager.Player.GetRealAutoAttackRange() && b.CanAANow()).ToList();
                 if (barrelsInAutoAttackRange.Any() && (Player.Buffs.All(buff => buff.Name != "gangplankpassiveattack")))
@@ -424,7 +423,7 @@ namespace e.Motion_Gangplank
                 }
             }
 
-            if (Config.Menu["Combo"]["combo.qe"].GetValue<MenuBool>() && Q.IsReady() && !BarrelAAForced)
+            if (Config.Menu["Combo"]["combo.qe"].GetValue<MenuBool>().Enabled && Q.IsReady() && !BarrelAAForced)
             {
                 AIHeroClient target = TargetSelector.GetTarget(1200, DamageType.Physical);
                 if (target != null)
@@ -458,7 +457,7 @@ namespace e.Motion_Gangplank
                                 }
                             }
                         }
-                        if (Config.Menu["Combo"]["combo.ex"].GetValue<MenuBool>())
+                        if (Config.Menu["Combo"]["combo.ex"].GetValue<MenuBool>().Enabled)
                         {
                             foreach (var b in AllBarrel)
                             {
@@ -506,7 +505,7 @@ namespace e.Motion_Gangplank
             }
             //Config.Menu["Key"]["key.q"].GetValue<MenuKeyBind>().Active
 
-            if (Config.Menu["Combo"]["combo.q"].GetValue<MenuBool>() && Q.IsReady())
+            if (Config.Menu["Combo"]["combo.q"].GetValue<MenuBool>().Enabled && Q.IsReady())
             {
                 AIHeroClient target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                 if (target != null && (Config.Menu["Key"]["key.q"].GetValue<MenuKeyBind>().Active || (!E.IsReady() && !AllBarrel.Any(b => b.GetBarrel().Position.Distance(target.Position) < 600))))
@@ -514,7 +513,7 @@ namespace e.Motion_Gangplank
                     Q.Cast(target);
                 }
             }
-            if (E.IsReady() && E.Instance.Ammo > 1 && Config.Menu["Combo"]["combo.e"].GetValue<MenuBool>() && !AllBarrel.Any(b => b.GetBarrel().Position.Distance(Player.Position) <= 1200))
+            if (E.IsReady() && E.Instance.Ammo > 1 && Config.Menu["Combo"]["combo.e"].GetValue<MenuBool>().Enabled && !AllBarrel.Any(b => b.GetBarrel().Position.Distance(Player.Position) <= 1200))
             {
                 AIHeroClient target = TargetSelector.GetTarget(1000, DamageType.Physical);
                 if (target == null) return;
@@ -605,7 +604,7 @@ namespace e.Motion_Gangplank
                     }
                 }
                 
-                if (Config.Menu["Lasthit"]["lasthit.q"].GetValue<MenuBool>() && (!AllBarrel.Any(b => b.GetBarrel().Position.Distance(Player.Position) < 1200) || Config.Menu["Key"]["key.q"].GetValue<MenuKeyBind>().Active))
+                if (Config.Menu["Lasthit"]["lasthit.q"].GetValue<MenuBool>().Enabled && (!AllBarrel.Any(b => b.GetBarrel().Position.Distance(Player.Position) < 1200) || Config.Menu["Key"]["key.q"].GetValue<MenuKeyBind>().Active))
                 {
                     var lowHealthMinion = GameObjects.EnemyMinions.FirstOrDefault(i => i.IsValidTarget(Q.Range));
                     if (lowHealthMinion != null && lowHealthMinion.Health <= Q.GetDamage(lowHealthMinion))
@@ -616,9 +615,9 @@ namespace e.Motion_Gangplank
 
         private static void Cleanse()
         {
-            if (W.IsReady() && Config.Menu["Cleanse"]["cleanse.w"].GetValue<MenuBool>())
+            if (W.IsReady() && Config.Menu["Cleanse"]["cleanse.w"].GetValue<MenuBool>().Enabled)
             {
-                if (Buffs.Any(entry => Config.Menu["Enable Cleanse for:"]["cleanse.bufftypes." + entry.Key].GetValue<MenuBool>() && Player.HasBuffOfType(entry.Value)))
+                if (Buffs.Any(entry => Config.Menu["Enable Cleanse for:"]["cleanse.bufftypes." + entry.Key].GetValue<MenuBool>().Enabled && Player.HasBuffOfType(entry.Value)))
                 {
                     W.Cast();
                 }

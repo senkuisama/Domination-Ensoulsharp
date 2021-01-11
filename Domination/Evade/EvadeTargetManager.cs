@@ -7,7 +7,7 @@ namespace DaoHungAIO.Evade
     using EnsoulSharp;
     using EnsoulSharp.SDK;
     using EnsoulSharp.SDK.MenuUI;
-    using EnsoulSharp.SDK.MenuUI.Values;
+    
     using SharpDX;
     using System;
     using System.Collections.Generic;
@@ -244,7 +244,7 @@ namespace DaoHungAIO.Evade
                 }
                 var aaa = GameObjects.AllyHeroes
                         .Where(t =>
-                            t.Distance(missile.TargetPos) < 100).FirstOrDefault();
+                            t.Distance(missile.Target.Position) < 100).FirstOrDefault();
                 var spellData =
                     Spells.FirstOrDefault(
                         i =>
@@ -267,7 +267,7 @@ namespace DaoHungAIO.Evade
                             ObjectManager.Player.CharacterName == "Karma")
                         {
                             if (DaoHungAIO.Evade.EvadeTargetManager.Menu["whitelist"][
-                                        ally.CharacterName.ToLower()] &&
+                                        ally.CharacterName.ToLower()] != null &&
                                 aaa.Distance(ObjectManager.Player) < DominationAIO.Common.Champion.E.Range)
                             {
                                 DominationAIO.Common.Champion.E.CastOnUnit(aaa);
@@ -278,7 +278,7 @@ namespace DaoHungAIO.Evade
 
                         {
                             if (DaoHungAIO.Evade.EvadeTargetManager.Menu["whitelist"][
-                                        ally.CharacterName.ToLower()] &&
+                                        ally.CharacterName.ToLower()] != null &&
                                 aaa.Distance(ObjectManager.Player) < DominationAIO.Common.Champion.W.Range)
                             {
                                 DominationAIO.Common.Champion.W.CastOnUnit(aaa);

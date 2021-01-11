@@ -34,7 +34,7 @@ namespace Troll_Chat_xD.Event
                 Drawing.DrawText(pos.X + addPosX, pos.Y + addPosY, color, text);
             }
         }
-        private static void GameOnOnWndProc(GameWndProcEventArgs args)
+        private static void GameOnOnWndProc(GameWndEventArgs args)
         {
             if (args.Msg != 0x20a || !MouseScrollEnabled)
                 return;
@@ -118,7 +118,6 @@ namespace Troll_Chat_xD.Event
                 if (Enabled)
                 {
                     PrintDick();
-                    Game.Print(ObjectManager.Player.Position);
                 }
                 Config.SetMenuKeybind("Settings", "PrintDick", false);
             }

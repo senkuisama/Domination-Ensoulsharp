@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using SPredictionMash;
 
 namespace DominationAIO.Champions
@@ -50,7 +50,7 @@ namespace DominationAIO.Champions
             BlitMenu.Attach();
 
             Q = new Spell(SpellSlot.Q, 1150f);
-            Q.SetSkillshot(0.5f, 110f, 1800, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Q.SetSkillshot(0.5f, 110f, 1800, true, SpellType.Line);
             W = new Spell(SpellSlot.W, Player.GetRealAutoAttackRange());
             E = new Spell(SpellSlot.E, Player.GetRealAutoAttackRange());
             R = new Spell(SpellSlot.R, 600);
@@ -78,7 +78,7 @@ namespace DominationAIO.Champions
                     var Pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, Target);
                     if(Target.DistanceToPlayer() > QMin.Value && Pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                     {
-                        if (Q.SPredictionCast(Target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                        if (Q.SPredictionCast(Target, EnsoulSharp.SDK.HitChance.High))
                             return;
                     }
                 }              

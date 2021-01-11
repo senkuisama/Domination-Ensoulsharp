@@ -1,7 +1,6 @@
 ﻿using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -92,5 +91,7 @@ namespace FunnySlayerCommon
                 Drawing.DrawCircle(FSTargetSelector.GetFSTarget(DrawTarget.ActiveValue).Position, 100, System.Drawing.Color.Red);
             }
         }
+
+
     }
 }

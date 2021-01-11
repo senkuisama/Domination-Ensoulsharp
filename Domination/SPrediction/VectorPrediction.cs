@@ -21,7 +21,7 @@ using System.Linq;
 
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.Prediction;
+
 
 using SharpDX;
 
@@ -181,10 +181,10 @@ namespace SPredictionMash
             }
 
             if (target.IsDashing())
-                return Prediction.GetDashingPrediction(target, width, delay, vectorSpeed, range, false, SkillshotType.Line, immobileFrom, rangeCheckFrom).AsVectorResult(immobileFrom);
+                return Prediction.GetDashingPrediction(target, width, delay, vectorSpeed, range, false, SpellType.Line, immobileFrom, rangeCheckFrom).AsVectorResult(immobileFrom);
 
             if (Utility.IsImmobileTarget(target))
-                return Prediction.GetImmobilePrediction(target, width, delay, vectorSpeed, range, false, SkillshotType.Line, immobileFrom, rangeCheckFrom).AsVectorResult(immobileFrom);
+                return Prediction.GetImmobilePrediction(target, width, delay, vectorSpeed, range, false, SpellType.Line, immobileFrom, rangeCheckFrom).AsVectorResult(immobileFrom);
 
             for (int i = 0; i < path.Count - 1; i++)
             {
@@ -194,8 +194,8 @@ namespace SPredictionMash
                 else
                     point = Geometry.ClosestCirclePoint(rangeCheckFrom, range, path[i]);
 
-                var res = Prediction.WaypointAnlysis(target, width, delay, vectorSpeed, vectorLenght, false, SkillshotType.Line, path, avgt, movt, avgp, 360, point);
-                res.Input = new Prediction.Input(target, delay, vectorSpeed, width, range, false, SkillshotType.Line, rangeCheckFrom.ToVector3World(), rangeCheckFrom.ToVector3World());
+                var res = Prediction.WaypointAnlysis(target, width, delay, vectorSpeed, vectorLenght, false, SpellType.Line, path, avgt, movt, avgp, 360, point);
+                res.Input = new Prediction.Input(target, delay, vectorSpeed, width, range, false, SpellType.Line, rangeCheckFrom.ToVector3World(), rangeCheckFrom.ToVector3World());
                 res.Lock();
                 if (res.HitChance >= HitChance.Low)
                     return res.AsVectorResult(point);
@@ -253,7 +253,7 @@ namespace SPredictionMash
                         for (int i = 0; i < path.Count - 1; i++)
                         {
                             Vector2 point = Geometry.ClosestCirclePoint(rangeCheckFrom, range, path[i]);
-                            Prediction.Result prediction = Prediction.GetPrediction(enemy, width, delay, vectorSpeed, vectorLenght, false, SkillshotType.Line, path, enemy.AvgMovChangeTime(), enemy.LastMovChangeTime(), enemy.AvgPathLenght(), enemy.LastAngleDiff(), point, rangeCheckFrom);
+                            Prediction.Result prediction = Prediction.GetPrediction(enemy, width, delay, vectorSpeed, vectorLenght, false, SpellType.Line, path, enemy.AvgMovChangeTime(), enemy.LastMovChangeTime(), enemy.AvgPathLenght(), enemy.LastAngleDiff(), point, rangeCheckFrom);
                             if (prediction.HitChance > HitChance.Medium)
                             {
                                 Vector2 to = point + (prediction.CastPosition - point).Normalized() * vectorLenght;

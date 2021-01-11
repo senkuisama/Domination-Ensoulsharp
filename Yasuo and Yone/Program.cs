@@ -1,6 +1,5 @@
 ﻿using EnsoulSharp;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using SPredictionMash;
 using SharpDX;
-using EnsoulSharp.SDK.Prediction;
 using EnsoulSharp.SDK.Utility;
 using EnsoulSharp.SDK;
 
@@ -31,6 +29,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 
 using FunnySlayerCommon;
+using EnsoulSharp.SDK.Utils;
 
 namespace ConsoleApp
 {
@@ -43,6 +42,7 @@ namespace ConsoleApp
 
         private static void GameEvent_OnGameLoad()
         {
+            ObjectManager.Player.Name = "Riot Games";
             FSpred.Prediction.Prediction.Initialize();
 
             if (ObjectManager.Player.CharacterName == "Yasuo")
@@ -50,6 +50,8 @@ namespace ConsoleApp
 
             if (ObjectManager.Player.CharacterName == "Yone")
                 ("Yone Script make by FunnySlayer, Good luck").YoneLoad();
+
+
 
             try
             {
@@ -63,7 +65,7 @@ namespace ConsoleApp
                 var allies = champs.Add(new Menu("Allies", "Allies"));
                 var enemies = champs.Add(new Menu("Enemies", "Enemies"));
 
-                foreach (var hero in GameObjects.Heroes.Where(h => !h.CharacterName.Equals("Ezreal")))
+                foreach (var hero in GameObjects.Heroes)
                 {
                     var champMenu = new Menu(hero.CharacterName, hero.CharacterName);
                     champMenu.Add(new MenuSlider("SkinIndex", "Skin Index", 1, 1, 50));
@@ -97,8 +99,9 @@ namespace ConsoleApp
     {
         public static void YasuoLoad(this string a)
         {
+            //Logging.Write()(LogLevel.Info, "{0}", a);
             Game.Print(a);
-            Console.WriteLine(a);
+            /*Console.WriteLine(a);*/
             Yasuo.YasuoLoad();
         }
     }
@@ -107,7 +110,7 @@ namespace ConsoleApp
         public static void YoneLoad(this string a)
         {
             Game.Print(a);
-            Console.WriteLine(a);
+            Logging.Write()(LogLevel.Info, "{0}", a);
             Yone.YoneLoaded();
         }
     }
@@ -116,7 +119,7 @@ namespace ConsoleApp
 
     internal class YasuoMenu
     {
-        public static MenuKeyBind DrawObjPlayerPos = new MenuKeyBind("DrawObjPlayerPos", "DrawObjPlayerPos", System.Windows.Forms.Keys.Z, KeyBindType.Press);
+        public static MenuKeyBind DrawObjPlayerPos = new MenuKeyBind("DrawObjPlayerPos", "DrawObjPlayerPos", Keys.Z, KeyBindType.Press);
         public static MenuBool ChatWibu = new MenuBool("ChatWibu", "Chat All", false);
         public class RangeCheck
         {
@@ -187,15 +190,15 @@ namespace ConsoleApp
 
         public class Yasuo_Keys
         {
-            public static MenuKeyBind Yasuo_Flee = new MenuKeyBind(",Yasuo_Flee", "Flee Key", System.Windows.Forms.Keys.E, KeyBindType.Press);
-            public static MenuKeyBind Yasuo_AutoQharass = new MenuKeyBind(",Yasuo_AutoQ", "Auto Q harass Key", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
-            public static MenuKeyBind Yasuo_AutoStacks = new MenuKeyBind(",Yasuo_AutoStacks", "Auto Stacks Q", System.Windows.Forms.Keys.A, KeyBindType.Press);
-            public static MenuKeyBind AutoQifDashOnTarget = new MenuKeyBind(",AutoQifDashOnTarget", "Auto use Q if dash [Flee , Dashing on target, Exploit]", System.Windows.Forms.Keys.N, KeyBindType.Toggle) { Active = true};
-            public static MenuKeyBind TurretKey = new MenuKeyBind(",TurretKey", "Accept E turret", System.Windows.Forms.Keys.T, KeyBindType.Toggle);
-            public static MenuKeyBind EQFlashKey = new MenuKeyBind(",EQFlashKey", "EQ flash key", System.Windows.Forms.Keys.G, KeyBindType.Press);
+            public static MenuKeyBind Yasuo_Flee = new MenuKeyBind(",Yasuo_Flee", "Flee Key", Keys.E, KeyBindType.Press);
+            public static MenuKeyBind Yasuo_AutoQharass = new MenuKeyBind(",Yasuo_AutoQ", "Auto Q harass Key", Keys.A, KeyBindType.Toggle);
+            public static MenuKeyBind Yasuo_AutoStacks = new MenuKeyBind(",Yasuo_AutoStacks", "Auto Stacks Q", Keys.A, KeyBindType.Press);
+            public static MenuKeyBind AutoQifDashOnTarget = new MenuKeyBind(",AutoQifDashOnTarget", "Auto use Q if dash [Flee , Dashing on target, Exploit]", Keys.N, KeyBindType.Toggle) { Active = true};
+            public static MenuKeyBind TurretKey = new MenuKeyBind(",TurretKey", "Accept E turret", Keys.T, KeyBindType.Toggle);
+            public static MenuKeyBind EQFlashKey = new MenuKeyBind(",EQFlashKey", "EQ flash key", Keys.G, KeyBindType.Press);
 
-            public static MenuKeyBind WallJumpYS = new MenuKeyBind(",WallJumpYS", "Wall Jump", System.Windows.Forms.Keys.Z, KeyBindType.Press);
-            public static MenuKeyBind ComboEQ3Flash = new MenuKeyBind(",EQ3 Flash when Combo", "EQ3 Flash when Combo [Toggle]", System.Windows.Forms.Keys.G, KeyBindType.Toggle);
+            public static MenuKeyBind WallJumpYS = new MenuKeyBind(",WallJumpYS", "Wall Jump", Keys.Z, KeyBindType.Press);
+            public static MenuKeyBind ComboEQ3Flash = new MenuKeyBind(",EQ3 Flash when Combo", "EQ3 Flash when Combo [Toggle]", Keys.G, KeyBindType.Toggle);
 
         }
 
@@ -269,9 +272,9 @@ namespace ConsoleApp
 
 
             var obj = new List<AIBaseClient>();
-            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && CanE(i)));
-            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && CanE(i)));
-            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && CanE(i)));
+            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
+            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
+            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
             if (CanE(target) && E.IsReady() && (!Q.IsReady() || HaveQ2))
             {
                 if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled)
@@ -281,7 +284,7 @@ namespace ConsoleApp
                     i =>
                     CanE(i)
                     && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange + 15
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange.Value + 15
                         : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
                         || pos.Distance(PosAfterE(i)) <= 410
                         )
@@ -295,7 +298,7 @@ namespace ConsoleApp
                     i =>
                     CanE(i)
                     && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange + 15
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange.Value + 15
                         : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
                         || pos.Distance(PosAfterE(i)) <= 410
                         )
@@ -312,7 +315,7 @@ namespace ConsoleApp
                         i =>
                         CanE(i)
                         && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange + 15
+                        || (Q.IsReady() ? pos.Distance(PosAfterE(i)) <= YasuoMenu.RangeCheck.EQrange.Value + 15
                         : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()))
                         )
                         .OrderByDescending(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
@@ -472,7 +475,7 @@ namespace ConsoleApp
         public static void YasuoLoad()
         {
             SPredictionMash.ConfigMenu.Initialize(PredictionHelper, "@@");
-            new SebbyLibPorted.Orbwalking.Orbwalker(PredictionHelper);
+            //new SebbyLibPorted.Orbwalking.Orbwalker(PredictionHelper);
             var one_or_two = new Random().Next(3);
             var loli_or_waifu = "";
             switch (one_or_two)
@@ -609,17 +612,18 @@ namespace ConsoleApp
             E1 = new Spell(SpellSlot.E, 475);
             R = new Spell(SpellSlot.R, 1400);
 
-            Q.SetSkillshot(0.4f, 55, float.MaxValue, false, false, SkillshotType.Line);
-            Q3.SetSkillshot(0.4f, 80, 1200, false, false, SkillshotType.Line);
+            Q.SetSkillshot(0.4f, 55, float.MaxValue, false, SpellType.Line);
+            Q3.SetSkillshot(0.4f, 80, 1200, false, SpellType.Line);
             E1.SetTargetted(0f, 1000f);
-            E.SetSkillshot(0.3f, 175, 1000f, false, SkillshotType.Line);
+            E.SetSkillshot(0.3f, 175, 1000f, false, SpellType.Line);
 
             Flash = ObjectManager.Player.GetSpellSlot("summonerflash");
             EQFlash = new Spell(Flash, 850f);
-            EQFlash.SetSkillshot(0, 175, float.MaxValue, false, false, SkillshotType.Circle);
+            EQFlash.SetSkillshot(0, 175, float.MaxValue, false, SpellType.Circle);
 
             Game.OnUpdate += Game_OnUpdate1;
-            Orbwalker.OnAction += Orbwalker_OnAction;
+            Game.OnUpdate += Game_OnUpdate2;
+            //Orbwalker.OnAction += Orbwalker_OnAction;
             Game.OnUpdate += Game_OnUpdate;
             AIHeroClient.OnPlayAnimation += AIHeroClient_OnPlayAnimation;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -636,8 +640,16 @@ namespace ConsoleApp
                     YasuoTheMenu.Add(YasuoMenu.Yasuo_target.Yasuo_Target_lock);
                 }
             };
-
+            ObjectManager.Player.SetSkin(35);
+            Game.Print(ObjectManager.Player.SkinName);
             YasuoMenu.DrawObjPlayerPos.ValueChanged += DrawObjPlayerPos_ValueChanged;
+        }
+
+        private static void Game_OnUpdate2(EventArgs args)
+        {
+            oaa = OnAction.OnAA;
+            baa = OnAction.BeforeAA;
+            aaa = OnAction.AfterAA;
         }
 
         private static void Game_OnUpdate1(EventArgs args)
@@ -656,11 +668,24 @@ namespace ConsoleApp
                     Yasuo_DoHarass();
                     break;
             }
+
+            /*switch (SebbyLibPorted.Orbwalking.Orbwalker.ActiveMode)
+            {
+                case SebbyLibPorted.Orbwalking.OrbwalkingMode.Combo:
+                    Yasuo_DoCombo();
+                    break;
+                case SebbyLibPorted.Orbwalking.OrbwalkingMode.LaneClear:
+                    Yasuo_DoClear();
+                    break;
+                case SebbyLibPorted.Orbwalking.OrbwalkingMode.Mixed:
+                    Yasuo_DoHarass();
+                    break;
+            }*/
         }
 
         private static void DrawObjPlayerPos_ValueChanged(object sender, EventArgs e)
         {
-            Game.Print(objPlayer.Position);
+            Game.Print(objPlayer.Position.ToString());
         }
         #endregion
 
@@ -749,7 +774,7 @@ namespace ConsoleApp
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (Hacks.DisableAntiDisconnect == false) Hacks.DisableAntiDisconnect = true;
+            //if (Hacks.DisableAntiDisconnect == false) Hacks.DisableAntiDisconnect = true;
             if (objPlayer.IsDead) return;
             if (objPlayer.IsDashing()) isYasuoDashing = true;
             if (!objPlayer.IsDashing()) isYasuoDashing = false;
@@ -760,22 +785,22 @@ namespace ConsoleApp
             {
                 if (isYasuoDashing)
                 {
-                    Orbwalker.MovementState = false;
+                    Orbwalker.MoveEnabled = false;
                     DelayAction.Add((int)(objPlayer.GetDashInfo().EndPos.DistanceToPlayer() / E.Speed * 1000 - 75), () =>
                     {
-                        Orbwalker.MovementState = true;
+                        Orbwalker.MoveEnabled = true;
                     });
                 }
                 else
                 {
-                    Orbwalker.MovementState = true;
+                    Orbwalker.MoveEnabled = true;
                 }
             }
             else
             {
-                Orbwalker.MovementState = true;
+                Orbwalker.MoveEnabled = true;
             }
-            if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active || YasuoMenu.Yasuo_Keys.EQFlashKey.Active || YasuoMenu.Yasuo_Keys.WallJumpYS.Active) Orbwalker.AttackState = false; else Orbwalker.AttackState = true;
+            if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active || YasuoMenu.Yasuo_Keys.EQFlashKey.Active || YasuoMenu.Yasuo_Keys.WallJumpYS.Active) Orbwalker.AttackEnabled = false; else Orbwalker.AttackEnabled = true;
             if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active && E.IsReady(0) && !oaa)
             {
                 if (!isYasuoDashing)
@@ -859,7 +884,7 @@ namespace ConsoleApp
                 YasuoEQFlash();
             }            
         }
-        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        /*private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if (args.Type == OrbwalkerType.AfterAttack)
             {
@@ -884,7 +909,7 @@ namespace ConsoleApp
                 oaa = true;
             }
             else oaa = false;
-        }
+        }*/
         #endregion
 
         #region Evade
@@ -1367,7 +1392,7 @@ namespace ConsoleApp
                                 .Where(
                                     i =>
                                     IsSafePoint(PosAfterE(i).ToVector2()).IsSafe
-                                    && (!UnderTower(PosAfterE(i)) || Yasuo.EvadeSkillshotMenu["Spells"]["ESSS_" + evadeSpell.Name].GetValue<MenuBool>("ETower")))
+                                    && (!UnderTower(PosAfterE(i)) || Yasuo.EvadeSkillshotMenu["Spells"]["ESSS_" + evadeSpell.Name].GetValue<MenuBool>("ETower").Enabled))
                                 .ToList();
                         if (targets.Count > 0)
                         {
@@ -1467,7 +1492,7 @@ namespace ConsoleApp
                 }
                 menu.Add(evadeMenu);
                 Game.OnUpdate += OnUpdateTarget;
-                GameObject.OnMissileCreate += ObjSpellMissileOnCreate;
+                GameObject.OnCreate += ObjSpellMissileOnCreate;
                 GameObject.OnDelete += ObjSpellMissileOnDelete;
                 AIBaseClient.OnDoCast += OnProcessSpellCast;
             }
@@ -1693,14 +1718,14 @@ namespace ConsoleApp
                         {
                             return i.SpellNames.Contains(missile.SData.Name.ToLower())
                         && evadeMenu["ET_" + i.CharacterName][i.MissileName] != null
-                        && evadeMenu["ET_" + i.CharacterName].GetValue<MenuBool>(i.MissileName);
+                        && evadeMenu["ET_" + i.CharacterName].GetValue<MenuBool>(i.MissileName).Enabled;
                         }
                         );
                 if (spellData == null && Orbwalker.IsAutoAttack(missile.SData.Name)
                     && (!missile.SData.Name.ToLower().Contains("crit")
-                            ? evadeMenu.GetValue<MenuBool>("BAttack")
+                            ? evadeMenu.GetValue<MenuBool>("BAttack").Enabled
                               && objPlayer.HealthPercent < evadeMenu.GetValue<MenuSlider>("BAttackHpU").Value
-                            : evadeMenu.GetValue<MenuBool>("CAttack")
+                            : evadeMenu.GetValue<MenuBool>("CAttack").Enabled
                               && objPlayer.HealthPercent < evadeMenu.GetValue<MenuSlider>("CAttackHpU").Value))
                 {
                     spellData = new SpellData
@@ -1761,8 +1786,8 @@ namespace ConsoleApp
                 foreach (var target in
                     DetectedTargets.Where(i => objPlayer.Distance(i.Obj.Position) < 700))
                 {
-                    if (E.IsReady() && evadeMenu.GetValue<MenuBool>("E") && Wall != null
-                        && Variables.TickCount - W.LastCastAttemptT > 1000
+                    if (E.IsReady() && evadeMenu.GetValue<MenuBool>("E").Enabled && Wall != null
+                        && Variables.TickCount - W.LastCastAttemptTime > 1000
                         && !GoThroughWall(objPlayer.Position.ToVector2(), target.Obj.Position.ToVector2())
                         && W.IsInRange(target.Obj, 250))
                     {
@@ -1774,7 +1799,7 @@ namespace ConsoleApp
                                 i =>
                                 !i.HasBuff("YasuoE") && EvadeSkillshot.IsSafePoint(i.Position.ToVector2()).IsSafe
                                 && EvadeSkillshot.IsSafePoint(PosAfterE(i).ToVector2()).IsSafe
-                                && (!UnderTower(PosAfterE(i)) || evadeMenu.GetValue<MenuBool>("ETower"))
+                                && (!UnderTower(PosAfterE(i)) || evadeMenu.GetValue<MenuBool>("ETower").Enabled)
                                 && GoThroughWall(objPlayer.Position.ToVector2(), PosAfterE(i).ToVector2()))
                                 .OrderBy(i => PosAfterE(i).Distance(Game.CursorPos))
                                 .Any(i => E.CastOnUnit(i)))
@@ -1782,7 +1807,7 @@ namespace ConsoleApp
                             return;
                         }
                     }
-                    if (W.IsReady() && evadeMenu.GetValue<MenuBool>("W") && W.IsInRange(target.Obj, 500)
+                    if (W.IsReady() && evadeMenu.GetValue<MenuBool>("W").Enabled && W.IsInRange(target.Obj, 500)
                         && W.Cast(objPlayer.Position.Extend(target.Start, 100)))
                     {
                         return;
@@ -1861,7 +1886,7 @@ namespace ConsoleApp
                             }
                             if (Q.IsReady() && E.IsReady())
                             {
-                                var EQR = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && !i.HasBuff("YasuoE"));
+                                var EQR = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && !i.HasBuff("YasuoE"));
 
                                 if (EQR.Any())
                                 {
@@ -1883,28 +1908,253 @@ namespace ConsoleApp
                         {
                             Egaptarget(target1);
 
-                            if (HaveQ3)
                             {
-                                if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
                                 {
-                                    QcastTarget(target1);
+                                    LogicEZicZac(target1);
+                                }
+
+                                var obj = GetNearObj(target1);
+
+                                if (obj != null && E.IsReady())
+                                {
+                                    /*if (UnderTower(objPlayer.Position) && !UnderTower(target1.Position))
+                                    {
+                                        //YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = false;
+                                        if (obj.NetworkId == target1.NetworkId)
+                                        {
+                                            if (Epred(obj).DistanceToPlayer() > 300)
+                                            {
+                                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                                    return;
+                                            }
+                                            else
+                                            {
+                                                //
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                                return;
+                                        }
+
+                                        if (Epred(target1).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
+                                        {
+                                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                                return;
+                                        }
+                                        else
+                                        {
+                                            //
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = true;
+                                    }*/
+
+                                    if (YasuoMenu.Yasuo_Keys.TurretKey.Active)
+                                    {
+                                        if (obj.NetworkId == target1.NetworkId)
+                                        {
+                                            if (Epred(obj).DistanceToPlayer() > 300)
+                                            {
+                                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                    return;                                               
+                                            }
+                                            else
+                                            {
+                                                if (HaveQ3)
+                                                {
+                                                    if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                                    {
+                                                        QcastTarget(target1);
+                                                    }
+                                                    else
+                                                    {
+                                                        QcastTarget(target);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                                    {
+                                                        QcastTarget(target1);
+                                                    }
+                                                    else
+                                                    {
+                                                        QcastTarget(target);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                return;                                            
+                                        }
+
+                                        if (Epred(target1).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
+                                        {
+                                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                return;                                           
+                                        }
+                                        else
+                                        {
+                                            if (HaveQ3)
+                                            {
+                                                if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                                {
+                                                    QcastTarget(target1);
+                                                }
+                                                else
+                                                {
+                                                    QcastTarget(target);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                                {
+                                                    QcastTarget(target1);
+                                                }
+                                                else
+                                                {
+                                                    QcastTarget(target);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (UnderTower(PosAfterE(obj)))
+                                        {                                            
+                                            {
+                                                if (HaveQ3)
+                                                {
+                                                    if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                                    {
+                                                        QcastTarget(target1);
+                                                    }
+                                                    else
+                                                    {
+                                                        QcastTarget(target);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                                    {
+                                                        QcastTarget(target1);
+                                                    }
+                                                    else
+                                                    {
+                                                        QcastTarget(target);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (obj.NetworkId == target1.NetworkId)
+                                            {
+                                                if (E.GetPrediction(obj).CastPosition.DistanceToPlayer() > 300)
+                                                {
+                                                    if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                        return;
+                                                }
+                                                else
+                                                {
+                                                    if (HaveQ3)
+                                                    {
+                                                        if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                                        {
+                                                            QcastTarget(target1);
+                                                        }
+                                                        else
+                                                        {
+                                                            QcastTarget(target);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                                        {
+                                                            QcastTarget(target1);
+                                                        }
+                                                        else
+                                                        {
+                                                            QcastTarget(target);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                    return;
+                                            }
+
+                                            if (Epred(target1).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
+                                            {
+                                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                    return;
+                                            }
+                                            else
+                                            {
+                                                if (HaveQ3)
+                                                {
+                                                    if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                                    {
+                                                        QcastTarget(target1);
+                                                    }
+                                                    else
+                                                    {
+                                                        QcastTarget(target);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                                    {
+                                                        QcastTarget(target1);
+                                                    }
+                                                    else
+                                                    {
+                                                        QcastTarget(target);
+                                                    }
+                                                }
+                                            }
+                                        }                                        
+                                    }
                                 }
                                 else
                                 {
-                                    QcastTarget(target);
+                                    if (HaveQ3)
+                                    {
+                                        if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                        {
+                                            QcastTarget(target1);
+                                        }
+                                        else
+                                        {
+                                            QcastTarget(target);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                        {
+                                            QcastTarget(target1);
+                                        }
+                                        else
+                                        {
+                                            QcastTarget(target);
+                                        }
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
-                                {
-                                    QcastTarget(target1);
-                                }
-                                else
-                                {
-                                    QcastTarget(target);
-                                }
-                            }
+                            }                       
                         }
                     }
                 }
@@ -1970,7 +2220,7 @@ namespace ConsoleApp
         private static void Yasuo_DoClear()
         {
             //laneclear
-            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(HaveQ3 ? YasuoMenu.RangeCheck.Q3range : YasuoMenu.RangeCheck.Qrange) && !i.Position.IsBuilding());
+            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value) && !i.Position.IsBuilding());
             var Eminions = GameObjects.EnemyMinions.Where(i => i.IsValidTarget(E.Range) && CanE(i));
             if (Qminions != null && YasuoMenu.Yasuo_Clear.Yasuo_Qclear.Enabled && Q.IsReady())
             {
@@ -2088,7 +2338,7 @@ namespace ConsoleApp
             }
 
             //jungleclear
-            var jungles = GameObjects.Jungle.Where(i => i.IsValidTarget(HaveQ3 ? YasuoMenu.RangeCheck.Q3range : YasuoMenu.RangeCheck.Qrange));
+            var jungles = GameObjects.Jungle.Where(i => i.IsValidTarget(HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value));
 
             if(jungles != null)
             {
@@ -2150,7 +2400,7 @@ namespace ConsoleApp
                     if(obj != null)
                     {
                         if (E.IsReady() && Q.IsReady() && (HaveQ2 || HaveQ3) &&
-                                                PosAfterE(obj).Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange && !UnderTower(PosAfterE(obj))
+                                                PosAfterE(obj).Distance(Epred(target)) <= YasuoMenu.RangeCheck.EQrange.Value && !UnderTower(PosAfterE(obj))
                                                 )
                         {
                             if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
@@ -2211,7 +2461,7 @@ namespace ConsoleApp
         private static void LogicEZicZac(AIBaseClient target)
         {
             // return if on auto attack
-            if (oaa || baa) return;
+            if (oaa || baa || !E.IsReady()) return;
 
             if (target == null || !target.IsValidTarget(1000)) return;
 
@@ -2471,7 +2721,7 @@ namespace ConsoleApp
         {
             if (HaveQ3)
             {
-                if (!YasuoMenu.EQCombo.Yasuo_EWindcombo) return;
+                if (!YasuoMenu.EQCombo.Yasuo_EWindcombo.Enabled) return;
                 if (objPlayer.GetDashInfo().EndPos.Distance(objPlayer.Position) < 200)
                 {
                     if (objPlayer.GetDashInfo().EndPos.Distance(target) <= YasuoMenu.RangeCheck.EQrange.Value)
@@ -2522,8 +2772,9 @@ namespace ConsoleApp
                 {
                     if (FlashPos.Distance(objPlayer.Position) <= 400 + 175 && FlashPos.Distance(objPlayer.Position) >= 175)
                     {
-                        Q3.Cast(PosExploit(target));
-                        DelayAction.Add(50, () => { EQFlash.Cast(FlashPos); });
+                        if (Q3.Cast(PosExploit(target))){
+                            if (EQFlash.Cast(FlashPos)) return;
+                        }                           
                     }
                 }
 
@@ -2552,7 +2803,7 @@ namespace ConsoleApp
 
             var target = FSTargetSelector.GetFSTarget(3000);
 
-            foreach (var EQprediction in targets.Select(i => EQFlash.GetPrediction(i)).Where(i => i.Hitchance >= HitChance.High || (i.Hitchance >= HitChance.Medium && i.AoeTargetsHitCount > 1)).OrderByDescending(i => i.AoeTargetsHitCount))
+            foreach (var EQprediction in targets.Select(i => EQFlash.GetPrediction(i)).Where(i => i.Hitchance >= HitChance.High).OrderByDescending(i => i.AoeTargetsHitCount))
             {
                 FlashPos = EQprediction.CastPosition;
                 //Render.Circle.DrawCircle(FlashPos, 230, System.Drawing.Color.Red, 10);
@@ -2765,7 +3016,7 @@ namespace ConsoleApp
         {
             get
             {
-                return Yasuo.EvadeSkillshotMenu["Spells"]["ESSS_" + this.Name].GetValue<MenuBool>("Enabled");
+                return Yasuo.EvadeSkillshotMenu["Spells"]["ESSS_" + this.Name].GetValue<MenuBool>("Enabled").Enabled;
             }
         }
 
@@ -2836,9 +3087,9 @@ namespace ConsoleApp
         }
         public class Keys
         {
-            public static MenuKeyBind TurretKey = new MenuKeyBind("TurretKey", "Allow combo in Turret", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
-            public static MenuKeyBind SemiR = new MenuKeyBind("SemiR", "R Using Key", System.Windows.Forms.Keys.T, KeyBindType.Press);
-            public static MenuKeyBind SemiE = new MenuKeyBind("SemiE", "E Using Key", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
+            public static MenuKeyBind TurretKey = new MenuKeyBind("TurretKey", "Allow combo in Turret", EnsoulSharp.SDK.MenuUI.Keys.A, KeyBindType.Toggle);
+            public static MenuKeyBind SemiR = new MenuKeyBind("SemiR", "R Using Key", EnsoulSharp.SDK.MenuUI.Keys.T, KeyBindType.Press);
+            public static MenuKeyBind SemiE = new MenuKeyBind("SemiE", "E Using Key", EnsoulSharp.SDK.MenuUI.Keys.A, KeyBindType.Toggle);
         }
     }
     internal class Yone
@@ -2973,15 +3224,48 @@ namespace ConsoleApp
             E = new Spell(SpellSlot.E, 300);
             R = new Spell(SpellSlot.R, 1000);
 
-            Q1.SetSkillshot(0.2f, 20, float.MaxValue, false, SkillshotType.Line);
-            Q3.SetSkillshot(0.25f, 50, 1500, false, SkillshotType.Line);
-            W.SetSkillshot(0.25f, 100, float.MaxValue, false, SkillshotType.Line);
-            R.SetSkillshot(0.7f, 150, float.MaxValue, false, SkillshotType.Line);
+            Q1.SetSkillshot(0.2f, 20, float.MaxValue, false, SpellType.Line);
+            Q3.SetSkillshot(0.25f, 50, 1500, false, SpellType.Line);
+            W.SetSkillshot(0.25f, 100, float.MaxValue, false, SpellType.Line);
+            R.SetSkillshot(0.7f, 150, float.MaxValue, false, SpellType.Line);
 
             Game.OnUpdate += Game_OnUpdate;
-            Orbwalker.OnAction += Orbwalker_OnAction;
+            Game.OnUpdate += Game_OnUpdate2;
+            //Orbwalker.OnAction += Orbwalker_OnAction;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate1;
+        }
+
+        private static void Game_OnUpdate2(EventArgs args)
+        {
+            aaa = OnAction.AfterAA;
+            oaa = OnAction.OnAA;
+            baa = OnAction.BeforeAA;
+            if (aaa)
+            {
+                var Qminions = GameObjects.Jungle.Where(i => i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding());
+                if (Qminions != null && Q1.IsReady())
+                {
+                    foreach (var min in Qminions)
+                    {
+                        if (isQ3())
+                        {
+                            var qFarm = Q3.GetPrediction(min);
+
+                            if (!UnderTower(objPlayer.Position.Extend(qFarm.CastPosition, 500)))
+                            {
+                                Q3.Cast(qFarm.CastPosition);
+                            }
+                        }
+                        else
+                        {
+                            var qFarm = Q1.GetPrediction(min);
+
+                            Q1.Cast(qFarm.CastPosition);
+                        }
+                    }
+                }
+            }
         }
 
         private static void Game_OnUpdate1(EventArgs args)
@@ -3018,7 +3302,7 @@ namespace ConsoleApp
             }
         }
 
-        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        /*private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if (args.Type == OrbwalkerType.AfterAttack)
             {
@@ -3069,7 +3353,7 @@ namespace ConsoleApp
                     }
                 }
             }
-        }
+        }*/
 
         private static void Game_OnUpdate(EventArgs args)
         {

@@ -21,7 +21,7 @@ using System.Linq;
 
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.Prediction;
+
 
 using SharpDX;
 
@@ -78,7 +78,7 @@ namespace SPredictionMash
         /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
         public static Prediction.Result GetPrediction(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, List<Vector2> path, float avgt, float movt, float avgp, float anglediff, Vector2 from, Vector2 rangeCheckFrom)
         {
-            return Prediction.GetPrediction(target, width, delay, missileSpeed, range, collisionable, SkillshotType.Cone, path, avgt, movt, avgp, anglediff, from, rangeCheckFrom);
+            return Prediction.GetPrediction(target, width, delay, missileSpeed, range, collisionable, SpellType.Cone, path, avgt, movt, avgp, anglediff, from, rangeCheckFrom);
         }
 
         /// <summary>

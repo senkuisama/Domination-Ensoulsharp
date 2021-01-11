@@ -23,7 +23,7 @@ namespace DaoHungAIO.Evade
 
     using EnsoulSharp;
     using EnsoulSharp.SDK;
-    using EnsoulSharp.SDK.MenuUI.Values;
+    using EnsoulSharp.SDK.MenuUI;
     using SharpDX;
     using System;
     using System.Collections.Generic;
@@ -190,7 +190,7 @@ namespace DaoHungAIO.Evade
 
         public bool GetBool(string name)
         {
-            return EvadeManager.SkillShotMenu["Evade" + SpellData.ChampionName.ToLower()][name + SpellData.MenuItemName].GetValue<MenuBool>();
+            return EvadeManager.SkillShotMenu["Evade" + SpellData.ChampionName.ToLower()][name + SpellData.MenuItemName].GetValue<MenuBool>().Enabled;
         }
 
         public bool IsActive()

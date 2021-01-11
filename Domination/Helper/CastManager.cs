@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.Prediction;
 
 namespace DominationAIO.Champions.Helper
 {

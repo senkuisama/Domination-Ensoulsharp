@@ -23,7 +23,7 @@ using System.Reflection;
 
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.Prediction;
+
 
 namespace SPredictionMash1
 {
@@ -72,7 +72,7 @@ namespace SPredictionMash1
             s_DetectedStasises = new List<Stasis>();
 
             Game.OnUpdate += Game_OnUpdate;
-            AIBaseClient.OnBuffGain += AIBaseClient_OnBuffGain;
+            AIBaseClient.OnBuffAdd += AIBaseClient_OnBuffGain;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace SPredictionMash1
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="args">The args.</param>
-        private static void AIBaseClient_OnBuffGain(AIBaseClient sender, AIBaseClientBuffGainEventArgs args)
+        private static void AIBaseClient_OnBuffGain(AIBaseClient sender, AIBaseClientBuffAddEventArgs args)
         {
             if (sender.Type == GameObjectType.AIHeroClient && sender.IsValid && sender.IsEnemy)
             {

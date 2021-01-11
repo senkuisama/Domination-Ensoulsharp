@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using EnsoulSharp.SDK.MenuUI;
 using SharpDX;
 using EnsoulSharp.SDK.Utility;
@@ -72,7 +72,7 @@ namespace DominationAIO.Champions
                 E = new Spell(SpellSlot.E);
                 R = new Spell(SpellSlot.R, 1500);
                 Q.SetTargetted(0.25f, 1800);
-                W.SetSkillshot(0.4f, 120, 1750, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+                W.SetSkillshot(0.4f, 120, 1750, true, SpellType.Line);
             }
         }
         public class setmenu
@@ -118,11 +118,11 @@ namespace DominationAIO.Champions
         public static void events()
         {
             Game.OnUpdate += Game_OnUpdate;
-            Orbwalker.OnAction += Orbwalker_OnAction;
-            Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+            //Orbwalker.OnAction += Orbwalker_OnAction;
+            AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
-        private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserArgs args)
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
         {
             if (sender.IsMe) return;
 
@@ -135,7 +135,7 @@ namespace DominationAIO.Champions
             }
         }
 
-        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        /*private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if (args.Type == OrbwalkerType.BeforeAttack)
             {
@@ -152,7 +152,7 @@ namespace DominationAIO.Champions
                 aa = true;
             }
             else aa = false;
-        }
+        }*/
 
         private static void Game_OnUpdate(EventArgs args)
         {
@@ -241,7 +241,7 @@ namespace DominationAIO.Champions
                             }
                             if (GetHeroesInRange(1000) >= 3 && ObjectManager.Player.HealthPercent > 0 && ObjectManager.Player.HealthPercent < 75)
                             {
-                                if (Rpos() != Vector3.Zero && menuclass.combo.usercombat)
+                                if (Rpos() != Vector3.Zero && menuclass.combo.usercombat.Enabled)
                                     if (E.IsReady())
                                     {
                                         E.Cast();
@@ -272,14 +272,14 @@ namespace DominationAIO.Champions
             {
                 if (GetMinionInRange(ObjectManager.Player.GetRealAutoAttackRange()) > 3)
                 {
-                    if (menuclass.farm.useq) Q.Cast();
-                    if (menuclass.farm.usee && !oa && !ba) E.Cast(Game.CursorPos);
+                    if (menuclass.farm.useq.Enabled) Q.Cast();
+                    if (menuclass.farm.usee.Enabled && !FunnySlayerCommon.OnAction.OnAA && !FunnySlayerCommon.OnAction.BeforeAA) E.Cast(Game.CursorPos);
                 }
                 if (GetMinionInRange(ObjectManager.Player.GetRealAutoAttackRange() + 300) < 1 && GetMinionInRange(W.Range) >= 1)
                 {
                     var thisminion = GameObjects.EnemyMinions.Where(i => !i.IsValidTarget(ObjectManager.Player.GetRealAutoAttackRange() + 300) && i.DistanceToPlayer() < W.Range && i.Health < W.GetDamage(i)).FirstOrDefault(i => i.DistanceToPlayer() < W.Range);
-                    var wpred = W.GetPrediction(thisminion, false, -1, EnsoulSharp.SDK.Prediction.CollisionObjects.Minions | EnsoulSharp.SDK.Prediction.CollisionObjects.YasuoWall);
-                    if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.Prediction.HitChance.High)
+                    var wpred = W.GetPrediction(thisminion, false, -1, new CollisionObjects[] {CollisionObjects.Minions, CollisionObjects.YasuoWall});
+                    if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.HitChance.High)
                     {
                         if (menuclass.farm.usew.Enabled) W.Cast(wpred.CastPosition);
                     }

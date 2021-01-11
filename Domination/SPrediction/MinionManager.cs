@@ -155,7 +155,7 @@ namespace SPredictionMash
                               || !minion.IsMelee() && type == MinionTypes.Ranged || type == MinionTypes.All
                           where
                               IsMinion(minion)
-                              || minionTeam == GameObjectTeam.Neutral && minion.MaxHealth > 5 && minion.IsHPBarRendered
+                              || minionTeam == GameObjectTeam.Neutral && minion.MaxHealth > 5 && minion.IsValidTarget()
                           select minion).Cast<AIBaseClient>().ToList();
 
             switch (order)

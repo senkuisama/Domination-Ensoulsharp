@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 using SebbyLibPorted.Prediction;
@@ -25,13 +25,13 @@ namespace DominationAIO.Champions
                 return;
 
             Q = new Spell(SpellSlot.Q, 800);
-            Q.SetSkillshot(0.3f, 150, 2000, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Q.SetSkillshot(0.3f, 150, 2000, true, SpellType.Line);
             E = new Spell(SpellSlot.E, 800);
-            E.SetSkillshot(0.25f, 100, 800, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            E.SetSkillshot(0.25f, 100, 800, true, SpellType.Line);
             R = new Spell(SpellSlot.R, 575);
 
             SpellCheckQ1 = new Spell(SpellSlot.Unknown, 800f);
-            SpellCheckQ1.SetSkillshot(0.25f, 80, 2000, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            SpellCheckQ1.SetSkillshot(0.25f, 80, 2000, true, SpellType.Line);
 
             ZoeMenu = new Menu("ZoeMenu", "FunnySlayer Zoe", true);
             var ZoeHelper = new Menu("Zoe_Helper", "Helper");
@@ -138,11 +138,11 @@ namespace DominationAIO.Champions
             {
                 if((Orbwalker.GetTarget() as AIBaseClient).HasBuff("zoeesleepstun") && Q.IsReady())
                 {
-                    Orbwalker.AttackState = false;
+                    Orbwalker.AttackEnabled = false;
                 }
                 else
                 {
-                    Orbwalker.AttackState = true;
+                    Orbwalker.AttackEnabled = true;
                 }
             }
 
@@ -169,11 +169,11 @@ namespace DominationAIO.Champions
                         {
                             if (EclientPos.DistanceToPlayer() > Q.Range && QTimer + QFlyingTime < Variables.TickCount)
                             {
-                                if (Q.Cast(EclientPos, true))
+                                if (Q.Cast(EclientPos))
                                 {
                                     DelayAction.Add(200, () =>
                                     {
-                                        if (R.Cast(EclientPos, true))
+                                        if (R.Cast(EclientPos))
                                             return;
                                     });                                    
                                 }
@@ -181,7 +181,7 @@ namespace DominationAIO.Champions
                             else
                             {
                                 if(QTimer + QFlyingTime < Variables.TickCount)
-                                    if (Q.Cast(EclientPos, true))
+                                    if (Q.Cast(EclientPos))
                                         return;
                             }
                         }
@@ -241,9 +241,9 @@ namespace DominationAIO.Champions
                 return;
 
             var Epred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, target);
-            if (E.IsReady() && Epred.Hitchance >= HitChance.High && Ecombo.Enabled)
+            if (E.IsReady() && Epred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High && Ecombo.Enabled)
             {
-                if (E.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                if (E.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                     return;                   
             }
             else
@@ -264,11 +264,11 @@ namespace DominationAIO.Champions
                             {
                                 if (R.IsReady())
                                 {
-                                    if (Q.Cast(CastPos, true))
+                                    if (Q.Cast(CastPos))
                                     {
                                         DelayAction.Add(200, () =>
                                         {
-                                            if (Qpred.Hitchance != HitChance.Collision && R.Cast(CastPos, true))
+                                            if (Qpred.Hitchance != SebbyLibPorted.Prediction.HitChance.Collision && R.Cast(CastPos))
                                                 return;
                                         });
                                     }
@@ -276,7 +276,7 @@ namespace DominationAIO.Champions
                             }
                             else
                             {
-                                if (Q.Cast(CastPos, true))
+                                if (Q.Cast(CastPos))
                                     return;
                             }
                         }
@@ -329,7 +329,7 @@ namespace DominationAIO.Champions
         }
         private static MissileClient QClient()
         {       
-            var Qc = GameObjects.Get<MissileClient>().Where(i => i.Position.IsValid() && i.Name == QMissile);
+            var Qc = ObjectManager.Get<MissileClient>().Where(i => i.Position.IsValid() && i.Name == QMissile);
             MissileClient Get = null;
             foreach (var hmm in Qc)
             {
@@ -344,7 +344,7 @@ namespace DominationAIO.Champions
         }
         private static AIMinionClient EClient()
         {       
-            var Ec = GameObjects.Get<AIMinionClient>().Where(i => i.Position.IsValid() && i.Name == "TestCubeRender");
+            var Ec = ObjectManager.Get<AIMinionClient>().Where(i => i.Position.IsValid() && i.Name == "TestCubeRender");
             AIMinionClient Get = null;
             foreach (var hmm in Ec)
             {
@@ -360,7 +360,7 @@ namespace DominationAIO.Champions
 
         private static AIHeroClient EDownClient()
         {
-            var Edc = GameObjects.Get<AIHeroClient>().Where(i => i.Position.IsValid() && !i.IsAlly && !i.IsDead && (i.HasBuff("zoeesleepcount") || i.HasBuff("zoeesleepcountdown") || i.HasBuff("zoeesleepcountdownslow")));
+            var Edc = ObjectManager.Get<AIHeroClient>().Where(i => i.Position.IsValid() && !i.IsAlly && !i.IsDead && (i.HasBuff("zoeesleepcount") || i.HasBuff("zoeesleepcountdown") || i.HasBuff("zoeesleepcountdownslow")));
             AIHeroClient Get = null;
             foreach (var hmm in Edc)
             {
@@ -375,7 +375,7 @@ namespace DominationAIO.Champions
         }
         private static AIHeroClient EStunClient()
         {
-            var Edc = GameObjects.Get<AIHeroClient>().Where(i => i.Position.IsValid() && !i.IsAlly && !i.IsDead && i.HasBuff("zoeesleepstun"));
+            var Edc = ObjectManager.Get<AIHeroClient>().Where(i => i.Position.IsValid() && !i.IsAlly && !i.IsDead && i.HasBuff("zoeesleepstun"));
             AIHeroClient Get = null;
             foreach (var hmm in Edc)
             {

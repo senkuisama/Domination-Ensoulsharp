@@ -22,7 +22,6 @@ using System.Linq;
 
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.Prediction;
 
 using SharpDX;
 
@@ -120,10 +119,10 @@ namespace SPredictionMash1
                 }
 
                 if (Utility.IsImmobileTarget(target))
-                    return Prediction.GetImmobilePrediction(target, width, delay, missileSpeed, range, collisionable, SkillshotType.Circle, from, rangeCheckFrom);
+                    return Prediction.GetImmobilePrediction(target, width, delay, missileSpeed, range, collisionable, SpellType.Circle, from, rangeCheckFrom);
 
                 if (target.IsDashing())
-                    return Prediction.GetDashingPrediction(target, width, delay, missileSpeed, range, collisionable, SkillshotType.Circle, from, rangeCheckFrom);
+                    return Prediction.GetDashingPrediction(target, width, delay, missileSpeed, range, collisionable, SpellType.Circle, from, rangeCheckFrom);
 
                 float targetDistance = rangeCheckFrom.Distance(target.PreviousPosition);
                 float flyTime = 0f;

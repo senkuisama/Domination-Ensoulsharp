@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SPrediction;
+using SPredictionMash;
 using EnsoulSharp.SDK;
 using SharpDX;
 using EnsoulSharp;
-using EnsoulSharp.SDK.MenuUI.Values;
+using EnsoulSharp.SDK.MenuUI;
 
 namespace e.Motion_Gangplank
 {
@@ -22,7 +22,7 @@ namespace e.Motion_Gangplank
 
         public static bool GetPredPos(AIHeroClient enemy, bool additionalReactionTime = false, bool additionalBarrelTime = false)
         {
-            PredPos = SPrediction.Prediction.GetFastUnitPosition(enemy, Config.Menu["Miscellanious"]["misc.enemyReactionTime"].GetValue<MenuSlider>().Value);
+            PredPos = SPredictionMash.Prediction.GetFastUnitPosition(enemy, Config.Menu["Miscellanious"]["misc.enemyReactionTime"].GetValue<MenuSlider>().Value);
             float reactionDistance = Config.Menu["Miscellanious"]["misc.enemyReactionTime"].GetValue<MenuSlider>().Value  +  (additionalReactionTime? Config.Menu["Miscellanious"]["misc.additionalReactionTime"].GetValue<MenuSlider>().Value : 0) * enemy.MoveSpeed*0.001f;
             if (PredPos.Distance(enemy) > reactionDistance)
             {

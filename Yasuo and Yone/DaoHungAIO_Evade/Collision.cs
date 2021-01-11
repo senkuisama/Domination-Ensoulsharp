@@ -197,7 +197,7 @@ namespace DaoHungAIO.Evade
 
                             if (collisionT - WallCastT < 4000)
                             {
-                                if (skillshot.SpellData.Type != SkillShotType.SkillshotMissileLine)
+                                if (skillshot.SpellData.Type != SpellType.SkillshotMissileLine)
                                 {
                                     skillshot.ForceDisabled = true;
                                 }

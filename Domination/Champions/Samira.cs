@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using SPredictionMash;
 
 namespace DominationAIO.Champions
@@ -32,7 +32,7 @@ namespace DominationAIO.Champions
             public static MenuBool ECombo = new MenuBool("ECombo", "E Combo");
             public static MenuBool EQ = new MenuBool("EQ", "Cast Q when E", false);
             public static MenuBool EW = new MenuBool("EW", "EW Combo");
-            public static MenuKeyBind EMinions = new MenuKeyBind("EMinions", "Accept E on Minion", System.Windows.Forms.Keys.A, KeyBindType.Toggle);
+            public static MenuKeyBind EMinions = new MenuKeyBind("EMinions", "Accept E on Minion", Keys.A, KeyBindType.Toggle);
             public static MenuSeparator Eonly = new MenuSeparator("Eonly", "But Only When");
             public static MenuSlider Eheath = new MenuSlider("E Heath", "Target Heath % <= ", 50, 0, 100);
             public static MenuBool ER = new MenuBool("E R", "R Is In Ready");
@@ -53,10 +53,10 @@ namespace DominationAIO.Champions
         }
         public static class KeysSettings
         {
-            public static MenuKeyBind QMixed = new MenuKeyBind("QMixed", "Q Harass When Clear ", System.Windows.Forms.Keys.H, KeyBindType.Toggle) { Active = true, };
-            public static MenuKeyBind QClear = new MenuKeyBind("QClear", "Q Clear Minions ", System.Windows.Forms.Keys.H, KeyBindType.Toggle) { Active = true, };
-            public static MenuKeyBind AllowTurret = new MenuKeyBind("AllowTurret", "Allow Turret Key [ Toggle ] ", System.Windows.Forms.Keys.T, KeyBindType.Toggle);
-            public static MenuKeyBind TurboFast = new MenuKeyBind("TurboFast", "Turbo Fastly", System.Windows.Forms.Keys.Z, KeyBindType.Toggle);
+            public static MenuKeyBind QMixed = new MenuKeyBind("QMixed", "Q Harass When Clear ", Keys.H, KeyBindType.Toggle) { Active = true, };
+            public static MenuKeyBind QClear = new MenuKeyBind("QClear", "Q Clear Minions ", Keys.H, KeyBindType.Toggle) { Active = true, };
+            public static MenuKeyBind AllowTurret = new MenuKeyBind("AllowTurret", "Allow Turret Key [ Toggle ] ", Keys.T, KeyBindType.Toggle);
+            public static MenuKeyBind TurboFast = new MenuKeyBind("TurboFast", "Turbo Fastly", Keys.Z, KeyBindType.Toggle);
         }
         public static MenuBool reset = new MenuBool("reset", "Reset Samira");
         public static void AddSamiraMenu(this Menu menu)
@@ -149,7 +149,7 @@ namespace DominationAIO.Champions
         public static void SamiraLoad()
         {
             Q = new Spell(SpellSlot.Q, 900f);
-            Q.SetSkillshot(0.25f, 50f, 2600, true, EnsoulSharp.SDK.Prediction.SkillshotType.Line);
+            Q.SetSkillshot(0.25f, 50f, 2600, true, SpellType.Line);
             W = new Spell(SpellSlot.W, 325f);
             E = new Spell(SpellSlot.E, 600f);
             E.SetTargetted(0f, 2000);
@@ -166,7 +166,7 @@ namespace DominationAIO.Champions
 
             Game.OnUpdate += Check;
             Game.OnUpdate += LogicCombo;
-            Orbwalker.OnAction += Orbwalker_OnAction;
+            //Orbwalker.OnAction += Orbwalker_OnAction;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             Game.OnUpdate += Game_OnUpdate;
             Game.OnUpdate += JungleClear;
@@ -186,7 +186,7 @@ namespace DominationAIO.Champions
             {
                 foreach(var min in minions)
                 {
-                    if (Q.IsReady() && SamiraSetMenu.QSettings.QManaCheck < Player.ManaPercent)
+                    if (Q.IsReady() && SamiraSetMenu.QSettings.QManaCheck.Value < Player.ManaPercent)
                     {
                         Q.Cast(min.Position);
                     }
@@ -213,7 +213,7 @@ namespace DominationAIO.Champions
 
             if(Orbwalker.ActiveMode == OrbwalkerMode.Harass && SamiraSetMenu.KeysSettings.QMixed.Active)
             {
-                if(SamiraSetMenu.QSettings.QManaCheck < Player.ManaPercent)
+                if(SamiraSetMenu.QSettings.QManaCheck.Value < Player.ManaPercent)
                 {
                     if (Q.IsReady())
                     {
@@ -222,7 +222,7 @@ namespace DominationAIO.Champions
                         {
                             foreach(var target in targets)
                             {
-                                if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                     return;
                             }
                         }
@@ -240,9 +240,9 @@ namespace DominationAIO.Champions
                         {
                             foreach(var min in minions)
                             {
-                                if (SamiraSetMenu.QSettings.QManaCheck < Player.ManaPercent)
+                                if (SamiraSetMenu.QSettings.QManaCheck.Value < Player.ManaPercent)
                                 {
-                                    if (Q.Cast(min, SamiraSetMenu.Misc.PacketCast) == CastStates.SuccessfullyCasted)
+                                    if (Q.Cast(min) == CastStates.SuccessfullyCasted)
                                         return;
                                 }
                             }
@@ -256,9 +256,9 @@ namespace DominationAIO.Champions
                         {
                             foreach (var min in minions)
                             {
-                                if (SamiraSetMenu.QSettings.QManaCheck < Player.ManaPercent)
+                                if (SamiraSetMenu.QSettings.QManaCheck.Value < Player.ManaPercent)
                                 {
-                                    if (Q.Cast(min, SamiraSetMenu.Misc.PacketCast) == CastStates.SuccessfullyCasted)
+                                    if (Q.Cast(min) == CastStates.SuccessfullyCasted)
                                         return;
                                 }
                             }
@@ -276,7 +276,7 @@ namespace DominationAIO.Champions
         }
         private static void LogicCombo(EventArgs args)
         {
-            if (Player.IsDead || OnAA || BeforeAA || Orbwalker.ActiveMode != OrbwalkerMode.Combo)
+            if (Player.IsDead || FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA || Orbwalker.ActiveMode != OrbwalkerMode.Combo)
                 return;
 
             if (SamiraSetMenu.KeysSettings.TurboFast.Active && Q.IsReady() && W.IsReady() && E.IsReady())
@@ -284,7 +284,7 @@ namespace DominationAIO.Champions
                 var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(E.Range);
                 if(target != null)
                 {
-                    if (AfterAA)
+                    if (FunnySlayerCommon.OnAction.AfterAA)
                     {
                         W.Cast();
                         E.Cast(target);
@@ -294,7 +294,7 @@ namespace DominationAIO.Champions
                         }
                         else
                         {
-                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                             {
                                 if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                     if (W.Cast())
@@ -331,12 +331,12 @@ namespace DominationAIO.Champions
                             if (target.IsValidTarget(300))
                             {
                                 Q.Cast(target.Position);
-                                E.DelayTargetCast(target, 200);
+                                E.Cast(target);
                                 EnsoulSharp.SDK.Utility.DelayAction.Add(300, () => { W.Cast(); });
                             }
                             else
                             {
-                                if(Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High))
+                                if(Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                 {
                                     if (W.Cast())
                                     {
@@ -373,9 +373,9 @@ namespace DominationAIO.Champions
                                     if (Player.Position.Extend(t.Position, +E.Range).CountEnemyHeroesInRange(R.Range) > SamiraSetMenu.RSettings.RCount.Value)
                                     {
                                         if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(t.Position, E.Range)))
-                                            if (E.Cast(t, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                            if (E.Cast(t) == CastStates.SuccessfullyCasted)
                                             {
-                                                if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                                                if (R.Cast())
                                                     return;
                                             }
                                     }
@@ -393,9 +393,9 @@ namespace DominationAIO.Champions
                                 {
                                     if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
                                     {
-                                        if (E.Cast(target, SamiraSetMenu.Misc.PacketCast) == CastStates.SuccessfullyCasted)
+                                        if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                         {
-                                            if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                                            if (R.Cast())
                                                 return;
                                         }
                                     }
@@ -403,7 +403,7 @@ namespace DominationAIO.Champions
                             }
                             else
                             {
-                                if (R.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                                if (R.Cast())
                                     return;
                             }
                         }
@@ -416,7 +416,7 @@ namespace DominationAIO.Champions
                         var fstarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(E.Range + Q.Range);
                         if (fstarget != null)
                         {
-                            var minion = GameObjects.Get<AIMinionClient>().Where(i => !i.IsDead && i.IsValid() && !i.IsAlly && i.IsValidTarget(E.Range) && Player.Position.Extend(i.Position, E.Range).Distance(fstarget) < Player.Distance(fstarget)).OrderBy(i => Player.Position.Extend(i.Position, E.Range).Distance(fstarget));
+                            var minion = ObjectManager.Get<AIMinionClient>().Where(i => !i.IsDead && i.IsValid() && !i.IsAlly && i.IsValidTarget(E.Range) && Player.Position.Extend(i.Position, E.Range).Distance(fstarget) < Player.Distance(fstarget)).OrderBy(i => Player.Position.Extend(i.Position, E.Range).Distance(fstarget));
                             if (minion != null)
                             {
                                 if (SamiraSetMenu.ESettings.EMinions.Active)
@@ -433,13 +433,13 @@ namespace DominationAIO.Champions
                                                     {
                                                         if (R.IsReady())
                                                         {
-                                                            if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                            if (E.Cast(min) == CastStates.SuccessfullyCasted)
                                                                 return;
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        if (E.Cast(min, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                        if (E.Cast(min) == CastStates.SuccessfullyCasted)
                                                             return;
                                                     }
                                                 }
@@ -458,7 +458,7 @@ namespace DominationAIO.Champions
                             if (FSpred.Prediction.Prediction.PredictUnitPosition(target, 700).DistanceToPlayer() > E.Range)
                             {
                                 if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                    if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                     {
                                         return;
                                     }
@@ -466,7 +466,7 @@ namespace DominationAIO.Champions
                             if (target.Health < GetEDmg(target) && SamiraSetMenu.ESettings.EKs.Enabled)
                             {
                                 if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                    if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                     {
                                         return;
                                     }
@@ -476,7 +476,7 @@ namespace DominationAIO.Champions
                                 if (Player.Position.Extend(target.Position, +E.Range).CountEnemyHeroesInRange(R.Range) > Player.CountEnemyHeroesInRange(R.Range))
                                 {
                                     if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                        if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                        if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                         {
                                             return;
                                         }
@@ -493,7 +493,7 @@ namespace DominationAIO.Champions
                                             {
                                                 if (Player.Position.Extend(Next.Position, E.Range).Distance(Pos) < Player.Distance(Pos))
                                                 {
-                                                    if (E.Cast(Next, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                                    if (E.Cast(Next) == CastStates.SuccessfullyCasted)
                                                         return;
                                                 }
                                             }
@@ -506,7 +506,7 @@ namespace DominationAIO.Champions
                                 if (Variables.TickCount > LastW + 750)
                                 {
                                     if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                        if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                        if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                         {
                                             return;
                                         }
@@ -515,9 +515,9 @@ namespace DominationAIO.Champions
                             if (Q.IsReady() && SamiraSetMenu.ESettings.EQ.Enabled)
                             {
                                 if (SamiraSetMenu.KeysSettings.AllowTurret.Active || !UnderTower(Player.Position.Extend(target.Position, E.Range)))
-                                    if (E.Cast(target, SamiraSetMenu.Misc.PacketCast.Enabled) == CastStates.SuccessfullyCasted)
+                                    if (E.Cast(target) == CastStates.SuccessfullyCasted)
                                     {
-                                        if (Q.Cast(new SharpDX.Vector3(45646, 546416, 45462), SamiraSetMenu.Misc.PacketCast.Enabled))
+                                        if (Q.Cast(new SharpDX.Vector3(45646, 546416, 45462)))
                                             return;
                                         return;
                                     }
@@ -534,7 +534,7 @@ namespace DominationAIO.Champions
                             var targets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(E.IsReady() ? E.Range : W.Range)).OrderBy(i => i.Health);
                             if (targets != null)
                             {
-                                if (W.Cast(SamiraSetMenu.Misc.PacketCast.Enabled))
+                                if (W.Cast())
                                     return;
                             }
                         }
@@ -581,7 +581,7 @@ namespace DominationAIO.Champions
                                             if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
                                                 return;
                                             else
-                                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.Prediction.HitChance.High, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
                                                 return;
                                         }
                                         else
@@ -594,7 +594,7 @@ namespace DominationAIO.Champions
                                                     if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
                                                         return;
                                                     else
-                                                    if (Q.Cast(t.Position, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                                    if (Q.Cast(t.Position))
                                                         return;
                                                 }
                                             }
@@ -609,7 +609,7 @@ namespace DominationAIO.Champions
                                                 if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
                                                     return;
                                                 else
-                                                if (Q.Cast(Player.Position.Extend(pred.CastPosition, Q.Range), SamiraSetMenu.Misc.PacketCast.Enabled))
+                                                if (Q.Cast(Player.Position.Extend(pred.CastPosition, Q.Range)))
                                                     return;
                                             }
                                         }
@@ -618,7 +618,7 @@ namespace DominationAIO.Champions
                                             if (LastCasted + SamiraSetMenu.Misc.AATimer.Value > Variables.TickCount)
                                                 return;
                                             else
-                                            if (Q.Cast(pred.CastPosition, SamiraSetMenu.Misc.PacketCast.Enabled))
+                                            if (Q.Cast(pred.CastPosition))
                                                 return;
                                         }
                                     }
@@ -680,15 +680,15 @@ namespace DominationAIO.Champions
                 }
             }
 
-            if (!sender.IsAlly && (args.Slot <= SpellSlot.R || Orbwalker.IsSpecialAttack(args.SData.Name)) && sender.Type == GameObjectType.AIHeroClient)
+            if (!sender.IsAlly && (args.Slot <= SpellSlot.R && sender.Type == GameObjectType.AIHeroClient))
             {
                 if(args.Target != null)
                 {
-                    if (args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId || args.Target.MemoryAddress == ObjectManager.Player.MemoryAddress)
+                    if (args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId)
                     {
                         if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
                         {
-                            if (SamiraSetMenu.WSettings.WBlock.Enabled && (Orbwalker.ActiveMode == OrbwalkerMode.Combo || !SamiraSetMenu.WSettings.WonlyBlockIncombo) && !BeforeAA && !OnAA)
+                            if (SamiraSetMenu.WSettings.WBlock.Enabled && (Orbwalker.ActiveMode == OrbwalkerMode.Combo || !SamiraSetMenu.WSettings.WonlyBlockIncombo.Enabled) && !FunnySlayerCommon.OnAction.BeforeAA && !FunnySlayerCommon.OnAction.OnAA)
                             {
                                 if (W.Cast())
                                 {
@@ -701,10 +701,10 @@ namespace DominationAIO.Champions
             }
         }
 
-        private static bool AfterAA = false;
+        /*private static bool AfterAA = false;
         private static bool BeforeAA = false;
-        private static bool OnAA = false;
-        private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
+        private static bool OnAA = false;*/
+        /*private static void Orbwalker_OnAction(object sender, OrbwalkerActionArgs args)
         {
             if(args.Type == OrbwalkerType.AfterAttack)
             {
@@ -740,12 +740,15 @@ namespace DominationAIO.Champions
             {
                 BeforeAA = false;
             }
-        }
+        }*/
 
         private static void Check(EventArgs args)
         {
             if (Player.IsDead)
                 return;
+
+            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.AfterAA)
+                LastCasted = 0;
 
             if (Player.HasBuff("SamiraR"))
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);

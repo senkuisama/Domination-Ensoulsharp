@@ -23,7 +23,7 @@ namespace DaoHungAIO.Evade
 
     using EnsoulSharp;
     using EnsoulSharp.SDK;
-    using EnsoulSharp.SDK.MenuUI.Values;
+    using EnsoulSharp.SDK.MenuUI;
     using SharpDX;
     using System;
     using System.Collections.Generic;
@@ -100,23 +100,23 @@ namespace DaoHungAIO.Evade
 
                 switch (spellData.Type)
                 {
-                    case SkillShotType.SkillshotCircle:
+                    case SpellType.SkillshotCircle:
                         Circle = new Geometry.Polygon.Circle(CollisionEnd, spellData.Radius, 22);
                         break;
-                    case SkillShotType.SkillshotLine:
+                    case SpellType.SkillshotLine:
                         Rectangle = new Geometry.Polygon.Rectangle(Start, CollisionEnd, spellData.Radius);
                         break;
-                    case SkillShotType.SkillshotMissileLine:
+                    case SpellType.SkillshotMissileLine:
                         Rectangle = new Geometry.Polygon.Rectangle(Start, CollisionEnd, spellData.Radius);
                         break;
-                    case SkillShotType.SkillshotCone:
+                    case SpellType.SkillshotCone:
                         Sector = new Geometry.Polygon.Sector(
                             start, CollisionEnd - start, spellData.Radius * (float) Math.PI / 180, spellData.Range, 22);
                         break;
-                    case SkillShotType.SkillshotRing:
+                    case SpellType.SkillshotRing:
                         Ring = new Geometry.Polygon.Ring(CollisionEnd, spellData.Radius, spellData.RingRadius, 22);
                         break;
-                    case SkillShotType.SkillshotArc:
+                    case SpellType.SkillshotArc:
                         Arc = new Geometry.Polygon.Arc(start, end,
                             EvadeManager.SkillShotsExtraRadius + (int) ally.BoundingRadius, 22);
                         break;
@@ -190,7 +190,7 @@ namespace DaoHungAIO.Evade
 
         public bool GetBool(string name)
         {
-            return EvadeManager.SkillShotMenu["Evade" + SpellData.ChampionName.ToLower()][name + SpellData.MenuItemName].GetValue<MenuBool>();
+            return EvadeManager.SkillShotMenu["Evade" + SpellData.ChampionName.ToLower()][name + SpellData.MenuItemName].GetValue<MenuBool>().Enabled;
         }
 
         public bool IsActive()
@@ -232,7 +232,7 @@ namespace DaoHungAIO.Evade
                 _collisionEnd = Collision.GetCollisionPoint(this);
             }
 
-            if (SpellData.Type == SkillShotType.SkillshotMissileLine)
+            if (SpellData.Type == SpellType.SkillshotMissileLine)
             {
                 Rectangle = new Geometry.Polygon.Rectangle(GetMissilePosition(0), CollisionEnd, SpellData.Radius);
                 UpdatePolygon();
@@ -268,27 +268,27 @@ namespace DaoHungAIO.Evade
         {
             switch (SpellData.Type)
             {
-                case SkillShotType.SkillshotCircle:
+                case SpellType.SkillshotCircle:
                     Circle.UpdatePolygon();
                     Polygon = Circle;
                     break;
-                case SkillShotType.SkillshotLine:
+                case SpellType.SkillshotLine:
                     Rectangle.UpdatePolygon();
                     Polygon = Rectangle;
                     break;
-                case SkillShotType.SkillshotMissileLine:
+                case SpellType.SkillshotMissileLine:
                     Rectangle.UpdatePolygon();
                     Polygon = Rectangle;
                     break;
-                case SkillShotType.SkillshotCone:
+                case SpellType.SkillshotCone:
                     Sector.UpdatePolygon();
                     Polygon = Sector;
                     break;
-                case SkillShotType.SkillshotRing:
+                case SpellType.SkillshotRing:
                     Ring.UpdatePolygon();
                     Polygon = Ring;
                     break;
-                case SkillShotType.SkillshotArc:
+                case SpellType.SkillshotArc:
                     Arc.UpdatePolygon();
                     Polygon = Arc;
                     break;
@@ -415,9 +415,9 @@ namespace DaoHungAIO.Evade
                     Distance += from.Distance(to);
                 }
 
-                if (SpellData.Type == SkillShotType.SkillshotMissileLine ||
-                    SpellData.Type == SkillShotType.SkillshotMissileCone ||
-                    SpellData.Type == SkillShotType.SkillshotArc)
+                if (SpellData.Type == SpellType.SkillshotMissileLine ||
+                    SpellData.Type == SpellType.SkillshotMissileCone ||
+                    SpellData.Type == SpellType.SkillshotArc)
                 {
 
                     foreach (var ally in bestAllies)
@@ -544,7 +544,7 @@ namespace DaoHungAIO.Evade
         public bool IsAboutToHit(int time, AIBaseClient unit)
         {
 
-            if (SpellData.Type == SkillShotType.SkillshotMissileLine)
+            if (SpellData.Type == SpellType.SkillshotMissileLine)
             {
                 var missilePos = GetMissilePosition(0);
                 var missilePosAfterT = GetMissilePosition(time);

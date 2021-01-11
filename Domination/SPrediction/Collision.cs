@@ -196,7 +196,7 @@ namespace SPredictionMash
                                 ClipperWrapper.DefineArc(from - new Vector2(900 / 2f, 20), to, (float)Math.PI * (to.Distance(from) / 900), 410, 320 * (to.Distance(from) / 900)));
             }
 
-            foreach (var effectEmitter in GameObjects.ParticleEmitters)
+            foreach (var effectEmitter in ObjectManager.Get<EffectEmitter>())
             {
                 if (effectEmitter.IsValid &&
                     Regex.IsMatch(effectEmitter.Name, @"Yasuo_.+_w_windwallenemy\d", RegexOptions.IgnoreCase))
@@ -204,7 +204,7 @@ namespace SPredictionMash
                     var wall = effectEmitter;
                     var level = wall.Name.Substring(wall.Name.Length - 2, 2);
                     var wallWidth = 250 + 50 * Convert.ToInt32(level);
-                    var wallDirection = wall.Direction.Perpendicular().ToVector2();
+                    var wallDirection = wall.Position.ToVector2();
                     var wallStart = wall.Position.ToVector2() + wallWidth / 2 * wallDirection;
                     var wallEnd = wallStart - wallWidth * wallDirection;
                     var wallPoly = ClipperWrapper.DefineRectangle(wallStart, wallEnd, 5);
@@ -234,7 +234,7 @@ namespace SPredictionMash
                 return false;
             }
 
-            foreach (var effectEmitter in GameObjects.ParticleEmitters)
+            foreach (var effectEmitter in ObjectManager.Get<EffectEmitter>())
             {
                 if (effectEmitter.IsValid &&
                     Regex.IsMatch(effectEmitter.Name, @"Yasuo_.+_w_windwallenemy\d", RegexOptions.IgnoreCase))
@@ -242,7 +242,7 @@ namespace SPredictionMash
                     var wall = effectEmitter;
                     var level = wall.Name.Substring(wall.Name.Length - 2, 2);
                     var wallWidth = 250 + 50 * Convert.ToInt32(level);
-                    var wallDirection = wall.Direction.Perpendicular().ToVector2();
+                    var wallDirection = wall.Position.ToVector2();
                     var wallStart = wall.Position.ToVector2() + wallWidth / 2 * wallDirection;
                     var wallEnd = wallStart - wallWidth * wallDirection;
                     var wallPoly = ClipperWrapper.DefineRectangle(wallStart, wallEnd, 5);

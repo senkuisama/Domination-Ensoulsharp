@@ -339,7 +339,7 @@ namespace SebbyLibPorted.Movement
                 return HitChance.VeryHigh;
             }
 
-            if (hero.Path.PathLength() > 0 != hero.IsMoving)
+            if (hero.Path.Length > 0 != hero.IsMoving)
             {
                 return HitChance.Medium;
             }
@@ -433,7 +433,7 @@ namespace SebbyLibPorted.Movement
             var dashData = input.Unit.GetDashInfo();
             var result = new PredictionOutput { Input = input };
             //Normal dashes.
-            if (!dashData.IsBlink)
+            if (dashData != null && !(dashData.Speed > 10000))
             {
                 //Mid air:
                 var endP = dashData.Path.Last();

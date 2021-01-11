@@ -72,7 +72,7 @@ namespace DaoHungAIO.Evade
         public string SpellName;
         public bool TakeClosestPath = false;
         public string ToggleParticleName = "";
-        public SkillShotType Type;
+        public SpellType Type;
         private int _radius;
         private int _range;
         
@@ -81,7 +81,7 @@ namespace DaoHungAIO.Evade
         public SpellData(string championName,
             string spellName,
             SpellSlot slot,
-            SkillShotType type,
+            SpellType type,
             int delay,
             int range,
             int radius,
@@ -126,7 +126,7 @@ namespace DaoHungAIO.Evade
             get
             {
                 return _range +
-                       (Type == SkillShotType.SkillshotLine || Type == SkillShotType.SkillshotMissileLine
+                       (Type == SpellType.SkillshotLine || Type == SpellType.SkillshotMissileLine
                            ? EvadeManager.SkillShotsExtraRange
                            : 0);
             }

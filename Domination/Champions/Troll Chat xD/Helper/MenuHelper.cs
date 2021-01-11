@@ -1,10 +1,11 @@
-﻿using System;
+﻿using EnsoulSharp.SDK.MenuUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using Menu = EnsoulSharp.SDK.MenuUI.Menu;
 
 namespace Troll_Chat_xD.Helper
@@ -19,7 +20,7 @@ namespace Troll_Chat_xD.Helper
         {
             menu.Add(new MenuSlider(name, displayName, value, minValue, maxValue));
         }
-        public static void AddMenuKeybind(this EnsoulSharp.SDK.MenuUI.Menu menu, string name, string displayName, Keys key, KeyBindType type)
+        public static void AddMenuKeybind(this EnsoulSharp.SDK.MenuUI.Menu menu, string name, string displayName, EnsoulSharp.SDK.MenuUI.Keys key, KeyBindType type)
         {
             menu.Add(new MenuKeyBind(name, displayName, key, type));
         }

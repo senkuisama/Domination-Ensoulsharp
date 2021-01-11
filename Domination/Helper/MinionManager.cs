@@ -12,7 +12,7 @@ namespace DominationAIO.Champions.Helper
     {
         public static IEnumerable<AIMinionClient> GetEnemyMinions(float range)
         {
-            return GameObjects.EnemyMinions.Where(x => x.IsValidTarget(range) && x.IsEnemy && x.IsMinion);
+            return GameObjects.EnemyMinions.Where(x => x.IsValidTarget(range) && x.IsEnemy && x.IsMinion());
         }
         public static IEnumerable<AIMinionClient> GetJungleMobs(float range)
         {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.MenuUI.Values;
+using EnsoulSharp.SDK.MenuUI;
 using SharpDX;
 namespace e.Motion_Gangplank
 {
@@ -20,7 +20,7 @@ namespace e.Motion_Gangplank
         }
         public AIMinionClient GetBarrel()
         {
-            return ObjectManager.GetUnitByNetworkId<AIMinionClient>((uint)BarrelObjectNetworkID);
+            return ObjectManager.GetUnitByNetworkId<AIMinionClient>(BarrelObjectNetworkID);
         }
         public bool CanAANow()
         {

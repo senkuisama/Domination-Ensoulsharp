@@ -1,5 +1,5 @@
 ﻿// Copyright 2014 - 2014 Esk0r
-// SkillShotType.cs is part of Evade.
+// SpellType.cs is part of Evade.
 // 
 // Evade is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 namespace DaoHungAIO.Evade
 {
-    public enum SkillShotType
+    public enum SpellType
     {
         SkillshotCircle,
         SkillshotLine,

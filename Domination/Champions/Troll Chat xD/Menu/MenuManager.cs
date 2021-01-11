@@ -1,10 +1,10 @@
-﻿using System;
+﻿using EnsoulSharp.SDK.MenuUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using EnsoulSharp.SDK.MenuUI.Values;
+
 using Troll_Chat_xD.Core;
 using Troll_Chat_xD.Helper;
 

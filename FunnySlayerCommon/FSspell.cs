@@ -22,7 +22,7 @@ namespace FunnySlayerCommon
             }
             else
             {
-                return ObjectManager.Player.Mana > spell.Mana && spell.ToggleState <= maxToggleState;
+                return ObjectManager.Player.Mana > spell.Mana && (int)spell.ToggleState <= maxToggleState;
             }
         }
     }

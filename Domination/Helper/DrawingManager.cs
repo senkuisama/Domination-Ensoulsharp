@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EnsoulSharp;
+using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.Utility;
 using SharpDX;
 using Color = System.Drawing.Color;

@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.MenuUI.Values;
-using EnsoulSharp.SDK.Prediction;
+
 using EnsoulSharp.SDK.Utility;
-using EnsoulSharp.SDK.Events;
 using SharpDX;
 using System.Drawing;
 
@@ -122,7 +120,7 @@ namespace Yasuo_LogicHelper
         }
         public static List<AIMinionClient> GetJungleTargetsInRange(float range)
         {
-            return GameObjects.Jungle.Where(x => x.IsValidTarget(2000) && x.IsMonster).Cast<AIMinionClient>().ToList();
+            return GameObjects.Jungle.Where(x => x.IsValidTarget(2000) && x.IsJungle()).Cast<AIMinionClient>().ToList();
         }
         public static Vector3 Epred(AIBaseClient target)
         {

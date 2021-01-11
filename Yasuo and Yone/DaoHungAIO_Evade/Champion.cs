@@ -10,7 +10,7 @@ namespace DominationAIO.Common
     using Menu = EnsoulSharp.SDK.MenuUI.Menu;
     using Spell = EnsoulSharp.SDK.Spell;
     using EnsoulSharp.SDK;
-    using static EnsoulSharp.SDK.Gapcloser;
+    using static EnsoulSharp.SDK.AntiGapcloser;
 
     internal abstract class Champion
     {
@@ -74,13 +74,13 @@ namespace DominationAIO.Common
         {
             Game.OnUpdate += this.OnGameUpdate;
             EnsoulSharp.Drawing.OnDraw += Drawing;
-            Orbwalker.OnAction += OnAction;
+            //Orbwalker.OnAction += OnAction;
             Spellbook.OnCastSpell += OnCastSpell;
             AIBaseClient.OnProcessSpellCast += OnProcessSpellCast;
-            Gapcloser.OnGapcloser += OnGapcloser;
+            AntiGapcloser.OnGapcloser += OnGapcloser;
         }
 
-        internal virtual void OnGapcloser(AIBaseClient Sender, GapcloserArgs args)
+        internal virtual void OnGapcloser(AIBaseClient Sender, AntiGapcloser.GapcloserArgs args)
         {
 
         }
@@ -91,10 +91,10 @@ namespace DominationAIO.Common
         }
 
 
-        internal virtual void OnAction(object sender, OrbwalkerActionArgs args)
+        /*internal virtual void OnAction(object sender, OrbwalkerActionArgs args)
         {
 
-        }
+        }*/
 
         internal virtual void OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {

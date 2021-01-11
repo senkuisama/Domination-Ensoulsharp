@@ -5,7 +5,7 @@
     using EnsoulSharp;
     using EnsoulSharp.SDK;
     using EnsoulSharp.SDK.MenuUI;
-    using EnsoulSharp.SDK.MenuUI.Values;
+    
     using SharpDX;
     using System;
     using System.Linq;
@@ -114,7 +114,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()])
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                     {
                                         DominationAIO.Common.Champion.E.CastOnUnit(ally);
                                     }
@@ -125,7 +125,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()])
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                     {
                                         DominationAIO.Common.Champion.W.CastOnUnit(ally);
                                     }
@@ -147,7 +147,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()])
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                     {
                                         DominationAIO.Common.Champion.E.CastOnUnit(ally);
                                     }
@@ -158,7 +158,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()])
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                     {
                                         DominationAIO.Common.Champion.W.CastOnUnit(ally);
                                     }
@@ -186,8 +186,7 @@
 
                                     {
                                         if (EvadeTargetManager.Menu["whitelist"][
-                                                ally.CharacterName.ToLower()]
-    )
+                                                ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                         {
                                             DominationAIO.Common.Champion.E.CastOnUnit(ally);
                                         }
@@ -198,8 +197,7 @@
 
                                     {
                                         if (EvadeTargetManager.Menu["whitelist"][
-                                                ally.CharacterName.ToLower()]
-    )
+                                                ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                         {
                                             DominationAIO.Common.Champion.W.CastOnUnit(ally);
                                         }
@@ -222,7 +220,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.E.CastOnUnit(ally);
@@ -234,7 +232,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.W.CastOnUnit(ally);
@@ -257,8 +255,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
-)
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                     {
                                         DominationAIO.Common.Champion.E.CastOnUnit(ally);
                                     }
@@ -269,8 +266,7 @@
 
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
-)
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                     {
                                         DominationAIO.Common.Champion.W.CastOnUnit(ally);
                                     }
@@ -284,7 +280,7 @@
                             {
                                 case "Jax":
                                     if (Menu["Blockjax"]["BlockSpellE"] != null &&
-                                        Menu["Blockjax"]["BlockSpellE"])
+                                        Menu["Blockjax"]["BlockSpellE"].GetValue<MenuBool>().Enabled)
                                     {
                                         if (target.HasBuff("jaxcounterstrike"))
                                         {
@@ -303,8 +299,7 @@
                                                 {
 
                                                     if (EvadeTargetManager.Menu["whitelist"][
-                                                            ally.CharacterName.ToLower()]
-                )
+                                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                                                     {
                                                         DominationAIO.Common.Champion.E.CastOnUnit(ally);
                                                     }
@@ -315,7 +310,7 @@
 
                                                 {
                                                     if (EvadeTargetManager.Menu["whitelist"][
-                                                            ally.CharacterName.ToLower()]
+                                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
                 )
                                                     {
                                                         DominationAIO.Common.Champion.W.CastOnUnit(ally);
@@ -330,7 +325,7 @@
                                     break;
                                 case "Riven":
                                     if (Menu["Blockriven"]["BlockSpellQ"] != null &&
-                                        Menu["Blockriven"]["BlockSpellQ"])
+                                        Menu["Blockriven"]["BlockSpellQ"].GetValue<MenuBool>().Enabled)
                                     {
                                         if (Utils.GameTimeTickCount - RivenQTime <= 100 && RivenDashPos.IsValid() &&
                                             ally.Distance(target) <= RivenQRange)
@@ -342,7 +337,7 @@
 
                                             {
                                                 if (EvadeTargetManager.Menu["whitelist"][
-                                                        ally.CharacterName.ToLower()]
+                                                        ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
             )
                                                 {
 
@@ -355,7 +350,7 @@
 
                                             {
                                                 if (EvadeTargetManager.Menu["whitelist"][
-                                                        ally.CharacterName.ToLower()]
+                                                        ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
             )
                                                 {
                                                     DominationAIO.Common.Champion.W.CastOnUnit(ally);
@@ -382,7 +377,7 @@
                 if (ally != null)
                 {
 
-                    if (EvadeTargetManager.AttackMenu["Brian.EvadeTargetMenu.Turret"])
+                    if (EvadeTargetManager.AttackMenu["Brian.EvadeTargetMenu.Turret"].GetValue<MenuBool>().Enabled)
                     {
                         if ( ally.IsAlly)
                         {
@@ -397,7 +392,7 @@
                                     DominationAIO.Common.Champion.E.Range)
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.E.CastOnUnit(Args.Target);
@@ -414,7 +409,7 @@
                                     DominationAIO.Common.Champion.W.Range)
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.W.CastOnUnit(Args.Target);
@@ -430,15 +425,15 @@
 
                 if (ally != null)
                 {
-                if (!sender.IsMinion)
+                if (!sender.IsMinion())
                 {
                     if (ally.IsAlly)
                     {
                         if (Args.SData.Name.Contains("BasicAttack") &&
-                            EvadeTargetManager.AttackMenu["Brian.EvadeTargetMenu.BAttack"] &&
+                            EvadeTargetManager.AttackMenu["Brian.EvadeTargetMenu.BAttack"].GetValue<MenuBool>().Enabled &&
                             ally.HealthPercent <=
                             EvadeTargetManager.AttackMenu["Brian.EvadeTargetMenu.BAttackHpU"]
-                                .GetValue<MenuSlider>())
+                                .GetValue<MenuSlider>().Value)
                         {
 
 
@@ -453,7 +448,7 @@
                                     DominationAIO.Common.Champion.E.Range)
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.E.CastOnUnit(Args.Target);
@@ -471,7 +466,7 @@
                                    DominationAIO.Common.Champion.W.Range)
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.W.CastOnUnit(Args.Target);
@@ -485,7 +480,7 @@
                 }
                 if (ally != null)
                 {
-                    if (sender.IsMinion)
+                    if (sender.IsMinion())
                     {
 
                         if (ally.IsAlly)
@@ -502,13 +497,13 @@
 
                                     if (
                                         EvadeTargetManager
-                                            .AttackMenu["Brian.EvadeTargetMenu.Minion"] && ally.HealthPercent <=
+                                            .AttackMenu["Brian.EvadeTargetMenu.Minion"].GetValue<MenuBool>().Enabled && ally.HealthPercent <=
                                         EvadeTargetManager
                                             .AttackMenu["Brian.EvadeTargetMenu.HP"]
-                                            .GetValue<MenuSlider>())
+                                            .GetValue<MenuSlider>().Value)
                                     {
                                         if (EvadeTargetManager.Menu["whitelist"][
-                                                ally.CharacterName.ToLower()]
+                                                ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
     )
                                         {
                                             DominationAIO.Common.Champion.E.CastOnUnit(ally);
@@ -527,13 +522,13 @@
 
                                     if (
                                         EvadeTargetManager
-                                            .AttackMenu["Brian.EvadeTargetMenu.Minion"] && ally.HealthPercent <=
+                                            .AttackMenu["Brian.EvadeTargetMenu.Minion"].GetValue<MenuBool>().Enabled && ally.HealthPercent <=
                                         EvadeTargetManager
                                             .AttackMenu["Brian.EvadeTargetMenu.HP"]
-                                            .GetValue<MenuSlider>())
+                                            .GetValue<MenuSlider>().Value)
                                     {
                                         if (EvadeTargetManager.Menu["whitelist"][
-                                                ally.CharacterName.ToLower()]
+                                                ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
     )
                                         {
                                             DominationAIO.Common.Champion.W.CastOnUnit(ally);
@@ -545,9 +540,9 @@
                         }
                     }
                     if (Args.SData.Name.Contains("crit")  &&
-                      EvadeTargetManager.AttackMenu["Brian.EvadeTargetMenu.CAttack"]
+                      EvadeTargetManager.AttackMenu["Brian.EvadeTargetMenu.CAttack"].GetValue<MenuBool>().Enabled
                         && ally.HealthPercent <= EvadeTargetManager
-                            .AttackMenu["Brian.EvadeTargetMenu.CAttackHpU"].GetValue<MenuSlider>())
+                            .AttackMenu["Brian.EvadeTargetMenu.CAttackHpU"].GetValue<MenuSlider>().Value)
                     {
                        // if (ally.IsHero)
                         {
@@ -561,7 +556,7 @@
                                     DominationAIO.Common.Champion.E.Range)
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.E.CastOnUnit(ally);
@@ -579,7 +574,7 @@
                                    DominationAIO.Common.Champion.W.Range)
                                 {
                                     if (EvadeTargetManager.Menu["whitelist"][
-                                            ally.CharacterName.ToLower()]
+                                            ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled
 )
                                     {
                                         DominationAIO.Common.Champion.W.CastOnUnit(ally);
@@ -623,7 +618,7 @@
                         if (ally != null  && ally.IsAlly)
                         {
                             if (EvadeTargetManager.Menu["whitelist"][
-                                    ally.CharacterName.ToLower()])
+                                    ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                             {
                                 DominationAIO.Common.Champion.E.CastOnUnit(Args.Target);
                             }
@@ -641,7 +636,7 @@
                         if (ally != null  && ally.IsAlly)
                         {
                             if (EvadeTargetManager.Menu["whitelist"][
-                                    ally.CharacterName.ToLower()])
+                                    ally.CharacterName.ToLower()].GetValue<MenuBool>().Enabled)
                             {
                                 DominationAIO.Common.Champion.W.CastOnUnit(Args.Target);
                             }
@@ -663,7 +658,7 @@
 
 
             if (Menu["Block" + riven.CharacterName.ToLower()]["BlockSpell" + SpellSlot.Q.ToString()] != null &&
-                Menu["Block" + riven.CharacterName.ToLower()]["BlockSpell" + SpellSlot.Q.ToString()])
+                Menu["Block" + riven.CharacterName.ToLower()]["BlockSpell" + SpellSlot.Q.ToString()].GetValue<MenuBool>().Enabled)
             {
                 if (Args.Animation.ToLower() == "spell1c")
                 {
@@ -683,7 +678,7 @@
             }
 
             if (Menu["Block" + riven.CharacterName.ToLower()]["BlockSpell" + SpellSlot.Q.ToString()] != null &&
-               Menu["Block" + riven.CharacterName.ToLower()]["BlockSpell" + SpellSlot.Q.ToString()])
+               Menu["Block" + riven.CharacterName.ToLower()]["BlockSpell" + SpellSlot.Q.ToString()].GetValue<MenuBool>().Enabled)
             {
                 RivenDashPos = Args.EndPos;
             }

@@ -35,9 +35,9 @@ namespace SebbyLibPorted
         /// <param name="args">The <see cref="AIBaseClientProcessSpellCastEventArgs"/> instance containing the event data.</param>
         private static void AIBaseClient_OnDoCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
-            if (ActiveAttacks.ContainsKey(sender.NetworkId) && sender.IsMelee)
+            if (ActiveAttacks.ContainsKey((uint)sender.NetworkId) && sender.IsMelee)
             {
-                ActiveAttacks[sender.NetworkId].Processed = true;
+                ActiveAttacks[(uint)sender.NetworkId].Processed = true;
             }
         }
 
@@ -51,7 +51,7 @@ namespace SebbyLibPorted
                 {
                     if (activeAttack.Key == casterNetworkId)
                     {
-                        ActiveAttacks[casterNetworkId].Processed = true;
+                        ActiveAttacks[(uint)casterNetworkId].Processed = true;
                     }
                 }
             }
@@ -74,9 +74,9 @@ namespace SebbyLibPorted
         {
             if (spellbook.Owner.IsValid && args.SpellStopCancelled)
             {
-                if (ActiveAttacks.ContainsKey(spellbook.Owner.NetworkId))
+                if (ActiveAttacks.ContainsKey((uint)spellbook.Owner.NetworkId))
                 {
-                    ActiveAttacks.Remove(spellbook.Owner.NetworkId);
+                    ActiveAttacks.Remove((uint)spellbook.Owner.NetworkId);
                 }
             }
         }
@@ -94,7 +94,7 @@ namespace SebbyLibPorted
             }
 
             var target = (AIBaseClient)args.Target;
-            ActiveAttacks.Remove(sender.NetworkId);
+            ActiveAttacks.Remove((uint)sender.NetworkId);
 
             var attackData = new PredictedDamage(
                 sender,
@@ -105,7 +105,7 @@ namespace SebbyLibPorted
                 sender.AttackDelay * 1000 - (sender is AITurretClient ? 70 : 0),
                 sender.IsMelee ? int.MaxValue : (int)args.SData.MissileSpeed,
                 (float)sender.GetAutoAttackDamage(target));
-            ActiveAttacks.Add(sender.NetworkId, attackData);
+            ActiveAttacks.Add((uint)sender.NetworkId, attackData);
         }
 
         public static float GetHealthPrediction(AIBaseClient unit, int time, int delay = 70)

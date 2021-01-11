@@ -229,7 +229,7 @@ namespace SebbyLibPorted.Prediction
         {
             var SpellInput = new PredictionInput
             {
-                Aoe = (spell.Type == EnsoulSharp.SDK.Prediction.SkillshotType.Circle || Aoe ? true : false),
+                Aoe = (spell.Type == SpellType.Circle || Aoe ? true : false),
                 Unit = unit,
                 Collision = spell.Collision,
                 CollisionObjects = (CollisionObjects ?? new CollisionableObjects[1]),
@@ -603,7 +603,7 @@ namespace SebbyLibPorted.Prediction
             var dashData = input.Unit.GetDashInfo();
             var result = new PredictionOutput { Input = input };
             //Normal dashes.
-            if (!dashData.IsBlink)
+            if (dashData != null && !(dashData.Speed > 10000))
             {
                 //Mid air:
                 var endP = dashData.Path.Last();

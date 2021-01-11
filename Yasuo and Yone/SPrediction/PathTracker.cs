@@ -77,7 +77,7 @@ namespace SPredictionMash
         public static void Initialize()
         {
             foreach (var enemy in GameObjects.EnemyHeroes)
-                EnemyInfo.Add(enemy.NetworkId, new EnemyData(new List<Vector2>()));
+                EnemyInfo.Add((uint)enemy.NetworkId, new EnemyData(new List<Vector2>()));
 
             AIBaseClient.OnNewPath += AIBaseClient_OnNewPath;
             AIBaseClient.OnDoCast += AIBaseClient_OnDoCast;
@@ -92,9 +92,9 @@ namespace SPredictionMash
             if (!sender.IsEnemy || !(sender.Type == GameObjectType.AIHeroClient && sender.IsValid) || args.IsDash)
                 return;
 
-            var enemy = EnemyInfo[sender.NetworkId];
+            var enemy = EnemyInfo[(uint)sender.NetworkId];
 
-            if (args.Path.Count < 2)
+            if (args.Path.Count() < 2)
             {
                 if (!enemy.IsStopped)
                 {
@@ -152,7 +152,7 @@ namespace SPredictionMash
                 }
             }
 
-            EnemyInfo[sender.NetworkId] = enemy;
+            EnemyInfo[(uint)sender.NetworkId] = enemy;
         }
 
         /// <summary>
@@ -162,11 +162,11 @@ namespace SPredictionMash
         {
             if (Orbwalker.IsAutoAttack(args.SData.Name) && sender.IsEnemy && sender.Type == GameObjectType.AIHeroClient && sender.IsValid)
             {
-                var enemy = EnemyInfo[sender.NetworkId];
+                var enemy = EnemyInfo[(uint)sender.NetworkId];
 
                 enemy.LastWindupTick = Environment.TickCount;
                 enemy.IsWindupChecked = false;
-                EnemyInfo[sender.NetworkId] = enemy;
+                EnemyInfo[(uint)sender.NetworkId] = enemy;
             }
         }
 
@@ -177,10 +177,10 @@ namespace SPredictionMash
         {
             if (Orbwalker.IsAutoAttack(args.SData.Name) && sender.IsEnemy && sender.Type == GameObjectType.AIHeroClient && sender.IsValid)
             {
-                var enemy = EnemyInfo[sender.NetworkId];
+                var enemy = EnemyInfo[(uint)sender.NetworkId];
 
                 enemy.LastAATick = Environment.TickCount;
-                EnemyInfo[sender.NetworkId] = enemy;
+                EnemyInfo[(uint)sender.NetworkId] = enemy;
             }
         }
     }

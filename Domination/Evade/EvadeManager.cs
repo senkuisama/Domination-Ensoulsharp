@@ -23,7 +23,7 @@ namespace DaoHungAIO.Evade
     using EnsoulSharp;
     using EnsoulSharp.SDK;
     using EnsoulSharp.SDK.MenuUI;
-    using EnsoulSharp.SDK.MenuUI.Values;
+    
     using SharpDX;
     using System;
     using System.Collections.Generic;
@@ -191,7 +191,7 @@ namespace DaoHungAIO.Evade
                                         if (willHitList.Any())
                                         {
                                             if (DaoHungAIO.Evade.EvadeTargetManager.Menu["whitelist"][
-                                                    ally.CharacterName.ToLower()]
+                                                    ally.CharacterName.ToLower()] != null
                                                 )
                                             {
                                                 if (willHitList.OrderByDescending(
@@ -229,7 +229,7 @@ namespace DaoHungAIO.Evade
                                     if (willHitList.Any())
                                     {
                                         if (DaoHungAIO.Evade.EvadeTargetManager.Menu["whitelist"][
-                                                ally.CharacterName.ToLower()]
+                                                ally.CharacterName.ToLower()] != null
                                             )
                                         {
                                             if (willHitList.OrderByDescending(
@@ -677,7 +677,7 @@ namespace DaoHungAIO.Evade
                             for (var j = -s; j <= s; j++)
                             {
                                 var candidate = originalCandidate + j * 20 * direction;
-                                var pathToPoint = ally.GetPath(candidate.ToVector3()).ToVector2();
+                                /*var pathToPoint = ally.GetPath(candidate.ToVector3()).ToVector2();
 
                                 if (IsSafePath(pathToPoint, 250, speed, delay).IsSafe)
                                 {
@@ -687,7 +687,7 @@ namespace DaoHungAIO.Evade
                                 if (IsSafePath(pathToPoint, 80, speed, delay).IsSafe && j == 0)
                                 {
                                     badCandidates.Add(candidate);
-                                }
+                                }*/
                             }
                         }
                     }

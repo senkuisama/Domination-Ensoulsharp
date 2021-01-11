@@ -22,9 +22,9 @@ namespace SebbyLibPorted
             {
                 return Interrupter.CastingSpell[target.NetworkId];
             }
-            if (Interrupter.CastingSpell.ContainsKey((uint)target.MemoryAddress))
+            if (Interrupter.CastingSpell.ContainsKey(target.NetworkId))
             {
-                return Interrupter.CastingSpell[(uint)target.MemoryAddress];
+                return Interrupter.CastingSpell[target.NetworkId];
             }
             return null;
         }

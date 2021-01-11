@@ -47,7 +47,7 @@ namespace DaoHungAIO.Evade
         {
             AIBaseClient.OnProcessSpellCast += OnProcessSpellCast;
             GameObject.OnDelete += MissileOnDelete;
-            GameObject.OnMissileCreate += MissileOnCreate;
+            GameObject.OnCreate += MissileOnCreate;
             GameObject.OnCreate += OnCreate;
             GameObject.OnDelete += OnDelete;
         }

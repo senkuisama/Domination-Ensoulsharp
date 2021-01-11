@@ -1,6 +1,6 @@
 ﻿using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.MenuUI.Values;
+using EnsoulSharp.SDK.MenuUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;

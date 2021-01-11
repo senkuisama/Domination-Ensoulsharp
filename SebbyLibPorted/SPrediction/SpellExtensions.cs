@@ -20,7 +20,7 @@ using System;
 
 using EnsoulSharp;
 using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.Prediction;
+
 
 using SharpDX;
 
@@ -51,11 +51,11 @@ namespace SPredictionMash1
 
             switch (s.Type)
             {
-                case SkillshotType.Line:
+                case SpellType.Line:
                     return LinePrediction.GetPrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, target.GetWaypoints(), target.AvgMovChangeTime(), target.LastMovChangeTime(), target.AvgPathLenght(), target.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
-                case SkillshotType.Circle:
+                case SpellType.Circle:
                     return CirclePrediction.GetPrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, target.GetWaypoints(), target.AvgMovChangeTime(), target.LastMovChangeTime(), target.AvgPathLenght(), target.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
-                case SkillshotType.Cone:
+                case SpellType.Cone:
                     return ConePrediction.GetPrediction(target, s.Width, s.Delay, s.Speed, s.Range, s.Collision, target.GetWaypoints(), target.AvgMovChangeTime(), target.LastMovChangeTime(), target.AvgPathLenght(), target.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
             }
 
@@ -106,11 +106,11 @@ namespace SPredictionMash1
 
             switch (s.Type)
             {
-                case SkillshotType.Line:
+                case SpellType.Line:
                     return LinePrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
-                case SkillshotType.Circle:
+                case SpellType.Circle:
                     return CirclePrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
-                case SkillshotType.Cone:
+                case SpellType.Cone:
                     return ConePrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
             }
 
@@ -294,7 +294,7 @@ namespace SPredictionMash1
             }
             #endregion
 
-            /*#region if fs prediction selected
+            #region if fs prediction selected
             if (ConfigMenu.SelectedPrediction.Index == 2)
             {
                 var pout = FSpred.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
@@ -309,9 +309,9 @@ namespace SPredictionMash1
                 else
                     return false;
             }
-            #endregion*/
+            #endregion
 
-            #region If Exory Prediction Selected
+            /*#region If Exory Prediction Selected
             if (ConfigMenu.SelectedPrediction.Index == 3)
             {
                 var pout = SebbyLibPorted.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
@@ -326,7 +326,7 @@ namespace SPredictionMash1
                 else
                     return false;
             }
-            #endregion
+            #endregion*/
 
             if (minHit > 1)
                 return SPredictionCastAoe(s, minHit);
@@ -343,13 +343,13 @@ namespace SPredictionMash1
 
             switch (s.Type)
             {
-                case SkillshotType.Line:
+                case SpellType.Line:
                     result = LinePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, t.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
                     break;
-                case SkillshotType.Circle:
+                case SpellType.Circle:
                     result = CirclePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, t.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
                     break;
-                case SkillshotType.Cone:
+                case SpellType.Cone:
                     result = ConePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, t.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
                     break;
                 default:
@@ -520,13 +520,13 @@ namespace SPredictionMash1
 
             switch (s.Type)
             {
-                case SkillshotType.Line:
+                case SpellType.Line:
                     result = LinePrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
                     break;
-                case SkillshotType.Circle:
+                case SpellType.Circle:
                     result = CirclePrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
                     break;
-                case SkillshotType.Cone:
+                case SpellType.Cone:
                     result = ConePrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
                     break;
                 default:

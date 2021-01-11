@@ -23,8 +23,6 @@ using System.Linq;
 using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-using EnsoulSharp.SDK.MenuUI.Values;
-using EnsoulSharp.SDK.Prediction;
 
 using SharpDX;
 
@@ -50,7 +48,7 @@ namespace SPredictionMash1
             public float SpellWidth;
             public float SpellRange;
             public bool SpellCollisionable;
-            public SkillshotType SpellSkillShotType;
+            public SpellType SpellSpellType;
             public List<Vector2> Path;
             public float AvgReactionTime;
             public float LastMovChangeTime;
@@ -71,7 +69,7 @@ namespace SPredictionMash1
                 SpellWidth = s.Width;
                 SpellRange = s.Range;
                 SpellCollisionable = s.Collision;
-                SpellSkillShotType = s.Type;
+                SpellSpellType = s.Type;
                 Path = Target.GetWaypoints();
                 if (Target is AIHeroClient)
                 {
@@ -92,7 +90,7 @@ namespace SPredictionMash1
                 RangeCheckFrom = s.RangeCheckFrom;
             }
 
-            public Input(AIBaseClient _target, float delay, float speed, float radius, float range, bool collision, SkillshotType type, Vector3 _from, Vector3 _rangeCheckFrom)
+            public Input(AIBaseClient _target, float delay, float speed, float radius, float range, bool collision, SpellType type, Vector3 _from, Vector3 _rangeCheckFrom)
             {
                 Target = _target;
                 SpellDelay = delay;
@@ -100,7 +98,7 @@ namespace SPredictionMash1
                 SpellWidth = radius;
                 SpellRange = range;
                 SpellCollisionable = collision;
-                SpellSkillShotType = type;
+                SpellSpellType = type;
                 Path = Target.GetWaypoints();
                 if (Target is AIHeroClient)
                 {
@@ -264,7 +262,7 @@ namespace SPredictionMash1
         /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
         internal static Result GetPrediction(Input input)
         {
-            return GetPrediction(input.Target, input.SpellWidth, input.SpellDelay, input.SpellMissileSpeed, input.SpellRange, input.SpellCollisionable, input.SpellSkillShotType, input.Path, input.AvgReactionTime, input.LastMovChangeTime, input.AvgPathLenght, input.LastAngleDiff, input.From.ToVector2(), input.RangeCheckFrom.ToVector2());
+            return GetPrediction(input.Target, input.SpellWidth, input.SpellDelay, input.SpellMissileSpeed, input.SpellRange, input.SpellCollisionable, input.SpellSpellType, input.Path, input.AvgReactionTime, input.LastMovChangeTime, input.AvgPathLenght, input.LastAngleDiff, input.From.ToVector2(), input.RangeCheckFrom.ToVector2());
         }
 
         /// <summary>
@@ -279,7 +277,7 @@ namespace SPredictionMash1
         /// <param name="type">Spell skillshot type</param>
         /// <param name="from">Spell casted position</param>
         /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
-        internal static Result GetPrediction(AIHeroClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type)
+        internal static Result GetPrediction(AIHeroClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SpellType type)
         {
             return GetPrediction(target, width, delay, missileSpeed, range, collisionable, type, target.GetWaypoints(), target.AvgMovChangeTime(), target.LastMovChangeTime(), target.AvgPathLenght(), target.LastAngleDiff(), ObjectManager.Player.PreviousPosition.ToVector2(), ObjectManager.Player.PreviousPosition.ToVector2());
         }
@@ -301,7 +299,7 @@ namespace SPredictionMash1
         /// <param name="from">Spell casted position</param>
         /// <param name="rangeCheckFrom"></param>
         /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
-        internal static Result GetPrediction(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, List<Vector2> path, float avgt, float movt, float avgp, float anglediff, Vector2 from, Vector2 rangeCheckFrom)
+        internal static Result GetPrediction(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SpellType type, List<Vector2> path, float avgt, float movt, float avgp, float anglediff, Vector2 from, Vector2 rangeCheckFrom)
         {
             AssertInitializationMode();
 
@@ -312,11 +310,11 @@ namespace SPredictionMash1
 
             try
             {
-                if (type == SkillshotType.Circle)
+                if (type == SpellType.Circle)
                     range += width;
 
                 //to do: hook logic ? by storing average movement direction etc
-                if (path.Count <= 1 && movt > 100 && (Environment.TickCount - PathTracker.EnemyInfo[target.NetworkId].LastAATick > 300 || !ConfigMenu.CheckAAWindUp)) //if target is not moving, easy to hit (and not aaing)
+                if (path.Count <= 1 && movt > 100 && (Environment.TickCount - PathTracker.EnemyInfo[(uint)target.NetworkId].LastAATick > 300 || !ConfigMenu.CheckAAWindUp)) //if target is not moving, easy to hit (and not aaing)
                 {
                     result.HitChance = HitChance.VeryHigh;
                     result.CastPosition = target.PreviousPosition.ToVector2();
@@ -338,9 +336,9 @@ namespace SPredictionMash1
                         return result;
                     }
 
-                    if (Environment.TickCount - PathTracker.EnemyInfo[target.NetworkId].LastAATick < 300 && ConfigMenu.CheckAAWindUp)
+                    if (Environment.TickCount - PathTracker.EnemyInfo[(uint)target.NetworkId].LastAATick < 300 && ConfigMenu.CheckAAWindUp)
                     {
-                        if (target.AttackCastDelay * 1000 + PathTracker.EnemyInfo[target.NetworkId].AvgOrbwalkTime + avgt - width / 2f / target.MoveSpeed >= GetArrivalTime(target.PreviousPosition.ToVector2().Distance(from), delay, missileSpeed))
+                        if (target.AttackCastDelay * 1000 + PathTracker.EnemyInfo[(uint)target.NetworkId].AvgOrbwalkTime + avgt - width / 2f / target.MoveSpeed >= GetArrivalTime(target.PreviousPosition.ToVector2().Distance(from), delay, missileSpeed))
                         {
                             result.HitChance = HitChance.High;
                             result.CastPosition = target.PreviousPosition.ToVector2();
@@ -400,7 +398,7 @@ namespace SPredictionMash1
         /// <param name="type">Spell skillshot type</param>
         /// <param name="from">Spell casted position</param>
         /// <returns></returns>
-        internal static Result GetDashingPrediction(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, Vector2 from, Vector2 rangeCheckFrom)
+        internal static Result GetDashingPrediction(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SpellType type, Vector2 from, Vector2 rangeCheckFrom)
         {
             Result result = new Result();
             result.Input = new Input(target, delay, missileSpeed, width, range, collisionable, type, from.ToVector3World(), rangeCheckFrom.ToVector3World());
@@ -409,7 +407,7 @@ namespace SPredictionMash1
             if (target.IsDashing())
             {
                 var dashInfo = target.GetDashInfo();
-                if (dashInfo.IsBlink)
+                if (dashInfo == null)
                 {
                     result.HitChance = HitChance.None;
                     result.CastPosition = dashInfo.EndPos;
@@ -441,7 +439,7 @@ namespace SPredictionMash1
         /// <param name="type">Spell skillshot type</param>
         /// <param name="from">Spell casted position</param>
         /// <returns></returns>
-        internal static Result GetImmobilePrediction(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, Vector2 from, Vector2 rangeCheckFrom)
+        internal static Result GetImmobilePrediction(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SpellType type, Vector2 from, Vector2 rangeCheckFrom)
         {
             Result result = new Result();
             result.Input = new Input(target, delay, missileSpeed, width, range, collisionable, type, from.ToVector3World(), rangeCheckFrom.ToVector3World());
@@ -454,7 +452,7 @@ namespace SPredictionMash1
             if (missileSpeed != 0)
                 t += from.Distance(target.PreviousPosition) / missileSpeed;
 
-            if (type == SkillshotType.Circle)
+            if (type == SpellType.Circle)
                 t += width / target.MoveSpeed / 2f;
 
             if (t >= Utility.LeftImmobileTime(target))
@@ -539,7 +537,7 @@ namespace SPredictionMash1
         /// <param name="avgp">Average Path Lenght</param>
         /// <param name="from">Spell casted position</param>
         /// <returns></returns>
-        internal static Result WaypointAnlysis(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SkillshotType type, List<Vector2> path, float avgt, float movt, float avgp, float anglediff, Vector2 from, float moveSpeed = 0, bool isDash = false)
+        internal static Result WaypointAnlysis(AIBaseClient target, float width, float delay, float missileSpeed, float range, bool collisionable, SpellType type, List<Vector2> path, float avgt, float movt, float avgp, float anglediff, Vector2 from, float moveSpeed = 0, bool isDash = false)
         {
             if (moveSpeed == 0)
                 moveSpeed = target.MoveSpeed;
@@ -582,7 +580,7 @@ namespace SPredictionMash1
                     float distance = width;
                     float extender = target.BoundingRadius;
 
-                    if (type == SkillshotType.Line)
+                    if (type == SpellType.Line)
                         extender = width;
 
                     int steps = (int)Math.Floor(path[k].Distance(path[k + 1]) / distance);

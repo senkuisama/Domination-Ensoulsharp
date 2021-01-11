@@ -182,7 +182,7 @@ namespace DominationAIO.NewPlugins
                 {
                     if (VayneMenu.ECombo.FastE.Enabled)
                     {
-                        Game.OnUpdate += Game_OnUpdate1;
+                        //Game.OnUpdate += Game_OnUpdate1;
                     }
                     else
                     {

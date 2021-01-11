@@ -88,7 +88,7 @@ namespace Pyke_Ryū
             {
                 foreach(var target in targets.OrderBy(i => i.DistanceToPlayer()).ThenBy(i => i.Health))
                 {
-                    if(target != null && !target.IsDead && target.Health <= R.GetDamage(target, 14) && R.IsReadyToCastOn(target))
+                    if(target != null && !target.IsDead && target.Health <= R.GetDamage(target) && R.IsReadyToCastOn(target))
                     {
                         var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
                         if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)

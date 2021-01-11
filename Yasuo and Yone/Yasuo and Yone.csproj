@@ -41,28 +41,28 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.SDK">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="FunnySlayerCommon">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\FunnySlayerCommon.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\FunnySlayerCommon.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\log4net.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

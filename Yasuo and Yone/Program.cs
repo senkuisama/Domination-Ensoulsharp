@@ -99,9 +99,9 @@ namespace ConsoleApp
     {
         public static void YasuoLoad(this string a)
         {
-            //Logging.Write()(LogLevel.Info, "{0}", a);
+            Logging.Write()(LogLevel.Info, "{0}", a);
             Game.Print(a);
-            /*Console.WriteLine(a);*/
+            Console.WriteLine(a);
             Yasuo.YasuoLoad();
         }
     }
@@ -685,7 +685,7 @@ namespace ConsoleApp
 
         private static void DrawObjPlayerPos_ValueChanged(object sender, EventArgs e)
         {
-            Game.Print(objPlayer.Position.ToString());
+            //Game.Print(objPlayer.Position.ToString());
         }
         #endregion
 
@@ -1907,7 +1907,29 @@ namespace ConsoleApp
                         else
                         {
                             Egaptarget(target1);
-
+                            if (HaveQ3)
+                            {
+                                if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
+                                {
+                                    QcastTarget(target1);
+                                }
+                                else
+                                {
+                                    QcastTarget(target);
+                                }
+                            }
+                            else
+                            {
+                                if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
+                                {
+                                    QcastTarget(target1);
+                                }
+                                else
+                                {
+                                    QcastTarget(target);
+                                }
+                            }
+                            /*
                             {
                                 if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
                                 {
@@ -1918,7 +1940,7 @@ namespace ConsoleApp
 
                                 if (obj != null && E.IsReady())
                                 {
-                                    /*if (UnderTower(objPlayer.Position) && !UnderTower(target1.Position))
+                                    //if (UnderTower(objPlayer.Position) && !UnderTower(target1.Position))
                                     {
                                         //YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = false;
                                         if (obj.NetworkId == target1.NetworkId)
@@ -1952,7 +1974,7 @@ namespace ConsoleApp
                                     else
                                     {
                                         //YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = true;
-                                    }*/
+                                    }//
 
                                     if (YasuoMenu.Yasuo_Keys.TurretKey.Active)
                                     {
@@ -2154,7 +2176,7 @@ namespace ConsoleApp
                                         }
                                     }
                                 }
-                            }                       
+                            }   */                    
                         }
                     }
                 }
@@ -2803,7 +2825,7 @@ namespace ConsoleApp
 
             var target = FSTargetSelector.GetFSTarget(3000);
 
-            foreach (var EQprediction in targets.Select(i => EQFlash.GetPrediction(i)).Where(i => i.Hitchance >= HitChance.High).OrderByDescending(i => i.AoeTargetsHitCount))
+            foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.High && i.AoeTargetsHitCount >= 1).OrderByDescending(i => i.AoeTargetsHitCount))
             {
                 FlashPos = EQprediction.CastPosition;
                 //Render.Circle.DrawCircle(FlashPos, 230, System.Drawing.Color.Red, 10);
@@ -2814,7 +2836,7 @@ namespace ConsoleApp
                     {
                         //Render.Circle.DrawCircle(FlashPos, 230, System.Drawing.Color.Blue, 13);
                         Q3.Cast(PosExploit(target));
-                        DelayAction.Add(100, () => { EQFlash.Cast(FlashPos); });
+                        DelayAction.Add(1, () => { EQFlash.Cast(FlashPos); });
                     }
                 }
 

@@ -37,29 +37,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.SDK">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
-    </Reference>
-    <Reference Include="FunnySlayerCommon">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\FunnySlayerCommon.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\log4net.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -75,6 +72,19 @@
   <ItemGroup>
     <Compile Include="Cache.cs" />
     <Compile Include="Events.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\AoePrediction.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\Collision.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\CollisionableObjects.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\HitChance.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\Prediction.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\PredictionInput.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\PredictionOutput.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\SkillshotType.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\StoredPath.cs" />
+    <Compile Include="FunnySlayerCommon\FSspell.cs" />
+    <Compile Include="FunnySlayerCommon\FSTargetSelector.cs" />
+    <Compile Include="FunnySlayerCommon\MenuClass.cs" />
+    <Compile Include="FunnySlayerCommon\OnAction.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="HealthPrediction.cs" />
     <Compile Include="MEC.cs" />

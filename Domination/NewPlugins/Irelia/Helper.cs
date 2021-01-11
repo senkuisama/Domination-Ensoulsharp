@@ -19,8 +19,8 @@ namespace DominationAIO.NewPlugins
         }
         public static float Sheen()
         {
-            /*if (Variables.TickCount < Irelia.SheenTimer + 1550)
-                return 0f;*/
+            if (Variables.TickCount < Irelia.SheenTimer + 1550)
+                return 0f;
 
             if (ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force) || ObjectManager.Player.HasBuff("3078trinityforce") || ObjectManager.Player.HasBuff("trinityforce"))
             {

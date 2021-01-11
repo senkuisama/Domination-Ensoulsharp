@@ -120,7 +120,9 @@ namespace DominationAIO.Champions
             Game.OnUpdate += Game_OnUpdate;
             //Orbwalker.OnAction += Orbwalker_OnAction;
             AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+
         }
+
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
         {
@@ -157,6 +159,10 @@ namespace DominationAIO.Champions
         private static void Game_OnUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
+
+            if (ObjectManager.Player.HasBuff("KaisaE"))
+                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+
             var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(3000) && !i.IsDead);
 
 

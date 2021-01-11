@@ -92,7 +92,7 @@ namespace DominationAIO.NewPlugins
                     || args.Buff.Name.Contains("iceborn")
                     || args.Buff.Name.Contains("Lich"))
                 {
-                    Irelia.SheenTimer = Environment.TickCount;
+                    Irelia.SheenTimer = Variables.TickCount;
                 }
             }
         }

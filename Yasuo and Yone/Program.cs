@@ -2823,9 +2823,53 @@ namespace ConsoleApp
 
             if (!targets.Any()) return;
 
-            var target = FSTargetSelector.GetFSTarget(3000);
+            var target = TargetSelector.GetTarget(850);
 
-            foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.High && i.AoeTargetsHitCount >= 1).OrderByDescending(i => i.AoeTargetsHitCount))
+            if (target == null)
+                return;
+
+            targets.OrderByDescending(i => EQFlash.GetPrediction(target, true).AoeTargetsHitCount).ForEach(i =>
+            {
+                FlashPos = EQFlash.GetPrediction(i, true).CastPosition;
+
+                if (isYasuoDashing && HaveQ3 && Q.IsReady() && FlashPos != Vector3.Zero)
+                {
+                    if (FlashPos.Distance(objPlayer.Position) <= 400 + 175 && FlashPos.Distance(objPlayer.Position) > 175)
+                    {
+                        Q3.Cast(PosExploit(target));
+                        DelayAction.Add(1, () => { EQFlash.Cast(FlashPos); });
+                    }
+                }
+
+                if (!isYasuoDashing && target != null)
+                {
+                    var obj = GetNearObj(target);
+                    if (obj != null)
+                    {
+                        if (obj.NetworkId == target.NetworkId)
+                        {
+                            if (Epred(obj).DistanceToPlayer() > 300)
+                            {
+                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                    return;
+                            }
+                        }
+                        else
+                        {
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
+                        }
+
+                        if (Epred(target).Distance(PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
+                        {
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                return;
+                        }
+                    }
+                }
+            });
+
+            /*foreach (var EQprediction in targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.High && i.AoeTargetsHitCount >= 1).OrderByDescending(i => i.AoeTargetsHitCount))
             {
                 FlashPos = EQprediction.CastPosition;
                 //Render.Circle.DrawCircle(FlashPos, 230, System.Drawing.Color.Red, 10);
@@ -2866,7 +2910,7 @@ namespace ConsoleApp
                         }
                     }
                 }
-            }
+            }*/
         }
         #endregion
     }

@@ -1,7 +1,7 @@
 ﻿using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
-
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -440,6 +440,127 @@ namespace DominationAIO.NewPlugins
         }
         private static void Game_OnUpdate1(EventArgs args)
         {
+            if (ObjectManager.Player.IsDead) return;
+
+            if(R.IsReady() && VayneMenu.Misc.RSettings.FindOut.Enabled)
+            {
+                if(TargetSelector.GetTargets(750) != null && !FunnySlayerCommon.OnAction.OnAA)
+                {
+                    var target = TargetSelector.GetTarget(750);
+                    if(TargetSelector.GetTargets(750).Count() >= 2 && ObjectManager.Player.CountAllyHeroesInRange(750) <= 1)
+                    {
+                        if (FunnySlayerCommon.OnAction.BeforeAA)
+                        {
+                            if(target.DistanceToPlayer() <= ObjectManager.Player.GetCurrentAutoAttackRange())
+                            {
+                                if(target.GetWaypoints()[3] != Vector2.Zero && target.DistanceToPlayer() <= target.GetWaypoints()[3].DistanceToPlayer())
+                                {
+                                    var i = target.GetWaypoints()[3];
+
+                                    var poswillcast = ObjectManager.Player.Position.Extend(i, 300);
+                                    if (!UnderTower(poswillcast))
+                                    {
+                                        if (R.IsReady())
+                                        {
+                                            if (R.Cast())
+                                                if (Q.Cast(poswillcast))
+                                                    return;
+                                        }
+                                        else
+                                        {
+                                            if (Q.Cast(poswillcast))
+                                                return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Q.Cast(Game.CursorPos))
+                                            return;
+                                    }
+                                }
+                            }
+                        }
+
+                        if(FunnySlayerCommon.OnAction.AfterAA && Q.IsReady())
+                        {
+                            if (target.GetWaypoints()[3] != Vector2.Zero && target.DistanceToPlayer() <= target.GetWaypoints()[3].DistanceToPlayer())
+                            {
+                                var i = target.GetWaypoints()[3];
+
+                                var poswillcast = ObjectManager.Player.Position.Extend(i, 300);
+                                if (!UnderTower(poswillcast))
+                                {
+                                    if (R.IsReady())
+                                    {
+                                        if (R.Cast())
+                                            if (Q.Cast(poswillcast))
+                                                return;
+                                    }
+                                    else
+                                    {
+                                        if (Q.Cast(poswillcast))
+                                            return;
+                                    }
+                                }
+                                else
+                                {
+                                    if (Q.Cast(Game.CursorPos))
+                                        return;
+                                }
+                            }
+                            else
+                            {
+                                if (Q.Cast(Game.CursorPos))
+                                    return;
+                            }
+                        }
+                    }
+
+                    if(TargetSelector.GetTargets(750).Any(i => i.HealthPercent >= 40 && (i.MaxHealth <= 2000 || i.CombatType == GameObjectCombatType.Melee || i.TotalAttackDamage >= 200 || i.TotalMagicalDamage >= 250)))
+                    {
+                        if (target.DistanceToPlayer() <= ObjectManager.Player.GetCurrentAutoAttackRange())
+                        {
+                            if (target.GetWaypoints()[3] != Vector2.Zero && target.DistanceToPlayer() <= target.GetWaypoints()[3].DistanceToPlayer())
+                            {
+                                var i = target.GetWaypoints()[3];
+
+                                var poswillcast = ObjectManager.Player.Position.Extend(i, 300);
+                                if (!UnderTower(poswillcast))
+                                {
+                                    if (R.IsReady())
+                                    {
+                                        if (R.Cast())
+                                            if (Q.Cast(poswillcast))
+                                                return;
+                                    }
+                                    else
+                                    {
+                                        if (Q.Cast(poswillcast))
+                                            return;
+                                    }
+                                }
+                                else
+                                {
+                                    if (Q.Cast(Game.CursorPos))
+                                        return;
+                                }
+                            }
+
+                            if (target.GetWaypoints()[3] != Vector2.Zero && target.DistanceToPlayer() >= target.GetWaypoints()[3].DistanceToPlayer())
+                            {
+                                if (R.IsReady())
+                                {
+                                    if (R.Cast())
+                                        if (Q.Cast(Game.CursorPos))
+                                            return;
+                                }
+                            }
+                        }
+                    }
+                }                
+            }
+
+
             if (E.IsReady() && VayneMenu.ECombo.UseE.Enabled)
             {
                 if ((!VayneMenu.ECombo.EOnlyCombo.Enabled || Orbwalker.ActiveMode <= OrbwalkerMode.Harass) && (!UnderTower(ObjectManager.Player.Position) || Orbwalker.ActiveMode <= OrbwalkerMode.Combo))

@@ -120,7 +120,8 @@ namespace DominationAIO.NewPlugins
                     },
                     new Menu("_OrbSet", "OrbWalker Settings")
                     {
-                        Misc.OrbWalk.OrbWalkerForVayne
+                        Misc.OrbWalk.OrbWalkerForVayne,
+                        //Orbwalker.Menu
                     },
                 };
 
@@ -145,6 +146,102 @@ namespace DominationAIO.NewPlugins
             //Orbwalker.OnAction += Orbwalker_OnAction;
             Game.OnUpdate += Game_OnUpdate;
             AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+
+            Orbwalker.OnAfterAttack += Orbwalker_OnAfterAttack;
+
+            Game.OnUpdate += Game_OnUpdate1;
+        }
+
+        private static void Orbwalker_OnAfterAttack(object sender, AfterAttackEventArgs e)
+        {
+            if (ObjectManager.Player.IsDead)
+                return;
+
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(640) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
+
+
+            if (Orbwalker.ActiveMode <= OrbwalkerMode.Harass || !VayneMenu.QCombo.QOnlyCombo.Enabled)
+            {
+                if(Orbwalker.LastTarget.Type == GameObjectType.AIHeroClient)
+                {
+                    if (targets != null)
+                    {
+                        var melee = targets.Where(i => i.CombatType == GameObjectCombatType.Melee);
+                        if (melee != null)
+                        {
+                            melee.ForEach(i =>
+                            {
+                                if (i.IsValidTarget(250) && i.CanMove && i.IsMoving && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
+                                {
+                                    if (i.DistanceToPlayer() > i.GetWaypoints().LastOrDefault().DistanceToPlayer())
+                                    {
+                                        if (i.DistanceToPlayer() <= ObjectManager.Player.GetWaypoints().LastOrDefault().Distance(i))
+                                        {
+                                            var poswillcast = ObjectManager.Player.Position.Extend(i.Position, 300);
+                                            if (!UnderTower(poswillcast))
+                                            {
+                                                if (R.IsReady())
+                                                {
+                                                    if (R.Cast())
+                                                        if (Q.Cast(poswillcast))
+                                                            return;
+                                                }
+                                                else
+                                                {
+                                                    if (Q.Cast(poswillcast))
+                                                        return;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Q.Cast(Game.CursorPos))
+                                                    return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (Q.Cast(Game.CursorPos))
+                                                return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Q.Cast(Game.CursorPos))
+                                            return;
+                                    }
+                                }
+                                else
+                                {
+                                    if (Q.Cast(Game.CursorPos))
+                                        return;
+                                }
+                            });
+                        }
+                        else
+                        {
+                            if (targets.Any(i => i.HealthPercent <= VayneMenu.RCombo.TargetHp.Value) || ObjectManager.Player.HealthPercent <= VayneMenu.RCombo.Hp.Value || ObjectManager.Player.CountEnemyHeroesInRange(600) >= VayneMenu.RCombo.Target.Value)
+                            {
+                                if (R.IsReady())
+                                {
+                                    if (R.Cast())
+                                        if (Q.Cast(Game.CursorPos))
+                                            return;
+                                }
+                                else
+                                {
+                                    if (Q.Cast(Game.CursorPos))
+                                        return;
+                                }
+                            }
+                            else
+                            {
+                                if (Q.Cast(Game.CursorPos))
+                                    return;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
@@ -176,7 +273,9 @@ namespace DominationAIO.NewPlugins
             if (ObjectManager.Player.IsDead)
                 return;
 
-            if(E.IsReady() && VayneMenu.ECombo.UseE.Enabled)
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(640) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
+
+            if (E.IsReady() && VayneMenu.ECombo.UseE.Enabled)
             {
                 if ((!VayneMenu.ECombo.EOnlyCombo.Enabled || Orbwalker.ActiveMode <= OrbwalkerMode.Harass) && (!UnderTower(ObjectManager.Player.Position) || Orbwalker.ActiveMode <= OrbwalkerMode.Combo))
                 {
@@ -186,7 +285,6 @@ namespace DominationAIO.NewPlugins
                     }
                     else
                     {
-                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(550) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
 
                         if (!FunnySlayerCommon.OnAction.OnAA && !FunnySlayerCommon.OnAction.BeforeAA)
                         {
@@ -197,7 +295,7 @@ namespace DominationAIO.NewPlugins
                                     var check = false;
                                     for (int i = 0; i < VayneMenu.Misc.ESettings.KnockBackRange.Value; i++)
                                     {
-                                        var t_pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 250);
+                                        var t_pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 300);
                                         var flag = NavMesh.GetCollisionFlags(t_pos.Extend(ObjectManager.Player.Position.ToVector2(), -i).ToVector3());
 
                                         if (flag.HasFlag(CollisionFlags.Building) || flag.HasFlag(CollisionFlags.Wall))
@@ -223,7 +321,6 @@ namespace DominationAIO.NewPlugins
 
             if(R.IsReady() && VayneMenu.RCombo.UseR.Enabled)
             {
-                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(550) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
                 if (!VayneMenu.RCombo.AutoEnable.Enabled || Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                 {
                     if (!FunnySlayerCommon.OnAction.OnAA)
@@ -255,7 +352,6 @@ namespace DominationAIO.NewPlugins
                 {
                     if (FunnySlayerCommon.OnAction.AfterAA && Orbwalker.LastTarget.Type == GameObjectType.AIHeroClient)
                     {
-                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(550) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
                         if(targets != null)
                         {
                             var melee = targets.Where(i => i.CombatType == GameObjectCombatType.Melee);
@@ -350,7 +446,7 @@ namespace DominationAIO.NewPlugins
                 {
                     if (VayneMenu.ECombo.FastE.Enabled)
                     {
-                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(550) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
+                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(580) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
 
                         if (targets != null)
                         {
@@ -359,7 +455,7 @@ namespace DominationAIO.NewPlugins
                                 var check = false;
                                 for (int i = 0; i < VayneMenu.Misc.ESettings.KnockBackRange.Value; i++)
                                 {
-                                    var t_pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 250);
+                                    var t_pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 300);
                                     var flag = NavMesh.GetCollisionFlags(t_pos.Extend(ObjectManager.Player.Position.ToVector2(), -i).ToVector3());
 
                                     if (flag.HasFlag(CollisionFlags.Building) || flag.HasFlag(CollisionFlags.Wall))
@@ -384,7 +480,7 @@ namespace DominationAIO.NewPlugins
                         if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA)
                             return;
 
-                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(550) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
+                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(580) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
 
                         if(targets != null)
                         {
@@ -393,7 +489,7 @@ namespace DominationAIO.NewPlugins
                                 var check = false;
                                 for (int i = 0; i < VayneMenu.Misc.ESettings.KnockBackRange.Value; i++)
                                 {
-                                    var t_pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 250);
+                                    var t_pos = FSpred.Prediction.Prediction.PredictUnitPosition(target, 300);
                                     var flag = NavMesh.GetCollisionFlags(t_pos.Extend(ObjectManager.Player.Position.ToVector2(), -i).ToVector3());
 
                                     if (flag.HasFlag(CollisionFlags.Building) || flag.HasFlag(CollisionFlags.Wall))

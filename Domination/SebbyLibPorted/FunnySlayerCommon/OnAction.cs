@@ -15,12 +15,14 @@ namespace FunnySlayerCommon
 
         public static void CheckOnAction()
         {
-            var menu = new Menu("___OnAction_MenuAttack", "_OrbWalker.OnAction");
+            var menu = new Menu("___OnAction_MenuAttack", "_OrbWalker.OnAction", true);
             menu.Add(new MenuSeparator("___Orbwalker_OnAfterAttack", "Orbwalker.OnAfterAttack"));
             menu.Add(new MenuSeparator("___Orbwalker_OnBeforeAttack", "Orbwalker.OnBeforeAttack"));
             menu.Add(new MenuSeparator("___Orbwalker_OnAttack", "Orbwalker.OnAttack"));
             menu.Add(new MenuSeparator("___Orbwalker_OnNonKillableMinion", "Orbwalker.OnNonKillableMinion"));
             menu.Add(new MenuSeparator("___Orbwalker_OnPreMove", "Orbwalker.OnPreMove"));
+
+            menu.Attach();
             Orbwalker.OnAfterAttack += Orbwalker_OnAfterAttack;
             Orbwalker.OnBeforeAttack += Orbwalker_OnBeforeAttack;
             Orbwalker.OnAttack += Orbwalker_OnAttack;
@@ -55,22 +57,6 @@ namespace FunnySlayerCommon
             }
             else
             {
-                if (ObjectManager.Player.IsMoving)
-                {
-                    if (aaa == true)
-                    {
-                        aaa = false;
-                    }
-                    if (oaa == true)
-                    {
-                        oaa = false;
-                    }
-                    if(baa == true)
-                    {
-                        baa = false;
-                    }
-                }
-
                 if (ObjectManager.Player.IsWindingUp)
                 {
                     if (oaa == false)
@@ -80,6 +66,18 @@ namespace FunnySlayerCommon
                     if (aaa == true)
                     {
                         aaa = false;
+                    }
+                    if (baa == true)
+                    {
+                        baa = false;
+                    }
+                }
+
+                if (ObjectManager.Player.IsMoving)
+                {
+                    if (oaa == true)
+                    {
+                        oaa = false;
                     }
                     if (baa == true)
                     {

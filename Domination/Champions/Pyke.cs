@@ -31,7 +31,7 @@ namespace Pyke_Ryū
             {
                 return;
             }
-            R.SetSkillshot(0.5f, 100f, float.MaxValue, false, SpellType.Circle);
+            R.SetSkillshot(0.4f, 100f, float.MaxValue, false, SpellType.Circle);
             Game.OnUpdate += RKS;
 
             Q.SetSkillshot(0.25f, 55f, 2000, true, SpellType.Line);
@@ -83,20 +83,24 @@ namespace Pyke_Ryū
                     }
                 }
             }*/
-            var targets = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsDead && i.IsEnemy && !i.IsAlly && !i.IsMinion() && !i.IsJungle() && i.Type == GameObjectType.AIHeroClient && R.IsReadyToCastOn(i));
-            if(targets != null)
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsDead && i.IsEnemy && !i.IsAlly && !i.IsMinion() && !i.IsJungle() && i.Type == GameObjectType.AIHeroClient).OrderBy(i => i.DistanceToPlayer()).ThenBy(i => i.Health);
+            if (targets != null)
             {
-                foreach(var target in targets.OrderBy(i => i.DistanceToPlayer()).ThenBy(i => i.Health))
+                foreach(var target in targets)
                 {
                     if(target != null && !target.IsDead && target.Health <= R.GetDamage(target) && R.IsReadyToCastOn(target))
                     {
-                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(R, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        var pred = R.GetPrediction(target);
+                        if (pred.Hitchance >= EnsoulSharp.SDK.HitChance.High && R.IsReadyToCastOn(target))
                         {
                             if (R.Cast(pred.CastPosition))
                                 return;
                         }
+                        else
+                            continue;
                     }
+                    else
+                        continue;
                 }
             }
         }

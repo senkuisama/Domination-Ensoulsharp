@@ -17,10 +17,15 @@ namespace DominationAIO.NewPlugins
                 ObjectManager.Get<AITurretClient>()
                     .Any(i => i.IsEnemy && !i.IsDead && (i.Distance(pos) < 850 + ObjectManager.Player.BoundingRadius + bonusrange));
         }
-        public static float Sheen()
+        public static float Sheen(AIBaseClient target = null)
         {
             if (Variables.TickCount < Irelia.SheenTimer + 1550)
                 return 0f;
+
+            if (ObjectManager.Player.CanUseItem((int)ItemId.Divine_Sunderer) || ObjectManager.Player.HasBuff("6632buff"))
+            {
+                return target.MaxHealth * 0.1f;
+            }
 
             if (ObjectManager.Player.CanUseItem((int)ItemId.Trinity_Force) || ObjectManager.Player.HasBuff("3078trinityforce") || ObjectManager.Player.HasBuff("trinityforce"))
             {
@@ -55,31 +60,32 @@ namespace DominationAIO.NewPlugins
                 passivedmg = (float)EnsoulSharp.SDK.Damage.CalculateMagicDamage(ObjectManager.Player, target, (double)PassiveDmg);
             }
             if (CheckItem == true)
-                normaldmg += Sheen();
+                normaldmg += Sheen(target);
 
             return (float)EnsoulSharp.SDK.Damage.CalculatePhysicalDamage(ObjectManager.Player, target, normaldmg) + passivedmg;
         }
 
         public static bool CanQ(AIBaseClient target, bool CheckItems = true)
         {
+            if (target.HasBuff("ireliamark"))
+                return true;
+
             if(target.Type == GameObjectType.AIHeroClient)
             {
-                if (target.Health <= GetQDmg(target, CheckItems) + GetQDmg(target, CheckItems) * 0.08f || target.HasBuff("ireliamark"))
+                if (target.Health <= GetQDmg(target, CheckItems) + GetQDmg(target, CheckItems) * 0.08f + (ObjectManager.Player.HasItem((int)ItemId.The_Collector) ? 0.05f * target.MaxHealth : 0))
                 {
                     return true;
                 }
-                else
-                    return false;
             }
             else
             {
-                if (target.Health <= GetQDmg(target, CheckItems) || target.HasBuff("ireliamark"))
+                if (target.Health <= GetQDmg(target, CheckItems))
                 {
                     return true;
                 }
-                else
-                    return false;
-            }           
+            }
+
+            return false;    
         }
     }
 }

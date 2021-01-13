@@ -87,6 +87,7 @@ namespace DominationAIO.NewPlugins
             {
                 if (args.Buff.Name == "sheen"
                     || args.Buff.Name == "3078trinityforce"
+                    || args.Buff.Name == "6632buff"
                     || args.Buff.Name.Contains("sheen")
                     || args.Buff.Name.Contains("trinity")
                     || args.Buff.Name.Contains("iceborn")
@@ -142,7 +143,9 @@ namespace DominationAIO.NewPlugins
 
         public static void Drawing_OnDraw(EventArgs args)
         {
-            if (!MenuSettings.ClearSettings.DrawMinions.Enabled) return;
+
+            Drawing.DrawCircle(ObjectManager.Player.Position, Irelia.Q.Range, System.Drawing.Color.Red);
+            /*if (!MenuSettings.ClearSettings.DrawMinions.Enabled) return;
 
             var minions = GameObjects.GetMinions(2000).Where(i => Helper.CanQ(i)).OrderByDescending(i => i.DistanceToPlayer()).ToList();
 
@@ -151,7 +154,7 @@ namespace DominationAIO.NewPlugins
             foreach (var min in minions)
             {
                 Drawing.DrawCircle(min.Position, 70, System.Drawing.Color.White);
-            }
+            }*/
         }
     }
 }

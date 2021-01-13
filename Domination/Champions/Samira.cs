@@ -645,7 +645,7 @@ namespace DominationAIO.Champions
             EGetDmg += Player.GetAutoAttackDamage(target);
 
             if (Player.HasBuff("SamiraR") || R.IsReady())
-                EGetDmg += Player.CalculatePhysicalDamage(target, (Rlist[R.Level] + 0.6f * Player.TotalAttackDamage) * 3);
+                EGetDmg += Player.CalculatePhysicalDamage(target, (Rlist[R.Level] + 0.6f * Player.TotalAttackDamage) * 2);
 
             return (float)EGetDmg;
         }

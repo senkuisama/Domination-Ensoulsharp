@@ -12,7 +12,7 @@ namespace DominationAIO.NewPlugins
 {
     public static class Irelia
     {
-        public static Spell Q = new Spell(EnsoulSharp.SpellSlot.Q, 600f);
+        public static Spell Q = new Spell(EnsoulSharp.SpellSlot.Q, 580f);
         public static Spell W = new Spell(EnsoulSharp.SpellSlot.W, 800f);
         public static Spell E = new Spell(EnsoulSharp.SpellSlot.E, 775f);
         public static Spell R = new Spell(EnsoulSharp.SpellSlot.R, 900f);

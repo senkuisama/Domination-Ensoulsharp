@@ -16,27 +16,24 @@ namespace DominationAIO.NewPlugins
             if (target == null || !Irelia.Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
                 return;
 
-            var nearobj = ObjectManager.Get<AIBaseClient>().Where(i => i != null
-                                                        && !i.IsDead
-                                                        && i.IsEnemy
+            var nearobj = ObjectManager.Get<AIBaseClient>().FirstOrDefault(i => !i.IsDead
+                                                        && Irelia.Q.CanCast(i)
                                                         && !i.IsAlly
                                                         && Helper.CanQ(i)
                                                         && i.MaxHealth > 5
-                                                        && i.Distance(target) < ObjectManager.Player.GetRealAutoAttackRange() + 50)
-                                                            .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(target)).FirstOrDefault();
+                                                        && i.Distance(target) < ObjectManager.Player.GetRealAutoAttackRange() + 50);
 
             if (nearobj != null || Helper.CanQ(target))
             {
-                var obj = ObjectManager.Get<AIBaseClient>().Where(i => i != null
-                                    && !i.IsDead
+                var obj = ObjectManager.Get<AIBaseClient>().FirstOrDefault(i => !i.IsDead
+                                    && Irelia.Q.CanCast(i)
                                     && i.IsEnemy
                                     && !i.IsAlly
                                     && Helper.CanQ(i)
                                     && i.MaxHealth > 5
-                                    && i.Distance(target) < Irelia.Q.Range)
-                                    .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(target)).FirstOrDefault();
+                                    && i.Distance(target) < Irelia.Q.Range);
 
-                if (obj != null && obj.DistanceToPlayer() <= 600f && Irelia.Q.CanCast(obj))
+                if (obj != null && Irelia.Q.CanCast(obj))
                 {
                     if (!Helper.UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     {
@@ -46,16 +43,20 @@ namespace DominationAIO.NewPlugins
                     else
                     {
                         QGapCloserPos(target.Position);
+                        return;
                     }
                 }
                 else
                 {
                     QGapCloserPos(target.Position);
+                    return;
                 }
             }
             else
             {
                 QGapCloserPos(target.Position);
+                return;
+
             }
         }
 
@@ -64,108 +65,76 @@ namespace DominationAIO.NewPlugins
             if (target == null || !Irelia.Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
                 return;
 
-            if (Helper.CanQ(target))
+            if (!Helper.CanQ(target))
             {
-                //if (objPlayer.HealthPercent <= MenuSettings.QSettings.QHeath.Value)
-                //{
-                var objs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
-                && !i.IsDead
-                && i.IsEnemy
+                NewHighLogic(target);
+            }
+            else
+            {
+                var objs = ObjectManager.Get<AIBaseClient>().Where(i =>
+                !i.IsDead
+                && Irelia.Q.CanCast(i)
                 && !i.IsAlly
                 && i.Distance(target) < ObjectManager.Player.GetRealAutoAttackRange() + 50
                 && Helper.CanQ(i)
                 && i.MaxHealth > 5)
-                    .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(target)).ThenByDescending(i => i.Distance(target));
+                    .OrderByDescending(i => i.Health);
 
-                if (objs != null)
+
+                if (objs == null)
+                {
+                    NewHighLogic(target);
+                    return;
+                }
+                else
                 {
                     if (objs.Count() > 1)
                     {
-                        foreach (var obj in objs)
-                        {
-                            if (obj != null)
-                            {
-                                var tempobjs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
-                                && !i.IsDead
+                        var tempobjs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsDead
+                                && Irelia.Q.CanCast(i)
                                 && i.IsEnemy
                                 && !i.IsAlly
-                                && i.Distance(obj) < Irelia.Q.Range
+                                && i.Distance(objs.ToArray().FirstOrDefault()) <= Irelia.Q.Range
                                 && Helper.CanQ(i)
                                 && i.MaxHealth > 5)
-                                    .OrderByDescending(i => i.Health).ThenByDescending(i => i.Distance(obj));
+                                    .OrderByDescending(i => i.Distance(objs.ToArray().FirstOrDefault()));
 
-                                if (tempobjs != null)
-                                {
-                                    foreach (var tempobj in tempobjs)
-                                    {
-                                        if (tempobj != null)
-                                        {
-                                            if (tempobj.Distance(ObjectManager.Player.Position) <= (Irelia.Q.Range) && Irelia.Q.CanCast(tempobj))
-                                            {
-                                                if (!Helper.UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                {
-                                                    if (Irelia.Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
-                                                    {
-                                                        EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
-                                                        {
-                                                            if (obj.DistanceToPlayer() < 600f)
-                                                                if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                                    return;
-                                                                else
-                                                                    return;
-                                                        });
-                                                    }
-                                                    else
-                                                    {
-                                                        NewHighLogic(target);
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    NewHighLogic(target);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                NewHighLogic(target);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            NewHighLogic(target);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    NewHighLogic(target);
-                                }
+                        var newobj = tempobjs.FirstOrDefault(tempobj =>
+                        (tempobj.Distance(ObjectManager.Player.Position) <= (Irelia.Q.Range) && Irelia.Q.CanCast(tempobj))
+                        && (!Helper.UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
+                        );
+
+                        if(newobj == null || newobj.NetworkId == target.NetworkId || newobj.DistanceToPlayer() > Irelia.Q.Range || newobj.DistanceToPlayer() >= 600f)
+                        {
+                            NewHighLogic(target);
+                            return;
+                        }else
+                        {
+                            if(Irelia.Q.CanCast(newobj))
+                            if (Irelia.Q.Cast(newobj) == CastStates.SuccessfullyCasted)
+                            {
+                                if (objs.ToArray().FirstOrDefault().DistanceToPlayer() < 600f)
+                                    if (Irelia.Q.Cast(objs.ToArray().FirstOrDefault()) == CastStates.SuccessfullyCasted)
+                                        return;
                             }
                             else
                             {
                                 NewHighLogic(target);
+                                return;
                             }
-                        }
+                            else
+                            {
+                                NewHighLogic(target);
+                                return;
+                            }
+                        }                    
                     }
                     else
                     {
                         NewHighLogic(target);
+                        return;
                     }
                 }
-                else
-                {
-                    NewHighLogic(target);
-                }
-                //}
-                //else
-                //{
-                //    HighLogic(target);
-                //    return;
-                //}
-            }
-            else
-            {
-                NewHighLogic(target);
             }
         }
 
@@ -173,6 +142,7 @@ namespace DominationAIO.NewPlugins
         {
             if (target == null)
                 return;
+
             var objs = ObjectManager.Get<AIBaseClient>().Where(i => i != null
                                     && !i.IsDead
                                     && i.IsEnemy
@@ -655,6 +625,10 @@ namespace DominationAIO.NewPlugins
                 if (!Helper.UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
                         return;
+            }
+            else
+            {
+                return;
             }
         }
 

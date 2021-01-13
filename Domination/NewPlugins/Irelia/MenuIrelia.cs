@@ -68,6 +68,9 @@ namespace DominationAIO.NewPlugins
 
             SetEValue();
 
+            QSettings.QListComboMode.Index = 3;
+            ESettings.Emode.Index = 1;
+
             ESettings.Emode.ValueChanged += Emode_ValueChanged;
         }
 
@@ -78,7 +81,7 @@ namespace DominationAIO.NewPlugins
 
         public static void SetEValue()
         {
-            if(ESettings.Emode.Index == 0)
+            if (ESettings.Emode.Index == 0)
             {
                 ESettings.EDelay.Value = 600;
             }

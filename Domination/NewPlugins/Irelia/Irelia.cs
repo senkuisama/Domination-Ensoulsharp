@@ -32,6 +32,8 @@ namespace DominationAIO.NewPlugins
                 Player = ObjectManager.Player;
             }
 
+            Game.Print("Disable block dash spell in EzEvade misc");
+        
             Q.SetTargetted(0f, float.MaxValue);
             W.SetCharged("IreliaW", "ireliawdefense", 800, 800, 0);
             E.SetSkillshot(0.25f, 5f, 2000f, false, SpellType.Line);

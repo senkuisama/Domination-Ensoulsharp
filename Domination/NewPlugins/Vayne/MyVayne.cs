@@ -157,7 +157,7 @@ namespace DominationAIO.NewPlugins
             if (ObjectManager.Player.IsDead)
                 return;
 
-            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(640) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(660) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
 
 
             if (Orbwalker.ActiveMode <= OrbwalkerMode.Harass || !VayneMenu.QCombo.QOnlyCombo.Enabled)
@@ -166,35 +166,26 @@ namespace DominationAIO.NewPlugins
                 {
                     if (targets != null)
                     {
-                        var melee = targets.Where(i => i.CombatType == GameObjectCombatType.Melee);
-                        if (melee != null)
+                        targets.ForEach(i =>
                         {
-                            melee.ForEach(i =>
+                            if (i.IsValidTarget(350) && i.CanMove && i.IsMoving && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
                             {
-                                if (i.IsValidTarget(250) && i.CanMove && i.IsMoving && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
+                                if (i.DistanceToPlayer() > i.GetWaypoints().LastOrDefault().DistanceToPlayer())
                                 {
-                                    if (i.DistanceToPlayer() > i.GetWaypoints().LastOrDefault().DistanceToPlayer())
+                                    if (i.DistanceToPlayer() <= ObjectManager.Player.GetWaypoints().LastOrDefault().Distance(i))
                                     {
-                                        if (i.DistanceToPlayer() <= ObjectManager.Player.GetWaypoints().LastOrDefault().Distance(i))
+                                        var poswillcast = ObjectManager.Player.Position.Extend(i.Position, 300);
+                                        if (!UnderTower(poswillcast))
                                         {
-                                            var poswillcast = ObjectManager.Player.Position.Extend(i.Position, 300);
-                                            if (!UnderTower(poswillcast))
+                                            if (R.IsReady())
                                             {
-                                                if (R.IsReady())
-                                                {
-                                                    if (R.Cast())
-                                                        if (Q.Cast(poswillcast))
-                                                            return;
-                                                }
-                                                else
-                                                {
+                                                if (R.Cast())
                                                     if (Q.Cast(poswillcast))
                                                         return;
-                                                }
                                             }
                                             else
                                             {
-                                                if (Q.Cast(Game.CursorPos))
+                                                if (Q.Cast(poswillcast))
                                                     return;
                                             }
                                         }
@@ -215,30 +206,13 @@ namespace DominationAIO.NewPlugins
                                     if (Q.Cast(Game.CursorPos))
                                         return;
                                 }
-                            });
-                        }
-                        else
-                        {
-                            if (targets.Any(i => i.HealthPercent <= VayneMenu.RCombo.TargetHp.Value) || ObjectManager.Player.HealthPercent <= VayneMenu.RCombo.Hp.Value || ObjectManager.Player.CountEnemyHeroesInRange(600) >= VayneMenu.RCombo.Target.Value)
-                            {
-                                if (R.IsReady())
-                                {
-                                    if (R.Cast())
-                                        if (Q.Cast(Game.CursorPos))
-                                            return;
-                                }
-                                else
-                                {
-                                    if (Q.Cast(Game.CursorPos))
-                                        return;
-                                }
                             }
                             else
                             {
                                 if (Q.Cast(Game.CursorPos))
                                     return;
                             }
-                        }
+                        });
                     }
                 }
             }
@@ -273,7 +247,7 @@ namespace DominationAIO.NewPlugins
             if (ObjectManager.Player.IsDead)
                 return;
 
-            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(640) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(650) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
 
             if (E.IsReady() && VayneMenu.ECombo.UseE.Enabled)
             {
@@ -359,7 +333,7 @@ namespace DominationAIO.NewPlugins
                             {
                                 melee.ForEach(i =>
                                 {
-                                    if(i.IsValidTarget(250) && i.CanMove && i.IsMoving && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
+                                    if(i.IsValidTarget(350) && i.CanMove && i.IsMoving && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
                                     {
                                         if(i.DistanceToPlayer() > i.GetWaypoints().LastOrDefault().DistanceToPlayer())
                                         {

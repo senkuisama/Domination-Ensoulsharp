@@ -173,6 +173,9 @@
     <Compile Include="NewPlugins\Irelia\LogicR.cs" />
     <Compile Include="NewPlugins\Irelia\MenuIrelia.cs" />
     <Compile Include="NewPlugins\Vayne\MyVayne.cs" />
+    <Compile Include="NewPlugins\Yasuo\MyYS.cs" />
+    <Compile Include="NewPlugins\Yasuo\YShelper.cs" />
+    <Compile Include="NewPlugins\Yone\MyYone.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

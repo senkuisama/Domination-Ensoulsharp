@@ -67,6 +67,11 @@ namespace DominationAIO
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;
+                    case "Yasuo":
+                        NewPlugins.Yasuo.MyYS.YasuoLoad();
+                        Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                        break;
                     case "Katarina":
                         //Katarina.Load();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
@@ -112,12 +117,12 @@ namespace DominationAIO
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;
-                    case "Yasuo":
+                    /*case "Yasuo":
                         //ProdragonYasuo.loaded();
                         //Yasuo.Yasuo.OnLoad();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
-                        break;
+                        break;*/
                     case "Irelia":
                         NewPlugins.Irelia.NewIre();
                         Game.Print(Game.Version);

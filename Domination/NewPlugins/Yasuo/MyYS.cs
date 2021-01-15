@@ -214,7 +214,7 @@ namespace DominationAIO.NewPlugins.Yasuo
 
             Flash = ObjectManager.Player.GetSpellSlot("summonerflash");
             EQFlash = new Spell(Flash, 850f);
-            EQFlash.SetSkillshot(0, 175, float.MaxValue, false, SpellType.Circle);
+            EQFlash.SetSkillshot(0, 175f, float.MaxValue, false, SpellType.Circle);
 
             YasuoMenu.AddMenuYasuo();
 
@@ -1069,7 +1069,12 @@ namespace DominationAIO.NewPlugins.Yasuo
             oaa = OnAction.OnAA;
             baa = OnAction.BeforeAA;
             aaa = OnAction.AfterAA;
-            if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active || YasuoMenu.Yasuo_Keys.EQFlashKey.Active) Orbwalker.AttackEnabled = false; else Orbwalker.AttackEnabled = true;
+            if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active || YasuoMenu.Yasuo_Keys.EQFlashKey.Active)
+            {
+                Orbwalker.AttackEnabled = false;
+                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            }
+            else Orbwalker.AttackEnabled = true;
         }
         #endregion
 

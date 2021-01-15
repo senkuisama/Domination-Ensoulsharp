@@ -1,5 +1,6 @@
 ﻿using EnsoulSharp;
 using EnsoulSharp.SDK;
+using EnsoulSharp.SDK.MenuUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,8 @@ namespace Sebby
     {
         public GetIPrediction()
         {
-
+            var menu = new Menu("      P", "Exory Prediction Loaded", true);
+            menu.Attach();
         }
 
         public EnsoulSharp.SDK.PredictionOutput GetPrediction(EnsoulSharp.SDK.PredictionInput input)

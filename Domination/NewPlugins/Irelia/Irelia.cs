@@ -21,6 +21,7 @@ namespace DominationAIO.NewPlugins
         public static Vector3 E1Pos = Vector3.Zero;
         private static Menu IreliaMainMenu = null;
         public static float SheenTimer = 0;
+        public static float lastQ = 0f;
         public static void NewIre()
         {
             if(ObjectManager.Player == null)

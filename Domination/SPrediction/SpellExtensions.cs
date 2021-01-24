@@ -311,7 +311,7 @@ namespace SPredictionMash
             }
             #endregion
 
-            /*#region If Exory Prediction Selected
+            #region If Exory Prediction Selected
             if (ConfigMenu.SelectedPrediction.Index == 3)
             {
                 var pout = SebbyLibPorted.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
@@ -326,7 +326,7 @@ namespace SPredictionMash
                 else
                     return false;
             }
-            #endregion*/
+            #endregion
 
             if (minHit > 1)
                 return SPredictionCastAoe(s, minHit);

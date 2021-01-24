@@ -22,6 +22,8 @@ namespace DominationAIO.NewPlugins
                 MenuSettings.QSettings.Qcombo,
                 MenuSettings.QSettings.QListComboMode,
                 MenuSettings.QSettings.CheckQDmgITems,
+                QSettings.DrawQ,
+                QSettings.Qdelay,
             };
 
             Menu Wmenu = new Menu("Wmenu", "W Settings")
@@ -94,7 +96,9 @@ namespace DominationAIO.NewPlugins
         {
             public static MenuBool Qcombo = new MenuBool("Qcombo", "Q in Combo [Gap_closer | KillSteal]");
             public static MenuList QListComboMode = new MenuList("QListComboMode", "Q List Combo Mode", new string[] { " Gapcloser Logic ", " Dancing Logic ", " High Logic ", "Extream Logic" }, 1);
-            public static MenuBool CheckQDmgITems = new MenuBool("CheckItemDmg", "Q Dmg Check Items", false);
+            public static MenuBool CheckQDmgITems = new MenuBool("CheckItemDmg", "Q Dmg Check Items", true);
+            public static MenuBool DrawQ = new MenuBool("_ireDrawQ", "Draw Q range");
+            public static MenuSlider Qdelay = new MenuSlider("_Q Delay", "Q Delay (ms) ", 200, 0, 1000);
         }
         public class WSettings
         {

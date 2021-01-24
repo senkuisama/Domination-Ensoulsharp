@@ -34,7 +34,6 @@ namespace DominationAIO
         {
             FSpred.Prediction.Prediction.Initialize();
             FunnySlayerCommon.OnAction.CheckOnAction();
-            //Game.OnUpdate += Game_OnUpdate;
             if (ObjectManager.Player == null)
                 return;
             /*try
@@ -63,9 +62,13 @@ namespace DominationAIO
                 switch (GameObjects.Player.CharacterName)
                 {
                     case "Aphelios":
-                        //Champions.Aphelios.loaded.OnLoad();
+                        Champions.Aphelios.loaded.OnLoad();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
+                        break;
+                    case "Xerath":
+                        NewPlugins.MyXerath.XerathLoad();
+                        Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
                         break;
                     case "Yasuo":
                         NewPlugins.Yasuo.MyYS.YasuoLoad();
@@ -180,7 +183,6 @@ namespace DominationAIO
                         break;                   
                 }
                 skinhack.OnLoad(); 
-                //Troll_Chat_xD.Program.OnLoad();
             }
             catch (Exception ex)
             {

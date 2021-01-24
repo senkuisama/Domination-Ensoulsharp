@@ -37,6 +37,16 @@ namespace DominationAIO.NewPlugins
             {
                 Irelia.E1Pos = args.End;
             }
+
+
+            if (sender.IsMe && args.Slot.ToString() == "Q")
+            {
+                Irelia.lastQ = Variables.GameTimeTickCount;
+                if (Variables.GameTimeTickCount > Irelia.SheenTimer + 1650)
+                {
+                    Irelia.SheenTimer = Variables.GameTimeTickCount;
+                }
+            }
         }
 
         public static void Combo(EventArgs args)
@@ -93,7 +103,7 @@ namespace DominationAIO.NewPlugins
                     || args.Buff.Name.Contains("iceborn")
                     || args.Buff.Name.Contains("Lich"))
                 {
-                    Irelia.SheenTimer = Variables.TickCount;
+                    Irelia.SheenTimer = Variables.GameTimeTickCount;
                 }
             }
         }
@@ -143,18 +153,26 @@ namespace DominationAIO.NewPlugins
 
         public static void Drawing_OnDraw(EventArgs args)
         {
+            if (ObjectManager.Player.IsDead) return;
 
-            Drawing.DrawCircle(ObjectManager.Player.Position, Irelia.Q.Range, System.Drawing.Color.Red);
-            /*if (!MenuSettings.ClearSettings.DrawMinions.Enabled) return;
-
-            var minions = GameObjects.GetMinions(2000).Where(i => Helper.CanQ(i)).OrderByDescending(i => i.DistanceToPlayer()).ToList();
-
-            if (minions == null) return;
-
-            foreach (var min in minions)
+            if(Irelia.Q.IsReady() && MenuSettings.QSettings.DrawQ.Enabled)
             {
-                Drawing.DrawCircle(min.Position, 70, System.Drawing.Color.White);
-            }*/
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Irelia.Q.Range, System.Drawing.Color.Red);
+                Render.Circle.DrawCircle(Game.CursorPos, 150f, (Variables.GameTimeTickCount - Irelia.SheenTimer > 1600) ? System.Drawing.Color.Green : System.Drawing.Color.Red);
+            }
+
+            if (MenuSettings.ClearSettings.DrawMinions.Enabled)
+            {
+                var minions = ObjectManager.Get<AIMinionClient>().Where(i => !i.IsDead && !i.IsAlly && i.IsValidTarget(2000) && Helper.CanQ(i));
+                if(minions != null)
+                {
+                    foreach(var min in minions)
+                    {
+                        Render.Circle.DrawCircle(min.Position, 70f, System.Drawing.Color.Red, 10, false);
+                        //Drawing.DrawCircle(min.Position, 80f, System.Drawing.Color.White);
+                    }
+                }
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ namespace DominationAIO.Champions
                 var champs = menu.Add(new Menu("Champions", "Champions"));
                 var allies = champs.Add(new Menu("Allies", "Allies"));
                 var enemies = champs.Add(new Menu("Enemies", "Enemies"));
-                ObjectManager.Player.SetSkin(1);
+                //ObjectManager.Player.SetSkin(1);
                 foreach (var hero in GameObjects.Heroes)
                 {
                     var champMenu = new Menu(hero.CharacterName + hero.NetworkId + hero.Name, hero.CharacterName);

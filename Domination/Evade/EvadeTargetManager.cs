@@ -270,18 +270,17 @@ namespace DaoHungAIO.Evade
                                         ally.CharacterName.ToLower()] != null &&
                                 aaa.Distance(ObjectManager.Player) < DominationAIO.Common.Champion.E.Range)
                             {
-                                DominationAIO.Common.Champion.E.CastOnUnit(aaa);
+                                Champion.E.CastOnUnit((aaa));
                             }
                         }
                         if (ObjectManager.Player.CharacterName == "Lux" || ObjectManager.Player.CharacterName == "Sona" ||
                             ObjectManager.Player.CharacterName == "Taric")
 
                         {
-                            if (DaoHungAIO.Evade.EvadeTargetManager.Menu["whitelist"][
-                                        ally.CharacterName.ToLower()] != null &&
-                                aaa.Distance(ObjectManager.Player) < DominationAIO.Common.Champion.W.Range)
+                            if (DaoHungAIO.Evade.EvadeTargetManager.Menu["whitelist"][ally.CharacterName.ToLower()] != null &&
+                                aaa.Distance(ObjectManager.Player) < Champion.W.Range)
                             {
-                                DominationAIO.Common.Champion.W.CastOnUnit(aaa);
+                                Champion.W.CastOnUnit(aaa);
                             }
                         }
                     }

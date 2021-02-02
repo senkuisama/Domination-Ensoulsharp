@@ -3,7 +3,7 @@
   <asmv1:assemblyIdentity name="DominationAIO.exe" version="1.0.0.0" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="amd64" type="win32" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="DominationAIO" version="0.0.7694.21455" language="neutral" processorArchitecture="amd64" />
+    <assemblyIdentity name="DominationAIO" version="0.0.7703.24202" language="neutral" processorArchitecture="amd64" />
     <commandLine file="DominationAIO.exe" parameters="" />
   </entryPoint>
   <trustInfo>
@@ -42,38 +42,38 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DominationAIO.exe" size="589824">
-      <assemblyIdentity name="DominationAIO" version="0.0.7694.21455" language="neutral" processorArchitecture="amd64" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DominationAIO.exe" size="665600">
+      <assemblyIdentity name="DominationAIO" version="0.0.7703.24202" language="neutral" processorArchitecture="amd64" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>fNtydtYwz6lsTzHgEEwrqXMQ06XIc6POB/iGkHIOT1Y=</dsig:DigestValue>
+        <dsig:DigestValue>jDjodzVb42ANb/bkzShpsjrWiq3pKW61ulF6vunsVME=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="EnsoulSharp.dll" size="202752">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="EnsoulSharp.dll" size="203776">
       <assemblyIdentity name="EnsoulSharp" version="1.0.0.0" publicKeyToken="A79D4397685F9DF0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>lXZMJHaB3DInx3zoFQv0DDGp7kGFep30f9LDUWaKsFQ=</dsig:DigestValue>
+        <dsig:DigestValue>e004Qq0zFX+9kmfTXeIBVDtFF8NnhXibM1rhNgP3LQ8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="EnsoulSharp.SDK.dll" size="762880">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="EnsoulSharp.SDK.dll" size="762368">
       <assemblyIdentity name="EnsoulSharp.SDK" version="1.0.0.0" publicKeyToken="BCECB37B3B5656DD" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>HrSxTJhwxoy/Ir9QIkD4Z9dw1npebKt1PnjUTvheOT8=</dsig:DigestValue>
+        <dsig:DigestValue>n2GqxIFSEqtiVdBWUlZuoZMhCMKOnOYOv4BxP+2GZ/k=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

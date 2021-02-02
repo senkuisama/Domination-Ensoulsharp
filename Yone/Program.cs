@@ -2243,7 +2243,7 @@ namespace ConsoleApp
         private static void Yasuo_DoClear()
         {
             //laneclear
-            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value) && !i.Position.IsBuilding());
+            List<AIBaseClient> Qminions = null; //GameObjects.Enemy.Where(i => i.IsValidTarget(HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value) && !i.Position.IsBuilding());
             var Eminions = GameObjects.EnemyMinions.Where(i => i.IsValidTarget(E.Range) && CanE(i));
             if (Qminions != null && YasuoMenu.Yasuo_Clear.Yasuo_Qclear.Enabled && Q.IsReady())
             {
@@ -2805,7 +2805,7 @@ namespace ConsoleApp
                 {
                     if (FlashPos.Distance(objPlayer.Position) <= 400 + 175 && FlashPos.Distance(objPlayer.Position) >= 175)
                     {
-                        var objs = GameObjects.Enemy.Where(i => !i.Position.IsBuilding() && CanE(i) && i.IsValidTarget(E.Range));
+                        List<AIBaseClient> objs = null; //GameObjects.Enemy.Where(i => !i.Position.IsBuilding() && CanE(i) && i.IsValidTarget(E.Range));
                         foreach(var obj in objs)
                         {
                             if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
@@ -3455,7 +3455,7 @@ namespace ConsoleApp
         }
         private static void Yone_Clear()
         {
-            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
+            var Qminions = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsDead && !i.IsAlly && i.IsValidTarget(isQ3() ? 900 : 475) && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
             if (Qminions != null && Q1.IsReady())
             {
                 foreach (var min in Qminions)

@@ -92,8 +92,8 @@ namespace DominationAIO.NewPlugins.Yasuo
 
             var Epred = target.Position;
 
-            var E = new Spell(SpellSlot.E, 475);
-            E.SetSkillshot(0.3f, 175, 1000f, false, SpellType.Line);
+            var Et = new Spell(SpellSlot.E, 475);
+            Et.SetSkillshot(0.3f, 175, 1000f, false, SpellType.Line);
 
             if (ObjectManager.Player.IsDashing())
             {
@@ -101,7 +101,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             }
             else
             {
-                Epred = E.GetPrediction(target).CastPosition;
+                Epred = Et.GetPrediction(target).CastPosition;
             }
 
             var pos = Epred;
@@ -119,12 +119,70 @@ namespace DominationAIO.NewPlugins.Yasuo
                     break;
             }
 
+            var obj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && Et.CanCast(i) && CanE(i));
 
-            var obj = new List<AIBaseClient>();
-            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
-            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
-            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
-            if (CanE(target) && E.IsReady() && (!(new Spell(SpellSlot.Q)).IsReady() || HaveQ2))
+            if(obj == null)
+            {
+                return null;
+            }
+
+            if (MyYS.YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled == true)
+            {
+                if (HaveQ2)
+                {
+                    return
+
+
+                    obj.FirstOrDefault(
+                    i => (
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20
+                         )
+                         ||
+                         (
+                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 150
+                         )
+                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
+                    );
+                }
+                else
+                {
+                    return
+
+
+                    obj.FirstOrDefault(
+                    i => (
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20
+                         )
+                         ||
+                         (
+                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 15
+                         )
+                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
+                    );
+                }                
+            }
+            else
+            {
+                return
+
+
+                obj.FirstOrDefault(
+                    i => (
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20                       
+                         )
+                         ||
+                         (
+                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 15
+                         )
+                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
+                );
+            }
+
+            /*var obj = new List<AIBaseClient>();
+            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Et.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
+            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(Et.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
+            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(Et.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
+            if (CanE(target) && Et.IsReady() && (!(new Spell(SpellSlot.Q)).IsReady() || HaveQ2))
             {
                 if (MyYS.YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled)
                 {
@@ -181,7 +239,7 @@ namespace DominationAIO.NewPlugins.Yasuo
                         )
                         .OrderBy(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
                 }
-            }
+            }*/
         }
     }
 }

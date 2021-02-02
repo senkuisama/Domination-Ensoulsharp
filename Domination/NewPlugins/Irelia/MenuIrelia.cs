@@ -38,6 +38,7 @@ namespace DominationAIO.NewPlugins
                 MenuSettings.ESettings.Emode,
                 MenuSettings.ESettings.EDelay,
                 MenuSettings.ESettings.Efeedback,
+                ESettings.E1vs1Range,
             };
 
             Menu Rmenu = new Menu("Rmenu", "R Settings")
@@ -111,6 +112,7 @@ namespace DominationAIO.NewPlugins
             public static MenuBool Ecombo = new MenuBool("Ecombo", "E in Combo");
             public static MenuList Emode = new MenuList("ImproveE", "E Logic : ", new string[] { "Simple E", "Calculator E delay", "Calculator E Pred" }, 0);
             public static MenuSlider EDelay = new MenuSlider("ImproveE Delay", "Delay E prediction (Default 600)", 1150, 400, 1400);
+            public static MenuSlider E1vs1Range = new MenuSlider("E1vs1Range", "Range E when 1vs1", 350, 100, 1000);
             public static MenuSeparator Efeedback = new MenuSeparator("Efeedback", "E logic if not good Feedback it to FunnySlayer#0348");
         }
 

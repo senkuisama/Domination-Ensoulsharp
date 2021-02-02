@@ -222,6 +222,17 @@ namespace DominationAIO.NewPlugins.Yasuo
             Game.OnUpdate += Game_OnUpdate1;
             Game.OnUpdate += Game_OnUpdate2;
             Game.OnUpdate += Game_OnUpdate3;
+
+            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+        }
+
+        private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
+        {
+            if(sender.IsMe && args.Slot == SpellSlot.Q)
+            {
+                //Game.SendEmote(EmoteId.Dance);
+                //ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            }
         }
 
         #region Onupdate 3
@@ -309,7 +320,7 @@ namespace DominationAIO.NewPlugins.Yasuo
                 {
                     if (FlashPos.Distance(ObjectManager.Player.Position) <= 400 + 175 && FlashPos.Distance(ObjectManager.Player.Position) >= 175)
                     {
-                        var objs = GameObjects.Enemy.Where(i => !i.Position.IsBuilding() && YasuoHelper.CanE(i) && i.IsValidTarget(E.Range));
+                        var objs = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && !i.Position.IsBuilding() && YasuoHelper.CanE(i) && i.IsValidTarget(E.Range));
                         foreach (var obj in objs)
                         {
                             if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
@@ -394,7 +405,7 @@ namespace DominationAIO.NewPlugins.Yasuo
         private static void Yasuo_DoClear()
         {
             //laneclear
-            var Qminions = GameObjects.Enemy.Where(i => i.IsValidTarget(YasuoHelper.HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value) && !i.Position.IsBuilding());
+            var Qminions = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && (i.Type == GameObjectType.AIHeroClient || i.Type == GameObjectType.AIMinionClient) && i.IsValidTarget(YasuoHelper.HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value) && !i.Position.IsBuilding());
             var Eminions = GameObjects.EnemyMinions.Where(i => i.IsValidTarget(E.Range) && YasuoHelper.CanE(i));
             if (Qminions != null && YasuoMenu.Yasuo_Clear.Yasuo_Qclear.Enabled && Q.IsReady())
             {
@@ -873,8 +884,12 @@ namespace DominationAIO.NewPlugins.Yasuo
 
                 if (Q.SPredictionCast(target as AIHeroClient, HitChance.High))
                     return;
+
+                if (Q.CastIfHitchanceMinimum(target, HitChance.High) == CastStates.SuccessfullyCasted)
+                    return;
             }
         }
+
         private static void CastQcircle(AIBaseClient target)
         {
             if (YasuoHelper.HaveQ3)

@@ -285,12 +285,9 @@ namespace SPredictionMash
                 if (minHit > 1)
                     if (pout.AoeTargetsHitCount >= minHit)
                         return s.Cast(pout.CastPosition);
-                    else return false;
 
                 if (pout.Hitchance >= hc)
                     return s.Cast(pout.CastPosition);
-                else
-                    return false;
             }
             #endregion
 
@@ -302,12 +299,9 @@ namespace SPredictionMash
                 if (minHit > 1)
                     if (pout.AoeTargetsHitCount >= minHit)
                         return s.Cast(pout.CastPosition);
-                    else return false;
 
-                if (pout.Hitchance >= (FSpred.Prediction.HitChance)hc)
+                if ((int)pout.Hitchance >= (int)hc)
                     return s.Cast(pout.CastPosition);
-                else
-                    return false;
             }
             #endregion
 
@@ -319,12 +313,9 @@ namespace SPredictionMash
                 if (minHit > 1)
                     if (pout.AoeTargetsHitCount >= minHit)
                         return s.Cast(pout.CastPosition);
-                    else return false;
 
-                if (pout.Hitchance >= (SebbyLibPorted.Prediction.HitChance)hc)
+                if ((int)pout.Hitchance >= (int)hc)
                     return s.Cast(pout.CastPosition);
-                else
-                    return false;
             }
             #endregion
 

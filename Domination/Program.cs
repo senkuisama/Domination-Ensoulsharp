@@ -66,6 +66,12 @@ namespace DominationAIO
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;
+                    case "Viego":
+                        NewPlugins.MyViego.ViegoLoad();
+                        break;
+                    case "Fiora":
+                        new DaoHungAIO.Champions.Fiora();
+                        break;
                     case "Xerath":
                         NewPlugins.MyXerath.XerathLoad();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");

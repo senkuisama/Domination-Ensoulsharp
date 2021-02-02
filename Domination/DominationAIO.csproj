@@ -84,25 +84,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp">
-      <HintPath>E:\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.SDK">
-      <HintPath>E:\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
-      <HintPath>E:\EnsoulSharp\Reference\log4net.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>E:\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>E:\EnsoulSharp\Reference\SharpDX.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>E:\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>E:\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -176,6 +176,7 @@
     <Compile Include="NewPlugins\Irelia\LogicR.cs" />
     <Compile Include="NewPlugins\Irelia\MenuIrelia.cs" />
     <Compile Include="NewPlugins\Vayne\MyVayne.cs" />
+    <Compile Include="NewPlugins\Viego\MyViego.cs" />
     <Compile Include="NewPlugins\Xerath\MyXerath.cs" />
     <Compile Include="NewPlugins\Yasuo\MyYS.cs" />
     <Compile Include="NewPlugins\Yasuo\YShelper.cs" />
@@ -246,6 +247,7 @@
     <Compile Include="SPrediction\StasisPrediction.cs" />
     <Compile Include="SPrediction\Utility.cs" />
     <Compile Include="SPrediction\VectorPrediction.cs" />
+    <Compile Include="TyDaoHungAIO\Fiora.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

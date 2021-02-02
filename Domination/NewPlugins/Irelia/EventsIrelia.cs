@@ -65,10 +65,7 @@ namespace DominationAIO.NewPlugins
                 return;
             }
             else
-            {
-                if(MenuSettings.ESettings.Ecombo.Enabled)
-                    LogicE.EPrediction(true);
-
+            {              
                 if (MenuSettings.QSettings.Qcombo.Enabled)
                 {
                     LogicQ.GapCloserTargetCanKillable();
@@ -88,7 +85,10 @@ namespace DominationAIO.NewPlugins
                             LogicQ.QGapCloserPos(target.Position);
                             break;
                     }
-                }               
+                }
+
+                if (MenuSettings.ESettings.Ecombo.Enabled)
+                    LogicE.EPrediction(true);
             }
         }
         public static void AIBaseClient_OnBuffLose(AIBaseClient sender, AIBaseClientBuffRemoveEventArgs args)

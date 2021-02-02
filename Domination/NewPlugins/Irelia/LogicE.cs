@@ -107,14 +107,14 @@ namespace DominationAIO.NewPlugins
                                     var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempE, target);
                                     if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High && pred.CastPosition.IsValid())
                                     {
-                                        int range = 1000;
+                                        int range = 2000;
                                         if (ObjectManager.Player.CountEnemyHeroesInRange(775) > 2)
                                         {
-                                            range = 1000;
+                                            range = 2000;
                                         }
                                         else
                                         {
-                                            range = 325;
+                                            range = MenuSettings.ESettings.E1vs1Range.Value;
                                         }
 
                                         for (int i = range; i > 50; i--)
@@ -155,7 +155,91 @@ namespace DominationAIO.NewPlugins
                         }
                         else
                         {
-                            if (Irelia.E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 800)
+                            {
+                                if (Irelia.E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 800)
+                                {
+                                    if(ObjectManager.Player.CountEnemyHeroesInRange(775) >= 2)
+                                    {
+                                        foreach(var gettarget in ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(775)).OrderBy(i => i.DistanceToPlayer()))
+                                        {
+                                            if (gettarget == null)
+                                                return;
+
+                                            if(gettarget.NetworkId == target.NetworkId)
+                                            {
+                                                continue;
+                                            }
+                                            else
+                                            {
+                                                if(target.DistanceToPlayer() > gettarget.DistanceToPlayer())
+                                                {
+                                                    var castpos = gettarget.Position.Extend(target.Position, -200);
+                                                    if(castpos.DistanceToPlayer() <= 775)
+                                                    {
+                                                        if (Irelia.E.Cast(castpos))
+                                                            return;
+                                                    }
+                                                    else
+                                                    {
+                                                        continue;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    var castpos = target.Position.Extend(gettarget.Position, -200);
+                                                    if (castpos.DistanceToPlayer() <= 775)
+                                                    {
+                                                        if (Irelia.E.Cast(castpos))
+                                                            return;
+                                                    }
+                                                    else
+                                                    {
+                                                        continue;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Geometry.Circle circle = new Geometry.Circle(ObjectManager.Player.Position, 600, 50);
+
+                                        {
+                                            foreach (var onecircle in circle.Points)
+                                            {
+                                                if (onecircle.Distance(target) > 600)
+                                                {
+                                                    if (Irelia.E.Cast(onecircle))
+                                                    {
+                                                        var vector2 = FSpred.Prediction.Prediction.GetPrediction(target, 600);
+                                                        var v3 = Vector2.Zero;
+                                                        if (vector2.CastPosition.IsValid() && vector2.CastPosition.Distance(ObjectManager.Player.Position) < Irelia.E.Range - 100)
+                                                            for (int j = 50; j <= 900; j += 50)
+                                                            {
+                                                                var vector3 = vector2.CastPosition.Extend(Irelia.E1Pos.ToVector2(), -j);
+                                                                if (vector3.Distance(ObjectManager.Player) >= Irelia.E.Range && v3 != Vector2.Zero)
+                                                                {
+                                                                    if (Irelia.E.Cast(v3))
+                                                                    {
+                                                                        return;
+                                                                    }
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    v3 = vector3.ToVector2();
+                                                                    continue;
+                                                                }
+                                                            }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                else return;
+                            }
+                            /*if (Irelia.E.GetPrediction(target).CastPosition.DistanceToPlayer() <= 800)
                             {
                                 Geometry.Circle circle = new Geometry.Circle(ObjectManager.Player.Position, 600, 50);
 
@@ -226,7 +310,7 @@ namespace DominationAIO.NewPlugins
                                         }
                                     }
                                 }
-                            }
+                            }*/
                         }
                     }
                 }

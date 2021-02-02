@@ -22,6 +22,7 @@ namespace Pyke_Ryū
         public static Menu Selector = new Menu("Selector", "Target Menu");
         public static MenuBool Rpyke = new MenuBool("R Pyke", "R KS");
         public static MenuBool Qpyke = new MenuBool("Q Combo", "Q Combo|Harass");
+        public static MenuBool Qpykefull = new MenuBool("Q Combo Qpykefull", "Only when can pulling", false);
         public static MenuBool Wpyke = new MenuBool("W Combo", "W Combo|Harass");
         public static MenuBool Epyke = new MenuBool("E Combo", "E Combo|Harass");
 
@@ -43,15 +44,26 @@ namespace Pyke_Ryū
             RootPyke.Add(Selector);
             RootPyke.Add(Rpyke);
             RootPyke.Add(Qpyke);
+            RootPyke.Add(Qpykefull);
             RootPyke.Add(Wpyke);
             RootPyke.Add(Epyke);           
             RootPyke.Attach();
 
             Game.OnUpdate += Game_OnUpdate;
             Game.OnUpdate += Game_OnUpdate1;
-            Drawing.OnDraw += Drawing_OnDraw;            
+            Drawing.OnDraw += Drawing_OnDraw;
+            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
         }
 
+        private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
+        {
+            if(sender.IsMe && args.Slot == SpellSlot.Q)
+            {
+                lastchangingQ = Variables.GameTimeTickCount;
+            }
+        }
+
+        public static float lastchangingQ = 0;
         private static void Game_OnUpdate1(EventArgs args)
         {
             if (Q.IsCharging)
@@ -86,7 +98,7 @@ namespace Pyke_Ryū
             var targets = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsDead && i.IsEnemy && !i.IsAlly && !i.IsMinion() && !i.IsJungle() && i.Type == GameObjectType.AIHeroClient).OrderBy(i => i.DistanceToPlayer()).ThenBy(i => i.Health);
             if (targets != null)
             {
-                foreach(var target in targets)
+                foreach(var target in targets.Where(i => R.CanCast(i) && i.Health <= R.GetDamage(i)))
                 {
                     if(target != null && !target.IsDead && target.Health <= R.GetDamage(target) && R.IsReadyToCastOn(target))
                     {
@@ -192,12 +204,16 @@ namespace Pyke_Ryū
                 if (Q.IsCharging)
                 {
                     Orbwalker.AttackEnabled = false;
-                    var pred = FSpred.Prediction.Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= FSpred.Prediction.HitChance.High));
-                    if(pred.Hitchance >= FSpred.Prediction.HitChance.High)
+
+                    if ((!Qpykefull.Enabled || Variables.GameTimeTickCount - lastchangingQ > 1000))
                     {
-                        if (Q.Cast(pred.CastPosition))
-                            return;
-                    }
+                        var pred = FSpred.Prediction.Prediction.GetPrediction(Q, targets.OrderBy(i => i.Health).FirstOrDefault(i => FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= FSpred.Prediction.HitChance.High));
+                        if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                        {
+                            if (Q.Cast(pred.CastPosition))
+                                return;
+                        }
+                    }                   
                 }
                 else
                 {

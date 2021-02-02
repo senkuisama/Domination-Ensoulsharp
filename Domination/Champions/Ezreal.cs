@@ -491,7 +491,7 @@ namespace DominationAIO.Champions
             if (!EzKeysSetting.FarmKey.Active)
                 return;
 
-            var Minions = GameObjects.Enemy.Where(i => i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
+            var Minions = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && (i.Type == GameObjectType.AIHeroClient || i.Type == GameObjectType.AIMinionClient) && i.IsValidTarget(Q.Range) && !i.IsAlly && !i.IsDead && !i.Position.IsBuilding()).OrderByDescending(i => i.Health);
             if (Minions == null)
                 return;
 
@@ -562,11 +562,11 @@ namespace DominationAIO.Champions
         {
             if (!Player.IsDead && DrawEzSettings.DrawQ.Enabled)
             {
-                Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
-                Drawing.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
-                if(FSTargetSelector.GetFSTarget(2000) != null)
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
+                Render.Circle.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
+                if(FSTargetSelector.GetFSTarget(Q.Range) != null)
                 {
-                    Drawing.DrawCircle(FSpred.Prediction.Prediction.GetPrediction(Q, FSTargetSelector.GetFSTarget(2000)).CastPosition, 20, System.Drawing.Color.White);
+                    Render.Circle.DrawCircle(FSpred.Prediction.Prediction.GetPrediction(Q, FSTargetSelector.GetFSTarget(2000)).CastPosition, 20, System.Drawing.Color.White);
                 }
             }
         }

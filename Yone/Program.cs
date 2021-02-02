@@ -44,6 +44,7 @@ namespace ConsoleApp
         {
             ObjectManager.Player.Name = "Riot Games";
             FSpred.Prediction.Prediction.Initialize();
+            FunnySlayerCommon.OnAction.CheckOnAction();
 
             if (ObjectManager.Player.CharacterName == "Yasuo")
                 ("This is Beta Yasuo 's Script, almost bug have been fixed so good luck").YasuoLoad();
@@ -3593,7 +3594,7 @@ namespace ConsoleApp
         
         private static void QCombo(AIBaseClient target1)
         {
-            if (oaa && !YoneMenu.Cancelaa.Q_cancel.Enabled) return;
+            if (FunnySlayerCommon.OnAction.OnAA && !YoneMenu.Cancelaa.Q_cancel.Enabled) return;
             if (!Q1.IsReady()) return;
             foreach(AIBaseClient target in GameObjects.Get<AIHeroClient>().Where(i => !i.IsAlly && !i.IsDead))
             {
@@ -3625,7 +3626,7 @@ namespace ConsoleApp
         private static void WCombo(AIBaseClient target)
         {
             if (!W.IsReady()) return;
-            if (oaa && !YoneMenu.Cancelaa.W_cancel.Enabled) return;
+            if (FunnySlayerCommon.OnAction.OnAA && !YoneMenu.Cancelaa.W_cancel.Enabled) return;
 
             if (W.IsReady() && target.IsValidTarget(600))
             {               
@@ -3667,7 +3668,7 @@ namespace ConsoleApp
         }
         private static void ECombo(AIBaseClient target)
         {
-            if (oaa && !YoneMenu.Cancelaa.E_cancel.Enabled) return;
+            if (FunnySlayerCommon.OnAction.OnAA && !YoneMenu.Cancelaa.E_cancel.Enabled) return;
             if (!YoneMenu.Ecombo.Combo_Ecombo.Enabled) return;
             if (!E.IsReady()) return;
 

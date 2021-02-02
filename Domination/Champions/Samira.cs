@@ -200,8 +200,8 @@ namespace DominationAIO.Champions
             {
                 if (SamiraSetMenu.Misc.DrawQAARange.Enabled)
                 {
-                    Drawing.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
-                    Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
+                    Render.Circle.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
+                    Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
                 }
             }
         }
@@ -235,7 +235,7 @@ namespace DominationAIO.Champions
                 {
                     if(Orbwalker.ActiveMode == OrbwalkerMode.LaneClear && SamiraSetMenu.KeysSettings.QClear.Active)
                     {
-                        var minions = GameObjects.Enemy.Where(i => !i.IsDead && i.IsValidTarget(Q.Range) && !i.Position.IsBuilding()).OrderBy(i => i.Health);
+                        var minions = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && (i.Type == GameObjectType.AIHeroClient || i.Type == GameObjectType.AIMinionClient) && !i.IsDead && i.IsValidTarget(Q.Range) && !i.Position.IsBuilding()).OrderBy(i => i.Health);
                         if(minions != null && Q.IsReady())
                         {
                             foreach(var min in minions)
@@ -251,7 +251,7 @@ namespace DominationAIO.Champions
 
                     if(Orbwalker.ActiveMode == OrbwalkerMode.LastHit)
                     {
-                        var minions = GameObjects.Enemy.Where(i => !i.IsDead && i.IsValidTarget(Q.Range) && !i.Position.IsBuilding() && i.Health < Player.GetSpellDamage(i, SpellSlot.Q)).OrderBy(i => i.Health);
+                        var minions = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && (i.Type == GameObjectType.AIHeroClient || i.Type == GameObjectType.AIMinionClient) && !i.IsDead && i.IsValidTarget(Q.Range) && !i.Position.IsBuilding() && i.Health < Player.GetSpellDamage(i, SpellSlot.Q)).OrderBy(i => i.Health);
                         if (minions != null && Q.IsReady())
                         {
                             foreach (var min in minions)
@@ -484,7 +484,7 @@ namespace DominationAIO.Champions
                                 if (FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range + 300) != null)
                                 {
                                     var Pos = FSpred.Prediction.Prediction.PredictUnitPosition(FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range + 300), 700);
-                                    var enemy = GameObjects.Enemy.Where(i => !i.IsDead && i.IsValidTarget(E.Range) && !i.Position.IsBuilding()).OrderBy(i => i.Health).OrderBy(i => i is AIHeroClient);
+                                    var enemy = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && (i.Type == GameObjectType.AIHeroClient || i.Type == GameObjectType.AIMinionClient) && !i.IsDead && i.IsValidTarget(E.Range) && !i.Position.IsBuilding()).OrderBy(i => i.Health).OrderBy(i => i is AIHeroClient);
                                     if (enemy != null)
                                     {
                                         foreach (var Next in enemy)

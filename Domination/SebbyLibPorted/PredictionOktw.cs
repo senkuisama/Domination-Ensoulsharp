@@ -229,7 +229,7 @@ namespace SebbyLibPorted.Prediction
         {
             var SpellInput = new PredictionInput
             {
-                Aoe = (spell.Type == SpellType.Circle || Aoe ? true : false),
+                Aoe = ((spell.Type == SpellType.Circle || Aoe) ? true : false),
                 Unit = unit,
                 Collision = spell.Collision,
                 CollisionObjects = (CollisionObjects ?? new CollisionableObjects[1]),
@@ -241,11 +241,15 @@ namespace SebbyLibPorted.Prediction
                 RangeCheckFrom = spell.RangeCheckFrom,
                 From = spell.From
             };
+
             if(SpellInput.Aoe == true)
             {
-                AoePrediction.GetPrediction(SpellInput);
+                return AoePrediction.GetPrediction(SpellInput);
             }
-            return GetPrediction(SpellInput);
+            else
+            {
+                return GetPrediction(SpellInput);
+            }
         }
 
         public static PredictionOutput GetPrediction(PredictionInput input)
@@ -265,17 +269,21 @@ namespace SebbyLibPorted.Prediction
             if (ft)
             {
                 //Increase the delay due to the latency and server tick:
-                input.Delay += Game.Ping / 2000f + 0.06f;
+                input.Delay += Game.Ping / 1000f + 0.075f;
 
-                if (input.Aoe)
+                /*if (input.Aoe)
                 {
                     return AoePrediction.GetPrediction(input);
-                }
+                }*/
             }
 
             //Target too far away.
-            if (Math.Abs(input.Range - float.MaxValue) > float.Epsilon &&
+            /*if (Math.Abs(input.Range - float.MaxValue) > float.Epsilon &&
                 input.Unit.DistanceSquared(input.RangeCheckFrom) > Math.Pow(input.Range * 1.5, 2))
+            {
+                return new PredictionOutput { Input = input };
+            }*/
+            if(float.MaxValue - input.Radius > float.Epsilon && input.RangeCheckFrom.Distance(input.Unit.Position) > input.Range * 3f)
             {
                 return new PredictionOutput { Input = input };
             }
@@ -288,10 +296,13 @@ namespace SebbyLibPorted.Prediction
             else
             {
                 //Unit is immobile.
-                var remainingImmobileT = UnitIsImmobileUntil(input.Unit);
-                if (remainingImmobileT >= 0d)
+                if (!input.Unit.CanMove)
                 {
-                    result = GetImmobilePrediction(input, remainingImmobileT);
+                    var remainingImmobileT = UnitIsImmobileUntil(input.Unit);
+                    if (remainingImmobileT >= 0d)
+                    {
+                        result = GetImmobilePrediction(input, remainingImmobileT);
+                    }
                 }
             }
 
@@ -719,7 +730,7 @@ namespace SebbyLibPorted.Prediction
                         buff.IsActive && Game.Time <= buff.EndTime &&
                         (buff.Type == BuffType.Charm || buff.Type == BuffType.Knockup || buff.Type == BuffType.Stun ||
                          buff.Type == BuffType.Suppression || buff.Type == BuffType.Snare || buff.Type == BuffType.Fear
-                         || buff.Type == BuffType.Taunt || buff.Type == BuffType.Knockback))
+                         || buff.Type == BuffType.Taunt || buff.Type == BuffType.Knockback) || buff.Type == BuffType.Asleep)
                     .Aggregate(0d, (current, buff) => Math.Max(current, buff.EndTime));
             return (result - Game.Time);
         }

@@ -595,7 +595,7 @@ namespace DominationAIO.Champions
 
             if (minions.Any())
             {
-                var Qfarm = Q.GetLineFarmLocation(minions);
+                var Qfarm = Q.GetLineFarmLocation(minions.ToList());
 
                 if (Qfarm.Position.IsValid() && AkaliMenu.ClearSettings.useQ.Enabled && AkaliMenu.ClearSettings.ClearMana.Value < Player.Mana)
                 {

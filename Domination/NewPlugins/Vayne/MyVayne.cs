@@ -151,7 +151,24 @@ namespace DominationAIO.NewPlugins
 
             Game.OnUpdate += Game_OnUpdate1;
         }
+        private static Vector3 GetQCastPos(this AIHeroClient target)
+        {
+            if (target.CombatType != GameObjectCombatType.Melee && !Game.CursorPos.IsWall()) return Game.CursorPos;
+            var allcastpos = new List<EnsoulSharp.SDK.Clipper.IntPoint>();
 
+            if (ObjectManager.Player.CountEnemyHeroesInRange(800) > 1)
+            {
+                var circel = new Geometry.Circle(ObjectManager.Player.Position, 300).ToClipperPath();
+                allcastpos.AddRange(circel.Where(c => !Helper.UnderTower(new Vector3(c.X, c.Y, 0)) && (target.IsFacing(ObjectManager.Player)) ? (new Vector3(c.X, c.Y, 0)).Distance(target) <= 530 : (new Vector3(c.X, c.Y, 0)).Distance(target) <= 555 - 0.2 * target.MoveSpeed).ToList());
+            }
+            if(allcastpos != null && allcastpos.Count > 1)
+            {
+                var getpos = allcastpos.OrderBy(p => new Vector3(p.X, p.Y, 0).Distance(Game.CursorPos)).FirstOrDefault();
+                return new Vector3(getpos.X, getpos.Y, 0);
+            }
+
+            return Game.CursorPos;
+        }
         private static void Orbwalker_OnAfterAttack(object sender, AfterAttackEventArgs e)
         {
             if (ObjectManager.Player.IsDead)
@@ -160,32 +177,40 @@ namespace DominationAIO.NewPlugins
             var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(660) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
 
 
-            if (Orbwalker.ActiveMode <= OrbwalkerMode.Harass || !VayneMenu.QCombo.QOnlyCombo.Enabled)
+            if (Orbwalker.ActiveMode < OrbwalkerMode.Harass || !VayneMenu.QCombo.QOnlyCombo.Enabled)
             {
-                if(Orbwalker.LastTarget.Type == GameObjectType.AIHeroClient)
+                if(e.Target.Type == GameObjectType.AIHeroClient)
                 {
                     if (targets != null)
                     {
                         targets.ForEach(i =>
                         {
-                            if (i.IsValidTarget(350) && i.CanMove && i.IsMoving && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
+                            if (i.IsValidTarget(660) && i.CanMove && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
                             {
                                 if (i.DistanceToPlayer() > i.GetWaypoints().LastOrDefault().DistanceToPlayer())
                                 {
                                     if (i.DistanceToPlayer() <= ObjectManager.Player.GetWaypoints().LastOrDefault().Distance(i))
                                     {
-                                        var poswillcast = ObjectManager.Player.Position.Extend(i.Position, 300);
-                                        if (!UnderTower(poswillcast))
+                                        var poswillcast = GetQCastPos(i);
+                                        if(poswillcast != Vector3.Zero)
                                         {
-                                            if (R.IsReady())
+                                            if (!UnderTower(poswillcast))
                                             {
-                                                if (R.Cast())
+                                                if (R.IsReady())
+                                                {
+                                                    if (R.Cast())
+                                                        if (Q.Cast(poswillcast))
+                                                            return;
+                                                }
+                                                else
+                                                {
                                                     if (Q.Cast(poswillcast))
                                                         return;
+                                                }
                                             }
                                             else
                                             {
-                                                if (Q.Cast(poswillcast))
+                                                if (Q.Cast(Game.CursorPos))
                                                     return;
                                             }
                                         }
@@ -251,7 +276,7 @@ namespace DominationAIO.NewPlugins
 
             if (E.IsReady() && VayneMenu.ECombo.UseE.Enabled)
             {
-                if ((!VayneMenu.ECombo.EOnlyCombo.Enabled || Orbwalker.ActiveMode <= OrbwalkerMode.Harass) && (!UnderTower(ObjectManager.Player.Position) || Orbwalker.ActiveMode <= OrbwalkerMode.Combo))
+                if ((!VayneMenu.ECombo.EOnlyCombo.Enabled || Orbwalker.ActiveMode < OrbwalkerMode.Harass) && (!UnderTower(ObjectManager.Player.Position)))
                 {
                     if (VayneMenu.ECombo.FastE.Enabled)
                     {
@@ -333,24 +358,32 @@ namespace DominationAIO.NewPlugins
                             {
                                 melee.ForEach(i =>
                                 {
-                                    if(i.IsValidTarget(350) && i.CanMove && i.IsMoving && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
+                                    if(i.IsValidTarget(660) && i.CanMove && VayneMenu.QCombo.QBack.Enabled && (R.IsReady() || ObjectManager.Player.HasBuff("VayneInquisition") || !VayneMenu.Misc.QSettings.OnlyWhenRActive.Enabled))
                                     {
                                         if(i.DistanceToPlayer() > i.GetWaypoints().LastOrDefault().DistanceToPlayer())
                                         {
                                             if(i.DistanceToPlayer() <= ObjectManager.Player.GetWaypoints().LastOrDefault().Distance(i))
                                             {
-                                                var poswillcast = ObjectManager.Player.Position.Extend(i.Position, 300);
-                                                if (!UnderTower(poswillcast))
+                                                var poswillcast = GetQCastPos(i);
+                                                if(poswillcast != Vector3.Zero)
                                                 {
-                                                    if (R.IsReady())
+                                                    if (!UnderTower(poswillcast))
                                                     {
-                                                        if (R.Cast())
+                                                        if (R.IsReady())
+                                                        {
+                                                            if (R.Cast())
+                                                                if (Q.Cast(poswillcast))
+                                                                    return;
+                                                        }
+                                                        else
+                                                        {
                                                             if (Q.Cast(poswillcast))
                                                                 return;
+                                                        }
                                                     }
                                                     else
                                                     {
-                                                        if (Q.Cast(poswillcast))
+                                                        if (Q.Cast(Game.CursorPos))
                                                             return;
                                                     }
                                                 }

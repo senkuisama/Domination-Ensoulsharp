@@ -19,7 +19,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             var Epred = aIBaseClient.Position;
 
             var E = new Spell(SpellSlot.E, 475);
-            E.SetSkillshot(0.3f, 175, 1000f, false, SpellType.Line);
+            E.SetSkillshot(0.3f, 175, 750f + 0.6f * ObjectManager.Player.MoveSpeed, false, SpellType.Line);
 
             if (ObjectManager.Player.IsDashing())
             {
@@ -27,7 +27,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             }
             else
             {
-                Epred = E.GetPrediction(aIBaseClient).CastPosition;
+                Epred = FSpred.Prediction.Prediction.GetPrediction(E, aIBaseClient).CastPosition;
             }
 
             return Epred;
@@ -90,21 +90,10 @@ namespace DominationAIO.NewPlugins.Yasuo
             if (target == null)
                 return null;
 
-            var Epred = target.Position;
-
             var Et = new Spell(SpellSlot.E, 475);
-            Et.SetSkillshot(0.3f, 175, 1000f, false, SpellType.Line);
+            Et.SetSkillshot(0.3f, 175, (float)(750f + 0.6f * ObjectManager.Player.MoveSpeed), false, SpellType.Line);
 
-            if (ObjectManager.Player.IsDashing())
-            {
-                Epred = target.Position;
-            }
-            else
-            {
-                Epred = Et.GetPrediction(target).CastPosition;
-            }
-
-            var pos = Epred;
+            var pos = FSpred.Prediction.Prediction.GetPrediction(Et, target).CastPosition;
 
             switch (MyYS.YasuoMenu.Ecombo.Yasuo_EMode.SelectedValue)
             {
@@ -114,69 +103,28 @@ namespace DominationAIO.NewPlugins.Yasuo
                 case "Cursor Pos":
                     pos = Game.CursorPos;
                     break;
-                case "Logic Target Gapcloser":
-                    pos = Epred;
-                    break;
             }
 
-            var obj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && Et.CanCast(i) && CanE(i));
+            var obj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValid && i.IsValidTarget(475) && CanE(i));
 
             if(obj == null)
             {
                 return null;
             }
 
-            if (MyYS.YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled == true)
-            {
-                if (HaveQ2)
-                {
-                    return
+            return
 
 
-                    obj.FirstOrDefault(
+                obj.Where(
                     i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 50
                          )
                          ||
                          (
-                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 150
+                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + MyYS.YasuoMenu.EQCombo.EBonusRange.Value
                          )
                          && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
-                    );
-                }
-                else
-                {
-                    return
-
-
-                    obj.FirstOrDefault(
-                    i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20
-                         )
-                         ||
-                         (
-                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 15
-                         )
-                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
-                    );
-                }                
-            }
-            else
-            {
-                return
-
-
-                obj.FirstOrDefault(
-                    i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20                       
-                         )
-                         ||
-                         (
-                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 15
-                         )
-                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
-                );
-            }
+                ).OrderBy(i => PosAfterE(i).Distance(pos)).ThenBy(i => i.Type == GameObjectType.AIMinionClient).FirstOrDefault();
 
             /*var obj = new List<AIBaseClient>();
             obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Et.Range) && !i.IsDead && !i.IsAlly && CanE(i)));

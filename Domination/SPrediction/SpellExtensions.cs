@@ -254,6 +254,100 @@ namespace SPredictionMash
         }
         #endregion
 
+        public static Vector3 PredCastPos(this Spell s, AIHeroClient t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
+        {
+            if (rangeCheckFrom == null)
+                rangeCheckFrom = ObjectManager.Player.PreviousPosition;
+
+            if (t == null)
+                return Vector3.Zero;
+
+            if (!s.IsSkillShot)
+                return Vector3.Zero;
+
+            #region if common prediction selected
+            if (ConfigMenu.SelectedPrediction.Index == 1)
+            {
+                var pout = s.GetPrediction(t, minHit > 1);
+
+                if (minHit > 1)
+                    if (pout.AoeTargetsHitCount >= minHit)
+                        return pout.CastPosition;
+
+                if (pout.Hitchance >= hc)
+                    return pout.CastPosition;
+            }
+            #endregion
+
+            #region if fs prediction selected
+            if (ConfigMenu.SelectedPrediction.Index == 2)
+            {
+                var pout = FSpred.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
+
+                if (minHit > 1)
+                    if (pout.AoeTargetsHitCount >= minHit)
+                        return pout.CastPosition;
+
+                if ((int)pout.Hitchance >= (int)hc)
+                    return pout.CastPosition;
+            }
+            #endregion
+
+            #region If Exory Prediction Selected
+            if (ConfigMenu.SelectedPrediction.Index == 3)
+            {
+                var pout = SebbyLibPorted.Prediction.Prediction.GetPrediction(s, t, minHit > 1);
+
+                if (minHit > 1)
+                    if (pout.AoeTargetsHitCount >= minHit)
+                        return pout.CastPosition;
+
+                if ((int)pout.Hitchance >= (int)hc)
+                    return pout.CastPosition;
+            }
+            #endregion
+
+            /*if (minHit > 1)
+                return SPredictionCastAoe(s, minHit);*/
+
+            if (t.HealthPercent > filterHPPercent)
+                return Vector3.Zero;
+
+            float avgt = t.AvgMovChangeTime() + reactionIgnoreDelay;
+            float movt = t.LastMovChangeTime();
+            float avgp = t.AvgPathLenght();
+            var waypoints = t.GetWaypoints();
+
+            Prediction.Result result;
+
+            switch (s.Type)
+            {
+                case SpellType.Line:
+                    result = LinePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, t.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
+                    break;
+                case SpellType.Circle:
+                    result = CirclePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, t.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
+                    break;
+                case SpellType.Cone:
+                    result = ConePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, t.LastAngleDiff(), s.From.ToVector2(), s.RangeCheckFrom.ToVector2());
+                    break;
+                default:
+                    throw new InvalidOperationException("Unknown spell type");
+            }
+
+            Drawings.s_DrawTick = Variables.TickCount;
+            Drawings.s_DrawPos = result.CastPosition;
+            Drawings.s_DrawHitChance = result.HitChance.ToString();
+            Drawings.s_DrawDirection = (result.CastPosition - s.From.ToVector2()).Normalized().Perpendicular();
+            Drawings.s_DrawWidth = (int)s.Width;
+
+            if (result.HitChance >= hc)
+            {
+                return result.CastPosition.ToVector3();
+            }
+            return Vector3.Zero;
+        }
+
         #region Cast methods
         /// <summary>
         /// Spell extension for cast spell with SPrediction
@@ -266,6 +360,7 @@ namespace SPredictionMash
         /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
         /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
         /// <returns>true if spell has casted</returns>
+        /// 
         public static bool SPredictionCast(this Spell s, AIHeroClient t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
         {
             if (rangeCheckFrom == null)

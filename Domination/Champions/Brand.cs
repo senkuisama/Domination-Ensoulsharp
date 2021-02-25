@@ -57,11 +57,22 @@ namespace DominationAIO.Champions
             BrandMenu.Add(BrandAuto);
             BrandMenu.Attach();
 
-            Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W);
+            Q = new Spell(SpellSlot.Q, 1000f);
+            W = new Spell(SpellSlot.W, 900f);
             E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R);
-            
+
+            Q.SetSkillshot(0.25f, 55f, 1600f, true, SpellType.Line);
+            //Q.Range = 1000f; Q.Delay = 0.25f; Q.Width = 55f; Q.Speed = 1600f; Q.Collision = true; Q.Type = SpellType.Line;
+            //Q
+            W.SetSkillshot(0.75f, 200f, float.MaxValue, false, SpellType.Circle);
+            //  W.Range = 900f; W.Delay = 0.75f; W.Width = 200f; W.Speed = float.MaxValue; W.Collision = false; W.Type = SpellType.Circle;
+            //W
+            E.Range = 675f; E.SetTargetted(0.25f, float.MaxValue);
+            //E
+            R.Range = 750f; R.SetTargetted(0.25f, 1000f);
+            //R
+
             QPred = new FSpred.Prediction.PredictionInput
             {
                 Aoe = false,
@@ -129,15 +140,7 @@ namespace DominationAIO.Champions
                 //if (RPoly != null)
                     RPoly = null;
             }
-            //Poly
-            Q.Range = 1000f; Q.Delay = 0.25f; Q.Width = 55f; Q.Speed = 1600f; Q.Collision = true; Q.Type = SpellType.Line;
-            //Q
-            W.Range = 900f; W.Delay = 0.75f; W.Width = 200f; W.Speed = float.MaxValue; W.Collision = false; W.Type = SpellType.Circle;
-            //W
-            E.Range = 675f; E.SetTargetted(0.25f, float.MaxValue);
-            //E
-            R.Range = 750f; R.SetTargetted(0.25f, 1000f);
-            //R
+            //Poly           
         }
 
         private static void BRANDDRAWING(EventArgs args)
@@ -174,25 +177,22 @@ namespace DominationAIO.Champions
             if (Orbwalker.ActiveMode != OrbwalkerMode.Harass && Orbwalker.ActiveMode != OrbwalkerMode.Combo)
                 return;
 
-            if (R.IsReady() && BrandSettings.Rcombo.Enabled)
-            {
-                DO_BRAND_R();
-            }
-
             if (E.IsReady() && BrandSettings.Ecombo.Enabled)
             {
                 DO_BRAND_E();
             }
-
-            if (Q.IsReady() && BrandSettings.Qcombo.Enabled)
+            if (R.IsReady() && BrandSettings.Rcombo.Enabled)
             {
-                DO_BRAND_Q();
+                DO_BRAND_R();
             }
-
             if (W.IsReady() && BrandSettings.Wcombo.Enabled)
             {
                 DO_BRAND_W();
             }
+            if (Q.IsReady() && BrandSettings.Qcombo.Enabled)
+            {
+                DO_BRAND_Q();
+            }         
         }
 
         private static void DO_BRAND_Q()
@@ -208,8 +208,8 @@ namespace DominationAIO.Champions
             {
                 if (BrandSettings.AcceptQ.Enabled)
                 {
-                    var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                    if(pred != null && pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
+                    if(pred != null && pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                     {
                         if (Q.Cast(pred.CastPosition))
                         {
@@ -254,8 +254,8 @@ namespace DominationAIO.Champions
             {
                 if (FunnySlayerCommon.OnAction.AfterAA)
                 {
-                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
-                    if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    var pred = W.GetPrediction(target);
+                    if(pred.Hitchance >= EnsoulSharp.SDK.HitChance.High)
                     {
                         if (W.Cast(pred.CastPosition))
                             return;
@@ -268,8 +268,8 @@ namespace DominationAIO.Champions
                 {
                     if (BrandSettings.AcceptW.Enabled)
                     {
-                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        var pred = W.GetPrediction(target);
+                        if (pred.Hitchance >= EnsoulSharp.SDK.HitChance.High)
                         {
                             if (W.Cast(pred.CastPosition))
                                 return;
@@ -278,8 +278,8 @@ namespace DominationAIO.Champions
                 }
                 else
                 {
-                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target);
-                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    var pred = W.GetPrediction(target);
+                    if (pred.Hitchance >= EnsoulSharp.SDK.HitChance.High)
                     {
                         if (W.Cast(pred.CastPosition))
                             return;
@@ -463,8 +463,8 @@ namespace DominationAIO.Champions
             if (target == null)
                 return;
 
-            var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-            if(pred != null && pred.Hitchance >= FSpred.Prediction.HitChance.High)
+            var pred = Q.GetPrediction(target);
+            if(pred != null && pred.Hitchance >= EnsoulSharp.SDK.HitChance.High)
             {
                 if (Q.Cast(pred.CastPosition))
                     return;

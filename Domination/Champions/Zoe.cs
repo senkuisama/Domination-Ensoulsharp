@@ -36,7 +36,7 @@ namespace DominationAIO.Champions
             ZoeMenu = new Menu("ZoeMenu", "FunnySlayer Zoe", true);
             var ZoeHelper = new Menu("Zoe_Helper", "Helper");
             SPredictionMash.ConfigMenu.Initialize(ZoeHelper, "Get Prediction");
-            new SebbyLibPorted.Orbwalking.Orbwalker(ZoeHelper);
+            //new SebbyLibPorted.Orbwalking.Orbwalker(ZoeHelper);
             ZoeMenu.Add(ZoeHelper);
             ZoeMenu.Add(Qcombo);
             ZoeMenu.Add(Ecombo);

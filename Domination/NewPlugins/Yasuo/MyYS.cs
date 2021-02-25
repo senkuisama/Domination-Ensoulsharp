@@ -50,6 +50,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             {
                 public static MenuBool Yasuo_EQcombo = new MenuBool(",Yasuo_EQcombo", "Yasuo EQ in Combo");
                 public static MenuBool Yasuo_EWindcombo = new MenuBool(",Yasuo_EWindcombo", "Yasuo EQ Wind in Combo");
+                public static MenuSlider EBonusRange = new MenuSlider(",Yasuo_EBonusRange", "Yasuo Bonus E Range", 50, 0, 150);
             }
 
             public class Wcombo
@@ -159,6 +160,7 @@ namespace DominationAIO.NewPlugins.Yasuo
 
                 EQcombo.Add(YasuoMenu.EQCombo.Yasuo_EQcombo);
                 EQcombo.Add(YasuoMenu.EQCombo.Yasuo_EWindcombo);
+                EQcombo.Add(YasuoMenu.EQCombo.EBonusRange);
 
                 Rcombo.Add(YasuoMenu.Rcombo.Yasuo_Rcombo);
                 Rcombo.Add(YasuoMenu.Rcombo.RDelayTime);
@@ -222,8 +224,20 @@ namespace DominationAIO.NewPlugins.Yasuo
             Game.OnUpdate += Game_OnUpdate1;
             Game.OnUpdate += Game_OnUpdate2;
             Game.OnUpdate += Game_OnUpdate3;
+            Game.OnUpdate += Game_OnUpdate4;
 
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+        }
+
+        private static void Game_OnUpdate4(EventArgs args)
+        {
+            if(Orbwalker.ActiveMode == OrbwalkerMode.Combo && !ObjectManager.Player.IsDead)
+            {
+                if (YasuoMenu.Yasuo_Keys.ComboEQ3Flash.Active)
+                {
+                    EQFlashInCombo();
+                }
+            }
         }
 
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
@@ -240,28 +254,51 @@ namespace DominationAIO.NewPlugins.Yasuo
         {
             if (ObjectManager.Player.IsDashing())
             {
-                if (YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active && Q.IsReady(0))
+                if(YasuoMenu.Yasuo_Keys.Yasuo_AutoStacks.Active && Q.IsReady() && !YasuoHelper.HaveQ2 && !YasuoHelper.HaveQ3)
                 {
-                    foreach (var target in GameObjects.EnemyHeroes.Where(i => !i.IsDead && !i.IsAlly && i.IsVisible && i.IsValidTarget(600)))
+                    var targets = TargetSelector.GetTargets(950);
+                    if (targets == null)
+                        return;
+
+                    if(targets.Any(i => YasuoHelper.Eprediction(i).Distance(ObjectManager.Player.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value + 15))
                     {
-                        if (target != null && target.Distance(ObjectManager.Player.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value && ObjectManager.Player.GetDashInfo().EndPos.DistanceToPlayer() < 200)
+                        if (Q.Cast(YasuoHelper.PosExploit(null)))
+                            return;
+                    }
+                    else
+                    {
+                        if(!targets.Any(i => i.Distance(ObjectManager.Player.GetDashInfo().EndPos) < 350))
                         {
-                            Q.Cast(YasuoHelper.PosExploit(target));
+                            if (Q.Cast(YasuoHelper.PosExploit(null)))
+                                return;
                         }
                     }
-                    if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active && Q.Name != "YasuoQ3Wrapper")
-                    {
-                        Q.Cast(YasuoHelper.PosExploit(null));
-                    }
-                    if (YasuoMenu.Yasuo_Keys.EQFlashKey.Active && Q.Name != "YasuoQ3Wrapper")
-                    {
-                        Q.Cast(YasuoHelper.PosExploit(null));
-                    }
-                    if (ObjectManager.Player.HasBuff("YasuoQ1"))
-                    {
-                        Q.Cast(YasuoHelper.PosExploit(null));
-                    }
                 }
+                else
+                {
+                    if (YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active && Q.IsReady(0))
+                    {
+                        foreach (var target in GameObjects.EnemyHeroes.Where(i => !i.IsDead && !i.IsAlly && i.IsVisible && i.IsValidTarget(600)))
+                        {
+                            if (target != null && target.Distance(ObjectManager.Player.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value && ObjectManager.Player.GetDashInfo().EndPos.DistanceToPlayer() < 200)
+                            {
+                                Q.Cast(YasuoHelper.PosExploit(target));
+                            }
+                        }
+                        if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active && Q.Name != "YasuoQ3Wrapper")
+                        {
+                            Q.Cast(YasuoHelper.PosExploit(null));
+                        }
+                        if (YasuoMenu.Yasuo_Keys.EQFlashKey.Active && Q.Name != "YasuoQ3Wrapper")
+                        {
+                            Q.Cast(YasuoHelper.PosExploit(null));
+                        }
+                        if (ObjectManager.Player.HasBuff("YasuoQ1"))
+                        {
+                            Q.Cast(YasuoHelper.PosExploit(null));
+                        }
+                    }
+                }                
             }
         }
         #endregion
@@ -273,15 +310,12 @@ namespace DominationAIO.NewPlugins.Yasuo
 
             switch (Orbwalker.ActiveMode)
             {
-                case OrbwalkerMode.Combo:
-                    if (YasuoMenu.Yasuo_Keys.ComboEQ3Flash.Active)
-                    {
-                        EQFlashInCombo();
-                    }
+                case OrbwalkerMode.Combo:                    
                     Yasuo_DoCombo();
                     break;
                 case OrbwalkerMode.LaneClear:
                     Yasuo_DoClear();
+                    YasuoJungle();
                     break;
                 case OrbwalkerMode.Harass:
                     Yasuo_DoHarass();
@@ -333,14 +367,59 @@ namespace DominationAIO.NewPlugins.Yasuo
 
         private static void Yasuo_DoCombo()
         {
-            var target1 = TargetSelector.SelectedTarget;
-            if (target1 == null || !target1.IsValidTarget(3000))
+            var heroes = GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(2000));
+
+            if(heroes != null)
             {
-                target1 = FSTargetSelector.GetFSTarget(3000);
+                if (R.IsReady() && YasuoMenu.Rcombo.Yasuo_Rcombo.Enabled && heroes.Any(target => target.IsValidTarget(R.Range) && YasuoMenu.Rcombo.RtargetHeath.Value >= target.HealthPercent && (target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Knockback))))
+                {
+                    var target = heroes.Where(i => i.IsValidTarget(R.Range) && YasuoMenu.Rcombo.RtargetHeath.Value >= i.HealthPercent && (i.HasBuffOfType(BuffType.Knockup) || i.HasBuffOfType(BuffType.Knockback))).FirstOrDefault();
+
+                    var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
+                    if ((buff.EndTime - Game.Time) * 1000 <= YasuoMenu.Rcombo.RDelayTime.Value && !YasuoMenu.Rcombo.AlwaysEQR.Enabled)
+                    {
+                        Game.Print("R accepted");
+                        if (R.Cast(target.Position))
+                            return;
+                    }
+                    if (Q.IsReady() && E.IsReady())
+                    {
+                        var EQR = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && !i.HasBuff("YasuoE"));
+
+                        if (EQR.Any())
+                        {
+                            foreach (var obj in EQR)
+                            {
+                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                {
+                                    if (Q.Cast(YasuoHelper.PosExploit(null)))
+                                    {
+                                        if (R.Cast(target.Position))
+                                            return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (Q.IsReady() && ObjectManager.Player.IsDashing())
+                    {
+                        if (Q.Cast(YasuoHelper.PosExploit(null)))
+                        {
+                            if (R.Cast(target.Position))
+                                return;
+                        }
+                    }
+                }
+                else
+                {
+                    Egaptarget();
+                    QcastTarget();
+                }
             }
-            foreach (var target in GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(2000)))
+            #region hmm
+            /*foreach (var target in GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(2000)))
             {
-                if (target == null || target.HasBuffOfType(BuffType.Invulnerability) || target.HasBuffOfType(BuffType.SpellImmunity))
+                if (target == null)
                     return;
                 if (target != null || target1 != null)
                 {
@@ -350,7 +429,8 @@ namespace DominationAIO.NewPlugins.Yasuo
                         if ((buff.EndTime - Game.Time) * 1000 <= YasuoMenu.Rcombo.RDelayTime.Value && !YasuoMenu.Rcombo.AlwaysEQR.Enabled)
                         {
                             Game.Print("R accepted");
-                            R.Cast(target.Position);
+                            if (R.Cast(target.Position))
+                                return;
                         }
                         if (Q.IsReady() && E.IsReady())
                         {
@@ -360,52 +440,107 @@ namespace DominationAIO.NewPlugins.Yasuo
                             {
                                 foreach (var obj in EQR)
                                 {
-                                    E1.CastOnUnit(obj);
-                                    Q.Cast(YasuoHelper.PosExploit(null));
-                                    R.Cast(target.Position);
+                                    if(E1.Cast(obj) == CastStates.SuccessfullyCasted)
+                                    {
+                                        if (Q.Cast(YasuoHelper.PosExploit(null)))
+                                        {
+                                            if (R.Cast(target.Position))
+                                                return;
+                                        }
+                                    }
                                 }
                             }
                         }
                         if (Q.IsReady() && ObjectManager.Player.IsDashing())
                         {
-                            Q.Cast(YasuoHelper.PosExploit(null));
-                            R.Cast(target.Position);
+                            if (Q.Cast(YasuoHelper.PosExploit(null)))
+                            {
+                                if (R.Cast(target.Position))
+                                    return;
+                            }
                         }
                     }
                     else
                     {
-                        Egaptarget(target1);
+                        Egaptarget();
                         if (YasuoHelper.HaveQ3)
                         {
                             if (Q3.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Q3range.Value)
                             {
-                                QcastTarget(target1);
+                                QcastTarget();
                             }
                             else
                             {
-                                QcastTarget(target);
+                                QcastTarget();
                             }
                         }
                         else
                         {
                             if (Q.GetPrediction(target1).CastPosition.DistanceToPlayer() <= YasuoMenu.RangeCheck.Qrange.Value)
                             {
-                                QcastTarget(target1);
+                                QcastTarget();
                             }
                             else
                             {
-                                QcastTarget(target);
+                                QcastTarget();
                             }
                         }
                     }
                 }
+            }*/
+            #endregion
+        }
+        private static void YasuoJungle()
+        {
+            if (OnAction.OnAA)
+                return;
+
+            //jungleclear
+            var jungles = GameObjects.GetJungles(YasuoHelper.HaveQ3 ? 1100 : 475, JungleType.All, JungleOrderTypes.Health);
+            if (jungles == null)
+                return;
+
+            if (E.IsReady())
+            {
+                var jungleEon = jungles.Where(i => i.DistanceToPlayer() < 475 && i.DistanceToPlayer() > 240 && YasuoHelper.CanE(i)).FirstOrDefault();
+                if (jungleEon != null)
+                    if (E1.Cast(jungleEon) == CastStates.SuccessfullyCasted)
+                        return;
+            }
+
+            if (Q.IsReady())
+            {
+                if (ObjectManager.Player.IsDashing())
+                {
+                    if (YasuoHelper.HaveQ2)
+                    {
+                        if (Q.Cast(YasuoHelper.PosExploit(null)))
+                            return;
+                    }
+                    else
+                    {
+                        if(jungles.Any(i => i.Distance(ObjectManager.Player.GetDashInfo().EndPos) < 185))
+                        {
+                            if (Q.Cast(YasuoHelper.PosExploit(null)))
+                                return;
+                        }
+                    }
+                }
+                else
+                {
+                    var getjungleQ = jungles.Where(i => i.DistanceToPlayer() < (YasuoHelper.HaveQ3 ? 1100 : 475)).FirstOrDefault();
+                    if(getjungleQ != null)
+                    {
+                        if (Q.Cast(getjungleQ.Position))
+                            return;
+                    }
+                }
             }
         }
-
         private static void Yasuo_DoClear()
         {
             //laneclear
-            var Qminions = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && (i.Type == GameObjectType.AIHeroClient || i.Type == GameObjectType.AIMinionClient) && i.IsValidTarget(YasuoHelper.HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value) && !i.Position.IsBuilding());
+            var Qminions = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && (i.Type == GameObjectType.AIHeroClient || i.IsMinion() || i.IsJungle()) && i.IsValidTarget(YasuoHelper.HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value) && !i.Position.IsBuilding());
             var Eminions = GameObjects.EnemyMinions.Where(i => i.IsValidTarget(E.Range) && YasuoHelper.CanE(i));
             if (Qminions != null && YasuoMenu.Yasuo_Clear.Yasuo_Qclear.Enabled && Q.IsReady())
             {
@@ -520,56 +655,7 @@ namespace DominationAIO.NewPlugins.Yasuo
                         }
                     }
                 }
-            }
-
-            //jungleclear
-            var jungles = GameObjects.Jungle.Where(i => i.IsValidTarget(YasuoHelper.HaveQ3 ? YasuoMenu.RangeCheck.Q3range.Value : YasuoMenu.RangeCheck.Qrange.Value));
-
-            if (jungles != null)
-            {
-                if (ObjectManager.Player.IsDashing())
-                {
-                    YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active = true;
-                }
-
-                foreach (var jl in jungles)
-                {
-                    if (jl.IsValidTarget(YasuoMenu.RangeCheck.Erange.Value) && YasuoHelper.CanE(jl) && jl.DistanceToPlayer() > 240)
-                    {
-                        if (E1.Cast(jl) == CastStates.SuccessfullyCasted || E1.CastOnUnit(jl))
-                            return;
-                    }
-                    if (Q.IsReady())
-                        if (YasuoHelper.HaveQ3)
-                        {
-                            if (ObjectManager.Player.IsDashing())
-                            {
-                                if (YasuoHelper.Eprediction(jl).Distance(ObjectManager.Player.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value)
-                                {
-                                    Q3.Cast(YasuoHelper.PosExploit(jl));
-                                }
-                            }
-                            else
-                            {
-                                Q3.Cast(Q3.GetPrediction(jl).CastPosition);
-                            }
-                        }
-                        else
-                        {
-                            if (ObjectManager.Player.IsDashing())
-                            {
-                                if (YasuoHelper.Eprediction(jl).Distance(ObjectManager.Player.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value)
-                                {
-                                    Q.Cast(YasuoHelper.PosExploit(jl));
-                                }
-                            }
-                            else
-                            {
-                                Q.Cast(Q.GetPrediction(jl).CastPosition);
-                            }
-                        }
-                }
-            }
+            }           
         }
 
         private static void Yasuo_DoHarass()
@@ -588,7 +674,7 @@ namespace DominationAIO.NewPlugins.Yasuo
                                                 YasuoHelper.PosAfterE(obj).Distance(YasuoHelper.Eprediction(target)) <= YasuoMenu.RangeCheck.EQrange.Value && !YasuoHelper.UnderTower(YasuoHelper.PosAfterE(obj))
                                                 )
                         {
-                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
                             {
                                 YasuoMenu.Yasuo_Keys.AutoQifDashOnTarget.Active = true;
                                 return;
@@ -630,7 +716,7 @@ namespace DominationAIO.NewPlugins.Yasuo
                 }
             }
 
-            var minions = ObjectManager.Get<AIMinionClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(Q.Range) && i.Health < Q.GetDamage(i));
+            var minions = ObjectManager.Get<AIMinionClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(Q.Range) && i.MaxHealth > 5 && i.Health < Q.GetDamage(i));
             if (minions != null)
             {
                 foreach (var min in minions)
@@ -643,94 +729,37 @@ namespace DominationAIO.NewPlugins.Yasuo
             }
         }
 
-        private static void Egaptarget(AIBaseClient target)
+        private static void Egaptarget()
         {
-            if (target == null || oaa || baa) return;
-
-            if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
-            {
-                LogicEZicZac(target);
-            }
-
+            var target = TargetSelector.GetTarget(YasuoMenu.RangeCheck.Egaprange.Value);
+            if (target == null || OnAction.OnAA || OnAction.BeforeAA) return;
+          
             var obj = YasuoHelper.GetNearObj(target);
-
-            if (obj != null && E.Level >= 1)
+            if(obj != null && E1.Level >= 1)
             {
-                if (YasuoHelper.UnderTower(ObjectManager.Player.Position) && !YasuoHelper.UnderTower(target.Position))
+                /*if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
                 {
-                    YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = false;
+                    LogicEZicZac(target);
+                }*/
+                if (!YasuoHelper.UnderTower(YasuoHelper.PosAfterE(obj)) || YasuoMenu.Yasuo_Keys.TurretKey.Active)
+                {
                     if (obj.NetworkId == target.NetworkId)
                     {
-                        if (YasuoHelper.Eprediction(obj).DistanceToPlayer() > 300)
+                        if (obj.DistanceToPlayer() >= 250)
                         {
-                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
                                 return;
                         }
                     }
                     else
                     {
-                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
-                            return;
-                    }
-
-                    if (YasuoHelper.Eprediction(target).Distance(YasuoHelper.PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
-                    {
-                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
                             return;
                     }
                 }
                 else
-                {
-                    //YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled = true;
-                }
-                if (YasuoMenu.Yasuo_Keys.TurretKey.Active)
-                {
-                    if (obj.NetworkId == target.NetworkId)
-                    {
-                        if (YasuoHelper.Eprediction(obj).DistanceToPlayer() > 300)
-                        {
-                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
-                                return;
-                        }
-                    }
-                    else
-                    {
-                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
-                            return;
-                    }
-
-                    if (YasuoHelper.Eprediction(target).Distance(YasuoHelper.PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
-                    {
-                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
-                            return;
-                    }
-                }
-                else
-                {
-                    if (YasuoHelper.UnderTower(YasuoHelper.PosAfterE(obj))) return;
-
-                    if (obj.NetworkId == target.NetworkId)
-                    {
-                        if (E.GetPrediction(obj).CastPosition.DistanceToPlayer() > 300)
-                        {
-                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
-                                return;
-                        }
-                    }
-                    else
-                    {
-                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
-                            return;
-                    }
-
-                    if (YasuoHelper.Eprediction(target).Distance(YasuoHelper.PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
-                    {
-                        if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
-                            return;
-                    }
-                }
-            }
-
+                    return;
+            }            
         }
 
         private static void LogicEZicZac(AIBaseClient target)
@@ -751,9 +780,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             bool ready = false;
 
             //search
-            var AllObj = new List<AIBaseClient>();
-            AllObj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
-            AllObj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(1000) && !i.IsAlly && !i.HasBuff("YasuoE")));
+            var AllObj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsDead && !i.IsAlly && E1.CanCast(i) && YasuoHelper.CanE(i));
 
             //MenuChecker
             if (YasuoMenu.Ecombo.Yasuo_zizzacRange.Value < target.DistanceToPlayer()) return;
@@ -797,7 +824,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             }
 
             //set
-            if (AllObj.Count < 2) return;
+            if (AllObj.Count() < 2) return;
             foreach (var aobj in AllObj)
             {
                 obj1 = aobj;
@@ -853,8 +880,9 @@ namespace DominationAIO.NewPlugins.Yasuo
             }
         }
 
-        private static void QcastTarget(AIBaseClient target)
+        private static void QcastTarget()
         {
+            var target = TargetSelector.GetTarget(YasuoHelper.HaveQ3 ? Q3.Range : Q.Range);
             if (target == null || !Q.IsReady()) return;
 
             if (!ObjectManager.Player.IsDashing())
@@ -872,20 +900,17 @@ namespace DominationAIO.NewPlugins.Yasuo
             if (YasuoHelper.HaveQ3)
             {
                 if (!YasuoMenu.Qcombo.Yasuo_Windcombo.Enabled) return;
-                if (oaa && target.HealthPercent > YasuoMenu.Qcombo.Yasuo_Qoa.Value) return;
+                if (OnAction.OnAA) return;
 
                 if (Q3.SPredictionCast(target as AIHeroClient, HitChance.High))
                     return;
             }
             else
             {
-                if (!YasuoMenu.Qcombo.Yasuo_Windcombo.Enabled) return;
-                if (oaa && target.HealthPercent > YasuoMenu.Qcombo.Yasuo_Qoa.Value) return;
+                if (!YasuoMenu.Qcombo.Yasuo_Qcombo.Enabled) return;
+                if (OnAction.OnAA) return;
 
                 if (Q.SPredictionCast(target as AIHeroClient, HitChance.High))
-                    return;
-
-                if (Q.CastIfHitchanceMinimum(target, HitChance.High) == CastStates.SuccessfullyCasted)
                     return;
             }
         }
@@ -1016,7 +1041,7 @@ namespace DominationAIO.NewPlugins.Yasuo
                 YasuoEQFlash();
             }
         }
-#endregion
+        #endregion
 
         #region EQ flash
         private static void YasuoEQFlash()
@@ -1035,19 +1060,68 @@ namespace DominationAIO.NewPlugins.Yasuo
             if (target == null)
                 return;
 
-            targets.OrderByDescending(i => EQFlash.GetPrediction(target, true).AoeTargetsHitCount).ForEach(i =>
+            if(targets.Count == 1)
             {
-                FlashPos = EQFlash.GetPrediction(i, true).CastPosition;
-
+                FlashPos = target.Position;
                 if (ObjectManager.Player.IsDashing() && YasuoHelper.HaveQ3 && Q.IsReady() && FlashPos != Vector3.Zero)
                 {
                     if (FlashPos.Distance(ObjectManager.Player.Position) <= 400 + 175 && FlashPos.Distance(ObjectManager.Player.Position) > 150)
                     {
-                        Q3.Cast(YasuoHelper.PosExploit(target));
-                        DelayAction.Add(1, () => { EQFlash.Cast(FlashPos); });
+                        if (Q3.Cast(YasuoHelper.PosExploit(target)))
+                        {
+                            if (EQFlash.Cast(FlashPos))
+                                return;
+                        }
                     }
                 }
+            }
+            
+            if (targets.Count() >= 2)
+            {
+                targets.OrderByDescending(i => EQFlash.GetPrediction(target, true).AoeTargetsHitCount).ForEach(i =>
+                {
+                    FlashPos = EQFlash.GetPrediction(i, true).CastPosition;
 
+                    if (ObjectManager.Player.IsDashing() && YasuoHelper.HaveQ3 && Q.IsReady() && FlashPos != Vector3.Zero)
+                    {
+                        if (FlashPos.Distance(ObjectManager.Player.Position) <= 400 + 175 && FlashPos.Distance(ObjectManager.Player.Position) > 150)
+                        {
+                            Q3.Cast(YasuoHelper.PosExploit(target));
+                            DelayAction.Add(1, () => { EQFlash.Cast(FlashPos); });
+                        }
+                    }
+
+                    if (!ObjectManager.Player.IsDashing() && target != null)
+                    {
+                        var obj = YasuoHelper.GetNearObj(target);
+                        if (obj != null)
+                        {
+                            if (obj.NetworkId == target.NetworkId)
+                            {
+                                if (YasuoHelper.Eprediction(obj).DistanceToPlayer() > 300)
+                                {
+                                    if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                        return;
+                                }
+                            }
+                            else
+                            {
+                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                    return;
+                            }
+
+                            if (YasuoHelper.Eprediction(target).Distance(YasuoHelper.PosAfterE(obj)) <= YasuoMenu.RangeCheck.EQrange.Value)
+                            {
+                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted || E1.CastOnUnit(obj))
+                                    return;
+                            }
+                        }
+                    }
+                });
+            }
+            else
+            {
+                FlashPos = target.Position;
                 if (!ObjectManager.Player.IsDashing() && target != null)
                 {
                     var obj = YasuoHelper.GetNearObj(target);
@@ -1074,13 +1148,26 @@ namespace DominationAIO.NewPlugins.Yasuo
                         }
                     }
                 }
-            });
+
+                if (ObjectManager.Player.IsDashing() && YasuoHelper.HaveQ3 && Q.IsReady() && FlashPos != Vector3.Zero)
+                {
+                    if (FlashPos.Distance(ObjectManager.Player.Position) <= 600 && FlashPos.Distance(ObjectManager.Player.Position) > 125)
+                    {
+                        if (Q3.Cast(YasuoHelper.PosExploit(target)))
+                        {
+                            if (EQFlash.Cast(FlashPos))
+                                return;
+                        }
+                    }
+                }
+            }
         }
         #endregion
 
         #region Onupdate
         private static void Game_OnUpdate(EventArgs args)
         {
+            Q.Range = YasuoMenu.RangeCheck.Qrange.Value;
             oaa = OnAction.OnAA;
             baa = OnAction.BeforeAA;
             aaa = OnAction.AfterAA;
@@ -1460,7 +1547,7 @@ namespace DominationAIO.NewPlugins.Yasuo
                                 && (!YasuoHelper.UnderTower(YasuoHelper.PosAfterE(i)) || evadeMenu.GetValue<MenuBool>("ETower").Enabled)
                                 && GoThroughWall(ObjectManager.Player.Position.ToVector2(), YasuoHelper.PosAfterE(i).ToVector2()))
                                 .OrderBy(i => YasuoHelper.PosAfterE(i).Distance(Game.CursorPos))
-                                .Any(i => E.CastOnUnit(i)))
+                                .Any(i => E1.CastOnUnit(i)))
                         {
                             return;
                         }

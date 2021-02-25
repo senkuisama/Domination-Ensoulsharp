@@ -154,7 +154,7 @@ namespace DominationAIO.Champions.Aphelios
             var helper = new Menu("Get Helper", "Get Helper");
             helper.AddTargetSelectorMenu();
             SPredictionMash.ConfigMenu.Initialize(helper, "Get Help pls");
-            new SebbyLibPorted.Orbwalking.Orbwalker(helper);
+            //new SebbyLibPorted.Orbwalking.Orbwalker(helper);
             menu.Add(helper);
             menu.Add(getgun);
             menu.Add(secsec);
@@ -2846,9 +2846,9 @@ namespace DominationAIO.Champions.Aphelios
                 float.MaxValue, 10f, 9.67f, 9.33f, 9f, 8.67f, 8.33f, 8f
             };
 
-            return array[PlayerLevel()] 
-                + array[PlayerLevel()] * Player.PercentCooldownMod 
-                - Game.Ping / 1000;
+            return array[PlayerLevel()]
+                + array[PlayerLevel()] * Player.PercentCooldownMod;
+                //- Game.Ping / 1000;
         }
         private static float GetQ2CD()
         {
@@ -2860,9 +2860,9 @@ namespace DominationAIO.Champions.Aphelios
                 float.MaxValue, 10f, 9.67f, 9.33f, 9f, 8.67f, 8.33f, 8f
             };
 
-            return array[PlayerLevel()] 
-                + array[PlayerLevel()] * Player.PercentCooldownMod 
-                - Game.Ping / 1000;
+            return array[PlayerLevel()]
+                + array[PlayerLevel()] * Player.PercentCooldownMod;
+                //- Game.Ping / 1000;
         }
         private static float GetQ3CD()
         {
@@ -2874,9 +2874,9 @@ namespace DominationAIO.Champions.Aphelios
                 float.MaxValue, 12f, 11.67f, 11.33f, 11f, 10.67f, 10.33f, 10f
             };
 
-            return array[PlayerLevel()] 
-                + array[PlayerLevel()] * Player.PercentCooldownMod 
-                - Game.Ping / 1000;
+            return array[PlayerLevel()]
+                + array[PlayerLevel()] * Player.PercentCooldownMod;
+                //- Game.Ping / 1000;
         }
         private static float GetQ4CD()
         {
@@ -2888,9 +2888,9 @@ namespace DominationAIO.Champions.Aphelios
                 float.MaxValue, 9f, 8.5f, 8f, 7.5f, 7f, 6.5f, 6f
             };
 
-            return array[PlayerLevel()] 
-                + array[PlayerLevel()] * Player.PercentCooldownMod 
-                - Game.Ping / 1000;
+            return array[PlayerLevel()]
+                + array[PlayerLevel()] * Player.PercentCooldownMod;
+                //- Game.Ping / 1000;
         }
         private static float GetQ5CD()
         {
@@ -2902,9 +2902,9 @@ namespace DominationAIO.Champions.Aphelios
                 float.MaxValue, 9f, 8.5f, 8f, 7.5f, 7f, 6.5f, 6f
             };
 
-            return array[PlayerLevel()] 
-                + array[PlayerLevel()] * Player.PercentCooldownMod 
-                - Game.Ping / 1000;
+            return array[PlayerLevel()]
+                + array[PlayerLevel()] * Player.PercentCooldownMod;
+                //- Game.Ping / 1000;
         }
     }
 }

@@ -381,7 +381,8 @@ namespace FSpred.Prediction
 			}
 			if (ft)
 			{
-				input.Delay += Game.Ping / 2000f + 0.06f;
+				input.Delay += //Game.Ping / 2000f + 
+					0.06f;
 				if (input.Aoe)
 				{
 					return AoePrediction.GetPrediction(input);

@@ -196,7 +196,7 @@ namespace DominationAIO.NewPlugins
                                         {
                                             if (!UnderTower(poswillcast))
                                             {
-                                                if (R.IsReady())
+                                                if (R.IsReady() && VayneMenu.RCombo.UseR.Enabled && (Orbwalker.ActiveMode < OrbwalkerMode.Harass || VayneMenu.RCombo.AutoEnable.Enabled))
                                                 {
                                                     if (R.Cast())
                                                         if (Q.Cast(poswillcast))
@@ -320,7 +320,7 @@ namespace DominationAIO.NewPlugins
 
             if(R.IsReady() && VayneMenu.RCombo.UseR.Enabled)
             {
-                if (!VayneMenu.RCombo.AutoEnable.Enabled || Orbwalker.ActiveMode == OrbwalkerMode.Combo)
+                if (VayneMenu.RCombo.AutoEnable.Enabled || Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                 {
                     if (!FunnySlayerCommon.OnAction.OnAA)
                     {
@@ -369,7 +369,7 @@ namespace DominationAIO.NewPlugins
                                                 {
                                                     if (!UnderTower(poswillcast))
                                                     {
-                                                        if (R.IsReady())
+                                                        if (R.IsReady() && VayneMenu.RCombo.UseR.Enabled && (Orbwalker.ActiveMode < OrbwalkerMode.Harass || VayneMenu.RCombo.AutoEnable.Enabled))
                                                         {
                                                             if (R.Cast())
                                                                 if (Q.Cast(poswillcast))
@@ -467,22 +467,11 @@ namespace DominationAIO.NewPlugins
                                     var poswillcast = ObjectManager.Player.Position.Extend(i, 300);
                                     if (!UnderTower(poswillcast))
                                     {
-                                        if (R.IsReady())
+                                        if (R.IsReady() && VayneMenu.RCombo.UseR.Enabled && (Orbwalker.ActiveMode < OrbwalkerMode.Harass || VayneMenu.RCombo.AutoEnable.Enabled))
                                         {
                                             if (R.Cast())
-                                                if (Q.Cast(poswillcast))
                                                     return;
-                                        }
-                                        else
-                                        {
-                                            if (Q.Cast(poswillcast))
-                                                return;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (Q.Cast(Game.CursorPos))
-                                            return;
+                                        }                                        
                                     }
                                 }
                             }
@@ -497,7 +486,7 @@ namespace DominationAIO.NewPlugins
                                 var poswillcast = ObjectManager.Player.Position.Extend(i, 300);
                                 if (!UnderTower(poswillcast))
                                 {
-                                    if (R.IsReady())
+                                    if (R.IsReady() && VayneMenu.RCombo.UseR.Enabled && (Orbwalker.ActiveMode < OrbwalkerMode.Harass || VayneMenu.RCombo.AutoEnable.Enabled))
                                     {
                                         if (R.Cast())
                                             if (Q.Cast(poswillcast))
@@ -534,7 +523,7 @@ namespace DominationAIO.NewPlugins
                                 var poswillcast = ObjectManager.Player.Position.Extend(i, 300);
                                 if (!UnderTower(poswillcast))
                                 {
-                                    if (R.IsReady())
+                                    if (R.IsReady() && VayneMenu.RCombo.UseR.Enabled && (Orbwalker.ActiveMode < OrbwalkerMode.Harass || VayneMenu.RCombo.AutoEnable.Enabled))
                                     {
                                         if (R.Cast())
                                             if (Q.Cast(poswillcast))
@@ -574,7 +563,9 @@ namespace DominationAIO.NewPlugins
                 {
                     if (VayneMenu.ECombo.FastE.Enabled)
                     {
-                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(580) && !i.IsDead).OrderBy(k => k.MaxHealth).ThenBy(k => k.Health);
+                        var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(580) && !i.IsDead)
+                            .OrderBy(k => k.MaxHealth)
+                            .ThenBy(k => k.Health);
 
                         if (targets != null)
                         {

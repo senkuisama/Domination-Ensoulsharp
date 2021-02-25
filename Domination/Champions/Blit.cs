@@ -36,7 +36,7 @@ namespace DominationAIO.Champions
             var HelperMenu = new Menu("Helper", "Helper");
             FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(HelperMenu);
             SPredictionMash.ConfigMenu.Initialize(HelperMenu, "Get Prediction");
-            new SebbyLibPorted.Orbwalking.Orbwalker(HelperMenu);
+            //new SebbyLibPorted.Orbwalking.Orbwalker(HelperMenu);
 
             BlitMenu.Add(HelperMenu);
             BlitMenu.Add(QComboHarass);

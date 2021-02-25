@@ -126,7 +126,7 @@ namespace FSpred.Prediction
 			{
 				num = input.Delay;
 			}
-			int time = (int)(num * 1000f) - Game.Ping;
+			int time = (int)(num * 1000f); //- Game.Ping;
 			return LaneClearHealthPrediction(minion, time, 0) <= 0f;
 		}
 		public static float LaneClearHealthPrediction(AIBaseClient unit, int time, int delay = 70)

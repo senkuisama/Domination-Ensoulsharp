@@ -84,25 +84,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp">
-      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.SDK">
-      <HintPath>E:\New download\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
-      <HintPath>E:\New download\EnsoulSharp\Reference\log4net.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>E:\New download\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>E:\New download\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -154,6 +154,19 @@
     <Compile Include="Evade\SpellData.cs" />
     <Compile Include="Evade\SpellDatabase.cs" />
     <Compile Include="Evade\Utils.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\AoePrediction.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\Collision.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\CollisionableObjects.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\HitChance.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\Prediction.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\PredictionInput.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\PredictionOutput.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\SkillshotType.cs" />
+    <Compile Include="FunnySlayerCommon\FSPrediction\StoredPath.cs" />
+    <Compile Include="FunnySlayerCommon\FSspell.cs" />
+    <Compile Include="FunnySlayerCommon\FSTargetSelector.cs" />
+    <Compile Include="FunnySlayerCommon\MenuClass.cs" />
+    <Compile Include="FunnySlayerCommon\OnAction.cs" />
     <Compile Include="Helper\CastManager.cs" />
     <Compile Include="Common\Champion.cs" />
     <Compile Include="Helper\DrawingManager.cs" />
@@ -168,6 +181,7 @@
     <Compile Include="Champions\Troll Chat xD\Program.cs" />
     <Compile Include="Champions\skinhack.cs" />
     <Compile Include="Common\YasuoSpellDatabase.cs" />
+    <Compile Include="NewPlugins\BaseUlt\MyBS.cs" />
     <Compile Include="NewPlugins\Irelia\Helper.cs" />
     <Compile Include="NewPlugins\Irelia\EventsIrelia.cs" />
     <Compile Include="NewPlugins\Irelia\Irelia.cs" />
@@ -175,7 +189,11 @@
     <Compile Include="NewPlugins\Irelia\LogicQ.cs" />
     <Compile Include="NewPlugins\Irelia\LogicR.cs" />
     <Compile Include="NewPlugins\Irelia\MenuIrelia.cs" />
+    <Compile Include="NewPlugins\Jinx\MyJinx.cs" />
+    <Compile Include="NewPlugins\Katarina\MyKatarina.cs" />
+    <Compile Include="NewPlugins\Sylas\MySylas.cs" />
     <Compile Include="NewPlugins\Vayne\MyVayne.cs" />
+    <Compile Include="NewPlugins\VelKoz\MyVelKoz.cs" />
     <Compile Include="NewPlugins\Viego\MyViego.cs" />
     <Compile Include="NewPlugins\Xerath\MyXerath.cs" />
     <Compile Include="NewPlugins\Yasuo\MyYS.cs" />
@@ -190,19 +208,6 @@
     </Compile>
     <Compile Include="SebbyLibPorted\Cache.cs" />
     <Compile Include="SebbyLibPorted\Events.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\AoePrediction.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\Collision.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\CollisionableObjects.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\HitChance.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\Prediction.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\PredictionInput.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\PredictionOutput.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\SkillshotType.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSPrediction\StoredPath.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSspell.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\FSTargetSelector.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\MenuClass.cs" />
-    <Compile Include="SebbyLibPorted\FunnySlayerCommon\OnAction.cs" />
     <Compile Include="SebbyLibPorted\Geometry.cs" />
     <Compile Include="SebbyLibPorted\HealthPrediction.cs" />
     <Compile Include="SebbyLibPorted\MEC.cs" />
@@ -273,6 +278,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Champions\Troll Chat xD\obj\" />
+    <Folder Include="NewPlugins\Draven\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -75,7 +75,7 @@ namespace DominationAIO.Champions
             ESamira.Add(ESettings.ECombo);
             ESamira.Add(ESettings.EQ);
             ESamira.Add(ESettings.EW);
-            ESamira.Add(ESettings.EMinions).Permashow(true, "Allow E Minions", SharpDX.Color.Red);
+            ESamira.Add(ESettings.EMinions).Permashow();
             ESamira.Add(ESettings.Eonly);
             ESamira.Add(ESettings.Eheath);
             ESamira.Add(ESettings.ER);
@@ -93,7 +93,7 @@ namespace DominationAIO.Champions
             KeysSamira.Add(KeysSettings.QMixed).Permashow();
             KeysSamira.Add(KeysSettings.QClear).Permashow();
             KeysSamira.Add(KeysSettings.AllowTurret).Permashow();
-            KeysSamira.Add(KeysSettings.TurboFast).Permashow(true, "Fast Combo", SharpDX.Color.Yellow);
+            KeysSamira.Add(KeysSettings.TurboFast).Permashow();
 
             menu.Add(QSamira);
             menu.Add(WSamira);
@@ -158,7 +158,7 @@ namespace DominationAIO.Champions
             var Helper = new Menu("Helper", "Helper");
             SPredictionMash.ConfigMenu.Initialize(Helper, "Helper");
             FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(Helper);
-            new SebbyLibPorted.Orbwalking.Orbwalker(Helper);
+            //new SebbyLibPorted.Orbwalking.Orbwalker(Helper);
             SamiraMenu.Add(Helper);
 
             SamiraMenu.AddSamiraMenu();
@@ -167,10 +167,16 @@ namespace DominationAIO.Champions
             Game.OnUpdate += Check;
             Game.OnUpdate += LogicCombo;
             //Orbwalker.OnAction += Orbwalker_OnAction;
+            Orbwalker.OnAfterAttack += Orbwalker_OnAfterAttack;
             AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
             Game.OnUpdate += Game_OnUpdate;
             Game.OnUpdate += JungleClear;
             Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private static void Orbwalker_OnAfterAttack(object sender, AfterAttackEventArgs e)
+        {
+            LastCasted = 0;
         }
 
         private static void JungleClear(EventArgs args)
@@ -200,8 +206,8 @@ namespace DominationAIO.Champions
             {
                 if (SamiraSetMenu.Misc.DrawQAARange.Enabled)
                 {
-                    Render.Circle.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
-                    Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
+                    Drawing.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.Red);
+                    Drawing.DrawCircle(Player.Position, 900, System.Drawing.Color.Yellow);
                 }
             }
         }
@@ -747,7 +753,7 @@ namespace DominationAIO.Champions
             if (Player.IsDead)
                 return;
 
-            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.AfterAA)
+            if (FunnySlayerCommon.OnAction.AfterAA)
                 LastCasted = 0;
 
             if (Player.HasBuff("SamiraR"))

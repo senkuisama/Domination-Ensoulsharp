@@ -85,7 +85,7 @@ namespace DominationAIO.Champions
 
             EzSpredictionmenu = new Menu("EzSpredictionmenu", "(Sprediction)");
             SebbyLibMenuAttack = new Menu("OrbWalking@@", "OrbWalking @@");
-            new SebbyLibPorted.Orbwalking.Orbwalker(SebbyLibMenuAttack);
+            //new SebbyLibPorted.Orbwalking.Orbwalker(SebbyLibMenuAttack);
             EzSpredictionmenu.Add(SebbyLibMenuAttack);
             SPredictionMash.Prediction.Initialize(EzSpredictionmenu);
 
@@ -228,7 +228,7 @@ namespace DominationAIO.Champions
         {
             if (Player.IsDead) return;
 
-            BU();
+            //BU();
             if(Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
                 EzCombo();
@@ -562,12 +562,12 @@ namespace DominationAIO.Champions
         {
             if (!Player.IsDead && DrawEzSettings.DrawQ.Enabled)
             {
-                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
-                Render.Circle.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
-                if(FSTargetSelector.GetFSTarget(Q.Range) != null)
+                Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
+                //Render.Circle.DrawCircle(Player.Position, Player.GetRealAutoAttackRange(), System.Drawing.Color.White);
+                /*if(FSTargetSelector.GetFSTarget(Q.Range) != null)
                 {
                     Render.Circle.DrawCircle(FSpred.Prediction.Prediction.GetPrediction(Q, FSTargetSelector.GetFSTarget(2000)).CastPosition, 20, System.Drawing.Color.White);
-                }
+                }*/
             }
         }
 

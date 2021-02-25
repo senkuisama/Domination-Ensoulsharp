@@ -573,7 +573,9 @@ namespace DaoHungAIO.Champions
                 return;
             }
                 foreach (var target in
-                    DetectedTargets.Where(i => i != null && i.Obj != null && i.Obj.SData != null && Fiora.W.IsInRange(i.Obj, 150 + Game.Ping * i.Obj.SData.MissileSpeed / 1000)).OrderBy(i => i.Obj.Position.Distance(Player.Position)))
+                    DetectedTargets.Where(i => i != null && i.Obj != null && i.Obj.SData != null && Fiora.W.IsInRange(i.Obj, 150 + 0
+                    //Game.Ping * i.Obj.SData.MissileSpeed / 1000)
+                    )).OrderBy(i => i.Obj.Position.Distance(Player.Position)))
                 {
                     var tar = TargetSelector.GetTarget(Fiora.W.Range);
                     if (tar.IsValidTarget(Fiora.W.Range))
@@ -1218,7 +1220,9 @@ namespace DaoHungAIO.Champions
                     var buff = jax.GetBuff("JaxCounterStrike");
                     if (buff != null)
                     {
-                        if ((buff.EndTime - Game.Time) * 1000 <= 650 + Game.Ping && Player.Position.ToVector2().Distance(jax.Position.ToVector2())
+                        if ((buff.EndTime - Game.Time) * 1000 <= 650 
+                            //+ Game.Ping 
+                            && Player.Position.ToVector2().Distance(jax.Position.ToVector2())
                             <= Player.BoundingRadius + jax.BoundingRadius + jax.AttackRange + 100)
                         {
                             SolveInstantBlock();
@@ -1359,7 +1363,9 @@ namespace DaoHungAIO.Champions
                 if (buff != null)
                 {
                     //Game.Print(buff.EndTime - Game.Time);
-                    if ((buff.EndTime - Game.Time) * 1000 <= 650 + Game.Ping && Player.Position.ToVector2().Distance(jax.Position.ToVector2())
+                    if ((buff.EndTime - Game.Time) * 1000 <= 650 
+                        //+ Game.Ping
+                        && Player.Position.ToVector2().Distance(jax.Position.ToVector2())
                         <= Player.BoundingRadius + jax.BoundingRadius + jax.AttackRange + 100)
                     {
                         SolveInstantBlock();
@@ -1394,7 +1400,9 @@ namespace DaoHungAIO.Champions
                 var obj = ObjectManager.Get<GameObject>().Where(x => x.Name == "GrandLineSeeker").FirstOrDefault();
                 if (obj == null)
                     return;
-                if (obj.Position.ToVector2().Distance(Player.Position.ToVector2()) <= 300 + 700 * Game.Ping / 1000)
+                if (obj.Position.ToVector2().Distance(Player.Position.ToVector2()) <= 300 + 70 
+                    //* Game.Ping / 1000
+                    )
                 {
                     SolveInstantBlock();
                     return;
@@ -1424,7 +1432,9 @@ namespace DaoHungAIO.Champions
                     {
                         if (Player.Position.ToVector2().Distance(ramus.Position.ToVector2())
                             <= Player.BoundingRadius + ramus.AttackRange + ramus.BoundingRadius
-                            + ramus.MoveSpeed * (0.5f + Game.Ping / 1000))
+                            + ramus.MoveSpeed * (0.5f + 0
+                            //Game.Ping / 1000
+                            ))
                         {
                             if (waypoints.Any(x => x.Distance(Player.Position.ToVector2())
                                 <= Player.BoundingRadius + ramus.AttackRange + ramus.BoundingRadius + 70))
@@ -1452,7 +1462,7 @@ namespace DaoHungAIO.Champions
                 .GetValue<MenuBool>("Fizz" + SpellSlot.R).Enabled)
             {
                 if (FizzFishChum != null && FizzFishChum.IsValid
-                    && Variables.GameTimeTickCount - FizzFishChumStartTick >= 1500 - 250 - Game.Ping
+                    && Variables.GameTimeTickCount - FizzFishChumStartTick >= 1500 - 250 //- Game.Ping
                     && Player.Position.ToVector2().Distance(FizzFishChum.Position.ToVector2()) <= 250 + Player.BoundingRadius)
                 {
                     SolveInstantBlock();
@@ -1467,7 +1477,7 @@ namespace DaoHungAIO.Champions
                 .GetValue<MenuBool>("Nocturne" + SpellSlot.R).Enabled)
             {
                 var buff = Player.GetBuff("nocturneparanoiadash");
-                if (buff != null && Player.Position.ToVector2().Distance(nocturne.Position.ToVector2()) <= 300 + 1200 * Game.Ping / 1000)
+                if (buff != null && Player.Position.ToVector2().Distance(nocturne.Position.ToVector2()) <= 300 + 120 )//* Game.Ping / 1000)
                 {
                     SolveInstantBlock();
                     return;
@@ -1513,7 +1523,9 @@ namespace DaoHungAIO.Champions
             {
                 if (spellData.CharacterName == "Neeko" && spellData.Slot == SpellSlot.R && caster.HasBuff("neekor2"))
                 {
-                    SolveDelayBlock((int)(.9f * 1000 - 250 - Game.Ping));
+                    SolveDelayBlock((int)(.9f * 1000 - 250 
+                        //- Game.Ping
+                        ));
                     return;
                 }
             }
@@ -1533,7 +1545,8 @@ namespace DaoHungAIO.Champions
                 endTime = endTime - 0.9f;
             }
             //Game.Print("detected:" + (buff.EndTime - Game.Time) * 1000);
-            if ((buff.EndTime - Game.Time) * 1000 <= 250 + Game.Ping)
+            if ((buff.EndTime - Game.Time) * 1000 <= 250 //+ Game.Ping
+                )
             {
                 //Game.Print("Find target");
                 var tar = TargetSelector.GetTarget(Fiora.W.Range);

@@ -7,6 +7,8 @@ using DominationAIO.Champions;
 using System.Threading.Tasks;
 using EnsoulSharp.SDK.MenuUI;
 using FunnySlayerCommon;
+using DominationAIO.NewPlugins;
+using System.Collections.Generic;
 
 namespace DominationAIO
 {
@@ -66,8 +68,15 @@ namespace DominationAIO
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;
+                    case "Velkoz":
+                        NewPlugins.MyVelKoz.VelkozLoad();
+
+                        break;
                     case "Viego":
                         NewPlugins.MyViego.ViegoLoad();
+                        break;
+                    case "Jinx":
+                        MyJinx.LoadJinx();
                         break;
                     case "Fiora":
                         new DaoHungAIO.Champions.Fiora();
@@ -82,7 +91,7 @@ namespace DominationAIO
 
                         break;
                     case "Katarina":
-                        //Katarina.Load();
+                        NewPlugins.Katarina.MyKatarina.LoadKata();
                         Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                         break;
@@ -188,7 +197,18 @@ namespace DominationAIO
                         Console.WriteLine("DominationAIO Does Not Support " + ObjectManager.Player.CharacterName);
                         break;                   
                 }
-                skinhack.OnLoad(); 
+                skinhack.OnLoad();
+
+                var listbaseultsupported = new List<string>()
+                {
+                    "Draven",
+                    "Ezreal",
+                    "Ashe",
+                    "Jinx"
+                };
+
+                if(listbaseultsupported.Contains(ObjectManager.Player.CharacterName))
+                    MyBaseUlt.LoadBaseUlt();
             }
             catch (Exception ex)
             {

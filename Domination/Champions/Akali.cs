@@ -33,7 +33,7 @@ namespace DominationAIO.Champions
         {
             public static MenuBool Wcombo = new MenuBool("Wcombo", "W Combo");
             public static MenuSliderButton TargetCount = new MenuSliderButton("TargetCount", "Count Enemy Heroes In Range > 1", 600, 400, 800);
-            public static MenuSliderButton Wmana = new MenuSliderButton("Wmana", "Energy < [0 = off]", 100, 0, 200);
+            public static MenuSliderButton Wmana = new MenuSliderButton("Wmana", "Energy < [0 = off]", 100, 0, 300);
         }
 
         public class ESettings
@@ -155,6 +155,9 @@ namespace DominationAIO.Champions
             Orbwalker.OnAfterAttack += Orbwalker_OnAfterAttack;
             Orbwalker.OnBeforeAttack += Orbwalker_OnBeforeAttack;
             Orbwalker.OnAttack += Orbwalker_OnAttack;
+
+            if (ObjectManager.Player.PercentCooldownMod < -0.7)
+                isURF = true;
         }
 
         private static void Orbwalker_OnAttack(object sender, AttackingEventArgs e)
@@ -185,18 +188,18 @@ namespace DominationAIO.Champions
         {
             if (Player.HavePassive())
             {
-                Drawing.DrawCircle(Player.Position, Player.GetCurrentAutoAttackRange(), System.Drawing.Color.White);
+                Render.Circle.DrawCircle(Player.Position, Player.GetCurrentAutoAttackRange(), System.Drawing.Color.White);
             }
             else
             {
-                Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Blue);
             }
 
             var target = Orbwalker.GetTarget() as AIHeroClient;
 
             if(target != null && target is AIHeroClient && target.IsVisibleOnScreen)
             {
-                Drawing.DrawCircle(target.Position, 70, System.Drawing.Color.Gold);
+                Render.Circle.DrawCircle(target.Position, 70, System.Drawing.Color.Gold);
             }
         }
 
@@ -220,7 +223,7 @@ namespace DominationAIO.Champions
         public static bool isW = false;
         public static bool isE = false;
         public static bool isR = false;
-
+        public static bool isURF = false;
         private static void AIHeroClient_OnAggro(AIBaseClient sender, AIBaseClientAggroEventArgs args)
         {
             if (sender.CharacterName == "TestCubeRender" && isQ)
@@ -341,7 +344,23 @@ namespace DominationAIO.Champions
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (Player.IsDead) return;
+            if(CanUseQNow == false && AkaliMenu.QSettings.QPassive.Enabled || isURF)
+            {
+                CanUseQNow = true;
+            }
+
+            if (Player.IsDead) {
+                Orbwalker.AttackEnabled = true;
+                Orbwalker.MoveEnabled = true;
+
+                Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
+
+                return;
+            }
+            if (Variables.TickCount - TimeCast > AkaliMenu.QSettings.MoveQ.Value)
+            {
+                Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
+            }
 
             CheckAll();
 
@@ -446,7 +465,7 @@ namespace DominationAIO.Champions
                     }
                     else
                     {
-                        if(Player.Mana - Q.Mana <= Q.Mana - 1.5f * 5)
+                        if(Player.Mana - Q.Mana <= Q.Mana - 1.5f * 5 || isURF)
                         {
                             if (target.IsValidTarget(Q.Range))
                             {
@@ -476,7 +495,7 @@ namespace DominationAIO.Champions
                 else
                 {
                     var Epred = E.GetPrediction(target, false, -1, new CollisionObjects[] { CollisionObjects.Minions, CollisionObjects.YasuoWall});
-                    if (W.IsReady() && E.IsReady() && Player.Mana - E.Mana <= Q.Mana)
+                    if (W.IsReady() && E.IsReady() && (Player.Mana - E.Mana <= Q.Mana) || isURF)
                     {
                         if(E.Name == "AkaliE")
                         {
@@ -491,9 +510,9 @@ namespace DominationAIO.Champions
                         
                         if(E.Name == "AkaliEb" && GameObjects.EnemyHeroes.Any(i => i.HasBuff("AkaliEMis")))
                         {
-                            E.Cast(Epred.CastPosition);
+                            E.Cast();
 
-                            if (target.IsValidTarget(300))
+                            if (target.IsValidTarget(400))
                             {
                                 W.Cast(target.Position);
                             }
@@ -503,7 +522,7 @@ namespace DominationAIO.Champions
                     {
                         if (W.IsReady())
                         {
-                            if(Player.Mana <= AkaliMenu.WSettings.Wmana.Value && target.Position.DistanceToPlayer() < 500)
+                            if(Player.Mana <= AkaliMenu.WSettings.Wmana.Value || isURF && target.Position.DistanceToPlayer() < 500)
                             {
                                 W.Cast(Player.Position);
                             }

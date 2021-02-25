@@ -48,14 +48,14 @@ namespace DominationAIO.NewPlugins
         public static void ViegoLoad()
         {
             Q = new Spell(SpellSlot.Q, 600f);
-            W = new Spell(SpellSlot.W, 300f);
+            W = new Spell(SpellSlot.W, 400f);
             E = new Spell(SpellSlot.E, 700f);
             Esoul = new Spell(SpellSlot.Unknown, 400f);
             R = new Spell(SpellSlot.R, 500f);
 
             Q.SetSkillshot(0.35f, 60f, float.MaxValue, false, SpellType.Line);
             W.SetSkillshot(0.25f, 60f, 800f, true, SpellType.Line);
-            W.SetCharged("ViegoW", "ViegoW", 300, 800, 1.25f);
+            W.SetCharged("ViegoW", "ViegoW", 400, 900, 1f);
             R.SetSkillshot(1f, 100f, float.MaxValue, false, SpellType.Circle);
             Game.Print("Viego Loaded. Not support Passive champions");
 
@@ -81,7 +81,7 @@ namespace DominationAIO.NewPlugins
             Rmenu.Add(ViegoMenu.RCombo.TargetHeath);
             Rmenu.Add(ViegoMenu.RCombo.TakeSoul).Permashow();
             var GetEnemy = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly);
-            foreach (var enemy in GetEnemy)
+            foreach (var enemy in GetEnemy.Where(i => i.CharacterName != ObjectManager.Player.CharacterName))
             {
                 Rmenu.Add(new MenuSeparator(enemy.NetworkId + enemy.CharacterName + enemy.Name, enemy.CharacterName + " Not support !"));
             }
@@ -265,13 +265,6 @@ namespace DominationAIO.NewPlugins
             if (target == null)
                 return;
 
-            var orbtarget = Orbwalker.GetTarget();
-            if (orbtarget != null)
-            {
-                if ((orbtarget as AIBaseClient).HasBuff(Mark))
-                    ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, orbtarget);
-            }
-
             if (Q.Name == "ViegoQ")
             {               
                 if (W.IsCharging)
@@ -302,7 +295,7 @@ namespace DominationAIO.NewPlugins
                         {
                             if (!R.IsReady() && R.Level >= 1 && ViegoMenu.RCombo.TakeSoul.Enabled)
                             {
-                                var gettargetsoul = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.Health <= 0 && i.DistanceToPlayer() <= ObjectManager.Player.GetCurrentAutoAttackRange() + 150).OrderByDescending(i => i.MaxHealth).FirstOrDefault();
+                                var gettargetsoul = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && i.Health <= 0 && i.DistanceToPlayer() <= ObjectManager.Player.GetCurrentAutoAttackRange() + 200).OrderByDescending(i => i.MaxHealth).FirstOrDefault();
                                 if (gettargetsoul != null)
                                 {
                                     ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, gettargetsoul);
@@ -411,7 +404,7 @@ namespace DominationAIO.NewPlugins
                         {
                             if (!R.IsReady() && R.Level >= 1 && CanUseR(target) && ViegoMenu.RCombo.TakeSoul.Enabled)
                             {
-                                var gettargetsoul = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly  && i.DistanceToPlayer() <= ObjectManager.Player.GetCurrentAutoAttackRange()&& i.Health <= 0).OrderByDescending(i => i.MaxHealth);
+                                var gettargetsoul = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly  && i.DistanceToPlayer() <= ObjectManager.Player.GetCurrentAutoAttackRange() + 200 && i.Health <= 0).OrderByDescending(i => i.MaxHealth);
                                 if (gettargetsoul != null)
                                 {
                                     foreach (var targetsoul in gettargetsoul)

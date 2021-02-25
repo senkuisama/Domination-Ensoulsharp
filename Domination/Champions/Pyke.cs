@@ -102,8 +102,8 @@ namespace Pyke_Ryū
                 {
                     if(target != null && !target.IsDead && target.Health <= R.GetDamage(target) && R.IsReadyToCastOn(target))
                     {
-                        var pred = R.GetPrediction(target);
-                        if (pred.Hitchance >= EnsoulSharp.SDK.HitChance.High && R.IsReadyToCastOn(target))
+                        var pred = FSpred.Prediction.Prediction.GetPrediction(R, target);
+                        if (pred.Hitchance >= FSpred.Prediction.HitChance.High && R.IsReadyToCastOn(target))
                         {
                             if (R.Cast(pred.CastPosition))
                                 return;

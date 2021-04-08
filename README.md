@@ -1,6 +1,9 @@
 # Domination-Ensoulsharp
 SDK v2 updated:
-Zoe, Sion R, Samira, Pyke, Kaisa, Ezreal, Brand, Blit, Aphelios, Akali, Ganplank, Irelia, Vayne, Viego, Xerath, Yasuo, Fiora.
-https://www.microsoft.com/en-us/download/confirmation.aspx?id=48159
+Sylas, Leesin, Aphelios, Velkoz, Viego, Jinx, Fiora, 
+Xerath, Yasuo, Katarina, Blitzcrank, Zoe, Samira, Yi, 
+Brand, Irelia, Vayne, Kaisa, Gangplank, Sion, Akali, 
+Ezreal, Pyke, Kayle
+Simple tracker, Skin changer, Base ult
 
 Discord link: https://discord.gg/Sme64hw5Fe

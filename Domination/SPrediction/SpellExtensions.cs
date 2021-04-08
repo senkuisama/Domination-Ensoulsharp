@@ -262,8 +262,8 @@ namespace SPredictionMash
             if (t == null)
                 return Vector3.Zero;
 
-            if (!s.IsSkillShot)
-                return Vector3.Zero;
+            /*if (!s.IsSkillShot)
+                return Vector3.Zero;*/
 
             #region if common prediction selected
             if (ConfigMenu.SelectedPrediction.Index == 1)

@@ -105,10 +105,8 @@
       <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Akali.cs" />
@@ -191,6 +189,7 @@
     <Compile Include="NewPlugins\Irelia\MenuIrelia.cs" />
     <Compile Include="NewPlugins\Jinx\MyJinx.cs" />
     <Compile Include="NewPlugins\Katarina\MyKatarina.cs" />
+    <Compile Include="NewPlugins\Leesin\MyLee.cs" />
     <Compile Include="NewPlugins\Sylas\MySylas.cs" />
     <Compile Include="NewPlugins\Vayne\MyVayne.cs" />
     <Compile Include="NewPlugins\VelKoz\MyVelKoz.cs" />
@@ -253,6 +252,18 @@
     <Compile Include="SPrediction\Utility.cs" />
     <Compile Include="SPrediction\VectorPrediction.cs" />
     <Compile Include="TyDaoHungAIO\Fiora.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplank.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankAuto.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankBarrels.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankCombo.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankConfig.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankHarass.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankHelper.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankJungleClear.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankLaneClear.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankVariables.cs" />
+    <Compile Include="TyDaoHungAIO\Gangplank\BadaoMainVariables.cs" />
+    <Compile Include="TyDaoHungAIO\Kayle.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

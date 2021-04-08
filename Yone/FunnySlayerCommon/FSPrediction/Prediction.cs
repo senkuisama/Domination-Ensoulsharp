@@ -10,7 +10,7 @@ namespace FSpred.Prediction
 {
 	public static class Prediction
 	{
-		public static PredictionOutput GetPrediction(this Spell spell, AIBaseClient unit, bool aoe = false, float overrideRange = -1f, CollisionableObjects[] collisionable = null, int minTargets = 2)
+		public static PredictionOutput GetPrediction(this Spell spell, AIBaseClient unit, bool aoe = false, float overrideRange = -1f, CollisionableObjects[] collisionable = null)
 		{
 			bool flag = false;
 			if ((SkillshotType)spell.Type == SkillshotType.SkillshotCircle)
@@ -33,11 +33,37 @@ namespace FSpred.Prediction
 				CollisionObjects = (collisionable ?? new CollisionableObjects[1])
 			});
 		}
+
+		public static PredictionOutput GetPrediction(this Spell spell, AIBaseClient unit, out PredictionInput getinput, bool aoe = false, float overrideRange = -1f, CollisionableObjects[] collisionable = null)
+		{
+			bool flag = false;
+			if ((SkillshotType)spell.Type == SkillshotType.SkillshotCircle)
+			{
+				flag = true;
+			}
+
+			getinput = new PredictionInput
+			{
+				CollisionYasuoWall = false,
+				Unit = unit,
+				Delay = spell.Delay,
+				Radius = spell.Width,
+				Speed = spell.Speed,
+				From = spell.From,
+				Range = ((overrideRange > 150f) ? overrideRange : spell.Range),
+				Collision = spell.Collision,
+				Type = (SkillshotType)spell.Type,
+				RangeCheckFrom = spell.RangeCheckFrom,
+				Aoe = (flag || aoe),
+				CollisionObjects = (collisionable ?? new CollisionableObjects[1])
+			};
+			return Prediction.GetPrediction(getinput);
+		}
 		public static bool CastSpell(this Spell spell, AIHeroClient target, HitChance hit = HitChance.High)
 		{
 			try
 			{
-				var prediction = spell.GetPrediction(target, false, -1f, null, 2);
+				var prediction = FSpred.Prediction.Prediction.GetPrediction(spell, target, false, -1f, null);
 				if (prediction.AoeTargetsHitCount > 1 && prediction.Hitchance >= HitChance.High)
 				{
 					return spell.Cast(prediction.CastPosition);
@@ -381,7 +407,8 @@ namespace FSpred.Prediction
 			}
 			if (ft)
 			{
-				input.Delay += Game.Ping / 2000f + 0.06f;
+				input.Delay += Game.Ping / 2000f + 
+					0.06f;
 				if (input.Aoe)
 				{
 					return AoePrediction.GetPrediction(input);
@@ -394,6 +421,8 @@ namespace FSpred.Prediction
 					Input = input
 				};
 			}
+
+
 			if (input.Unit.IsDashing())
 			{
 				predictionOutput = Prediction.GetDashingPrediction(input);
@@ -410,10 +439,14 @@ namespace FSpred.Prediction
 					input.Range = input.Range * item.Value / 100f;
 				}
 			}
+
+
 			if (predictionOutput == null)
 			{
 				predictionOutput = Prediction.GetStandardPrediction(input);
 			}
+
+
 			if (Math.Abs(input.Range - 3.40282347E+38f) > 1.401298E-45f)
 			{
 				if (predictionOutput.Hitchance >= HitChance.High && (double)input.RangeCheckFrom.DistanceSquared(input.Unit.Position) > Math.Pow((double)(input.Range + input.RealRadius * 3f / 4f), 2.0))

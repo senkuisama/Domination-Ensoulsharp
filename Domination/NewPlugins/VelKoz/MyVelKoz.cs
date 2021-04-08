@@ -23,6 +23,7 @@ namespace DominationAIO.NewPlugins
             public static class Qmenu
             {
                 public static MenuBool useQ = new MenuBool("useQ", "Use Q");
+                public static MenuBool Qexc = new MenuBool("useQExc", "Enchance Q");
                 public static MenuBool Qcombo = new MenuBool("Qcombo", "Use on Combo");
                 public static MenuBool Qharass = new MenuBool("Qharass", "Use on Harass");
                 public static MenuBool autoQ2 = new MenuBool("autoQ2", "Auto Q splits");
@@ -63,8 +64,10 @@ namespace DominationAIO.NewPlugins
 
             newspell.SetSkillshot(2f, 80f, 1400f, false, SpellType.Line);
             Qsplits.SetSkillshot(delay, 50f, 2000f, true, SpellType.Line);
+
             var qs = new Menu("qs", "Q Settings");
             qs.Add(VKMenuSettings.Qmenu.useQ);
+            qs.Add(VKMenuSettings.Qmenu.Qexc);
             qs.Add(VKMenuSettings.Qmenu.Qcombo);
             qs.Add(VKMenuSettings.Qmenu.Qharass);
             qs.Add(VKMenuSettings.Qmenu.autoQ2);
@@ -157,12 +160,6 @@ namespace DominationAIO.NewPlugins
                  else
                     Orbwalker.AttackEnabled = true;
 
-            if (Qm == null || Q.Name == "VelkozQ")
-            {
-                Q.SetSkillshot(0.25f, 80f, 1400f, true, SpellType.Line);
-                Qsplits.SetSkillshot(0.25f, 50f, 2000f, true, SpellType.Line);
-            }
-
             if (ObjectManager.Player.Spellbook.IsChanneling && VKMenuSettings.Rmenu.Aim.Enabled)
             {
                 var endPoint = new Vector2();
@@ -231,14 +228,15 @@ namespace DominationAIO.NewPlugins
                                      h.NetworkId == potentialTargets.OrderBy(t => t.Health / Q.GetDamage(t)).ToList()[0].NetworkId) &&
                                     (h.Position.ToVector2().Distance(qMissilePosition, Qm.EndPosition.ToVector2(), true) > Q.Width + h.BoundingRadius)))
                 {
-                    var prediction = SebbyLibPorted.Prediction.Prediction.GetPrediction(Qsplits, enemy);
+                    var prediction = FSpred.Prediction.Prediction.GetPrediction(Qsplits, enemy);
                     var d1 = prediction.UnitPosition.ToVector2().Distance(qMissilePosition, lineSegment1End, true);
                     var d2 = prediction.UnitPosition.ToVector2().Distance(qMissilePosition, lineSegment2End, true);
-                    if (prediction.Hitchance >= SebbyLibPorted.Prediction.HitChance.High &&
-                        (d1 < Qsplits.Width + enemy.BoundingRadius || d2 < Qsplits.Width + enemy.BoundingRadius))
+                    if (prediction.Hitchance >= HitChance.High &&
+                        (d1 < Qsplits.Width || d2 < Qsplits.Width))
                     {
-                        if (Q.Cast())
-                            return;
+                        if(Orbwalker.ActiveMode <= OrbwalkerMode.Harass || VKMenuSettings.Qmenu.autoQ2.Enabled)
+                            if (Q.Cast())
+                                return;
                     }
                 }
             }
@@ -303,12 +301,24 @@ namespace DominationAIO.NewPlugins
                             else
                             {
                                 //code by Kortatu
-                                for (int i = -1; i <= 1; i += 2)
+                                var c = 0;
+                                var d = 28;
+                                if (VKMenuSettings.Qmenu.Qexc.Enabled)
                                 {
+                                    c = -1;
+                                    d = 30;
+                                }
+                                for (int i = 1; i >= c; i-= 2)
+                                {
+                                    if(i == 0)
+                                    {
+                                        i = -1;
+                                    }
+
                                     var newpred = FSpred.Prediction.Prediction.GetPrediction(newspell, gettarget);
                                     if (newpred.Hitchance >= HitChance.High && newpred.CastPosition.DistanceToPlayer() <= MaxRange)
                                     {
-                                        var alpha = 28 * (float)Math.PI / 180;
+                                        float alpha = d * (float)Math.PI / 180;
                                         var cp = ObjectManager.Player.Position.ToVector2() +
                                                  (newpred.CastPosition.ToVector2() - ObjectManager.Player.Position.ToVector2()).Rotated
                                                      (i * alpha);

@@ -11,6 +11,50 @@ namespace DominationAIO.NewPlugins
 {
     public static class LogicQ
     {
+        public static void FocusCanQTarget(AIBaseClient target)
+        {
+            if (target == null || !Irelia.Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
+                return;
+
+            if (FunnySlayerCommon.OnAction.OnAA)
+                return;
+
+            if (Helper.CanQ(target) && target.Position.ReturnUnderTower())
+            {
+                var obj = ObjectManager.Get<AIBaseClient>().Where(i => 
+                i.NetworkId != target.NetworkId 
+                && !i.IsDead && Helper.CanQ(i) 
+                && i.DistanceToPlayer() <= Irelia.Q.Range 
+                && i.Position.Distance(target.Position) <= Irelia.Q.Range 
+                && i.Position.ReturnUnderTower() && i.MaxHealth > 5 
+                && !i.IsAlly).OrderByDescending(i => i.Health)
+                .ThenByDescending(i => i.Distance(target))
+                .ThenBy(i => i.Type == GameObjectType.AIMinionClient);
+
+
+                if (obj != null && obj.FirstOrDefault() != null)
+                {
+                    var getobj = obj.FirstOrDefault();
+                    if (Irelia.Q.CanCast(getobj))
+                    {
+                        if (Irelia.Q.Cast(getobj) == CastStates.SuccessfullyCasted)
+                            return;
+                        else
+                            return;
+                    }
+                }
+            }
+
+            QGapCloserPos(target.Position);
+            return;
+        }
+
+
+        public static bool ReturnUnderTower(this Vector3 pos)
+        {
+            return (!Helper.UnderTower(pos) || MenuSettings.KeysSettings.TurretKey.Active);
+        }
+
         public static void NewHighLogic(AIBaseClient target)
         {
             if (target == null || !Irelia.Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
@@ -38,6 +82,8 @@ namespace DominationAIO.NewPlugins
                     if (!Helper.UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     {
                         if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                            return;
+                        else
                             return;
                     }
                     else
@@ -116,7 +162,9 @@ namespace DominationAIO.NewPlugins
                                 if (objs.ToArray().FirstOrDefault().DistanceToPlayer() < 600f)
                                     if (Irelia.Q.Cast(objs.ToArray().FirstOrDefault()) == CastStates.SuccessfullyCasted)
                                         return;
-                            }
+                                        else
+                                            return;
+                                }
                             else
                             {
                                 NewHighLogic(target);

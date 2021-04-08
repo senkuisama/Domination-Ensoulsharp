@@ -36,6 +36,7 @@ namespace DominationAIO.NewPlugins.Katarina
             {
                 public static MenuBool useELogic = new MenuBool("Use E logic", "Use E Logic", false);
                 public static MenuBool EKS = new MenuBool("EKs", "Use E KS");
+                public static MenuKeyBind SaveE = new MenuKeyBind("SaveEIfNoDaggers", "Save E", Keys.H, KeyBindType.Toggle, true);
             }
 
             public static class Rmenu
@@ -86,6 +87,7 @@ namespace DominationAIO.NewPlugins.Katarina
 
             Estg.Add(KataMenu.Emenu.useELogic);
             Estg.Add(KataMenu.Emenu.EKS);
+            Estg.Add(KataMenu.Emenu.SaveE).Permashow();
 
             Rstg.Add(KataMenu.Rmenu.RCombo).Permashow();
             Rstg.Add(KataMenu.Rmenu.UseRifKS);
@@ -103,7 +105,7 @@ namespace DominationAIO.NewPlugins.Katarina
 
             W = new Spell(SpellSlot.W, 340f);
 
-            E = new Spell(SpellSlot.E, 725f);
+            E = new Spell(SpellSlot.E, 775f);
 
             R = new Spell(SpellSlot.R, 550f);
             
@@ -121,11 +123,57 @@ namespace DominationAIO.NewPlugins.Katarina
             var Etarget = E.GetTarget();
             if(Etarget != null)
             {
-                if (Etarget.Health <= E.GetDamage(Etarget))
+                if (_daggersList != null && booldagger)
                 {
-                    if (E.CastOnUnit(Etarget))
-                        return;
+                    foreach (var dagger in _daggersList.Where(i => Variables.GameTimeTickCount - i.CreateTime >= 1000 && i.Position.DistanceToPlayer() <= 775).OrderBy(i => i.CreateTime))
+                    {
+                        if (dagger == null)
+                            return;
+                        var targets = TargetSelector.GetTargets(775 + 340);
+                        if (targets == null)
+                            return;
+
+                        if (targets.Any(i => i.Distance(dagger.Position) <= 390 && i.Health <= PassiveDmg(i)))
+                        {
+                            var target = targets.Where(i => i.Distance(dagger.Position) <= 390 && i.Health <= PassiveDmg(i))
+                                .FirstOrDefault();
+
+                            if (target == null)
+                                return;
+
+                            var poscast = dagger.Dagger.Position.Extend(target.Position, 100);
+                            if (ObjectManager.Player.Distance(poscast) <= 775)
+                            {
+                                if (E.Cast(poscast))
+                                    return;
+                            }
+                            else
+                            {
+                                if (Etarget.Health <= E.GetDamage(Etarget))
+                                {
+                                    if (E.Cast(Etarget.Position))
+                                        return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (Etarget.Health <= E.GetDamage(Etarget))
+                            {
+                                if (E.Cast(Etarget.Position))
+                                    return;
+                            }
+                        }
+                    }
                 }
+                else
+                {
+                    if (Etarget.Health <= E.GetDamage(Etarget))
+                    {
+                        if (E.Cast(Etarget.Position))
+                            return;
+                    }
+                }                
             }
             var Qtarget = Q.GetTarget();
             if(Qtarget != null)
@@ -139,9 +187,8 @@ namespace DominationAIO.NewPlugins.Katarina
         }
 
         private static void Game_OnUpdate(EventArgs args)
-        {
-
-            if(Orbwalker.ActiveMode >= OrbwalkerMode.LaneClear || _daggersList == null || !_daggersList.Any(i => i.Dagger.Position.DistanceToPlayer() < 300) || _daggersList.Any(i => i.Dagger.Position.DistanceToPlayer() < 100))
+        {           
+            if (Orbwalker.ActiveMode >= OrbwalkerMode.LaneClear || !KataMenu.Wmenu.WOrb.Enabled || !booldagger || !_daggersList.Any(i => i.Dagger.Position.DistanceToPlayer() < 300) || _daggersList.Where(i => i.Dagger.Position.DistanceToPlayer() < 100).FirstOrDefault() == null)
             {
                 Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
             }
@@ -153,16 +200,16 @@ namespace DominationAIO.NewPlugins.Katarina
             else
             {
                 Orbwalker.MoveEnabled = true;
-                if (_daggersList != null)
+                if (_daggersList != null && booldagger)
                 {
-                    if (_daggersList.Any(i => i.Dagger.Position.DistanceToPlayer() < 300 && Variables.GameTimeTickCount - i.CreateTime >= 750))
+                    if (_daggersList.Where(i => i.Dagger.Position.DistanceToPlayer() < 300 && Variables.GameTimeTickCount - i.CreateTime >= 750).FirstOrDefault() != null)
                     {
                         Orbwalker.AttackEnabled = false;
 
                         var target = TargetSelector.GetTargets(340);
                         if(target != null)
                         {
-                            if (Orbwalker.ActiveMode == OrbwalkerMode.Combo && KataMenu.Wmenu.WOrb.Enabled && !_daggersList.Any(i => i.Dagger.Position.DistanceToPlayer() < 100))
+                            if (Orbwalker.ActiveMode == OrbwalkerMode.Combo && KataMenu.Wmenu.WOrb.Enabled && _daggersList.Where(i => i.Dagger.Position.DistanceToPlayer() < 100).FirstOrDefault() != null)
                             {
                                 Orbwalker.SetOrbwalkerPosition(_daggersList.Where(i => i.Dagger.Position.DistanceToPlayer() < 300).OrderBy(i => i.CreateTime).ThenBy(i => i.Dagger.Position.DistanceToPlayer()).FirstOrDefault().Position.Extend(target.FirstOrDefault().Position, 100));
                             }
@@ -184,7 +231,7 @@ namespace DominationAIO.NewPlugins.Katarina
                 else
                 {
                     Orbwalker.AttackEnabled = true;
-                    //Orbwalker.SetOrbwalkerPosition(Game.CursorPos);
+                    Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
                 }             
             }            
         }
@@ -225,8 +272,8 @@ namespace DominationAIO.NewPlugins.Katarina
 
             if(!E.IsReady())
                 return;
-            
-            if (_daggersList != null)
+           
+            if (_daggersList != null && booldagger)
             {
                 foreach (var dagger in _daggersList.Where(i => Variables.GameTimeTickCount - i.CreateTime >= 1000 && i.Position.DistanceToPlayer() <= 775).OrderBy(i => i.CreateTime))
                 {
@@ -261,7 +308,7 @@ namespace DominationAIO.NewPlugins.Katarina
             {
                 if (sender.Name == "HiddenMinion")
                 {
-                    _daggersList.RemoveAll(i => i.uid == sender.NetworkId);
+                    _daggersList.RemoveAll(i => i.Dagger.NetworkId == sender.NetworkId);
                 }
             }
         }
@@ -283,8 +330,16 @@ namespace DominationAIO.NewPlugins.Katarina
             {
                 foreach (var dagger in _daggersList)
                 {
-                    Drawing.DrawCircle(dagger.Dagger.Position, 340, Color.Gold);
-                    Drawing.DrawCircle(dagger.Dagger.Position, 150, Color.Chartreuse);
+                    if(dagger.Dagger.Team == GameObjectTeam.Chaos)
+                    {
+                        Drawing.DrawCircle(dagger.Dagger.Position, 340, Color.DarkRed);
+                        Render.Circle.DrawCircle(dagger.Dagger.Position, 150, Color.DarkRed);
+                    }
+                    else
+                    {
+                        Drawing.DrawCircle(dagger.Dagger.Position, 340, Color.Gold);
+                        Render.Circle.DrawCircle(dagger.Dagger.Position, 150, Color.Chartreuse);
+                    }                   
                     var pos = Drawing.WorldToScreen(dagger.Position);
                     if (Variables.GameTimeTickCount - dagger.CreateTime >= 1000)
                     {
@@ -292,22 +347,49 @@ namespace DominationAIO.NewPlugins.Katarina
                     }
                 }
             }
-        }
 
+            if (Game.Ping >= 100)
+            {
+                var pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
+                Drawing.DrawText(pos.X - 20, pos.Y + 20, Color.Yellow, "High Ping " + Game.Ping.To<string>());
+            }
+        }
+        public static bool booldagger = false;
         private static void GameOnOnUpdate(EventArgs args)
         {
+
+            {
+                var target = E.GetTarget();
+                if (target != null && E.IsReady() && KataMenu.Emenu.EKS.Enabled)
+                {
+                    if (target.Health <= E.GetDamage(target) + (!ObjectManager.Player.HasBuff("katarinarsound") ? ObjectManager.Player.GetAutoAttackDamage(target) : 0))
+                    {
+                        if (E.Cast(target.Position))
+                            return;
+                    }
+                }
+            }
+
+
             if (_daggersList != null)
             {
-                _daggersList.RemoveAll(i =>
-                    !ObjectManager.Get<AIMinionClient>().Where(x => x.Name == "HiddenMinion" && x.IsValid && !x.IsDead)
-                        .Any(x => x.NetworkId == i.Dagger.NetworkId));
-                _daggersList.RemoveAll(i => Variables.GameTimeTickCount - i.CreateTime >= 5000);
+                if (_daggersList.FirstOrDefault() == null || !_daggersList.Any(i => i.Dagger.Team == ObjectManager.Player.Team))
+                    booldagger = false;
+                else
+                    booldagger = true;
             }
-            
+
+
+            if (_daggersList != null)
+            {              
+                _daggersList.RemoveAll(i => Variables.GameTimeTickCount - i.CreateTime >= 5000 || i.Dagger.IsDead || !i.Dagger.IsValid || i.Dagger.Position == Vector3.Zero);
+            }
+
+            /**/
+
             if (ObjectManager.Player.IsDead) 
                 return;
-           
-           
+
             if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
                 switch (KataMenu.combomode.Index)
@@ -320,14 +402,25 @@ namespace DominationAIO.NewPlugins.Katarina
                         break;
                     case 2:
                         QE();
+                        //LogicQWER();
                         EQ();
                         break;
+                }
+            }
+
+            if(Orbwalker.ActiveMode == OrbwalkerMode.Harass)
+            {
+                var Qtarget = Q.GetTarget();
+                if (Q.IsReady() && Qtarget != null)
+                {
+                    if (Q.Cast(Qtarget) == CastStates.SuccessfullyCasted)
+                        return;
                 }
             }
         }
 
         private static void EQ()
-        {
+        {        
             var Wtarget = W.GetTarget();
             if(Wtarget != null && W.IsReady())
             {
@@ -337,60 +430,17 @@ namespace DominationAIO.NewPlugins.Katarina
                         return;
                 }
             }
-
-            var Etarget = E.GetTarget();
-            var Qtarget = Q.GetTarget();
-
-            if (E.IsReady() && Etarget != null)
+           
+            if (!KataMenu.Emenu.SaveE.Active || booldagger || (W.IsReady() && W.Level >= 1) || (Q.IsReady() && Q.Level >= 1))
             {
-                if (KataMenu.Emenu.useELogic.Enabled)
+                if (E.IsReady())
                 {
-                    if(Q.IsReady() || W.IsReady() || _daggersList != null)
-                    {
-                        if(!Helper.UnderTower(Etarget.Position.Extend(ObjectManager.Player.Position, -50)) || KataMenu.turret.Active)
-                        
-                        {
-                            if (_daggersList.Any() && _daggersList != null)
-                            {
-                                var dagger = _daggersList.FirstOrDefault().Dagger;
-
-                                var circel = new Geometry.Circle(Etarget.Position.ToVector2(), 50);
-                                var first = circel.Points.OrderBy(i => i.Distance(dagger.Position)).FirstOrDefault();
-
-                                if (!Helper.UnderTower(first.ToVector3()) || KataMenu.turret.Active)
-                                {
-                                    if (E.Cast(first))
-                                        return;
-                                }
-                                else
-                                {
-                                    if (Etarget.Position.Extend(ObjectManager.Player.Position, -50).DistanceToPlayer() <= 725)
-                                        if (E.Cast(Etarget.Position.Extend(ObjectManager.Player.Position, -50)))
-                                            return;
-                                }
-                            }
-                            else
-                            {
-                                if (Etarget.Position.Extend(ObjectManager.Player.Position, -50).DistanceToPlayer() <= 725)
-                                    if (E.Cast(Etarget.Position.Extend(ObjectManager.Player.Position, -50)))
-                                        return;
-                            }                           
-                        }                        
-                    }
-                }
-                else
-                {
-                    if (Q.IsReady() || W.IsReady() || _daggersList != null)
-                    {
-                        if (!Helper.UnderTower(Etarget.Position.Extend(ObjectManager.Player.Position, -50)) || KataMenu.turret.Active)
-                        {
-                            if (E.Cast(Etarget.Position))
-                                return;
-                        }
-                    }
+                    if (DoComboE())
+                        return;
                 }
             }
 
+            var Qtarget = Q.GetTarget();
             if (Q.IsReady() && Qtarget != null)
             {
                 if (Q.Cast(Qtarget) == CastStates.SuccessfullyCasted)
@@ -439,7 +489,7 @@ namespace DominationAIO.NewPlugins.Katarina
                         return;
                 }
             }
-            var Etarget = E.GetTarget();
+
             var Qtarget = Q.GetTarget();
 
             if (Q.IsReady() && Qtarget != null)
@@ -448,53 +498,13 @@ namespace DominationAIO.NewPlugins.Katarina
                     return;
             }
 
-            if (E.IsReady() && Etarget != null && !Q.IsReady())
+            if (E.IsReady() && !Q.IsReady())
             {
-                if (KataMenu.Emenu.useELogic.Enabled)
+                if (!KataMenu.Emenu.SaveE.Active || booldagger || (W.IsReady() && W.Level >= 1))
                 {
-                    if (W.IsReady() || _daggersList != null)
-                    {
-                        if (!Helper.UnderTower(Etarget.Position.Extend(ObjectManager.Player.Position, -50)) || KataMenu.turret.Active)
-                        {
-                            if (_daggersList.Any() && _daggersList != null)
-                            {
-                                var dagger = _daggersList.FirstOrDefault().Dagger;
-
-                                var circel = new Geometry.Circle(Etarget.Position.ToVector2(), 50);
-                                var first = circel.Points.OrderBy(i => i.Distance(dagger.Position)).FirstOrDefault();
-
-                                if (!Helper.UnderTower(first.ToVector3()) || KataMenu.turret.Active)
-                                {
-                                    if (E.Cast(first))
-                                        return;
-                                }
-                                else
-                                {
-                                    if (Etarget.Position.Extend(ObjectManager.Player.Position, -50).DistanceToPlayer() <= 725)
-                                        if (E.Cast(Etarget.Position.Extend(ObjectManager.Player.Position, -50)))
-                                            return;
-                                }
-                            }
-                            else
-                            {
-                                if (Etarget.Position.Extend(ObjectManager.Player.Position, -50).DistanceToPlayer() <= 725)
-                                    if (E.Cast(Etarget.Position.Extend(ObjectManager.Player.Position, -50)))
-                                        return;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (W.IsReady() || _daggersList != null)
-                    {
-                        if (!Helper.UnderTower(Etarget.Position.Extend(ObjectManager.Player.Position, -50)) || KataMenu.turret.Active)
-                        {
-                            if (E.Cast(Etarget.Position))
-                                return;
-                        }
-                    }
-                }
+                    if (DoComboE())
+                        return;
+                }                
             }
             
             if (R.IsReady())
@@ -530,50 +540,63 @@ namespace DominationAIO.NewPlugins.Katarina
         }
         private static void LogicQWER()
         {
-            var target = TargetSelector.GetTarget(775 + 340, DamageType.Magical);
-            if (target == null)
-                return;
 
-            if(_daggersList != null)
+        }
+
+        public static bool DoComboE()
+        {
+            var target = E.GetTarget(400);
+            if(target != null)
             {
-                foreach(var dagger in _daggersList)
+                var posontarget = target.Position;
+
+                if (target.Position.DistanceToPlayer()
+                        < FSpred.Prediction.Prediction.PredictUnitPosition(target, 200)
+                        .DistanceToPlayer())
                 {
-                    if(dagger.Position.Distance(target.Position) < 390)
+                    posontarget = target.Position.Extend(ObjectManager.Player.Position, -50);
+                }
+                else
+                {
+                    posontarget = target.Position.Extend(ObjectManager.Player.Position, -50);
+                }
+
+                if (_daggersList != null && booldagger)
+                {
+                    var bestdagger = _daggersList.Where(i => i.Dagger.Position.Distance(target) <= 390).OrderBy(i => i.CreateTime).OrderBy(i => i.Dagger.Position.DistanceToPlayer()).ThenByDescending(i => i.Dagger.Position.Distance(target)).FirstOrDefault();
+                    if(bestdagger != null)
                     {
-                        if(!E.IsReady() && !Helper.UnderTower(dagger.Dagger.Position))
-                        {
-                            if(dagger.Dagger.Position.DistanceToPlayer() >= 725)
-                            {
-                                if(W.IsReady() && KataMenu.Wmenu.Wgapcloser.Enabled)
-                                {
-                                    if (W.Cast())
-                                        return;
-                                }
-                                else
-                                {
-                                    EQ();
-                                }
-                            }
-                            else
-                            {
-                                EQ();
-                            }
-                        }
-                        else
-                        {
-                            EQ();
-                        }
+                        goto CastEOnDagger;
                     }
-                    else
+                    
+                    if(posontarget != Vector3.Zero)
                     {
-                        EQ();
+                        if (posontarget.DistanceToPlayer() <= 725 && (!Helper.UnderTower(posontarget) || KataMenu.turret.Active))
+                            return (E.Cast(posontarget));
+                    }
+                    
+
+                    CastEOnDagger:
+                    if(bestdagger != null)
+                    {
+                        var castpos = bestdagger.Dagger.Position.Extend(target.Position, 150);
+                        if(castpos.DistanceToPlayer() <= E.Range && (!Helper.UnderTower(castpos) || KataMenu.turret.Active))
+                        {
+                            return (E.Cast(castpos));
+                        }
                     }
                 }
+                else
+                {
+                    if(posontarget != Vector3.Zero)
+                    {
+                        if (posontarget.DistanceToPlayer() <= 725 && (!Helper.UnderTower(posontarget) || KataMenu.turret.Active))
+                            return E.Cast(posontarget);
+                    }                    
+                }
             }
-            else
-            {
-                EQ();
-            }
+
+            return false;
         }
     }
 

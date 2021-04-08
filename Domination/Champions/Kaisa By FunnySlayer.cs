@@ -107,6 +107,7 @@ namespace DominationAIO.Champions
 
                 misc.Add(menuclass.misc.usee);
                 misc.Add(menuclass.misc.usew);
+                AntiGapcloser.Attach(misc);
 
                 kaisa.Add(combo);
                 kaisa.Add(harass);
@@ -160,17 +161,11 @@ namespace DominationAIO.Champions
         {
             if (Player.IsDead) return;
 
-            if (ObjectManager.Player.HasBuff("KaisaE"))
-                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(2000) && !i.IsDead).OrderBy(i => i.Health);
 
-            var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(3000) && !i.IsDead);
-
-
-            if (targets != null)
+            if (targets != null && targets.FirstOrDefault() != null)
                 foreach (var target in targets)
                 {
-                    if (target == null) return;
-
                     if (menuclass.misc.usew.Enabled && W.IsReady(0))
                     {
                         if (target.Health <= W.GetDamage(target))
@@ -179,6 +174,7 @@ namespace DominationAIO.Champions
                             if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                             {
                                 if (!oa && !ba) W.Cast(wpred.CastPosition);
+                                return;
                             }
                         }
                     }
@@ -192,10 +188,12 @@ namespace DominationAIO.Champions
                                 if (menuclass.combo.useqafteraa.Enabled)
                                 {
                                     if (aa) Q.Cast(target);
+                                    return;
                                 }
                                 else
                                 {
                                     Q.Cast(target);
+                                    return;
                                 }
                             }
                         }
@@ -208,6 +206,7 @@ namespace DominationAIO.Champions
                                 if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                                 {
                                     if (!oa && !ba && target.DistanceToPlayer() > ObjectManager.Player.GetRealAutoAttackRange()) W.Cast(wpred.CastPosition);
+                                    return;
                                 }
                             }
                             else
@@ -215,6 +214,7 @@ namespace DominationAIO.Champions
                                 if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                                 {
                                     if (!oa && !ba) W.Cast(wpred.CastPosition);
+                                    return;
                                 }
                             }
                         }
@@ -225,6 +225,7 @@ namespace DominationAIO.Champions
                                 if (target.DistanceToPlayer() < menuclass.combo.edistance.Value)
                                 {
                                     E.Cast(Game.CursorPos);
+                                    return;
                                 }
                             }
                         }
@@ -234,6 +235,7 @@ namespace DominationAIO.Champions
                             {
                                 if (Rpos() != Vector3.Zero)
                                     R.Cast(Rpos());
+                                return;
                             }
                             if (ObjectManager.Player.HealthPercent > 0 && ObjectManager.Player.HealthPercent < menuclass.combo.rp.Value)
                             {
@@ -244,6 +246,7 @@ namespace DominationAIO.Champions
                                         DelayAction.Add(200, () => { R.Cast(Rpos()); });
                                     }
                                     else R.Cast(Rpos());
+                                return;
                             }
                             if (GetHeroesInRange(1000) >= 3 && ObjectManager.Player.HealthPercent > 0 && ObjectManager.Player.HealthPercent < 75)
                             {
@@ -254,6 +257,7 @@ namespace DominationAIO.Champions
                                         DelayAction.Add(200, () => { R.Cast(Rpos()); });
                                     }
                                     else R.Cast(Rpos());
+                                return;
                             }
                         }
                     }
@@ -262,6 +266,7 @@ namespace DominationAIO.Champions
                         if (menuclass.harass.useq.Enabled && Q.IsReady(0) && target.IsValidTarget(Q.Range))
                         {
                             Q.Cast(target);
+                            return;
                         }
                         if (menuclass.harass.usew.Enabled && W.IsReady(0) && target.IsValidTarget(W.Range))
                         {
@@ -269,6 +274,7 @@ namespace DominationAIO.Champions
                             if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
                             {
                                 if (!oa && !ba) W.Cast(wpred.CastPosition);
+                                return;
                             }
                         }
                     }
@@ -288,9 +294,11 @@ namespace DominationAIO.Champions
                     if (wpred.CastPosition != Vector3.Zero && wpred.Hitchance >= EnsoulSharp.SDK.HitChance.High)
                     {
                         if (menuclass.farm.usew.Enabled) W.Cast(wpred.CastPosition);
+                        return;
                     }
                 }
             }
+            return;
         }
 
         private static int GetMinionInRange(float range)
@@ -333,78 +341,10 @@ namespace DominationAIO.Champions
             foreach (var target in targets)
             {
                 Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 200, 20);
-                foreach (var circle in newcircle.Points)
-                {
-                    if (circle.CountEnemyHeroesInRange(400) <= 2)
-                    {
-                        pos = circle.ToVector3();
-                    }
-                }
+                var circle = newcircle.Points.Where(c => c.CountEnemyHeroesInRange(400) <= 2).FirstOrDefault();
+                return circle.ToVector3();
             }
-            /*foreach(var target in targets)
-            {
-                    if (target == null || !target.HasBuff("kaisapassivemarker")) pos = Vector3.Zero;
-                Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 75, 20);
-                    foreach(var checkpoint in newcircle.Points.Where(i => i.DistanceToPlayer() < R.Range))
-                    {
-                        if (GetHeroesInRange(R.Range) == 0) pos = Vector3.Zero;
-                        if(GetHeroesInRange(1000) >= 2)
-                        {
-                            if (checkpoint.CountEnemyHeroesInRange(400) < GetHeroesInRange(1000))
-                            {
-                                pos = checkpoint.ToVector3();
-                            }
-                        }
-                        else
-                        {
-                            if(checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
-                            {
-                                pos = checkpoint.ToVector3();
-                            }
-                        }                           
-                    }
-            }*/
-            /*foreach (var target in targets.Where(i => i.IsValidTarget(R.Range)))
-            {
-                if (target == null) pos = Vector3.Zero;
-                Geometry.Circle newcircle = new Geometry.Circle(target.Position, ObjectManager.Player.GetRealAutoAttackRange() - 150, 20);
-                foreach (var checkpoint in newcircle.Points.Where(i => i.DistanceToPlayer() < R.Range))
-                {
-                    if (checkpoint.CountEnemyHeroesInRange(400) == 1)
-                    {
-                        if (GetHeroesInRange(700) >= 2)
-                        {
-                            if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400))
-                            {
-                                if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
-                                {
-                                    pos = checkpoint.ToVector3();
-                                }
-                            }
-                        }
-                    }
-                    if (checkpoint.CountEnemyHeroesInRange(400) == 2)
-                    {
-                        if (GetHeroesInRange(700) >= 3)
-                        {
-                            if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400))
-                            {
-                                if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
-                                {
-                                    pos = checkpoint.ToVector3();
-                                }
-                            }
-                        }
-                    }
-                    if (GetHeroesInRange(700) > checkpoint.CountEnemyHeroesInRange(400) + 1)
-                    {
-                        if (checkpoint.Distance(turret) > ObjectManager.Player.GetRealAutoAttackRange())
-                        {
-                            pos = checkpoint.ToVector3();
-                        }
-                    }
-                }
-            }*/
+
             return pos;
         }
     }

@@ -13,19 +13,50 @@ namespace FunnySlayerCommon
     {       
         private static bool baa, oaa, aaa, killminion, premove;
 
-        public static void CheckOnAction()
+        public static void CheckOnAction(bool attackMenu = false, Menu attackto = null)
         {
-            var menu = new Menu("___OnAction_MenuAttack", "_OrbWalker.OnAction");
-            menu.Add(new MenuSeparator("___Orbwalker_OnAfterAttack", "Orbwalker.OnAfterAttack"));
-            menu.Add(new MenuSeparator("___Orbwalker_OnBeforeAttack", "Orbwalker.OnBeforeAttack"));
-            menu.Add(new MenuSeparator("___Orbwalker_OnAttack", "Orbwalker.OnAttack"));
-            menu.Add(new MenuSeparator("___Orbwalker_OnNonKillableMinion", "Orbwalker.OnNonKillableMinion"));
-            menu.Add(new MenuSeparator("___Orbwalker_OnPreMove", "Orbwalker.OnPreMove"));
+            if (attackMenu && attackto != null)
+            {
+                var menu = new Menu("___OnAction_MenuAttack", "_OrbWalker.OnAction", true);
+                menu.Add(new MenuSeparator("___Orbwalker_OnAfterAttack", "Orbwalker.OnAfterAttack"));
+                menu.Add(new MenuSeparator("___Orbwalker_OnBeforeAttack", "Orbwalker.OnBeforeAttack"));
+                menu.Add(new MenuSeparator("___Orbwalker_OnAttack", "Orbwalker.OnAttack"));
+                menu.Add(new MenuSeparator("___Orbwalker_OnNonKillableMinion", "Orbwalker.OnNonKillableMinion"));
+                menu.Add(new MenuSeparator("___Orbwalker_OnPreMove", "Orbwalker.OnPreMove"));
+
+                attackto.Add(menu);
+            }     
+            
             Orbwalker.OnAfterAttack += Orbwalker_OnAfterAttack;
             Orbwalker.OnBeforeAttack += Orbwalker_OnBeforeAttack;
             Orbwalker.OnAttack += Orbwalker_OnAttack;
             Orbwalker.OnNonKillableMinion += Orbwalker_OnNonKillableMinion;
-            Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.OnBeforeMove += Orbwalker_OnBeforeMove;
+            //Game.OnUpdate += Game_OnUpdate;
+        }
+
+        private static void Orbwalker_OnBeforeMove(object sender, BeforeMoveEventArgs e)
+        {
+            if (aaa == true)
+            {
+                aaa = false;
+            }
+            if (baa == true)
+            {
+                baa = false;
+            }
+            if (oaa == true)
+            {
+                oaa = false;
+            }
+            if (killminion == true)
+            {
+                killminion = false;
+            }
+            if (premove == false)
+            {
+                premove = true;
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -55,31 +86,23 @@ namespace FunnySlayerCommon
             }
             else
             {
-                if (ObjectManager.Player.IsMoving)
-                {
-                    if (aaa == true)
-                    {
-                        aaa = false;
-                    }
-                    if (oaa == true)
-                    {
-                        oaa = false;
-                    }
-                    if(baa == true)
-                    {
-                        baa = false;
-                    }
-                }
-
                 if (ObjectManager.Player.IsWindingUp)
                 {
                     if (oaa == false)
                     {
                         oaa = true;
                     }
-                    if (aaa == true)
+                    if (baa == true)
                     {
-                        aaa = false;
+                        baa = false;
+                    }
+                }
+
+                if (ObjectManager.Player.IsMoving)
+                {
+                    if (oaa == true)
+                    {
+                        oaa = false;
                     }
                     if (baa == true)
                     {
@@ -94,6 +117,22 @@ namespace FunnySlayerCommon
             if (killminion == false)
             {
                 killminion = true;
+            }
+            if (aaa == true)
+            {
+                aaa = false;
+            }
+            if (baa == true)
+            {
+                baa = false;
+            }
+            if (oaa == true)
+            {
+                oaa = false;
+            }
+            if (premove == true)
+            {
+                premove = false;
             }
         }
 
@@ -111,6 +150,14 @@ namespace FunnySlayerCommon
             {
                 oaa = true;
             }
+            if (killminion == true)
+            {
+                killminion = false;
+            }
+            if (premove == true)
+            {
+                premove = false;
+            }
         }
 
         private static void Orbwalker_OnBeforeAttack(object sender, BeforeAttackEventArgs e)
@@ -127,6 +174,14 @@ namespace FunnySlayerCommon
             {
                 oaa = false;
             }
+            if (killminion == true)
+            {
+                killminion = false;
+            }
+            if (premove == true)
+            {
+                premove = false;
+            }
         }
 
         private static void Orbwalker_OnAfterAttack(object sender, AfterAttackEventArgs e)
@@ -142,6 +197,14 @@ namespace FunnySlayerCommon
             if (oaa == true)
             {
                 baa = false;
+            }
+            if (killminion == true)
+            {
+                killminion = false;
+            }
+            if (premove == true)
+            {
+                premove = false;
             }
         }
 

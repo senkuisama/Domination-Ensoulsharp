@@ -67,6 +67,7 @@ namespace DominationAIO.NewPlugins.Yasuo
         {
             if (t == null)
                 return false;
+
             return !t.HasBuff("YasuoE");
         }
 
@@ -105,14 +106,30 @@ namespace DominationAIO.NewPlugins.Yasuo
                     break;
             }
 
-            var obj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValid && i.IsValidTarget(475) && CanE(i));
+            var obj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && i.DistanceToPlayer() <= 475 && CanE(i));
 
             if(obj == null)
             {
                 return null;
             }
+            switch (MyYS.YasuoMenu.Ecombo.Yasuo_ERange.ActiveValue)
+            {
+                case 1:
+                    return
 
-            return
+
+                obj.Where(
+                    i => (
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 50
+                         )
+                         ||
+                         (
+                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + MyYS.YasuoMenu.EQCombo.EBonusRange.Value
+                         )
+                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
+                ).OrderByDescending(i => PosAfterE(i).Distance(pos)).ThenBy(i => i.Type == GameObjectType.AIMinionClient).FirstOrDefault();
+                case 2:
+                    return
 
 
                 obj.Where(
@@ -125,69 +142,20 @@ namespace DominationAIO.NewPlugins.Yasuo
                          )
                          && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
                 ).OrderBy(i => PosAfterE(i).Distance(pos)).ThenBy(i => i.Type == GameObjectType.AIMinionClient).FirstOrDefault();
-
-            /*var obj = new List<AIBaseClient>();
-            obj.AddRange(ObjectManager.Get<AIMinionClient>().Where(i => i.IsValidTarget(Et.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
-            obj.AddRange(ObjectManager.Get<AIHeroClient>().Where(i => i.IsValidTarget(Et.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
-            obj.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(Et.Range) && !i.IsDead && !i.IsAlly && CanE(i)));
-            if (CanE(target) && Et.IsReady() && (!(new Spell(SpellSlot.Q)).IsReady() || HaveQ2))
-            {
-                if (MyYS.YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled)
-                {
-                    return
-                obj.Where(
-                    i =>
-                    CanE(i)
-                    && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || ((new Spell(SpellSlot.Q)).IsReady() ? pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 15
-                        : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
-                        || pos.Distance(PosAfterE(i)) <= 410
-                        )
-                    )
-                    .OrderByDescending(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
-                }
-                else
-                {
-                    return
-                obj.Where(
-                    i =>
-                    CanE(i)
-                    && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || ((new Spell(SpellSlot.Q)).IsReady() ? pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 15
-                        : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
-                        || pos.Distance(PosAfterE(i)) <= 410
-                        )
-                    )
-                    .OrderBy(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
-                }
             }
-            else
-            {
-                if (MyYS.YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled)
-                {
-                    return
-                    obj.Where(
-                        i =>
-                        CanE(i)
-                        && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || ((new Spell(SpellSlot.Q)).IsReady() ? pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + 15
-                        : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()))
-                        )
-                        .OrderByDescending(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
-                }
-                else
-                {
-                    return
-                    obj.Where(
-                        i =>
-                        CanE(i)
-                        && (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                        || ((new Spell(SpellSlot.Q)).IsReady() ? pos.Distance(PosAfterE(i)) <= 230
-                        : pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()))
-                        )
-                        .OrderBy(i => pos.Distance(PosAfterE(i))).FirstOrDefault();
-                }
-            }*/
+            return
+
+
+                obj.Where(
+                    i => (
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 50
+                         )
+                         ||
+                         (
+                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + MyYS.YasuoMenu.EQCombo.EBonusRange.Value
+                         )
+                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
+                ).OrderByDescending(i => PosAfterE(i).Distance(pos)).ThenBy(i => i.Type == GameObjectType.AIMinionClient).FirstOrDefault();
         }
     }
 }

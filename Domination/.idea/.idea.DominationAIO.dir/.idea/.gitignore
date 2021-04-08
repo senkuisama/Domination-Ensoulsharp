@@ -1,0 +1,13 @@
+﻿# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/projectSettingsUpdater.xml
+/contentModel.xml
+/modules.xml
+/.idea.DominationAIO.iml
+# Datasource local storage ignored files
+/../../../../../../../../../../:\Users\FunnySlayer\Desktop\Domination\Domination\Domination\.idea\.idea.DominationAIO.dir\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/

@@ -268,7 +268,74 @@ namespace DominationAIO.Champions
             if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA)
                 return;
 
-            var targetss = ObjectManager.Get<AIHeroClient>().Where(i => 
+            {
+                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget() 
+                && i.DistanceToPlayer() <= W.Range && !i.IsDead
+                && FSpred.Prediction.Prediction.GetPrediction(W, i).Hitchance >= FSpred.Prediction.HitChance.High)
+                    .OrderBy(i => i.Health);
+
+                if(WEzSettings.Wcombo.Enabled && W.IsReady() && targets.Count() >= 1)
+                {
+                    var target = targets.FirstOrDefault();
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(W, target);
+                    if(pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                    {
+                        if (WEzSettings.Wonly.Enabled)
+                        {
+                            if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange() - 60)
+                            {
+                                if (Environment.TickCount - LastAfterAA >= (Player.AttackDelay - target.DistanceToPlayer() / W.Speed) * 1000 - W.Delay * 100 || Orbwalker.CanAttack())
+                                {
+                                    W.Cast(pred.CastPosition);
+                                    return;
+                                }
+                            }
+
+                            if (Q.IsReady())
+                            {
+                                var qpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+
+                                if(qpred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                {
+                                    if (W.Cast(pred.CastPosition))
+                                    {
+                                        Q.Cast(qpred.CastPosition);
+                                            return;
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            {
+                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget()
+                && i.DistanceToPlayer() <= Q.Range && !i.IsDead
+                && FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= FSpred.Prediction.HitChance.High)
+                    .OrderBy(i => i.Health);
+
+                if (QEzSettings.Qcombo.Enabled && Q.IsReady() && targets.Count() >= 1)
+                {
+                    var target = targets.FirstOrDefault();
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                    {
+                        Q.Cast(pred.CastPosition);
+                        return;
+                    }
+                }
+            }
+
+            if (EEzSettings.Ecombo.Enabled && E.IsReady())
+                EzECombo();
+
+            /*var targetss = ObjectManager.Get<AIHeroClient>().Where(i => 
             i != null
             && !i.IsDead
             && !i.IsAlly            
@@ -295,9 +362,8 @@ namespace DominationAIO.Champions
             {
                 EzQCombo();
 
-                if (EEzSettings.Ecombo.Enabled && E.IsReady())
-                    EzECombo();
-            }                                 
+                
+            }    */
         }
 
         private static void EzQCombo()
@@ -454,7 +520,7 @@ namespace DominationAIO.Champions
                 {
                     if (EPoint.CountEnemyHeroesInRange(Player.GetRealAutoAttackRange() + 200) <= EEzSettings.TargetCount.Value)
                     {
-                        if (E.Cast(EPoint))
+                        E.Cast(EPoint);
                             return;
                     }
                 }

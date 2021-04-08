@@ -2847,8 +2847,8 @@ namespace DominationAIO.Champions.Aphelios
             };
 
             return array[PlayerLevel()]
-                + array[PlayerLevel()] * Player.PercentCooldownMod;
-                //- Game.Ping / 1000;
+                + array[PlayerLevel()] * Player.PercentCooldownMod
+                - Game.Ping / 1000;
         }
         private static float GetQ2CD()
         {
@@ -2861,8 +2861,8 @@ namespace DominationAIO.Champions.Aphelios
             };
 
             return array[PlayerLevel()]
-                + array[PlayerLevel()] * Player.PercentCooldownMod;
-                //- Game.Ping / 1000;
+                + array[PlayerLevel()] * Player.PercentCooldownMod
+                - Game.Ping / 1000;
         }
         private static float GetQ3CD()
         {
@@ -2875,8 +2875,8 @@ namespace DominationAIO.Champions.Aphelios
             };
 
             return array[PlayerLevel()]
-                + array[PlayerLevel()] * Player.PercentCooldownMod;
-                //- Game.Ping / 1000;
+                + array[PlayerLevel()] * Player.PercentCooldownMod
+                - Game.Ping / 1000;
         }
         private static float GetQ4CD()
         {
@@ -2889,8 +2889,8 @@ namespace DominationAIO.Champions.Aphelios
             };
 
             return array[PlayerLevel()]
-                + array[PlayerLevel()] * Player.PercentCooldownMod;
-                //- Game.Ping / 1000;
+                + array[PlayerLevel()] * Player.PercentCooldownMod
+                - Game.Ping / 1000;
         }
         private static float GetQ5CD()
         {
@@ -2903,8 +2903,8 @@ namespace DominationAIO.Champions.Aphelios
             };
 
             return array[PlayerLevel()]
-                + array[PlayerLevel()] * Player.PercentCooldownMod;
-                //- Game.Ping / 1000;
+                + array[PlayerLevel()] * Player.PercentCooldownMod
+                - Game.Ping / 1000;
         }
     }
 }

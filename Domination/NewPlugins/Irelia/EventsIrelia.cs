@@ -65,7 +65,10 @@ namespace DominationAIO.NewPlugins
                 return;
             }
             else
-            {              
+            {
+                if (MenuSettings.ESettings.Ecombo.Enabled)
+                    LogicE.EPrediction(true);
+
                 if (MenuSettings.QSettings.Qcombo.Enabled)
                 {
                     LogicQ.GapCloserTargetCanKillable();
@@ -73,22 +76,16 @@ namespace DominationAIO.NewPlugins
                     switch (MenuSettings.QSettings.QListComboMode.Index)
                     {
                         case 1:
-                            LogicQ.NewHighLogic(target);
-                            break;
+                            LogicQ.FocusCanQTarget(target);
+                            return;
                         case 2:
-                            LogicQ.NewHighLogic(target);
-                            break;
-                        case 3:
                             LogicQ.NewExtreamLogic(target);
-                            break;
+                            return;
                         case 0:
                             LogicQ.QGapCloserPos(target.Position);
-                            break;
+                            return;
                     }
-                }
-
-                if (MenuSettings.ESettings.Ecombo.Enabled)
-                    LogicE.EPrediction(true);
+                }               
             }
         }
         public static void AIBaseClient_OnBuffLose(AIBaseClient sender, AIBaseClientBuffRemoveEventArgs args)

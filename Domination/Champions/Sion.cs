@@ -12,7 +12,7 @@ namespace DominationAIO.Champions
 {
     internal class Sion
     {
-        public static MenuBool Activated = new MenuBool("Activated", "Activated", true);
+        public static MenuBool Activated = new MenuBool("Activated", "R Sion Activated", true);
         public static void SionLoad()
         {
             Game.OnUpdate += Game_OnUpdate;

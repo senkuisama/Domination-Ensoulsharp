@@ -14,13 +14,18 @@ namespace DominationAIO.NewPlugins
     {
         private static List<BaseChampions> GetChampions = new List<BaseChampions>();
         private static List<AIBaseClient> BaseUltChampions = new List<AIBaseClient>();
+        private static MenuKeyBind key = new MenuKeyBind("Disable BS", "Disable Base Ult", Keys.Space, KeyBindType.Press);
+        private static MenuSlider MaxDmg = new MenuSlider("MaxDmg", "Max Dmg = %", 80, 60, 100);
         public static void LoadBaseUlt()
         {
             var menu = new Menu("BaseUltLoad", "Loaded Base Ult", true);
+            menu.Add(key);
             menu.Add(new MenuSeparator("Draven", "Draven"));
             menu.Add(new MenuSeparator("Ezreal", "Ezreal"));
             menu.Add(new MenuSeparator("Ashe", "Ashe"));
             menu.Add(new MenuSeparator("Jinx", "Jinx"));
+
+            menu.Add(MaxDmg);
             menu.Attach();
             var Base = GameObjects.EnemySpawnPoints.FirstOrDefault();
             if (GameObjects.EnemyHeroes != null)
@@ -43,10 +48,13 @@ namespace DominationAIO.NewPlugins
             {
                 var i = 1;
                 foreach(var target in BaseUltChampions)
-                {                   
+                {
+                    if (i >= 5)
+                        return;
+
                     var name = target.CharacterName;
                     var pos = ObjectManager.Player.HPBarPosition;
-                    Drawing.DrawText(pos.X, pos.Y + 20 * i, System.Drawing.Color.Red, target.CharacterName + " Can Base Ult");
+                    Drawing.DrawText(pos.X, pos.Y + 20 * i, System.Drawing.Color.Red, name + " Can Base Ult");
                     i++;
                 }
             }
@@ -94,6 +102,9 @@ namespace DominationAIO.NewPlugins
                     break;
             }
 
+            if (key.Active)
+                return;
+
             if (ObjectManager.Player.IsDead)
                 return;
             var R = new Spell(SpellSlot.R);
@@ -113,22 +124,29 @@ namespace DominationAIO.NewPlugins
 
                             if(target.Health <= R.GetDamage(target))
                             {
-                                BaseUltChampions.Add(target);
+                                if(!BaseUltChampions.Contains(target))
+                                    BaseUltChampions.Add(target);
                                 if(ObjectManager.Player.Distance(getinfo.PosBaseUlt) > 2000)
                                 {
                                     delay = 500 + delayshort;
                                     if((getinfo.PosBaseUlt.DistanceToPlayer() - 2000) / maxspeed * 1000 + delay >= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
                                     {
-                                        if (R.Cast(getinfo.PosBaseUlt))
-                                            return;
+                                        if ((getinfo.PosBaseUlt.DistanceToPlayer() - 2000) / maxspeed * 1000 + delay <= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start) + 750)
+                                        {
+                                            if (R.Cast(getinfo.PosBaseUlt))
+                                                return;
+                                        }                                        
                                     }
                                 }
                                 else
                                 {
                                     if (getinfo.PosBaseUlt.DistanceToPlayer() / 1500 * 1000 + Delay >= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
                                     {
-                                        if (R.Cast(getinfo.PosBaseUlt))
-                                            return;
+                                        if (getinfo.PosBaseUlt.DistanceToPlayer() / 1500 * 1000 + Delay <= 750 + getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
+                                        {
+                                            if (R.Cast(getinfo.PosBaseUlt))
+                                                return;
+                                        }                                        
                                     }
                                 }
                             }
@@ -137,24 +155,32 @@ namespace DominationAIO.NewPlugins
                         {
                             if (target.Health <= ObjectManager.Player.GetDravenRDmg(target) * 1.5)
                             {
-                                BaseUltChampions.Add(target);
+                                if (!BaseUltChampions.Contains(target))
+                                    BaseUltChampions.Add(target);
                                 if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay >= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
                                 {
-                                    if (R.Cast(getinfo.PosBaseUlt))
-                                        return;
+                                    if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay <= 750 + getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
+                                    {
+                                        if (R.Cast(getinfo.PosBaseUlt))
+                                            return;
+                                    }                                   
                                 }
                             }
 
                         }
                         if(ObjectManager.Player.CharacterName == "Ezreal")
                         {
-                            if (target.Health <= ObjectManager.Player.GetEzrealRDmg(target))
+                            if (target.Health <= ObjectManager.Player.GetEzrealRDmg(target) * MaxDmg.Value / 100)
                             {
-                                BaseUltChampions.Add(target);
+                                if (!BaseUltChampions.Contains(target))
+                                    BaseUltChampions.Add(target);
                                 if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay >= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
                                 {
-                                    if (R.Cast(getinfo.PosBaseUlt))
-                                        return;
+                                    if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay <= 750 + getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
+                                    {
+                                        if (R.Cast(getinfo.PosBaseUlt))
+                                            return;
+                                    }                                    
                                 }
                             }
                         }
@@ -163,18 +189,23 @@ namespace DominationAIO.NewPlugins
                         {
                             if (target.Health <= ObjectManager.Player.GetAsheRDmg(target))
                             {
-                                BaseUltChampions.Add(target);
+                                if (!BaseUltChampions.Contains(target))
+                                    BaseUltChampions.Add(target);
                                 if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay >= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
                                 {
-                                    if (R.Cast(getinfo.PosBaseUlt))
-                                        return;
+                                    if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay <= 750 + getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
+                                    {
+                                        if (R.Cast(getinfo.PosBaseUlt))
+                                            return;
+                                    }                                    
                                 }
                             }
                         }
                     }
                     else
                     {
-                        BaseUltChampions.Remove(target);
+                        if (BaseUltChampions.Contains(target))
+                            BaseUltChampions.Remove(target);
                         continue;
                     }
                 }

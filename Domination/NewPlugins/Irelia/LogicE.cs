@@ -66,8 +66,8 @@ namespace DominationAIO.NewPlugins
                                 var tempE = new Spell(SpellSlot.Unknown, 775);
                                 tempE.SetSkillshot(MenuSettings.ESettings.EDelay.Value / 1000, 1, 2000, false, EnsoulSharp.SDK.SpellType.Line);
                                 {
-                                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempE, target);
-                                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High && pred.CastPosition.IsValid())
+                                    var pred = FSpred.Prediction.Prediction.GetPrediction(tempE, target);
+                                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High && pred.CastPosition.IsValid())
                                     {
                                         int range = 0;
                                         if (ObjectManager.Player.CountEnemyHeroesInRange(775) > 2)
@@ -104,8 +104,8 @@ namespace DominationAIO.NewPlugins
                                 var tempE = new Spell(SpellSlot.Unknown, 775);
                                 tempE.SetSkillshot(0.25f, 1, 2000, false, EnsoulSharp.SDK.SpellType.Line);
                                 {
-                                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempE, target);
-                                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High && pred.CastPosition.IsValid())
+                                    var pred = FSpred.Prediction.Prediction.GetPrediction(tempE, target);
+                                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High && pred.CastPosition.IsValid())
                                     {
                                         int range = 2000;
                                         if (ObjectManager.Player.CountEnemyHeroesInRange(775) > 2)

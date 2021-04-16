@@ -11,6 +11,13 @@ namespace DominationAIO.NewPlugins.Yasuo
 {
     public static class YasuoHelper
     {
+        public static bool CheckDashingTick()
+        {
+            if (!ObjectManager.Player.IsDashing())
+                return false;
+
+            return Variables.GameTimeTickCount - ObjectManager.Player.GetDashInfo().StartTick > Yasuo.MyYS.YasuoMenu.Ecombo.DashingTick.Value;
+        }
         public static Vector3 Eprediction(AIBaseClient aIBaseClient = null)
         {
             if (aIBaseClient == null)
@@ -21,7 +28,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             var E = new Spell(SpellSlot.E, 475);
             E.SetSkillshot(0.3f, 175, 750f + 0.6f * ObjectManager.Player.MoveSpeed, false, SpellType.Line);
 
-            if (ObjectManager.Player.IsDashing())
+            if (CheckDashingTick())
             {
                 Epred = aIBaseClient.Position;
             }
@@ -70,12 +77,18 @@ namespace DominationAIO.NewPlugins.Yasuo
 
             return !t.HasBuff("YasuoE");
         }
-
+        public static bool HaveQ1
+        {
+            get
+            {
+                return !ObjectManager.Player.IsDead && (new Spell(SpellSlot.Q)).Name == "YasuoQ1Wrapper";
+            }
+        }
         public static bool HaveQ2
         {
             get
             {
-                return !ObjectManager.Player.IsDead && ObjectManager.Player.HasBuff("YasuoQ1");
+                return !ObjectManager.Player.IsDead && (new Spell(SpellSlot.Q)).Name == "YasuoQ2Wrapper";
             }
         }
         public static bool HaveQ3
@@ -94,7 +107,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             var Et = new Spell(SpellSlot.E, 475);
             Et.SetSkillshot(0.3f, 175, (float)(750f + 0.6f * ObjectManager.Player.MoveSpeed), false, SpellType.Line);
 
-            var pos = FSpred.Prediction.Prediction.GetPrediction(Et, target).CastPosition;
+            var pos = Eprediction(target);
 
             switch (MyYS.YasuoMenu.Ecombo.Yasuo_EMode.SelectedValue)
             {
@@ -134,7 +147,7 @@ namespace DominationAIO.NewPlugins.Yasuo
 
                 obj.Where(
                     i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 50
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20
                          )
                          ||
                          (
@@ -148,7 +161,7 @@ namespace DominationAIO.NewPlugins.Yasuo
 
                 obj.Where(
                     i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 50
+                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
                          )
                          ||
                          (

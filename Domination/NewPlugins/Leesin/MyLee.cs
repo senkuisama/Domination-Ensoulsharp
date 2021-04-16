@@ -89,6 +89,10 @@ namespace DominationAIO.NewPlugins
 
                 Drawing.DrawText(objpos, System.Drawing.Color.Blue, maxhit.ToString());
 
+
+                var line = new Geometry.Rectangle(insectarget.Position.ToVector2(), insectarget.Position.Extend(pos, -900).ToVector2(), 60);
+                line.Draw(System.Drawing.Color.Blue);
+
             }
             switch (Orbwalker.ActiveMode)
             {

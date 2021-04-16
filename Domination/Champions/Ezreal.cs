@@ -368,60 +368,73 @@ namespace DominationAIO.Champions
 
         private static void EzQCombo()
         {
-            var target = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsAlly && i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
-            if (target == null)
+            if (Player.IsDashing())
                 return;
-           
-            if (QEzSettings.Qcombo.Enabled)
+
+            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA)
+                return;
+
             {
-                if (Q.IsReady())
+                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget()
+                && i.DistanceToPlayer() <= W.Range && !i.IsDead
+                && FSpred.Prediction.Prediction.GetPrediction(W, i).Hitchance >= FSpred.Prediction.HitChance.High)
+                    .OrderBy(i => i.Health);
+
+                if (WEzSettings.Wcombo.Enabled && W.IsReady() && targets.Count() >= 1)
                 {
-                    if(W.IsReady() && WEzSettings.Wcombo.Enabled && target.IsValidTarget(W.Range) && FSpred.Prediction.Prediction.GetPrediction(W, target).Hitchance >= FSpred.Prediction.HitChance.High)
+                    var target = targets.FirstOrDefault();
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(W, target);
+                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                     {
-                        var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
-                        if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
+                        if (WEzSettings.Wonly.Enabled)
                         {
-                            if (W.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
+                            if (target.DistanceToPlayer() < Player.GetRealAutoAttackRange() - 60)
                             {
-                                if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
+                                if (Environment.TickCount - LastAfterAA >= (Player.AttackDelay - target.DistanceToPlayer() / W.Speed) * 1000 - W.Delay * 100 || Orbwalker.CanAttack())
                                 {
+                                    W.Cast(pred.CastPosition);
                                     return;
-                                }                               
+                                }
                             }
-                        }
-                    }
-                    if(!W.IsReady() || !WEzSettings.Wcombo.Enabled || SebbyLibPorted.Prediction.Prediction.GetPrediction(W, target).Hitchance < SebbyLibPorted.Prediction.HitChance.Medium)
-                    {
-                        if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            var RandomTarget = TargetSelector.GetTargets(Q.Range).OrderBy(i => i.Health).FirstOrDefault(i =>
-                            FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= FSpred.Prediction.HitChance.High
-                            );
 
-                            var Fspred = FSpred.Prediction.Prediction.GetPrediction(Q, RandomTarget);
-
-                            if (RandomTarget != null)
+                            if (Q.IsReady())
                             {
-                                if (W.IsReady() && WEzSettings.Wcombo.Enabled)
+                                var qpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+
+                                if (qpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                 {
-                                    if (Fspred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                    if (W.Cast(pred.CastPosition))
                                     {
-                                        if (W.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
-                                        {
-                                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
-                                            {
-                                                return;
-                                            }
-                                        }
+                                        Q.Cast(qpred.CastPosition);
+                                        return;
                                     }
+                                    return;
                                 }
                             }
                         }
-                    }                   
+                        else
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            {
+                var targets = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget()
+                && i.DistanceToPlayer() <= Q.Range && !i.IsDead
+                && FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= FSpred.Prediction.HitChance.High)
+                    .OrderBy(i => i.Health);
+
+                if (QEzSettings.Qcombo.Enabled && Q.IsReady() && targets.Count() >= 1)
+                {
+                    var target = targets.FirstOrDefault();
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                    {
+                        Q.Cast(pred.CastPosition);
+                        return;
+                    }
                 }
             }
         }
@@ -582,10 +595,14 @@ namespace DominationAIO.Champions
                                 {
                                     var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
                                     if (target != null)
-                                        
-
-                                    if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
-                                        return;
+                                    {
+                                        var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                                        if(pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                        {
+                                            Q.Cast(pred.CastPosition);
+                                            return;
+                                        }
+                                    }                                       
                                 }
                             }
                             else
@@ -597,10 +614,14 @@ namespace DominationAIO.Champions
                         {
                             var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
                             if (target != null)
-                                
-
-                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
-                                return;
+                            {
+                                var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                {
+                                    Q.Cast(pred.CastPosition);
+                                    return;
+                                }
+                            }                               
                         }
                     }
                 }
@@ -615,10 +636,14 @@ namespace DominationAIO.Champions
                         {
                             var target = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(Q.Range) && !i.IsDead && SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health).FirstOrDefault();
                             if (target != null)
-                                
-
-                            if (Q.SPredictionCast(target, EnsoulSharp.SDK.HitChance.High))
-                                return;
+                            {
+                                var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                {
+                                    Q.Cast(pred.CastPosition);
+                                    return;
+                                }
+                            }
                         }
                     }
                 }

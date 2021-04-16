@@ -13,7 +13,7 @@ namespace FSpred.Prediction
 		public static PredictionOutput GetPrediction(this Spell spell, AIBaseClient unit, bool aoe = false, float overrideRange = -1f, CollisionableObjects[] collisionable = null)
 		{
 			bool flag = false;
-			if ((SkillshotType)spell.Type == SkillshotType.SkillshotCircle)
+			if ((int)spell.Type == 1)
 			{
 				flag = true;
 			}

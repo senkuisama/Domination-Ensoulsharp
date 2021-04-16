@@ -121,7 +121,7 @@ namespace DominationAIO.NewPlugins
                 !i.IsDead
                 && Irelia.Q.CanCast(i)
                 && !i.IsAlly
-                && i.Distance(target) < ObjectManager.Player.GetRealAutoAttackRange() + 50
+                && i.Distance(target) < ObjectManager.Player.GetRealAutoAttackRange() + MenuSettings.QSettings.BonusQ.Value
                 && Helper.CanQ(i)
                 && i.MaxHealth > 5)
                     .OrderByDescending(i => i.Health);
@@ -666,7 +666,7 @@ namespace DominationAIO.NewPlugins
             && !i.IsDead
             && !i.IsAlly
             && Helper.CanQ(i)
-            && i.Position.Distance(pos) <= ObjectManager.Player.Distance(pos) + ObjectManager.Player.GetRealAutoAttackRange()).OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
+            && i.Position.Distance(pos) <= ObjectManager.Player.Distance(pos) + MenuSettings.QSettings.BonusQ.Value).OrderBy(i => i.DistanceToPlayer()).FirstOrDefault();
 
             if (Irelia.Q.IsReady() && obj != null && obj.DistanceToPlayer() <= 600f)
             {

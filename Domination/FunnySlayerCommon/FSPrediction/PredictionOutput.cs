@@ -12,7 +12,8 @@ namespace FSpred.Prediction
 		{
 			get
 			{
-				return Math.Max(this._aoeTargetsHitCount, this.AoeTargetsHit.Count);
+				var max = Math.Max(this._aoeTargetsHitCount, this.AoeTargetsHit.Count);
+				return Math.Max(max, 1);
 			}
 		}
 		public Vector3 CastPosition

@@ -247,15 +247,15 @@ namespace DominationAIO.Champions.Aphelios
             }
 
             {
-                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target, true);
+                //var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target, true);
             }
 
             if (target.Health < loaded.R.GetDamage(target))
             {
                 if (loaded.R4Ready)
                 {
-                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                     {
                         if (ObjectManager.Player.HasBuff(loaded.InfernumOn))
                         {
@@ -274,8 +274,8 @@ namespace DominationAIO.Champions.Aphelios
                 {
                     if (loaded.R5Ready)
                     {
-                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                         {
                             if (ObjectManager.Player.HasBuff(loaded.CrescendumOn))
                             {
@@ -294,8 +294,8 @@ namespace DominationAIO.Champions.Aphelios
                     {
                         if (loaded.R1Ready)
                         {
-                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                             {
                                 if (ObjectManager.Player.HasBuff(loaded.CalibrumOn))
                                 {
@@ -314,8 +314,8 @@ namespace DominationAIO.Champions.Aphelios
                         {
                             if (loaded.R3Ready)
                             {
-                                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                                if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                                 {
                                     if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
                                     {
@@ -334,8 +334,8 @@ namespace DominationAIO.Champions.Aphelios
                             {
                                 if (loaded.R2Ready)
                                 {
-                                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                    var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     {
                                         if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
                                         {
@@ -352,8 +352,8 @@ namespace DominationAIO.Champions.Aphelios
                                 }
                                 else
                                 {
-                                    var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                                    if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                    var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                                    if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                                     {
                                         if (loaded.R.Cast(pred.CastPosition))
                                             return;
@@ -367,8 +367,8 @@ namespace DominationAIO.Champions.Aphelios
             var realrange = ObjectManager.Player.HasBuff(loaded.CalibrumOn) ? ObjectManager.Player.GetRealAutoAttackRange() - 100 : ObjectManager.Player.GetRealAutoAttackRange();
 
             {
-                var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                if(pred.Hitchance >= FSpred.Prediction.HitChance.High)
                 {
                     if(pred.AoeTargetsHitCount >= 3 || pred.CastPosition.CountEnemyHeroesInRange(350) >= 3)
                     {
@@ -540,8 +540,8 @@ namespace DominationAIO.Champions.Aphelios
                 {
                     if (RSet.useR3.Enabled)
                     {
-                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                         {
                             if (ObjectManager.Player.HasBuff(loaded.GravitumOn))
                             {
@@ -558,8 +558,8 @@ namespace DominationAIO.Champions.Aphelios
                     }
                     else
                     {
-                        var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target);
-                        if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                        var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+                        if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                         {
                             if (ObjectManager.Player.HasBuff(loaded.SeverumOn))
                             {
@@ -628,7 +628,7 @@ namespace DominationAIO.Champions.Aphelios
             if (loaded.R4Ready && RSet.useR4.Enabled)
             {
                 var targets = ObjectManager.Get<AIHeroClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(1300)
-                && SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, target).Hitchance >= SebbyLibPorted.Prediction.HitChance.High);
+                && FSpred.Prediction.Prediction.GetPrediction(tempspell, target).Hitchance >= FSpred.Prediction.HitChance.High);
 
                 if(targets != null)
                 {
@@ -636,7 +636,7 @@ namespace DominationAIO.Champions.Aphelios
                     {
                         if(t != null)
                         {
-                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(tempspell, t, true);
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(tempspell, t, true);
                             if (pred.AoeTargetsHitCount >= 1)
                             {
                                 if (pred.AoeTargetsHit != null)
@@ -1180,21 +1180,35 @@ namespace DominationAIO.Champions.Aphelios
 
             if (ObjectManager.Player.HasBuff(loaded.CalibrumOn) && loaded.Q1.IsReady())
             {
-                var temptargets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(loaded.Q1.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health);
+                var temptargets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(loaded.Q1.Range) && FSpred.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= FSpred.Prediction.HitChance.High).OrderBy(i => i.Health);
                 if(temptargets != null)
                 {
-                    foreach(var temp in temptargets)
+                    while (temptargets.GetEnumerator().MoveNext())
                     {
-                        if(temp != null)
+                        var temp = temptargets.FirstOrDefault();
+                        if (temp != null)
                         {
-                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, temp);
-                            if(pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(loaded.Q1, temp);
+                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                             {
                                 if (loaded.Q1.Cast(pred.CastPosition))
                                     return;
                             }
                         }
                     }
+
+                    /*foreach (var temp in temptargets)
+                    {
+                        if(temp != null)
+                        {
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(loaded.Q1, temp);
+                            if(pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                            {
+                                if (loaded.Q1.Cast(pred.CastPosition))
+                                    return;
+                            }
+                        }
+                    }*/
                 }
             }
             if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && loaded.Q2.IsReady())
@@ -1216,12 +1230,26 @@ namespace DominationAIO.Champions.Aphelios
                 var temptargets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(loaded.Q4.Range) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health);
                 if (temptargets != null)
                 {
+                    /*while (temptargets.GetEnumerator().MoveNext())
+                    {
+                        var temp = temptargets.FirstOrDefault();
+                        if (temp != null)
+                        {
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(loaded.Q4, temp);
+                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                            {
+                                if (loaded.Q4.Cast(pred.CastPosition))
+                                    return;
+                            }
+                        }
+                    }*/
+
                     foreach (var temp in temptargets)
                     {
                         if (temp != null)
                         {
-                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q4, temp);
-                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(loaded.Q4, temp);
+                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                             {
                                 if (loaded.Q4.Cast(pred.CastPosition))
                                     return;
@@ -1235,12 +1263,26 @@ namespace DominationAIO.Champions.Aphelios
                 var temptargets = GameObjects.EnemyHeroes.Where(i => !i.IsDead && i.IsValidTarget(600) && SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q1, i).Hitchance >= SebbyLibPorted.Prediction.HitChance.High).OrderBy(i => i.Health);
                 if (temptargets != null)
                 {
+                    /*while (temptargets.GetEnumerator().MoveNext())
+                    {
+                        var temp = temptargets.FirstOrDefault();
+                        if (temp != null)
+                        {
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(loaded.Q5, temp);
+                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                            {
+                                if (loaded.Q5.Cast(pred.CastPosition))
+                                    return;
+                            }
+                        }
+                    }*/
+
                     foreach (var temp in temptargets)
                     {
                         if (temp != null)
                         {
-                            var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(loaded.Q5, temp);
-                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                            var pred = FSpred.Prediction.Prediction.GetPrediction(loaded.Q5, temp);
+                            if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
                             {
                                 if (loaded.Q5.Cast(pred.CastPosition))
                                     return;

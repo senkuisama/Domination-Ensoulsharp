@@ -180,6 +180,7 @@
     <Compile Include="Champions\skinhack.cs" />
     <Compile Include="Common\YasuoSpellDatabase.cs" />
     <Compile Include="NewPlugins\BaseUlt\MyBS.cs" />
+    <Compile Include="NewPlugins\Gwen\MyGwen.cs" />
     <Compile Include="NewPlugins\Irelia\Helper.cs" />
     <Compile Include="NewPlugins\Irelia\EventsIrelia.cs" />
     <Compile Include="NewPlugins\Irelia\Irelia.cs" />
@@ -251,6 +252,7 @@
     <Compile Include="SPrediction\StasisPrediction.cs" />
     <Compile Include="SPrediction\Utility.cs" />
     <Compile Include="SPrediction\VectorPrediction.cs" />
+    <Compile Include="TrackerHelper.cs" />
     <Compile Include="TyDaoHungAIO\Fiora.cs" />
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplank.cs" />
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankAuto.cs" />

@@ -34,11 +34,13 @@ namespace DominationAIO
         {           
             GameEvent.OnGameLoad += OnLoadingComplete;
         }
+
+        private static List<TrackerHelper> TrackerHelp = new List<TrackerHelper>();
+
         private static void OnLoadingComplete()
         {            
             if (ObjectManager.Player == null)
                 return;
-
             FSpred.Prediction.Prediction.Initialize();
             FunnySlayerCommon.OnAction.CheckOnAction();
 
@@ -71,6 +73,16 @@ namespace DominationAIO
                 {
                     switch (GameObjects.Player.CharacterName)
                     {
+                        case "Gwen":
+                            MyGwen.GwenLoad();
+                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                            break;
+                        case "Yone":
+                            MyYone.YoneLoad();
+                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                            break;
                         case "Kayle":
                             new DaoHungAIO.Champions.Kayle();
                             Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
@@ -249,7 +261,44 @@ namespace DominationAIO
             }
 
 
+            foreach (var item in GameObjects.EnemyHeroes)
+            {
+                var target = item;
+                var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId);
+                if (histracker == null || histracker.Count() < 1)
+                    TrackerHelp.Add(new TrackerHelper(target));
+            }
+            //Load Tracker
+
+            Game.OnUpdate += Game_OnUpdate;
+
             Drawing.OnDraw += Drawing_OnEndScene;
+        }
+
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            foreach (var item in GameObjects.EnemyHeroes)
+            {
+                var target = item;
+                var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId);
+                if (histracker.Count() >= 1)
+                {
+                    var thetracker = histracker.FirstOrDefault();
+                    if (thetracker.Unit.IsValidTarget())
+                    {
+                        thetracker.ValidPosition = target.Position;
+                        thetracker.InValidPosition = target.Position;
+                    }
+                    else
+                    {
+                        thetracker.InValidPosition = target.Position;
+                    }
+                }
+                else
+                {
+                    TrackerHelp.Add(new TrackerHelper(target));
+                }
+            }        
         }
 
         private static Menu programmenu = null;
@@ -277,52 +326,54 @@ namespace DominationAIO
 
             if (!LoadTracker.Enabled)
                 return;
-            /*foreach (var target in ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly && i.IsValidTarget()))
+
+            foreach (var item in GameObjects.EnemyHeroes)
             {
-                if (SaveLastPoint.ContainsKey(target.NetworkId))
-                {
-                    SaveLastPoint[target.NetworkId] = target.Position;
-                }
-                else
-                {
-                    SaveLastPoint.Add(target.NetworkId, target.Position);
-                }
-            }*/
-            foreach(var target in ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly))
-            {
-                //ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
+                var target = item;
+                var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId).FirstOrDefault();
 
-                if (!target.Position.IsZero && !target.CharacterName.ToString().Contains("PracticeTool") && target.Position.DistanceToPlayer() <= 20000)
+                if (histracker != null)
                 {
-                    if (target.Position.IsOnScreen())
+                    if(histracker.InValidPosition.DistanceToPlayer() <= 3000)
                     {
-                        var pos = Drawing.WorldToScreen(target.Position);
-                        if (!pos.IsZero && pos.DistanceToPlayer() <= 20000)
-                        {
-                            Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Yellow, target.CharacterName);
-                            Render.Circle.DrawCircle(target.Position, 50, System.Drawing.Color.Red);
-                        }
-                    }
-
-                    //Drawing.DrawLine(ObjectManager.Player.Position.ToVector2(), target.Position.ToVector2(), 1, System.Drawing.Color.Red);
-
-                    if(target.Position.DistanceToPlayer() <= 300)
-                    {
-                        var line = new Geometry.Line(ObjectManager.Player.Position, target.Position);
+                        var line = new Geometry.Line(ObjectManager.Player.Position, histracker.InValidPosition);
                         line.Draw(System.Drawing.Color.Red);
                     }
                     
-                    /*Geometry.Line getline;
-                    if (SaveLastPoint.ContainsKey(target.NetworkId) && !SaveLastPoint[target.NetworkId].IsZero)
-                        if (SaveLastPoint[target.NetworkId] != Vector3.Zero && SaveLastPoint[target.NetworkId] != target.Position)
+                    if (histracker.ValidPosition.IsOnScreen() || histracker.InValidPosition.IsOnScreen())
+                    {
+                        if (histracker.InValidPosition.IsOnScreen())
                         {
-                            getline = new Geometry.Line(target.Position, SaveLastPoint[target.NetworkId]);
-                            Render.Circle.DrawCircle(target.Position, 50, System.Drawing.Color.Green);
+                            var pos = Drawing.WorldToScreen(histracker.InValidPosition);
+                            Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Yellow, target.CharacterName);
+                            Render.Circle.DrawCircle(histracker.InValidPosition, 50, System.Drawing.Color.Red);                           
                         }
 
-                    */
-                }                                              
+                        if (histracker.ValidPosition.IsOnScreen() && histracker.ValidPosition.Distance(histracker.InValidPosition) > histracker.Unit.BoundingRadius)
+                        {
+                            var pos = Drawing.WorldToScreen(histracker.ValidPosition);
+                            Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Yellow, target.CharacterName);
+                            Render.Circle.DrawCircle(histracker.ValidPosition, 50, System.Drawing.Color.Green);
+                        }
+
+                        /*if (histracker.InValidPosition.Distance(histracker.ValidPosition) > histracker.Unit.BoundingRadius)
+                        {
+                            var line = new Geometry.Line(histracker.InValidPosition, histracker.ValidPosition);
+                            line.Draw(System.Drawing.Color.Blue);
+                        }*/
+
+                        /*if (histracker.InValidPosition.Distance(histracker.ValidPosition) > histracker.Unit.BoundingRadius)
+                        {
+                                                   
+                        }
+                        else
+                        {
+                            
+                        }*/
+                    }
+
+                }
             }
-        }
+        }    
     }   
 }

@@ -1029,7 +1029,7 @@ namespace DominationAIO.NewPlugins
                 }
                 else
                 {
-                    var obj = FindWBestTarget(TargetSelector.GetTarget(W.Range).Position, false);
+                    var obj = FindWBestTarget(TargetSelector.GetTarget(W.Range).Position, false, LeeMenu.LeeW.BonusWRange.Value, new List<GameObjectType>() { GameObjectType.AIHeroClient});
                     if (obj != null)
                         return W.CastOnUnit(obj);
 
@@ -1144,7 +1144,7 @@ namespace DominationAIO.NewPlugins
             var objcanwon = new List<AIBaseClient>();
             objcanwon.AddRange(ObjectManager.Get<AIBaseClient>().Where(i => i.IsAlly && !i.IsDead && i.DistanceToPlayer() <= W.Range && i.Distance(pos) <= rangcheck).ToList());
             objcanwon.AddRange(GameObjects.AllyHeroes);
-            objcanwon.RemoveAll(i => i.IsDead || i.DistanceToPlayer() > 700 || i.NetworkId == ObjectManager.Player.NetworkId);
+            objcanwon.RemoveAll(i => i.IsDead || i.DistanceToPlayer() > 700 || i.Distance(pos) >= rangcheck || i.NetworkId == ObjectManager.Player.NetworkId);
             objcanwon.OrderBy(i => i.Type == GameObjectType.AIHeroClient).ThenBy(i => i.Distance(pos));
             if (objcanwon != null && objcanwon.FirstOrDefault() != null)
             {

@@ -81,11 +81,12 @@ namespace DominationAIO.NewPlugins
 
         public static bool CanQ(AIBaseClient target, bool CheckItems = true)
         {
-            if (Variables.GameTimeTickCount - Irelia.lastQ <= MenuSettings.QSettings.Qdelay.Value)
+            /*if (Variables.GameTimeTickCount - Irelia.lastQ <= MenuSettings.QSettings.Qdelay.Value)
                 return false;
-
+            */
             if (target.HasBuff("ireliamark"))
                 return true;
+
             CheckItems = MenuSettings.QSettings.CheckQDmgITems.Enabled;
             
             if(target.Type == GameObjectType.AIHeroClient)

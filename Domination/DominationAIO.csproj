@@ -192,6 +192,7 @@
     <Compile Include="NewPlugins\Katarina\MyKatarina.cs" />
     <Compile Include="NewPlugins\Leesin\MyLee.cs" />
     <Compile Include="NewPlugins\Sylas\MySylas.cs" />
+    <Compile Include="NewPlugins\URF_Lucian.cs" />
     <Compile Include="NewPlugins\Vayne\MyVayne.cs" />
     <Compile Include="NewPlugins\VelKoz\MyVelKoz.cs" />
     <Compile Include="NewPlugins\Viego\MyViego.cs" />
@@ -266,6 +267,7 @@
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankVariables.cs" />
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoMainVariables.cs" />
     <Compile Include="TyDaoHungAIO\Kayle.cs" />
+    <Compile Include="TyDaoHungAIO\Viktor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

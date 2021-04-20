@@ -26,8 +26,8 @@ namespace DominationAIO.NewPlugins
             {
                 if (!Helper.UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                 {
-                    if (Irelia.Q.Cast(target) == CastStates.SuccessfullyCasted)
-                        return;
+                    Irelia.Q.Cast(target);
+                    return;
                 }
             }
         }
@@ -36,6 +36,7 @@ namespace DominationAIO.NewPlugins
             if (sender.IsMe && args.SData.Name == "IreliaEMissile")
             {
                 Irelia.E1Pos = args.End;
+                return;
             }
 
 
@@ -45,6 +46,7 @@ namespace DominationAIO.NewPlugins
                 if (Variables.GameTimeTickCount > Irelia.SheenTimer + 1650)
                 {
                     Irelia.SheenTimer = Variables.GameTimeTickCount;
+                    return;
                 }
             }
         }
@@ -101,6 +103,7 @@ namespace DominationAIO.NewPlugins
                     || args.Buff.Name.Contains("Lich"))
                 {
                     Irelia.SheenTimer = Variables.GameTimeTickCount;
+                    return;
                 }
             }
         }
@@ -113,11 +116,13 @@ namespace DominationAIO.NewPlugins
                 LogicE.EPrediction(false);
                 #endregion
                 LogicQ.QGapCloserPos(Game.CursorPos);
+                return;
             }
             if (MenuSettings.KeysSettings.SemiE.Active && Irelia.E.IsReady())
             {
                 #region New E pred
                 LogicE.EPrediction(false);
+                return;
                 #endregion
             }
             if (MenuSettings.KeysSettings.SemiR.Active && Irelia.R.IsReady())
@@ -137,6 +142,7 @@ namespace DominationAIO.NewPlugins
                         if (Rpos != Vector3.Zero)
                         {
                             Irelia.R.Cast(Rpos);
+                            return;
                         }
                     }                   
                 }

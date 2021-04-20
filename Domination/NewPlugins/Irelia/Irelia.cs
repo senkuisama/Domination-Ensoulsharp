@@ -35,7 +35,7 @@ namespace DominationAIO.NewPlugins
 
             Game.Print("Disable block dash spell in EzEvade misc");
         
-            Q.SetTargetted(0f, float.MaxValue);
+            Q.SetTargetted(0, float.MaxValue);
             W.SetCharged("IreliaW", "ireliawdefense", 800, 800, 0);
             E.SetSkillshot(0.25f, 5f, 2000f, false, SpellType.Line);
             R.SetSkillshot(0.4f, 200, 1000, false, SpellType.Line);
@@ -68,30 +68,21 @@ namespace DominationAIO.NewPlugins
         {            
             if (ObjectManager.Player.IsDead)
                 return;
-
-            if (!Q.IsReady())
-                return;
-
-            if (!MenuSettings.ClearSettings.QireClear.Enabled) return;
-            if (ObjectManager.Player.ManaPercent <= MenuSettings.ClearSettings.QireMana.Value) return;
-
-            if (Orbwalker.ActiveMode != OrbwalkerMode.LaneClear && Orbwalker.ActiveMode != OrbwalkerMode.LastHit && !MenuSettings.KeysSettings.AutoClearMinions.Active)
-                return;
-
             var minions = ObjectManager.Get<AIMinionClient>().Where(i => i != null && !i.IsDead && !i.IsAlly && i.IsValidTarget(600)).OrderBy(i => i.Health);
 
-            if (minions == null)
+            if (minions == null || !Q.IsReady() || !MenuSettings.ClearSettings.QireClear.Enabled || ObjectManager.Player.ManaPercent <= MenuSettings.ClearSettings.QireMana.Value || (Orbwalker.ActiveMode != OrbwalkerMode.LaneClear && Orbwalker.ActiveMode != OrbwalkerMode.LastHit && !MenuSettings.KeysSettings.AutoClearMinions.Active))
                 return;
 
-            foreach (var min in minions)
+            var min = minions.OrderBy(i => !Helper.UnderTower(i.Position)).FirstOrDefault();
+            if (Helper.CanQ(min) && min.DistanceToPlayer() < 600f)
             {
-                if (Helper.CanQ(min) && min.DistanceToPlayer() < 600f)
+                if (!Helper.UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                 {
-                    if (!Helper.UnderTower(min.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                    {
-                        if (Q.Cast(min) == CastStates.SuccessfullyCasted || Q.CastOnUnit(min))
-                            return;
-                    }
+                    if (Q.Cast(min) == CastStates.SuccessfullyCasted)
+                        return;
+
+                    Q.CastOnUnit(min);
+                    return;
                 }
             }
         }

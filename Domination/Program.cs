@@ -73,6 +73,16 @@ namespace DominationAIO
                 {
                     switch (GameObjects.Player.CharacterName)
                     {
+                        case "Lucian":
+                            Luian.URF_Lucian.LoadLucian();
+                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                            break;
+                        case "Viktor":
+                            DaoHungAIO.Champions.Viktor.LoadViktor();
+                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+
+                            break;
                         case "Gwen":
                             MyGwen.GwenLoad();
                             Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
@@ -130,11 +140,11 @@ namespace DominationAIO
                             Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
                             break;
-                        case "Lucian":
+                        /*case "Lucian":
                             //URF_Lucian.LoadLucian();
                             Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
 
-                            break;
+                            break;*/
                         /*case "TahmKench":
                             TahmKench.Load();
                             Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");

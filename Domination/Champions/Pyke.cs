@@ -121,7 +121,7 @@ namespace Pyke_Ryū
         {
             if (Player.IsDead) return;
 
-            Drawing.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.White);
+            Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.White);
         }
 
         private static void Game_OnUpdate(EventArgs args)

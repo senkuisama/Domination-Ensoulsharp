@@ -30,8 +30,63 @@ namespace DominationAIO.NewPlugins
 
             Game.OnUpdate += Game_OnUpdate;
             Game.OnUpdate += Game_OnUpdate1;
+            AIBaseClient.OnBuffAdd += AIBaseClient_OnBuffAdd;
+
+            foreach (var item in GameObjects.EnemyHeroes)
+            {
+                var target = item;
+                ListDmg.Add(new DmgOnTarget(target.NetworkId, 0));
+            }
         }
 
+        private static List<DmgOnTarget> ListDmg = new List<DmgOnTarget>();
+        class DmgOnTarget
+
+        {
+            public int UID;
+            public double dmg;
+            public DmgOnTarget(int ID, double Dmg)
+            {
+                UID = ID;
+                dmg = Dmg;
+            }
+        }
+
+
+        private static void AIBaseClient_OnBuffAdd(AIBaseClient sender, AIBaseClientBuffAddEventArgs args)
+        {
+            if (args.Buff.Name != "")
+                return;
+
+
+            var FindinList = ListDmg.Where(i => i.UID == sender.NetworkId);
+            if (FindinList.Count() >= 1)
+            {
+                var target = FindinList.FirstOrDefault();
+
+                //start dmg
+                target.dmg = 0;
+            }
+        }
+
+        private static double GetEDmg(AIBaseClient target)
+        {
+            if(!target.HasBuff(""))
+                return 0;
+            var findinlist = ListDmg.Where(i => i.UID == target.NetworkId);
+            if (findinlist.Count() < 1)
+                return 0;
+
+            double dmg = 0;
+            var list = new double[]
+            {
+                0.25, 0.275, 0.3, 0.325, 0.35
+            };
+            var xtarget = findinlist.FirstOrDefault();
+            dmg += list[E.Level] * xtarget.dmg;
+
+            return dmg;
+        }
         private static void Game_OnUpdate1(System.EventArgs args)
         {
             if (YoneMenu.Keys.SemiR.Active && R.IsReady())

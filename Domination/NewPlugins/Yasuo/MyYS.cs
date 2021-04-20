@@ -1051,7 +1051,14 @@ namespace DominationAIO.NewPlugins.Yasuo
 
             if (YasuoHelper.HaveQ3 && YasuoMenu.Qcombo.Yasuo_Windcombo.Enabled)
             {
-                var findqtarget = ObjectManager.Get<AIHeroClient>().Where(i =>
+                var targetpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
+                if(target != null && targetpred.Hitchance >= FSpred.Prediction.HitChance.High)
+                {
+                    Q3.Cast(targetpred.CastPosition);
+                }
+                else
+                {
+                    var findqtarget = ObjectManager.Get<AIHeroClient>().Where(i =>
                     i.IsValidTarget(YasuoMenu.RangeCheck.Q3range.Value)
                     && !i.IsDead
                     && !i.IsAlly
@@ -1061,18 +1068,26 @@ namespace DominationAIO.NewPlugins.Yasuo
                         .FirstOrDefault();
 
 
-                //var newtarget = 
-                var pout = FSpred.Prediction.Prediction.GetPrediction(Q3, findqtarget);
-                if (pout.Hitchance >= FSpred.Prediction.HitChance.High && pout.UnitPosition.DistanceToPlayer() <= 1080)
-                    Q3.Cast(pout.UnitPosition);
-                return;
+                    //var newtarget = 
+                    var pout = FSpred.Prediction.Prediction.GetPrediction(Q3, findqtarget);
+                    if (pout.Hitchance >= FSpred.Prediction.HitChance.High && pout.UnitPosition.DistanceToPlayer() <= 1080)
+                        Q3.Cast(pout.CastPosition);
+                    return;
+                }              
             }
             else
             {
                 if (!YasuoMenu.Qcombo.Yasuo_Qcombo.Enabled) return;
 
-                var findqtarget = ObjectManager.Get<AIHeroClient>().Where(i =>
-                    i.IsValidTarget(475)
+                var targetpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                if (target != null && targetpred.Hitchance >= FSpred.Prediction.HitChance.High)
+                {
+                    Q.Cast(targetpred.CastPosition);
+                }
+                else
+                {
+                    var findqtarget = ObjectManager.Get<AIHeroClient>().Where(i =>
+                    i.IsValidTarget(YasuoMenu.RangeCheck.Q3range.Value)
                     && !i.IsDead
                     && !i.IsAlly
                     && FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance
@@ -1080,10 +1095,13 @@ namespace DominationAIO.NewPlugins.Yasuo
                         .OrderBy(i => i.Health)
                         .FirstOrDefault();
 
-                var pout = FSpred.Prediction.Prediction.GetPrediction(Q, findqtarget);
-                if (pout.Hitchance >= FSpred.Prediction.HitChance.High && pout.UnitPosition.DistanceToPlayer() <= 475)
-                    Q.Cast(pout.UnitPosition);
-                return;
+
+                    //var newtarget = 
+                    var pout = FSpred.Prediction.Prediction.GetPrediction(Q, findqtarget);
+                    if (pout.Hitchance >= FSpred.Prediction.HitChance.High && pout.UnitPosition.DistanceToPlayer() <= 1080)
+                        Q.Cast(pout.CastPosition);
+                    return;
+                }
             }
         }
 

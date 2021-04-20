@@ -50,7 +50,7 @@ namespace DominationAIO.NewPlugins
                                             var poscast = pos.Extend(Irelia.E1Pos, -i);
                                             if (poscast.IsValid() && poscast.Distance(ObjectManager.Player.Position) < 775)
                                             {
-                                                if (Irelia.E.Cast(poscast))
+                                                Irelia.E.Cast(poscast);
                                                     return;
                                             }
                                             else
@@ -84,7 +84,7 @@ namespace DominationAIO.NewPlugins
                                             var pos = pred.CastPosition.Extend(Irelia.E1Pos, -i);
                                             if (pos.IsValid() && pos.Distance(ObjectManager.Player.Position) < 775)
                                             {
-                                                if (Irelia.E.Cast(pos))
+                                                Irelia.E.Cast(pos);
                                                     return;
                                             }
                                             else
@@ -132,7 +132,7 @@ namespace DominationAIO.NewPlugins
                                                 var castpos = spelldelaypred.CastPosition.Extend(Irelia.E1Pos, -i + 10);
                                                 if (castpos.Distance(ObjectManager.Player.Position) <= 775)
                                                 {
-                                                    if (Irelia.E.Cast(castpos))
+                                                    Irelia.E.Cast(castpos);
                                                         return;
                                                 }
                                                 else
@@ -176,7 +176,7 @@ namespace DominationAIO.NewPlugins
                                                     var castpos = gettarget.Position.Extend(target.Position, -200);
                                                     if(castpos.DistanceToPlayer() <= 775)
                                                     {
-                                                        if (Irelia.E.Cast(castpos))
+                                                        Irelia.E.Cast(castpos);
                                                             return;
                                                     }
                                                     else
@@ -189,7 +189,7 @@ namespace DominationAIO.NewPlugins
                                                     var castpos = target.Position.Extend(gettarget.Position, -200);
                                                     if (castpos.DistanceToPlayer() <= 775)
                                                     {
-                                                        if (Irelia.E.Cast(castpos))
+                                                        Irelia.E.Cast(castpos);
                                                             return;
                                                     }
                                                     else
@@ -219,10 +219,7 @@ namespace DominationAIO.NewPlugins
                                                                 var vector3 = vector2.CastPosition.Extend(Irelia.E1Pos.ToVector2(), -j);
                                                                 if (vector3.Distance(ObjectManager.Player) >= Irelia.E.Range && v3 != Vector2.Zero)
                                                                 {
-                                                                    if (Irelia.E.Cast(v3))
-                                                                    {
-                                                                        return;
-                                                                    }
+                                                                    Irelia.E.Cast(v3);
                                                                     break;
                                                                 }
                                                                 else

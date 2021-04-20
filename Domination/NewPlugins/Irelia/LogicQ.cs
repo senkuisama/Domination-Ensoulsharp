@@ -16,9 +16,6 @@ namespace DominationAIO.NewPlugins
             if (target == null || !Irelia.Q.IsReady() || !MenuSettings.QSettings.Qcombo.Enabled)
                 return;
 
-            if (FunnySlayerCommon.OnAction.OnAA)
-                return;
-
             if (Helper.CanQ(target) && target.Position.ReturnUnderTower())
             {
                 var obj = ObjectManager.Get<AIBaseClient>().Where(i => 
@@ -37,9 +34,7 @@ namespace DominationAIO.NewPlugins
                     var getobj = obj.FirstOrDefault();
                     if (Irelia.Q.CanCast(getobj))
                     {
-                        if (Irelia.Q.Cast(getobj) == CastStates.SuccessfullyCasted)
-                            return;
-                        else
+                        Irelia.Q.Cast(getobj);
                             return;
                     }
                 }
@@ -81,9 +76,7 @@ namespace DominationAIO.NewPlugins
                 {
                     if (!Helper.UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                     {
-                        if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                            return;
-                        else
+                        Irelia.Q.Cast(obj);
                             return;
                     }
                     else
@@ -159,10 +152,9 @@ namespace DominationAIO.NewPlugins
                             if(Irelia.Q.CanCast(newobj))
                             if (Irelia.Q.Cast(newobj) == CastStates.SuccessfullyCasted)
                             {
-                                if (objs.ToArray().FirstOrDefault().DistanceToPlayer() < 600f)
-                                    if (Irelia.Q.Cast(objs.ToArray().FirstOrDefault()) == CastStates.SuccessfullyCasted)
-                                        return;
-                                        else
+                                    if (objs.ToArray().FirstOrDefault().DistanceToPlayer() < 600f)
+                                        Irelia.Q.Cast(objs.ToArray().FirstOrDefault());
+
                                             return;
                                 }
                             else
@@ -222,7 +214,7 @@ namespace DominationAIO.NewPlugins
                                 {
                                     if (!Helper.UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                     {
-                                        if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                        Irelia.Q.Cast(obj);
                                             return;
                                     }
                                     else
@@ -231,7 +223,7 @@ namespace DominationAIO.NewPlugins
                                             if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                             {
                                                 if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                    if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
+                                                    Irelia.Q.Cast(obj1);
                                                         return;
                                             }
                                         }
@@ -243,7 +235,7 @@ namespace DominationAIO.NewPlugins
                                         if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                         {
                                             if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
+                                                Irelia.Q.Cast(obj1);
                                                     return;
                                         }
                                     }
@@ -255,7 +247,7 @@ namespace DominationAIO.NewPlugins
                                     if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                     {
                                         if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                            if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
+                                            Irelia.Q.Cast(obj1);
                                                 return;
                                     }
                                 }
@@ -300,8 +292,8 @@ namespace DominationAIO.NewPlugins
                                             {
                                                 if (!Helper.UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                                 {
-                                                    if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                        return;
+                                                    Irelia.Q.Cast(obj);
+                                                    return;
                                                 }
                                                 else
                                                 {
@@ -309,8 +301,8 @@ namespace DominationAIO.NewPlugins
                                                         if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                                         {
                                                             if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                                if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                                                    return;
+                                                                Irelia.Q.Cast(obj1);
+                                                            return;
                                                         }
                                                     }
                                                 }
@@ -321,8 +313,8 @@ namespace DominationAIO.NewPlugins
                                                     if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                                     {
                                                         if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                            if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                                                return;
+                                                            Irelia.Q.Cast(obj1);
+                                                        return;
                                                     }
                                                 }
                                             }
@@ -333,8 +325,8 @@ namespace DominationAIO.NewPlugins
                                                 if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                                 {
                                                     if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                        if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                                            return;
+                                                        Irelia.Q.Cast(obj1);
+                                                    return;
                                                 }
                                             }
                                         }
@@ -345,8 +337,8 @@ namespace DominationAIO.NewPlugins
                                             if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                             {
                                                 if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                    if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                                        return;
+                                                    Irelia.Q.Cast(obj1);
+                                                return;
                                             }
                                         }
                                     }
@@ -358,8 +350,8 @@ namespace DominationAIO.NewPlugins
                                     if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                     {
                                         if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                            if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                                return;
+                                            Irelia.Q.Cast(obj1);
+                                        return;
                                     }
                                 }
                             }
@@ -396,8 +388,8 @@ namespace DominationAIO.NewPlugins
 
                                     if (bobj != null && bobj.DistanceToPlayer() < 600f)
                                     {
-                                        if (Irelia.Q.Cast(bobj) == CastStates.SuccessfullyCasted)
-                                            return;
+                                        Irelia.Q.Cast(bobj);
+                                        return;
                                     }
                                     else
                                     {
@@ -405,8 +397,8 @@ namespace DominationAIO.NewPlugins
                                             if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                             {
                                                 if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                    if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                                        return;
+                                                    Irelia.Q.Cast(obj1);
+                                                return;
                                             }
                                         }
                                     }
@@ -417,8 +409,8 @@ namespace DominationAIO.NewPlugins
                                         if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                                         {
                                             if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                                if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                                    return;
+                                                Irelia.Q.Cast(obj1);
+                                            return;
                                         }
                                     }
                                 }
@@ -432,8 +424,8 @@ namespace DominationAIO.NewPlugins
                         if (Irelia.Q.IsReady() && obj1 != null && obj1.DistanceToPlayer() <= 600f)
                         {
                             if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                                if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                    return;
+                                Irelia.Q.Cast(obj1);
+                            return;
                         }
                     }
                 }       
@@ -489,9 +481,7 @@ namespace DominationAIO.NewPlugins
                                                             EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
                                                             {
                                                                 if (obj.DistanceToPlayer() < 600f)
-                                                                    if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                                        return;
-                                                                    else
+                                                                    Irelia.Q.Cast(obj);
                                                                         return;
                                                             });
                                                         }
@@ -590,21 +580,16 @@ namespace DominationAIO.NewPlugins
                                                         {
                                                             if (!Helper.UnderTower(tempobj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                                             {
-                                                                if (Irelia.Q.Cast(tempobj) == CastStates.SuccessfullyCasted)
+                                                                Irelia.Q.Cast(tempobj);
+                                                                EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
                                                                 {
-                                                                    EnsoulSharp.SDK.Utility.DelayAction.Add(300, () =>
-                                                                    {
-                                                                        if (obj.DistanceToPlayer() <= 600f)
-                                                                            if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                                                                                return;
-                                                                            else
-                                                                                return;
-                                                                    });
-                                                                }
-                                                                else
-                                                                {
-                                                                    HighLogic(target);
-                                                                }
+                                                                    if (obj.DistanceToPlayer() <= 600f)
+                                                                        if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
+                                                                            return;
+                                                                        else
+                                                                            return;
+                                                                });
+                                                                return;
                                                             }
                                                             else
                                                             {
@@ -671,8 +656,8 @@ namespace DominationAIO.NewPlugins
             if (Irelia.Q.IsReady() && obj != null && obj.DistanceToPlayer() <= 600f)
             {
                 if (!Helper.UnderTower(obj.Position) || MenuSettings.KeysSettings.TurretKey.Active)
-                    if (Irelia.Q.Cast(obj) == CastStates.SuccessfullyCasted)
-                        return;
+                    Irelia.Q.Cast(obj);
+                return;
             }
             else
             {
@@ -689,8 +674,8 @@ namespace DominationAIO.NewPlugins
             {
                 if (!Helper.UnderTower(target.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                 {
-                    if (Irelia.Q.Cast(target) == CastStates.SuccessfullyCasted)
-                        return;
+                    Irelia.Q.Cast(target);
+                    return;
                 }
             }
 
@@ -703,8 +688,8 @@ namespace DominationAIO.NewPlugins
                     {
                         if (!Helper.UnderTower(obj1.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                         {
-                            if (Irelia.Q.Cast(obj1) == CastStates.SuccessfullyCasted)
-                                return;
+                            Irelia.Q.Cast(obj1);
+                            return;
                         }
                     }
 
@@ -719,8 +704,8 @@ namespace DominationAIO.NewPlugins
                                 {
                                     if (!Helper.UnderTower(obj2.Position) || MenuSettings.KeysSettings.TurretKey.Active)
                                     {
-                                        if (Irelia.Q.Cast(obj2) == CastStates.SuccessfullyCasted)
-                                            return;
+                                        Irelia.Q.Cast(obj2);
+                                        return;
                                     }
                                 }
                             }

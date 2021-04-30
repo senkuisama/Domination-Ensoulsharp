@@ -254,6 +254,19 @@ namespace SPredictionMash
         }
         #endregion
 
+        public static Vector3 FSPredCastPos(this Spell s, AIBaseClient target)
+        {
+            if(target != null)
+            {
+                var pout = FSpred.Prediction.Prediction.GetPrediction(s, target);
+
+                if(pout.Hitchance >= FSpred.Prediction.HitChance.High)
+                return pout.CastPosition;
+            }
+
+            return Vector3.Zero;
+        }
+
         public static Vector3 PredCastPos(this Spell s, AIHeroClient t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
         {
             if (rangeCheckFrom == null)

@@ -1,6 +1,7 @@
 ﻿using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +34,104 @@ namespace FunnySlayerCommon
             Orbwalker.OnNonKillableMinion += Orbwalker_OnNonKillableMinion;
             Orbwalker.OnBeforeMove += Orbwalker_OnBeforeMove;
             //Game.OnUpdate += Game_OnUpdate;
+
+            if(MenuClass.SetOrbWalkerTarget.Enabled)
+                Game.OnUpdate += Game_OnUpdate1;
+
+            AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+
+            MenuClass.SetOrbWalkerTarget.ValueChanged += SetOrbWalkerTarget_ValueChanged;
         }
 
+        private static void SetOrbWalkerTarget_ValueChanged(MenuBool menuItem, EventArgs args)
+        {
+            if (!MenuClass.SetOrbWalkerTarget.Enabled)
+            {
+                Game.OnUpdate -= Game_OnUpdate1;
+                Orbwalker.AttackEnabled = true;
+                Orbwalker.MoveEnabled = true;
+            }
+            else
+            {
+                Game.OnUpdate += Game_OnUpdate1;
+            }
+        }
+
+        private static float CastTimeDelay => ObjectManager.Player.CombatType == GameObjectCombatType.Ranged ? ObjectManager.Player.AttackCastDelay * 1000 : 0f;
+        private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
+        {
+            if (!sender.IsMe)
+                return;
+
+            if (Orbwalker.IsAutoAttack(args.SData.Name) && !Orbwalker.IsAutoAttackReset(args.SData.Name))
+            {
+                LastAttack = Variables.GameTimeTickCount;
+            }
+        }
+
+        public static int LastDisableMove = 0;
+        private static int LastAttack = 0;
+        private static int LastSendPrintChat = 0;
+        private static void Game_OnUpdate1(EventArgs args)
+        {
+            if(ObjectManager.Player.CharacterName == "Yasuo")
+            {
+                if (DominationAIO.NewPlugins.Yasuo.MyYS.CheckImDashing)
+                {
+                    Orbwalker.AttackEnabled = false;
+                    ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                    Orbwalker.MoveEnabled = true;
+
+
+                    if (Orbwalker.ActiveMode <= OrbwalkerMode.LastHit)
+                        Orbwalker.Orbwalk(null, Game.CursorPos);
+                    else
+                        Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
+                }
+                else
+                {
+                    if (Orbwalker.ActiveMode <= OrbwalkerMode.LastHit)
+                        Orbwalker.Orbwalk(Orbwalker.GetTarget(), Game.CursorPos);
+                    else
+                        Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
+                    Orbwalker.AttackEnabled = true;
+                }
+
+                Set();
+            }
+            else
+            {
+                Set();
+            }                       
+            if (AfterAA)
+            {
+                LastDisableMove = 0;
+                Orbwalker.MoveEnabled = true;
+            }
+        }
+
+        private static void Set()
+        {
+            if (OnAA || Variables.GameTimeTickCount - LastAttack < CastTimeDelay)
+            {
+                LastDisableMove = Variables.GameTimeTickCount;
+                Orbwalker.MoveEnabled = false;
+            }
+            else
+            {
+                Orbwalker.MoveEnabled = true;
+            }
+
+            if (Variables.GameTimeTickCount - LastDisableMove >= 500 || Variables.GameTimeTickCount - LastAttack >= CastTimeDelay)
+            {
+                Orbwalker.MoveEnabled = true;
+                if (Variables.GameTimeTickCount - LastSendPrintChat >= 20000)
+                {
+                    LastSendPrintChat = Variables.GameTimeTickCount;
+                    Game.Print("Set Move = " + Orbwalker.MoveEnabled);
+                }
+            }
+        }
         private static void Orbwalker_OnBeforeMove(object sender, BeforeMoveEventArgs e)
         {
             if (aaa == true)

@@ -13,9 +13,9 @@ namespace DominationAIO.NewPlugins
     {
         public static void AttackToMenu(this Menu myMenu)
         {
-            Menu FStarget = new Menu("FS Target", "Target Selector");
-            FStarget.AddTargetSelectorMenu();
-            myMenu.Add(FStarget);
+            //Menu FStarget = new Menu("FS Target", "Target Selector");
+            //FStarget.AddTargetSelectorMenu();
+            //myMenu.Add(FStarget);
 
             Menu Qmenu = new Menu("Qmenu", "Q Settings")
             {

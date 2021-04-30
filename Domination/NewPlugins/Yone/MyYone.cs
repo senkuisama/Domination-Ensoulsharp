@@ -409,7 +409,7 @@ namespace DominationAIO.NewPlugins
             Keys.Add(YoneMenu.Keys.SemiE).Permashow();
             Keys.Add(YoneMenu.Keys.SemiR).Permashow();
 
-            FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(YMenu);
+            //FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(YMenu);
 
             YMenu.Add(combomenu);
             YMenu.Add(Qcb);

@@ -68,37 +68,54 @@ namespace FunnySlayerCommon
             ThisMenu.Add(SetOrbWalkerTarget);
             ThisMenu.Add(DrawTarget);
 
-            Game.OnUpdate += Game_OnUpdate;
+            if(SetOrbWalkerTarget.Enabled)
+                Game.OnUpdate += Game_OnUpdate;
+
             Drawing.OnDraw += Drawing_OnDraw;
 
             menu.Add(ThisMenu);
         }
 
         private static void Game_OnUpdate(EventArgs args)
-        {
+        {          
             if (SetOrbWalkerTarget.Enabled && Orbwalker.ActiveMode <= OrbwalkerMode.Harass)
             {
-                var target = FSTargetSelector.GetFSTarget(ObjectManager.Player.GetRealAutoAttackRange());
-                if(target != null)
+                if (ObjectManager.Player.CanAttack || Orbwalker.CanAttack())
                 {
-                    Orbwalker.Orbwalk(target, Game.CursorPos);
+                    var target = FSTargetSelector.GetFSTarget(ObjectManager.Player.GetCurrentAutoAttackRange());
+                    if (target != null)
+                    {
+                        Orbwalker.Orbwalk(target, Game.CursorPos);
+                    }
+                    else
+                    {
+                        Orbwalker.Orbwalk(Orbwalker.GetTarget(), Game.CursorPos);
+                    }
                 }
                 else
                 {
-                    Orbwalker.Orbwalk(Orbwalker.GetTarget(), Game.CursorPos);
+                    ResetOrbwalker();
                 }
             }
             else
             {
-                if (Orbwalker.ActiveMode > OrbwalkerMode.LastHit)
-                {
-                    Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
-                }
-                else
-                {
-                    Orbwalker.SetOrbwalkerPosition(Game.CursorPos);
-                }
+                ResetOrbwalker();
             }          
+        }
+
+        public static void ResetOrbwalker()
+        {
+            Orbwalker.MoveEnabled = true;
+            Orbwalker.AttackEnabled = true;
+
+            if (Orbwalker.ActiveMode > OrbwalkerMode.LastHit)
+            {               
+                Orbwalker.SetOrbwalkerPosition(Vector3.Zero);
+            }
+            else
+            {
+                Orbwalker.Orbwalk(Orbwalker.GetTarget(), Game.CursorPos);
+            }
         }
 
         public static MenuSlider GetSPriority(AIHeroClient t)
@@ -109,14 +126,24 @@ namespace FunnySlayerCommon
         {
             if (DrawTarget.Enabled  && FSTargetSelector.GetFSTarget(DrawTarget.ActiveValue) != null)
             {
-                var targetpos = Drawing.WorldToScreen(FSTargetSelector.GetFSTarget(DrawTarget.ActiveValue).Position);
-                Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X + 25, targetpos.Y - 25), 5f, System.Drawing.Color.Red);
-                Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X - 25, targetpos.Y - 25), 5f, System.Drawing.Color.Red);
+                var orbtarget = FSTargetSelector.GetFSTarget(ObjectManager.Player.GetCurrentAutoAttackRange());
+                if (orbtarget != null && SetOrbWalkerTarget.Enabled && Orbwalker.ActiveMode <= OrbwalkerMode.Harass && (FunnySlayerCommon.OnAction.BeforeAA || FunnySlayerCommon.OnAction.OnAA))
+                {
+                    var targetpos = Drawing.WorldToScreen(orbtarget.Position);
+                    Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X + 25, targetpos.Y - 25), 5f, System.Drawing.Color.Red);
+                    Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X - 25, targetpos.Y - 25), 5f, System.Drawing.Color.Red);
 
-                Drawing.DrawCircle(FSTargetSelector.GetFSTarget(DrawTarget.ActiveValue).Position, 100, System.Drawing.Color.Red);
+                    Drawing.DrawCircle(orbtarget.Position, 100, System.Drawing.Color.Red);
+                }
+                else
+                {
+                    var targetpos = Drawing.WorldToScreen(FSTargetSelector.GetFSTarget(DrawTarget.ActiveValue).Position);
+                    Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X + 25, targetpos.Y - 25), 5f, System.Drawing.Color.White);
+                    Drawing.DrawLine(new Vector2(targetpos.X, targetpos.Y), new Vector2(targetpos.X - 25, targetpos.Y - 25), 5f, System.Drawing.Color.White);
+
+                    Drawing.DrawCircle(FSTargetSelector.GetFSTarget(DrawTarget.ActiveValue).Position, 100, System.Drawing.Color.Red);
+                }                 
             }
         }
-
-
     }
 }

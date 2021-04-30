@@ -37,7 +37,7 @@ namespace DominationAIO.NewPlugins
             spells.Add(E);
             spells.Add(R);
 
-            FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(LeeMn);
+            //FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(LeeMn);
             LeeMenu.MenuAttack(LeeMn);
 
             Game.OnUpdate += Game_OnUpdate;
@@ -46,18 +46,30 @@ namespace DominationAIO.NewPlugins
             //Drawing.OnEndScene += Drawing_OnEndScene;
 
             Game.OnUpdate += Game_OnUpdate1;
-            Drawing.OnEndScene += Game_OnUpdate2;
-            //Drawing.OnEndScene += Drawing_OnEndScene1;
+            Game.OnUpdate += Game_OnUpdate2;
+            Drawing.OnEndScene += Drawing_OnEndScene1;
         }
 
         private static void Drawing_OnEndScene1(EventArgs args)
         {
-            foreach (var item in GameObjects.EnemyHeroes.Where(i => i.IsValidTarget()))
+            if (LeeMenu.LeeR.LogicInsec.Active)
             {
-                var target = item;
-                var pred = FSpred.Prediction.Prediction.GetPrediction(Rout, target);
-                Render.Circle.DrawCircle(pred.CastPosition, 20, System.Drawing.Color.Aqua);
-                Render.Circle.DrawCircle(pred.UnitPosition, 20, System.Drawing.Color.Azure);
+                var maxhit = 1;
+                var pos = Vector3.Zero;
+                var insectarget = FindtargetInsecMaxhit(out maxhit, out pos);
+                if (insectarget != null)
+                {
+                    Render.Circle.DrawCircle(insectarget.Position, 100, System.Drawing.Color.Black);
+                    Render.Circle.DrawCircle(pos, 100, System.Drawing.Color.Blue);
+                    var objpos = Drawing.WorldToScreen(pos);
+
+                    Drawing.DrawText(objpos, System.Drawing.Color.Blue, maxhit.ToString());
+
+
+                    var line = new Geometry.Rectangle(insectarget.Position.ToVector2(), insectarget.Position.Extend(pos, -900).ToVector2(), 60);
+                    line.Draw(System.Drawing.Color.Blue);
+
+                }
             }
         }
 
@@ -76,24 +88,13 @@ namespace DominationAIO.NewPlugins
 
         }
 
-        private static void Game_OnUpdate2(EventArgs args)
+        private static void Insec()
         {
-            var maxhit = 1;
-            var pos = Vector3.Zero;
-            var insectarget = FindtargetInsecMaxhit(out maxhit, out pos);
-            if (insectarget != null)
-            { 
-                Render.Circle.DrawCircle(insectarget.Position, 100, System.Drawing.Color.Black);
-                Render.Circle.DrawCircle(pos, 100, System.Drawing.Color.Blue);
-                var objpos = Drawing.WorldToScreen(pos);
 
-                Drawing.DrawText(objpos, System.Drawing.Color.Blue, maxhit.ToString());
+        }
 
-
-                var line = new Geometry.Rectangle(insectarget.Position.ToVector2(), insectarget.Position.Extend(pos, -900).ToVector2(), 60);
-                line.Draw(System.Drawing.Color.Blue);
-
-            }
+        private static void Game_OnUpdate2(EventArgs args)
+        {                     
             switch (Orbwalker.ActiveMode)
             {
                 case OrbwalkerMode.Combo:

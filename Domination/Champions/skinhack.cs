@@ -15,45 +15,70 @@ namespace DominationAIO.Champions
     {
 
         public static Menu menu;
-
+        private static List<CharSkin> charSkins = new List<CharSkin>(); 
         public static void OnLoad()
         {
             try
             {
+
                 menu = new Menu("skinhack", "SkinHack", true);
 
-                var champs = menu.Add(new Menu("Champions", "Champions"));
-                var allies = champs.Add(new Menu("Allies", "Allies"));
-                var enemies = champs.Add(new Menu("Enemies", "Enemies"));
-                //ObjectManager.Player.SetSkin(1);
-                foreach (var hero in GameObjects.Heroes)
-                {
-                    var champMenu = new Menu(hero.CharacterName + hero.NetworkId + hero.Name, hero.CharacterName);
-                    champMenu.Add(new MenuSlider("SkinIndex", "Skin Index", 1, 1, 50));
-                    champMenu.GetValue<MenuSlider>("SkinIndex").ValueChanged += (s, e) =>
-                    {
-                        Console.WriteLine($"[SKINHACK] Skin ID: {champMenu.GetValue<MenuSlider>("SkinIndex").Value}");
-                        GameObjects.Heroes.ForEach(
-                            p =>
-                            {
-                                if (p.CharacterName == hero.CharacterName)
-                                {
-                                    Console.WriteLine($"[SKINHACK] Changed: {hero.CharacterName}");
-                                    p.SetSkin(champMenu.GetValue<MenuSlider>("SkinIndex").Value);
-                                }
-                            });
-                    };
+                var allies = menu.Add(new Menu("Allies", "Allies"));
+                var enemies = menu.Add(new Menu("Enemies", "Enemies"));
 
-                    var rootMenu = hero.IsAlly ? allies : enemies;
-                    rootMenu.Add(champMenu);
+                foreach (var item in ObjectManager.Get<AIHeroClient>())
+                {
+                    var target = item;
+
+                    CharSkin hisskin = new CharSkin(target.NetworkId, 0);
+
+                    if (!charSkins.Contains(hisskin))
+                    {
+                        charSkins.Add(hisskin);
+
+                        if (hisskin.IsAlly)
+                        {
+                            allies.Add(hisskin.Menu);
+                        }
+                        else
+                        {
+                            enemies.Add(hisskin.Menu);
+                        }
+                    }
                 }
 
                 menu.Attach();
             }
             catch
             {
-
+                Console.WriteLine("Load Skin Changer Error");
             }
+        }
+    }
+    class CharSkin
+    {
+        public int SkinID;
+        public int UID;
+        public bool IsAlly;
+        public MenuSlider Menu;
+
+        public CharSkin(int uid, int skinid)
+        {
+            SkinID = skinid;
+            UID = uid;
+            var target = ObjectManager.GetUnitByNetworkId<AIHeroClient>(uid);
+            IsAlly = target.IsAlly;
+
+            Menu = new MenuSlider(target.IsAlly + target.NetworkId.ToString(), target.CharacterName + " Skin ID", 0, 0, 50);
+
+            Menu.ValueChanged += Menu_ValueChanged;
+        }
+
+        private void Menu_ValueChanged(MenuSlider menuItem, EventArgs args)
+        {
+            var target = ObjectManager.GetUnitByNetworkId<AIHeroClient>(this.UID);
+
+            target.SetSkin(menuItem.Value);
         }
     }
 }

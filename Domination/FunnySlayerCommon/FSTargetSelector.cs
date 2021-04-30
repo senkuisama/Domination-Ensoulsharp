@@ -43,22 +43,22 @@ namespace FunnySlayerCommon
                     switch (MenuClass.GetWeight.Index)
                     {
                         case 0:
-                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health).ToList();
+                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range) && !i.IsInvulnerableVisual).OrderBy(i => i.Health).ToList();
                             break;
                         case 1:
-                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Armor).ToList();
+                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range) && !i.IsInvulnerableVisual).OrderBy(i => i.Armor).ToList();
                             break;
                         case 2:
-                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Mana).ToList();
+                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range) && !i.IsInvulnerableVisual).OrderBy(i => i.Mana).ToList();
                             break;
                         case 3:
-                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i)).ToList();
+                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range) && !i.IsInvulnerableVisual).OrderBy(i => i.Health / ObjectManager.Player.GetAutoAttackDamage(i)).ToList();
                             break;
                         case 4:
-                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.CombatType == GameObjectCombatType.Ranged).ToList();
+                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range) && !i.IsInvulnerableVisual).OrderBy(i => i.CombatType == GameObjectCombatType.Ranged).ToList();
                             break;
                         case 5:
-                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range)).OrderBy(i => i.CombatType == GameObjectCombatType.Melee).ToList();
+                            ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range) && !i.IsInvulnerableVisual).OrderBy(i => i.CombatType == GameObjectCombatType.Melee).ToList();
                             break;
                         default:
                             return TargetSelector.GetTarget(range);
@@ -66,6 +66,11 @@ namespace FunnySlayerCommon
                 }
             }
           
+            if(MenuClass.SecondMenu.Index == 2)
+            {
+                ThisTargetList = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget(range) && !i.IsInvulnerableVisual).OrderByDescending(i => MenuClass.GetSPriority(i)).ToList();
+            }
+
             if (MenuClass.OrderByNearMouse.Enabled)
             {
                 var thetargets = ThisTargetList.OrderBy(i => i.Position.Distance(Game.CursorPos)).ToList();

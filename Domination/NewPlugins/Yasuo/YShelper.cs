@@ -16,7 +16,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             if (!ObjectManager.Player.IsDashing())
                 return false;
 
-            return Variables.GameTimeTickCount - ObjectManager.Player.GetDashInfo().StartTick > Yasuo.MyYS.YasuoMenu.Ecombo.DashingTick.Value;
+            return ObjectManager.Player.GetDashInfo().EndTick - Variables.GameTimeTickCount > Yasuo.MyYS.YasuoMenu.Ecombo.DashingTick.Value;
         }
         public static Vector3 Eprediction(AIBaseClient aIBaseClient = null)
         {
@@ -28,13 +28,32 @@ namespace DominationAIO.NewPlugins.Yasuo
             var E = new Spell(SpellSlot.E, 475);
             E.SetSkillshot(0.3f, 175, 750f + 0.6f * ObjectManager.Player.MoveSpeed, false, SpellType.Line);
 
-            if (CheckDashingTick())
+            if (MyYS.CheckImDashing)
             {
                 Epred = aIBaseClient.Position;
             }
             else
             {
                 Epred = FSpred.Prediction.Prediction.GetPrediction(E, aIBaseClient).CastPosition;
+            }
+
+            return Epred;
+        }
+
+        public static Vector3 Eprediction(Spell thespell, AIBaseClient aIBaseClient = null)
+        {
+            if (aIBaseClient == null)
+                return Vector3.Zero;
+
+            var Epred = aIBaseClient.Position;
+
+            if (MyYS.CheckImDashing)
+            {
+                Epred = aIBaseClient.Position;
+            }
+            else
+            {
+                Epred = FSpred.Prediction.Prediction.GetPrediction(thespell, aIBaseClient).CastPosition;
             }
 
             return Epred;
@@ -107,7 +126,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             var Et = new Spell(SpellSlot.E, 475);
             Et.SetSkillshot(0.3f, 175, (float)(750f + 0.6f * ObjectManager.Player.MoveSpeed), false, SpellType.Line);
 
-            var pos = Eprediction(target);
+            Vector3 pos = Eprediction(Et, target);
 
             switch (MyYS.YasuoMenu.Ecombo.Yasuo_EMode.SelectedValue)
             {
@@ -119,56 +138,37 @@ namespace DominationAIO.NewPlugins.Yasuo
                     break;
             }
 
-            var obj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && i.DistanceToPlayer() <= 475 && CanE(i));
+            var obj = ObjectManager.Get<AIBaseClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(475) && i.DistanceToPlayer() <= 475 && CanE(i));
 
             if(obj == null)
             {
                 return null;
             }
+
+            var gotobj = obj.Where(i => (pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer())
+            || (pos.DistanceSquared(PosAfterE(i)) <= Math.Pow(MyYS.YasuoMenu.RangeCheck.EQrange.Value + MyYS.YasuoMenu.EQCombo.EBonusRange.Value, 2))
+            && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i))));
+
+            var getobj = gotobj.OrderBy(i => PosAfterE(i).Distance(pos))
+                .ThenBy(i => i.Type == GameObjectType.AIMinionClient)
+                .FirstOrDefault();
+
             switch (MyYS.YasuoMenu.Ecombo.Yasuo_ERange.ActiveValue)
             {
                 case 1:
-                    return
-
-
-                obj.Where(
-                    i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 50
-                         )
-                         ||
-                         (
-                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + MyYS.YasuoMenu.EQCombo.EBonusRange.Value
-                         )
-                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
-                ).OrderByDescending(i => PosAfterE(i).Distance(pos)).ThenBy(i => i.Type == GameObjectType.AIMinionClient).FirstOrDefault();
+                getobj = gotobj.OrderByDescending(i => PosAfterE(i).Distance(pos))
+                        .ThenBy(i => i.Type == GameObjectType.AIMinionClient)
+                        .FirstOrDefault();
+                    break;
                 case 2:
-                    return
-
-
-                obj.Where(
-                    i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer() + 20
-                         )
-                         ||
-                         (
-                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + MyYS.YasuoMenu.EQCombo.EBonusRange.Value
-                         )
-                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
-                ).OrderBy(i => PosAfterE(i).Distance(pos)).ThenBy(i => i.Type == GameObjectType.AIMinionClient).FirstOrDefault();
+               getobj = gotobj.OrderBy(i => PosAfterE(i).Distance(pos))
+                        .ThenBy(i => i.Type == GameObjectType.AIMinionClient)
+                        .FirstOrDefault();
+                    break;
+                default:
+                    goto case 2;
             }
-            return
-
-
-                obj.Where(
-                    i => (
-                        pos.Distance(PosAfterE(i)) <= pos.DistanceToPlayer()
-                         )
-                         ||
-                         (
-                        pos.Distance(PosAfterE(i)) <= MyYS.YasuoMenu.RangeCheck.EQrange.Value + MyYS.YasuoMenu.EQCombo.EBonusRange.Value
-                         )
-                         && (MyYS.YasuoMenu.Yasuo_Keys.TurretKey.Active || !UnderTower(PosAfterE(i)))
-                ).OrderByDescending(i => PosAfterE(i).Distance(pos)).ThenBy(i => i.Type == GameObjectType.AIMinionClient).FirstOrDefault();
+            return getobj;
         }
     }
 }

@@ -121,9 +121,21 @@ namespace DominationAIO.Champions
             Game.OnUpdate += Game_OnUpdate;
             //Orbwalker.OnAction += Orbwalker_OnAction;
             AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+            Game.OnUpdate += Game_OnUpdate1;
 
         }
 
+        private static void Game_OnUpdate1(EventArgs args)
+        {
+            if (ObjectManager.Player.HasBuff("KaisaE"))
+            {
+                Orbwalker.AttackEnabled = false;
+            }
+            else
+            {
+                Orbwalker.AttackEnabled = true;
+            }
+        }
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
         {

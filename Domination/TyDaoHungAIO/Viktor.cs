@@ -112,7 +112,7 @@ namespace DaoHungAIO.Champions
             SpellList.Add(Emax);
             // Finetune spells
             Q.SetTargetted(0.25f, 2000);
-            W.SetSkillshot(0.5f, 300, float.MaxValue, false, SpellType.Circle);
+            W.SetSkillshot(1.4f, 300, float.MaxValue, false, SpellType.Circle);
             E.SetSkillshot(0, 55, speedE, false, SpellType.Line);
             R.SetSkillshot(0.25f, 300f, float.MaxValue, false, SpellType.Circle);
 
@@ -193,13 +193,376 @@ namespace DaoHungAIO.Champions
             }
         }
 
+        private static void PredictCastE(AIHeroClient target)
+        {
+            // Helpers
+            bool inRange = SharpDX.Vector2.DistanceSquared(target.Position.ToVector2(), player.Position.ToVector2()) < E.Range * E.Range;
+            FSpred.Prediction.PredictionOutput prediction;
+            bool spellCasted = false;
+
+            // Positions
+            SharpDX.Vector3 pos1, pos2;
+
+            // Champs
+            var nearChamps = (from champ in ObjectManager.Get<AIHeroClient>() where champ.IsValidTarget(maxRangeE) && target != champ select champ).ToList();
+            var innerChamps = new List<AIHeroClient>();
+            var outerChamps = new List<AIHeroClient>();
+            foreach (var champ in nearChamps)
+            {
+                if (SharpDX.Vector2.DistanceSquared(champ.Position.ToVector2(), player.Position.ToVector2()) < E.Range * E.Range)
+                    innerChamps.Add(champ);
+                else
+                    outerChamps.Add(champ);
+            }
+
+            // Minions
+            var nearMinions = GameObjects.GetMinions(player.Position, maxRangeE);
+            var innerMinions = new List<AIBaseClient>();
+            var outerMinions = new List<AIBaseClient>();
+            foreach (var minion in nearMinions)
+            {
+                if (SharpDX.Vector2.DistanceSquared(minion.Position.ToVector2(), player.Position.ToVector2()) < E.Range * E.Range)
+                    innerMinions.Add(minion);
+                else
+                    outerMinions.Add(minion);
+            }
+
+            // Main target in close range
+            if (inRange)
+            {
+                // Get prediction reduced speed, adjusted sourcePosition
+                E.Speed = speedE * 0.9f;
+                E.From = target.Position + (SharpDX.Vector3.Normalize(player.Position - target.Position) * (lengthE * 0.1f));
+                prediction = FSpred.Prediction.Prediction.GetPrediction(E, target);// E.GetPrediction(target);
+                E.From = player.Position;
+
+                // Prediction in range, go on
+                if (prediction.CastPosition.Distance(player.Position) < E.Range)
+                    pos1 = prediction.CastPosition;
+                // Prediction not in range, use exact position
+                else
+                {
+                    pos1 = target.Position;
+                    E.Speed = speedE;
+                }
+
+                // Set new sourcePosition
+                E.From = pos1;
+                E.RangeCheckFrom = pos1;
+
+                // Set new range
+                E.Range = lengthE;
+
+                // Get next target
+                if (nearChamps.Count > 0)
+                {
+                    // Get best champion around
+                    var closeToPrediction = new List<AIHeroClient>();
+                    foreach (var enemy in nearChamps)
+                    {
+                        // Get prediction
+                        prediction = FSpred.Prediction.Prediction.GetPrediction(E, enemy);
+                        // Validate target
+                        if (prediction.Hitchance >= FSpred.Prediction.HitChance.High && SharpDX.Vector2.DistanceSquared(pos1.ToVector2(), prediction.CastPosition.ToVector2()) < (E.Range * E.Range) * 0.8)
+                            closeToPrediction.Add(enemy);
+                    }
+
+                    // Champ found
+                    if (closeToPrediction.Count > 0)
+                    {
+                        // Sort table by health DEC
+                        if (closeToPrediction.Count > 1)
+                            closeToPrediction.Sort((enemy1, enemy2) => enemy2.Health.CompareTo(enemy1.Health));
+
+                        // Set destination
+                        prediction = FSpred.Prediction.Prediction.GetPrediction(E, closeToPrediction[0]);
+                        pos2 = prediction.CastPosition;
+
+                        // Cast spell
+                        CastE(pos1, pos2);
+                        spellCasted = true;
+                    }
+                }
+
+                // Spell not casted
+                if (!spellCasted)
+                {
+                    CastE(pos1, FSpred.Prediction.Prediction.GetPrediction(E, target).CastPosition);
+                }
+
+                // Reset spell
+                E.Speed = speedE;
+                E.Range = rangeE;
+                E.From = player.Position;
+                E.RangeCheckFrom = player.Position;
+            }
+
+            // Main target in extended range
+            else
+            {
+                // Radius of the start point to search enemies in
+                float startPointRadius = 150;
+
+                // Get initial start point at the border of cast radius
+                SharpDX.Vector3 startPoint = player.Position + SharpDX.Vector3.Normalize(target.Position - player.Position) * rangeE;
+
+                // Potential start from postitions
+                var targets = (from champ in nearChamps where SharpDX.Vector2.DistanceSquared(champ.Position.ToVector2(), startPoint.ToVector2()) < startPointRadius * startPointRadius && SharpDX.Vector2.DistanceSquared(player.Position.ToVector2(), champ.Position.ToVector2()) < rangeE * rangeE select champ).ToList();
+                if (targets.Count > 0)
+                {
+                    // Sort table by health DEC
+                    if (targets.Count > 1)
+                        targets.Sort((enemy1, enemy2) => enemy2.Health.CompareTo(enemy1.Health));
+
+                    // Set target
+                    pos1 = targets[0].Position;
+                }
+                else
+                {
+                    var minionTargets = (from minion in nearMinions where SharpDX.Vector2.DistanceSquared(minion.Position.ToVector2(), startPoint.ToVector2()) < startPointRadius * startPointRadius && SharpDX.Vector2.DistanceSquared(player.Position.ToVector2(), minion.Position.ToVector2()) < rangeE * rangeE select minion).ToList();
+                    if (minionTargets.Count > 0)
+                    {
+                        // Sort table by health DEC
+                        if (minionTargets.Count > 1)
+                            minionTargets.Sort((enemy1, enemy2) => enemy2.Health.CompareTo(enemy1.Health));
+
+                        // Set target
+                        pos1 = minionTargets[0].Position;
+                    }
+                    else
+                        // Just the regular, calculated start pos
+                        pos1 = startPoint;
+                }
+
+                // Predict target position
+                E.From = pos1;
+                E.Range = lengthE;
+                E.RangeCheckFrom = pos1;
+                prediction = FSpred.Prediction.Prediction.GetPrediction(E, target);
+
+                // Cast the E
+                if (prediction.Hitchance >= FSpred.Prediction.HitChance.High)
+                    CastE(pos1, prediction.CastPosition);
+
+                // Reset spell
+                E.Range = rangeE;
+                E.From = player.Position;
+                E.RangeCheckFrom = player.Position;
+            }
+
+        }
+
+        private static float MathFloat = 0;
+        private static void FSPredictionECast(AIBaseClient target)
+        {
+            if (target == null || !target.IsValidTarget())
+                return;
+
+            E.Speed = speedE;
+            E.Range = rangeE;
+            E.From = player.Position;
+            E.RangeCheckFrom = player.Position;
+
+            var SkillShotE = new Spell(SpellSlot.Unknown, lengthE);
+            SkillShotE.SetSkillshot(0.55f, 55f, 1500f, false, SpellType.Line);
+
+            var TempVector = target.Position - ObjectManager.Player.Position;
+            var NewVector = Vector3.Normalize(TempVector);
+            var tempspell = new Spell(SpellSlot.Unknown, maxRangeE);
+            tempspell.SetSkillshot(1f, 55f, 1500f, false, SpellType.Line);
+            var temppred = FSpred.Prediction.Prediction.GetPrediction(tempspell, target);
+
+            if (target.DistanceToPlayer() <= 525)
+            {
+                //TryFindPos1                
+                if(temppred.Hitchance >= FSpred.Prediction.HitChance.High)
+                {
+                    var ThePred = FSpred.Prediction.Prediction.GetPrediction(SkillShotE, target);
+                    var posE1 = ThePred.CastPosition.Extend(temppred.CastPosition, -200);
+                    if (ThePred.Hitchance >= FSpred.Prediction.HitChance.High)
+                    {
+                        UpdateThePos(posE1, temppred, ThePred);
+                    }
+                    else
+                    {
+                        posE1 = target.Position.Extend(temppred.CastPosition, -350);
+                        UpdateThePos(target, posE1, temppred);
+                    }
+                }
+                else
+                {                    
+                    var Pos1 = ObjectManager.Player.Position + NewVector * 200;
+
+                    if(Pos1.DistanceToPlayer() <= 525)
+                    {
+                        UpdateThePos(Pos1);
+                    }
+                }
+            }
+            else
+            {
+                var epred = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                int i = 300;
+
+                float alpha = FsEpred.Value * (float)Math.PI / 180;
+
+                if (AutoCalculator.Enabled)
+                {
+                    var simeplepos = (180 / Math.PI);
+                    var first = target.Position - ObjectManager.Player.Position;
+                    var second = temppred.CastPosition - ObjectManager.Player.Position;
+                    var a = 25;
+                    var third = target.Position.Extend(temppred.CastPosition, a);
+
+                    while (third.DistanceToPlayer() > 525)
+                    {
+                        a += 25;
+                        third = target.Position.Extend(temppred.CastPosition, a);
+
+                        if (a > rangeE)
+                            break;
+                    }
+
+                    var fourth = third - ObjectManager.Player.Position;
+
+                    var letcalculator = (first.X * fourth.X + first.Y * fourth.Y) 
+                        / ((Math.Sqrt(first.X * first.X + first.Y * first.Y)) * (Math.Sqrt(fourth.X * fourth.X + fourth.Y * fourth.Y)));
+
+                    var mathcompleted = simeplepos * Math.Acos(letcalculator);
+
+                    if(mathcompleted != double.NaN)
+                    {
+                        alpha = (float)(mathcompleted) * (float)Math.PI / 180;
+                    }
+
+                    MathFloat = Convert.ToInt32(mathcompleted);
+                }
+
+                while (epred.Hitchance < FSpred.Prediction.HitChance.High)
+                {
+                    var vv = ObjectManager.Player.Position.Extend(target.Position, i);
+
+                    var cp = ObjectManager.Player.Position.ToVector2() +
+                                 (vv.ToVector2() - ObjectManager.Player.Position.ToVector2()).Rotated
+                                     (1 * alpha);
+
+                    var cp2 = ObjectManager.Player.Position.ToVector2() +
+                                 (vv.ToVector2() - ObjectManager.Player.Position.ToVector2()).Rotated
+                                     (-1 * alpha);
+                    int d = 1;
+                    if (temppred.Hitchance >= FSpred.Prediction.HitChance.High)
+                    {
+                        if (target.Position.Extend(temppred.CastPosition, -350).Distance(cp2) <= target.Position.Extend(temppred.CastPosition, -300).Distance(cp))
+                        {
+                            d = -1;
+                        }
+                    }
+
+                    switch (d)
+                    {
+                        case -1:
+                            UpdateThePos(cp2.ToVector3());
+                            break;
+                        default:
+                            UpdateThePos(cp.ToVector3());
+                            break;
+                    }
+
+                    i += 25;
+                    if (i > 525)
+                    {
+                        //UpdateThePos(vv);
+                        break;
+                    }
+                }
+            }
+
+            var Epred = FSpred.Prediction.Prediction.GetPrediction(E, target);
+            if(Epred.Hitchance >= FSpred.Prediction.HitChance.High && E.From.DistanceSquared(ObjectManager.Player.Position) <= 275625 && Epred.CastPosition.DistanceSquared(ObjectManager.Player.Position) <= 1500625 && E.From.DistanceSquared(Epred.CastPosition) <= 490000)
+            {
+                CastE(E.From, Epred.CastPosition);
+            }
+
+            UpdateThePos(ObjectManager.Player.Position.Extend(target.Position, 525));
+            {
+                var Epred2 = FSpred.Prediction.Prediction.GetPrediction(E, target);
+                if (Epred2.Hitchance >= FSpred.Prediction.HitChance.High && E.From.DistanceSquared(ObjectManager.Player.Position) <= 275625 && Epred.CastPosition.DistanceSquared(ObjectManager.Player.Position) <= 1500625 && E.From.DistanceSquared(Epred.CastPosition) <= 490000)
+                {
+                    CastE(E.From, Epred2.CastPosition);
+                }
+            }
+            
+            E.Speed = speedE;
+            E.Range = rangeE;
+            E.From = player.Position;
+            E.RangeCheckFrom = player.Position;
+        }
+        private static void UpdateThePos(Vector3 vector3)
+        {
+            E.UpdateSourcePosition(vector3, vector3);
+        }
+        private static void UpdateThePos(AIBaseClient target, Vector3 zero, FSpred.Prediction.PredictionOutput temppred)
+        {
+            if (zero.DistanceToPlayer() <= 525)
+            {
+                E.UpdateSourcePosition(zero, zero);
+            }
+            else
+            {
+                if (temppred.CastPosition.DistanceToPlayer() <= 525)
+                {
+                    E.UpdateSourcePosition(temppred.CastPosition, temppred.CastPosition);
+                }
+                else
+                {
+                    var circel = new Geometry.Circle(FSpred.Prediction.Prediction.PredictUnitPosition(target, 500), 350).Points.ToList();
+                    circel.RemoveAll(i => i.DistanceToPlayer() >= 525);
+                    var pos = circel[0].ToVector3();
+                    if (!pos.IsZero)
+                    {
+                        E.UpdateSourcePosition(pos, pos);
+                    }
+                }
+            }
+        }
+
+        private static void UpdateThePos(Vector3 zero, FSpred.Prediction.PredictionOutput temppred, FSpred.Prediction.PredictionOutput ThePred)
+        {
+            if (zero.DistanceToPlayer() <= 525)
+            {
+                E.UpdateSourcePosition(zero, zero);
+            }
+            else
+            {
+                if (temppred.CastPosition.DistanceToPlayer() <= 525)
+                {
+                    E.UpdateSourcePosition(temppred.CastPosition, temppred.CastPosition);
+                }
+                else
+                {
+                    if (ThePred.CastPosition.DistanceToPlayer() <= 525)
+                    {
+                        E.UpdateSourcePosition(ThePred.CastPosition, ThePred.CastPosition);
+                    }
+                    else
+                    {
+                        var circel = new Geometry.Circle(ThePred.CastPosition.ToVector2(), 350).Points.ToList();
+                        circel.RemoveAll(i => i.DistanceToPlayer() >= 525);
+                        var pos = circel[0].ToVector3();
+                        if (!pos.IsZero)
+                        {
+                            E.UpdateSourcePosition(pos, pos);
+                        }
+                    }
+                }
+            }
+        }
+
         private static void OnCombo()
         {
 
             try
             {
-
-
                 bool useQ = boolLinks["comboUseQ"].GetValue<MenuBool>().Enabled && Q.IsReady();
                 bool useW = boolLinks["comboUseW"].GetValue<MenuBool>().Enabled && W.IsReady();
                 bool useE = boolLinks["comboUseE"].GetValue<MenuBool>().Enabled && E.IsReady();
@@ -207,9 +570,9 @@ namespace DaoHungAIO.Champions
 
                 bool killpriority = boolLinks["spPriority"].GetValue<MenuBool>().Enabled && R.IsReady();
                 bool rKillSteal = boolLinks["rLastHit"].GetValue<MenuBool>().Enabled;
-                AIHeroClient Etarget = TargetSelector.GetTarget(maxRangeE);
-                AIHeroClient Qtarget = TargetSelector.GetTarget(Q.Range);
-                AIHeroClient RTarget = TargetSelector.GetTarget(R.Range);
+                AIHeroClient Etarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(maxRangeE);
+                AIHeroClient Qtarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(Q.Range);
+                AIHeroClient RTarget = FunnySlayerCommon.FSTargetSelector.GetFSTarget(R.Range);
                 if (killpriority && Qtarget != null & Etarget != null && Etarget != Qtarget && ((Etarget.Health > TotalDmg(Etarget, false, true, false, false)) || (Etarget.Health > TotalDmg(Etarget, false, true, true, false) && Etarget == RTarget)) && Qtarget.Health < TotalDmg(Qtarget, true, true, false, false))
                 {
                     Etarget = Qtarget;
@@ -223,39 +586,52 @@ namespace DaoHungAIO.Champions
                     }
                 }
 
-
-                if (useE)
-                {
-                    if (Etarget != null)
-                        PredictCastE(Etarget);
-                }
                 if (useQ)
                 {
 
                     if (Qtarget != null)
                         Q.Cast(Qtarget);
                 }
+
+                if (useE)
+                {
+                    if (Etarget != null)
+                    {
+                        if(EpredictionList.Index == 0)
+                        {
+                            PredictCastE(Etarget);
+                        }
+                        else
+                        {
+                            FSPredictionECast(Etarget);
+                        }
+                    }
+                }
+               
                 if (useW)
                 {
-                    var t = TargetSelector.GetTarget(W.Range);
+                    var t = FunnySlayerCommon.FSTargetSelector.GetFSTarget(W.Range);
 
                     if (t != null)
                     {
+                        var pred = FSpred.Prediction.Prediction.GetPrediction(W, t);
+
                         if (t.Path.Count() < 2)
                         {
                             if (t.HasBuffOfType(BuffType.Slow))
                             {
-                                if (FSpred.Prediction.Prediction.GetPrediction(W, t).Hitchance >= FSpred.Prediction.HitChance.High)
-                                    if (W.Cast(t) == CastStates.SuccessfullyCasted)
-                                        return;
+                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                    W.Cast(pred.CastPosition);
                             }
                             if (t.CountEnemyHeroesInRange(250) > 2)
                             {
-                                if (FSpred.Prediction.Prediction.GetPrediction(W, t).Hitchance >= FSpred.Prediction.HitChance.High)
-                                    if (W.Cast(t) == CastStates.SuccessfullyCasted)
-                                        return;
+                                if (pred.Hitchance >= FSpred.Prediction.HitChance.High)
+                                    W.Cast(pred.CastPosition);
                             }
                         }
+
+                        if (pred.Hitchance >= FSpred.Prediction.HitChance.High && t.DistanceToPlayer() <= W.Range)
+                            W.Cast(pred.CastPosition);
                     }
                 }
                 if (useR && R.Instance.Name == "ViktorChaosStorm" && player.CanCast && !player.Spellbook.IsCastingSpell)
@@ -286,11 +662,12 @@ namespace DaoHungAIO.Champions
             if (closestminion.IsValidTarget(Q.Range))
             {
                 Q.Cast(closestminion);
+                return;
             }
             else if (closesthero.IsValidTarget(Q.Range))
             {
                 Q.Cast(closesthero);
-
+                return;
             }
         }
 
@@ -314,7 +691,14 @@ namespace DaoHungAIO.Champions
                 var target = TargetSelector.GetTarget(harassrange);
 
                 if (target != null)
-                    PredictCastE(target);
+                    if (EpredictionList.Index == 0)
+                    {
+                        PredictCastE(target);
+                    }
+                    else
+                    {
+                        FSPredictionECast(target);
+                    }
             }
         }
 
@@ -488,168 +872,7 @@ namespace DaoHungAIO.Champions
             return false;
         }
 
-
-        private static void PredictCastE(AIHeroClient target)
-        {
-            // Helpers
-            bool inRange = SharpDX.Vector2.DistanceSquared(target.Position.ToVector2(), player.Position.ToVector2()) < E.Range * E.Range;
-            FSpred.Prediction.PredictionOutput prediction;
-            bool spellCasted = false;
-
-            // Positions
-            SharpDX.Vector3 pos1, pos2;
-
-            // Champs
-            var nearChamps = (from champ in ObjectManager.Get<AIHeroClient>() where champ.IsValidTarget(maxRangeE) && target != champ select champ).ToList();
-            var innerChamps = new List<AIHeroClient>();
-            var outerChamps = new List<AIHeroClient>();
-            foreach (var champ in nearChamps)
-            {
-                if (SharpDX.Vector2.DistanceSquared(champ.Position.ToVector2(), player.Position.ToVector2()) < E.Range * E.Range)
-                    innerChamps.Add(champ);
-                else
-                    outerChamps.Add(champ);
-            }
-
-            // Minions
-            var nearMinions = GameObjects.GetMinions(player.Position, maxRangeE);
-            var innerMinions = new List<AIBaseClient>();
-            var outerMinions = new List<AIBaseClient>();
-            foreach (var minion in nearMinions)
-            {
-                if (SharpDX.Vector2.DistanceSquared(minion.Position.ToVector2(), player.Position.ToVector2()) < E.Range * E.Range)
-                    innerMinions.Add(minion);
-                else
-                    outerMinions.Add(minion);
-            }
-
-            // Main target in close range
-            if (inRange)
-            {
-                // Get prediction reduced speed, adjusted sourcePosition
-                E.Speed = speedE * 0.9f;
-                E.From = target.Position + (SharpDX.Vector3.Normalize(player.Position - target.Position) * (lengthE * 0.1f));
-                prediction = FSpred.Prediction.Prediction.GetPrediction(E, target);// E.GetPrediction(target);
-                E.From = player.Position;
-
-                // Prediction in range, go on
-                if (prediction.CastPosition.Distance(player.Position) < E.Range)
-                    pos1 = prediction.CastPosition;
-                // Prediction not in range, use exact position
-                else
-                {
-                    pos1 = target.Position;
-                    E.Speed = speedE;
-                }
-
-                // Set new sourcePosition
-                E.From = pos1;
-                E.RangeCheckFrom = pos1;
-
-                // Set new range
-                E.Range = lengthE;
-
-                // Get next target
-                if (nearChamps.Count > 0)
-                {
-                    // Get best champion around
-                    var closeToPrediction = new List<AIHeroClient>();
-                    foreach (var enemy in nearChamps)
-                    {
-                        // Get prediction
-                        prediction = FSpred.Prediction.Prediction.GetPrediction(E, enemy);
-                        // Validate target
-                        if (prediction.Hitchance >= FSpred.Prediction.HitChance.High && SharpDX.Vector2.DistanceSquared(pos1.ToVector2(), prediction.CastPosition.ToVector2()) < (E.Range * E.Range) * 0.8)
-                            closeToPrediction.Add(enemy);
-                    }
-
-                    // Champ found
-                    if (closeToPrediction.Count > 0)
-                    {
-                        // Sort table by health DEC
-                        if (closeToPrediction.Count > 1)
-                            closeToPrediction.Sort((enemy1, enemy2) => enemy2.Health.CompareTo(enemy1.Health));
-
-                        // Set destination
-                        prediction = FSpred.Prediction.Prediction.GetPrediction(E, closeToPrediction[0]);
-                        pos2 = prediction.CastPosition;
-
-                        // Cast spell
-                        CastE(pos1, pos2);
-                        spellCasted = true;
-                    }
-                }
-
-                // Spell not casted
-                if (!spellCasted)
-                {
-                    CastE(pos1, E.GetPrediction(target).CastPosition);
-                }
-
-                // Reset spell
-                E.Speed = speedE;
-                E.Range = rangeE;
-                E.From = player.Position;
-                E.RangeCheckFrom = player.Position;
-            }
-
-            // Main target in extended range
-            else
-            {
-                // Radius of the start point to search enemies in
-                float startPointRadius = 150;
-
-                // Get initial start point at the border of cast radius
-                SharpDX.Vector3 startPoint = player.Position + SharpDX.Vector3.Normalize(target.Position - player.Position) * rangeE;
-
-                // Potential start from postitions
-                var targets = (from champ in nearChamps where SharpDX.Vector2.DistanceSquared(champ.Position.ToVector2(), startPoint.ToVector2()) < startPointRadius * startPointRadius && SharpDX.Vector2.DistanceSquared(player.Position.ToVector2(), champ.Position.ToVector2()) < rangeE * rangeE select champ).ToList();
-                if (targets.Count > 0)
-                {
-                    // Sort table by health DEC
-                    if (targets.Count > 1)
-                        targets.Sort((enemy1, enemy2) => enemy2.Health.CompareTo(enemy1.Health));
-
-                    // Set target
-                    pos1 = targets[0].Position;
-                }
-                else
-                {
-                    var minionTargets = (from minion in nearMinions where SharpDX.Vector2.DistanceSquared(minion.Position.ToVector2(), startPoint.ToVector2()) < startPointRadius * startPointRadius && SharpDX.Vector2.DistanceSquared(player.Position.ToVector2(), minion.Position.ToVector2()) < rangeE * rangeE select minion).ToList();
-                    if (minionTargets.Count > 0)
-                    {
-                        // Sort table by health DEC
-                        if (minionTargets.Count > 1)
-                            minionTargets.Sort((enemy1, enemy2) => enemy2.Health.CompareTo(enemy1.Health));
-
-                        // Set target
-                        pos1 = minionTargets[0].Position;
-                    }
-                    else
-                        // Just the regular, calculated start pos
-                        pos1 = startPoint;
-                }
-
-                // Predict target position
-                E.From = pos1;
-                E.Range = lengthE;
-                E.RangeCheckFrom = pos1;
-                prediction = FSpred.Prediction.Prediction.GetPrediction(E, target);
-
-                // Cast the E
-                if (prediction.Hitchance >= FSpred.Prediction.HitChance.High)
-                    CastE(pos1, prediction.CastPosition);
-
-                // Reset spell
-                E.Range = rangeE;
-                E.From = player.Position;
-                E.RangeCheckFrom = player.Position;
-            }
-
-        }
-
-
-
+     
         private static void CastE(SharpDX.Vector3 source, SharpDX.Vector3 destination)
         {
             E.Cast(source, destination);
@@ -743,6 +966,11 @@ namespace DaoHungAIO.Champions
             // All circles
             if (player.IsDead)
                 return;
+
+            var pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
+            Drawing.DrawText(pos.X - 20, pos.Y + 20, Color.Yellow, MathFloat.To<string>());
+
+
             foreach (var spell in SpellList)
             {
                 var menuBool = menu.Item("Draw" + spell.Slot + "Range").GetValue<MenuBool>();
@@ -916,18 +1144,28 @@ namespace DaoHungAIO.Champions
                 }
             }
         }
+        private static MenuList EpredictionList = new MenuList("EpredictionList", "E Prediction ", new string[] { "Normal Pred", "Fs Pred" }, 0);
+        private static MenuSlider FsEpred = new MenuSlider("FsEPred", "Fs E Pred Value ", 15, 5, 120);
+        private static MenuBool AutoCalculator = new MenuBool("AutoCalculator", "Auto Calculator Fs E Pred Value ", false);
         private static void SetupMenu()
         {
 
             menu = new Menu("Viktor", "Viktor Ported", true);
             // Combo
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            /*FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(targetSelectorMenu);
+            menu.Add(targetSelectorMenu);*/
+
             var subMenu = menu.AddSubMenu(new Menu("Combo", "Combo"));
 
             
             ProcessLink("comboUseQ", subMenu.AddItem(new MenuBool("comboUseQ", "Use Q")));
             ProcessLink("comboUseW", subMenu.AddItem(new MenuBool("comboUseW", "Use W")));
             ProcessLink("comboUseE", subMenu.AddItem(new MenuBool("comboUseE", "Use E")));
+            subMenu.Add(EpredictionList);
+            subMenu.Add(FsEpred);
+            subMenu.Add(AutoCalculator);
+
             ProcessLink("comboUseR", subMenu.AddItem(new MenuBool("comboUseR", "Use R")));
             ProcessLink("qAuto", subMenu.AddItem(new MenuBool("qAuto", "Dont autoattack without passive")));
             ProcessLink("comboActive", subMenu.AddItem(new MenuKeyBind("comboActive", "Combo active", Keys.Space, KeyBindType.Press)));

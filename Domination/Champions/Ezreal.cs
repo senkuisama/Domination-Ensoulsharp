@@ -119,9 +119,9 @@ namespace DominationAIO.Champions
             EzRmenu.Add(REzSettings.BaseUlt);
 
             EzrealMenu = new Menu("EzrealMenu", "Ezreal Menu", true);
-            var TargetFS = new Menu("Target FS", "Target");
-            TargetFS.AddTargetSelectorMenu();
-            EzrealMenu.Add(TargetFS);
+            //var TargetFS = new Menu("Target FS", "Target");
+            //TargetFS.AddTargetSelectorMenu();
+            //EzrealMenu.Add(TargetFS);
             EzrealMenu.Add(keys);
             EzrealMenu.Add(EzQmenu);
             EzrealMenu.Add(EzWmenu);

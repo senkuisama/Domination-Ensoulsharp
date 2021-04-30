@@ -169,7 +169,7 @@ namespace FSpred.Prediction
 			_menu.Add(item);
 			_menu.Attach();
 
-			AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
+			//AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
 		}
 		public static void Shutdown()
 		{

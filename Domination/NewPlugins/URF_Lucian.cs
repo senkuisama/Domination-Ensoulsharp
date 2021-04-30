@@ -45,6 +45,12 @@ namespace Luian
             //Game.OnUpdate += Ex;
             Game.OnUpdate += Rx;
             Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.OnAfterAttack += Orbwalker_OnAfterAttack;
+        }
+
+        private static void Orbwalker_OnAfterAttack(object sender, AfterAttackEventArgs e)
+        {
+            LastQWE = 0;
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -55,6 +61,9 @@ namespace Luian
                     Player.IssueOrder(GameObjectOrder.AttackUnit, Orbwalker.GetTarget());
             }*/
 
+            if (Variables.GameTimeTickCount - LastQWE >= 1000)
+                LastQWE = 0;
+
             if (Orbwalker.ActiveMode != OrbwalkerMode.Combo)
                 return;
 
@@ -64,9 +73,12 @@ namespace Luian
             if (Player.IsDead)
                 return;
 
+            if (Variables.GameTimeTickCount - LastQWE <= 1000)
+                return;
+
             var dashPos = Player.Position.Extend(Game.CursorPos, LMenu.ESettings.ECombo.ActiveValue);
 
-            if (E.IsReady() && TargetSelector.GetTarget(ObjectManager.Player.GetCurrentAutoAttackRange() + 200) != null && LMenu.ESettings.ECombo.Enabled)
+            if (E.IsReady() && TargetSelector.GetTarget(ObjectManager.Player.GetCurrentAutoAttackRange()) != null && LMenu.ESettings.ECombo.Enabled)
             {
                 if (Passive())
                 {
@@ -128,12 +140,19 @@ namespace Luian
             }
         }
 
+        private static int LastQWE = 0;
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs Args)
         {
             if (!sender.IsMe)
             {
                 return;
             }
+
+            if(Args.Slot <= SpellSlot.E && Args.Slot != SpellSlot.Unknown)
+            {
+                LastQWE = Variables.GameTimeTickCount;
+            }
+
 
             if(Args.Slot <= SpellSlot.R && Args.Slot != SpellSlot.Unknown)
             {
@@ -194,7 +213,7 @@ namespace Luian
         }
         private static bool Passive()
         {
-            return Player.HasBuff("lucianPassiveBuff");
+            return Player.HasBuff("lucianPassiveBuff") || Variables.GameTimeTickCount - LastQWE <= 2000;
         }
 
         private static void Rx(EventArgs args)

@@ -136,6 +136,10 @@ namespace DominationAIO.NewPlugins
                     count = buffs[i].Count;
                 }
             }
+
+            if (FunnySlayerCommon.OnAction.AfterAA)
+                count += 1;
+
             return count;
         }
 
@@ -230,7 +234,7 @@ namespace DominationAIO.NewPlugins
                 }
                 if (GwenMenu.EMenu.EResetAA.Enabled)
                 {
-                    if (args.Slot == SpellSlot.Q)
+                    if (args.Slot == SpellSlot.E)
                     {
                         Orbwalker.ResetAutoAttackTimer();
                     }
@@ -274,6 +278,54 @@ namespace DominationAIO.NewPlugins
             {
                 GwenCombo();
             }
+
+            if(Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
+            {
+                if (JungleClearLogic())
+                    return;
+            }
+        }
+        private static bool JungleClearLogic()
+        {
+            var mobs = GameObjects.Jungle.Where(x => x.IsValidTarget(ObjectManager.Player.GetCurrentAutoAttackRange()) && x.GetJungleType() != JungleType.Unknown & !x.GetMinionType().HasFlag(MinionTypes.JunglePlant) ).ToList();
+
+            if (mobs.Any())
+            {
+                var first = mobs.FirstOrDefault();
+                if (E.IsReady())
+                {
+                    if (first != null && first.IsValidTarget(E.Range))
+                    {
+                        // avoid jumping ontop of the minion just anoying headaches
+                        if (first.InCurrentAutoAttackRange())
+                            E.Cast(ObjectManager.Player.Position);
+                        else
+                            E.Cast(first.Position);
+                    }
+                }
+                if (Q.IsReady() && QBuffCount() >= 4)
+                {
+                    var qMobs = mobs.Where(x => x.IsValidTarget(Q.Range)).ToList();
+                    var qFarm = Q.GetLineFarmLocation(qMobs); // pull from ferrisAIO prediction pool dont use specific for jungle
+
+                    if (qFarm.MinionsHit >= 2)
+                    {
+                        Q.Cast(qFarm.Position);
+                        return true;
+                    }
+                    else
+                    {
+                        if (first != null && first.IsValidTarget(Q.Range))
+                        {
+                            Q.Cast(first.Position);
+                            return true;
+                        }
+                    }
+
+                }
+            }
+
+            return false;
         }
 
         private static void GwenCombo()

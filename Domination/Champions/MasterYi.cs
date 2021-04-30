@@ -22,7 +22,7 @@ namespace DominationAIO.Champions
 
             YiMenu = new Menu("Yi Load", "Yi Load", true);
             EvadeManager.Attach(YiMenu);
-            FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(YiMenu);
+            //FunnySlayerCommon.MenuClass.AddTargetSelectorMenu(YiMenu);
             YiMenu.Attach();
 
             Q = new Spell(SpellSlot.Q, 625f);

@@ -329,7 +329,7 @@ namespace DominationAIO.Champions
         }
         private static MissileClient QClient()
         {       
-            var Qc = ObjectManager.Get<MissileClient>().Where(i => i.Position.IsValid() && i.Name == QMissile);
+            var Qc = ObjectManager.Get<MissileClient>().Where(i => i.Position.IsValid() && i.SpellCaster == ObjectManager.Player && i.Name == QMissile);
             MissileClient Get = null;
             foreach (var hmm in Qc)
             {

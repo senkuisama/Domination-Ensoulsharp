@@ -40,8 +40,8 @@ namespace Pyke_Ryū
             
             Q.SetCharged("PykeQ", "PykeQ", 400, 1100, 1.155f);
 
-            Selector.AddTargetSelectorMenu();
-            RootPyke.Add(Selector);
+            //Selector.AddTargetSelectorMenu();
+            //RootPyke.Add(Selector);
             RootPyke.Add(Rpyke);
             RootPyke.Add(Qpyke);
             RootPyke.Add(Qpykefull);

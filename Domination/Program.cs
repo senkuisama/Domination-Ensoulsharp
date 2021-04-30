@@ -270,19 +270,21 @@ namespace DominationAIO
                 Console.WriteLine(ex);
             }
 
-
-            foreach (var item in GameObjects.EnemyHeroes)
-            {
-                var target = item;
-                var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId);
-                if (histracker == null || histracker.Count() < 1)
-                    TrackerHelp.Add(new TrackerHelper(target));
-            }
+           
             //Load Tracker
+            if (LoadTracker.Enabled)
+            {
+                foreach (var item in GameObjects.EnemyHeroes)
+                {
+                    var target = item;
+                    var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId);
+                    if (histracker == null || histracker.Count() < 1)
+                        TrackerHelp.Add(new TrackerHelper(target));
+                }
+                Game.OnUpdate += Game_OnUpdate;
 
-            Game.OnUpdate += Game_OnUpdate;
-
-            Drawing.OnDraw += Drawing_OnEndScene;
+                Drawing.OnDraw += Drawing_OnEndScene;
+            }            
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -325,6 +327,8 @@ namespace DominationAIO
             programmenu.Add(LoadChamps);
             programmenu.Add(F5);
 
+
+            programmenu.AddTargetSelectorMenu();
 
             programmenu.Attach();
         }

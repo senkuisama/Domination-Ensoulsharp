@@ -348,6 +348,8 @@ namespace DominationAIO.NewPlugins.Katarina
                 }
             }
 
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.GreenYellow);
+
             if (Game.Ping >= 100)
             {
                 var pos = Drawing.WorldToScreen(ObjectManager.Player.Position);

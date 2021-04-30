@@ -152,7 +152,7 @@ namespace DominationAIO.Champions.Aphelios
             getgun.Add(GunR);
             getgun.Add(GunSelected);
             var helper = new Menu("Get Helper", "Get Helper");
-            helper.AddTargetSelectorMenu();
+            //helper.AddTargetSelectorMenu();
             SPredictionMash.ConfigMenu.Initialize(helper, "Get Help pls");
             //new SebbyLibPorted.Orbwalking.Orbwalker(helper);
             menu.Add(helper);

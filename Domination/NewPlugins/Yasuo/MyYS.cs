@@ -174,10 +174,10 @@ namespace DominationAIO.NewPlugins.Yasuo
                 Wcombo.Add(YasuoMenu.Wcombo.Yasuo_Wcombo);
                 Wcombo.Add(YasuoMenu.Wcombo.LoadWEvade);
 
-                var fstarget = new Menu("fs target", "FS Target Selector");
-                fstarget.AddTargetSelectorMenu();
+                /*var fstarget = new Menu("fs target", "FS Target Selector");
+                fstarget.AddTargetSelectorMenu();*/
 
-                themenu.Add(fstarget);
+                //themenu.Add(fstarget);
 
                 themenu.Add(Qcombo);
                 themenu.Add(Ecombo);
@@ -280,7 +280,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             E1 = new Spell(SpellSlot.E, 475);
             R = new Spell(SpellSlot.R, 1400);
 
-            Q.SetSkillshot(0.275f, 55, 20000, false, SpellType.Line);
+            Q.SetSkillshot(0.25f, 55, 20000, false, SpellType.Line);
             Q3.SetSkillshot(0.275f, 80, 1200, false, SpellType.Line);
             E1.SetTargetted(0f, 1000f);
             E.SetSkillshot(0.3f, 175, 1000f, false, SpellType.Line);
@@ -299,8 +299,17 @@ namespace DominationAIO.NewPlugins.Yasuo
             //Game.OnUpdate += Game_OnUpdate4;
             //Orbwalker.OnBeforeAttack += OrbwalkerOnOnBeforeAttack;
             //  Orbwalker.OnBeforeMove += Orbwalker_OnBeforeMove;
+            Dash.OnDash += Dash_OnDash;
 
             //AIBaseClient.OnProcessSpellCast += AIBaseClient_OnProcessSpellCast;
+        }
+
+        private static void Dash_OnDash(AIBaseClient sender, Dash.DashArgs args)
+        {
+            if (sender.IsMe)
+            {
+                CheckDashingEndTime = args.EndTick + YasuoMenu.Ecombo.DashingTick.Value;
+            }
         }
 
         private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
@@ -311,23 +320,6 @@ namespace DominationAIO.NewPlugins.Yasuo
                     CheckImDashing = false;
             }
         }
-
-        private static void Orbwalker_OnBeforeMove(object sender, BeforeMoveEventArgs e)
-        {
-            if (e.MovePosition != Vector3.Zero && YasuoMenu.Yasuo_target.Yasuo_Target_lock.Enabled)
-            {
-                Hud.ShowClick(ClickType.Move, e.MovePosition);
-            }
-        }
-
-        private static void OrbwalkerOnOnBeforeAttack(object sender, BeforeAttackEventArgs e)
-        {
-            if (e.Target != null && YasuoMenu.Yasuo_target.Yasuo_Target_lock.Enabled)
-            {
-                Hud.ShowClick(ClickType.Attack, Game.CursorPos);
-            }
-        }
-
 
         /*private static void AIBaseClient_OnProcessSpellCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
@@ -340,19 +332,18 @@ namespace DominationAIO.NewPlugins.Yasuo
 
         #region Onupdate 3
         private static int CheckDashingEndTime = 0;
-        private static bool CheckImDashing = false;
+        public static bool CheckImDashing = false;
         private static void Game_OnUpdate3(EventArgs args)
         {
-            if (ObjectManager.Player.IsDashing())
-            {
-                CheckDashingEndTime = ObjectManager.Player.GetDashInfo().EndTick + YasuoMenu.Ecombo.DashingTick.Value;
-            }
-
-            if (CheckDashingEndTime - Variables.GameTimeTickCount > 0)
+            if (!CheckImDashing && CheckDashingEndTime - Variables.GameTimeTickCount > 0)
                 CheckImDashing = true;
-            else CheckImDashing = false;
+            else 
+                if(CheckImDashing)
+                    CheckImDashing = false;
 
-            if (YasuoHelper.CheckDashingTick() && Q.IsReady())
+
+
+            if (CheckImDashing && Q.IsReady())
             {
                 if (YasuoMenu.Yasuo_Keys.Yasuo_AutoStacks.Active && YasuoHelper.HaveQ1)
                 {
@@ -370,8 +361,8 @@ namespace DominationAIO.NewPlugins.Yasuo
                         if (targets.Where(i => i.Distance(ObjectManager.Player.GetDashInfo().EndPos) < 350).Count() < 1)
                         {
                             Q.Cast(YasuoHelper.PosExploit(null));
-                            return;
                         }
+                        return;
                     }
                 }
                 else
@@ -384,8 +375,8 @@ namespace DominationAIO.NewPlugins.Yasuo
                             if (target != null && YasuoHelper.Eprediction(target).Distance(ObjectManager.Player.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value && ObjectManager.Player.GetDashInfo().EndPos.DistanceToPlayer() < 100)
                             {
                                 Q3.Cast(YasuoHelper.PosExploit(target));
-                                return;
                             }
+                            return;
                         }
                         else
                         {
@@ -393,24 +384,22 @@ namespace DominationAIO.NewPlugins.Yasuo
                             if (target != null && YasuoHelper.Eprediction(target).Distance(ObjectManager.Player.GetDashInfo().EndPos) <= YasuoMenu.RangeCheck.EQrange.Value && ObjectManager.Player.GetDashInfo().EndPos.DistanceToPlayer() < 100)
                             {
                                 Q.Cast(YasuoHelper.PosExploit(target));
-                                return;
                             }
                             if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active || YasuoMenu.Yasuo_Keys.EQFlashKey.Active)
                             {
                                 Q.Cast(YasuoHelper.PosExploit(target));
-                                return;
                             }
                             if (YasuoMenu.Yasuo_Keys.EQFlashKey.Active)
                             {
                                 Q.Cast(YasuoHelper.PosExploit(target));
-                                return;
                             }
 
                             if (YasuoHelper.HaveQ2)
                             {
                                 Q.Cast(YasuoHelper.PosExploit(target));
-                                return;
                             }
+
+                            return;
                         }                                               
                     }
                 }
@@ -438,7 +427,7 @@ namespace DominationAIO.NewPlugins.Yasuo
 
             //foreach (var EQprediction in )
             //{
-            var EQprediction = targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.High && i.AoeTargetsHitCount >= 1).OrderByDescending(i => i.AoeTargetsHitCount).FirstOrDefault();
+            var EQprediction = targets.Select(i => FSpred.Prediction.Prediction.GetPrediction(EQFlash, i)).Where(i => i.Hitchance >= FSpred.Prediction.HitChance.High && i.AoeTargetsHitCount >= 2).OrderByDescending(i => i.AoeTargetsHitCount).FirstOrDefault();
             if (EQprediction == null)
                 return;
             FlashPos = EQprediction.CastPosition;
@@ -472,7 +461,7 @@ namespace DominationAIO.NewPlugins.Yasuo
 
         private static void Yasuo_DoCombo()
         {
-            var heroes = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsDead && !i.IsAlly && i.DistanceToPlayer() <= 2000);
+            var heroes = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsDead && !i.IsAlly && i.DistanceToPlayer() <= 1400);
 
             if (heroes.FirstOrDefault() != null)
             {
@@ -480,43 +469,39 @@ namespace DominationAIO.NewPlugins.Yasuo
 
                 if (R.IsReady() && YasuoMenu.Rcombo.Yasuo_Rcombo.Enabled && target != null)
                 {
-
-                    if (target != null)
+                    var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
+                    if ((buff.EndTime - Game.Time) * 1000 <= YasuoMenu.Rcombo.RDelayTime.Value && !YasuoMenu.Rcombo.AlwaysEQR.Enabled)
                     {
-                        var buff = target.Buffs.FirstOrDefault(i => i.Type == BuffType.Knockback || i.Type == BuffType.Knockup);
-                        if ((buff.EndTime - Game.Time) * 1000 <= YasuoMenu.Rcombo.RDelayTime.Value && !YasuoMenu.Rcombo.AlwaysEQR.Enabled)
                         {
-                            {
-                                R.Cast(target.Position);
-                                Game.Print("R accepted");
-                                return;
-                            }
+                            R.Cast(target.Position);
+                            Game.Print("R accepted");
+                            return;
                         }
-                        if (Q.IsReady() && E.IsReady())
-                        {
-                            var EQR = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && !i.HasBuff("YasuoE"));
+                    }
+                    if (Q.IsReady() && E.IsReady())
+                    {
+                        var EQR = GameObjects.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsDead && !i.IsAlly && !i.HasBuff("YasuoE"));
 
-                            if (EQR != null)
-                            {
-                                //foreach (var obj in EQR)
-                                //{
-                                var obj = EQR.FirstOrDefault();
-                                if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
-                                {
-                                    {
-                                        Q.Cast(YasuoHelper.PosExploit(null));
-                                        R.Cast(target.Position);
-                                    }
-                                }
-                                //}
-                            }
-                        }
-                        if (Q.IsReady() && ObjectManager.Player.IsDashing())
+                        if (EQR != null)
                         {
+                            //foreach (var obj in EQR)
+                            //{
+                            var obj = EQR.FirstOrDefault();
+                            if (E1.Cast(obj) == CastStates.SuccessfullyCasted)
                             {
-                                Q.Cast(YasuoHelper.PosExploit(null));
-                                R.Cast(target.Position);
+                                {
+                                    Q.Cast(YasuoHelper.PosExploit(null));
+                                    R.Cast(target.Position);
+                                }
                             }
+                            //}
+                        }
+                    }
+                    if (Q.IsReady() && ObjectManager.Player.IsDashing())
+                    {
+                        {
+                            Q.Cast(YasuoHelper.PosExploit(null));
+                            R.Cast(target.Position);
                         }
                     }
                 }
@@ -794,13 +779,13 @@ namespace DominationAIO.NewPlugins.Yasuo
 
         private static void Yasuo_DoHarass()
         {
-            var targets = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(Q3.Range));
+            var targets = ObjectManager.Get<AIHeroClient>().Where(i => !i.IsAlly && !i.IsDead && i.IsValidTarget(YasuoHelper.HaveQ3 ? Q3.Range : Q.Range));
 
             if (targets != null)
             {
                 //foreach (var target in targets)
                 //{
-                var target = targets.OrderBy(i => i.Health).ThenBy(i => (YasuoHelper.HaveQ3 ? Q3 : Q).PredCastPos(i, HitChance.High).DistanceToPlayer()).FirstOrDefault();
+                var target = targets.OrderBy(i => i.Health).ThenBy(i => (YasuoHelper.HaveQ3 ? Q3 : Q).FSPredCastPos(i).DistanceToPlayer()).FirstOrDefault();
                 var obj = YasuoHelper.GetNearObj(target);
                 if (target != null)
                 {
@@ -885,6 +870,8 @@ namespace DominationAIO.NewPlugins.Yasuo
             if (!YasuoMenu.Ecombo.Yasuo_ERange.Enabled)
                 return;
             var obj = YasuoHelper.GetNearObj(target);
+
+
             if (obj != null && E1.Level >= 1)
             {
                 if (YasuoMenu.Ecombo.Yasuo_Eziczac.Enabled && E.Level >= 1)
@@ -907,8 +894,6 @@ namespace DominationAIO.NewPlugins.Yasuo
                         return;
                     }
                 }
-                else
-                    return;
             }
         }
 
@@ -1026,14 +1011,11 @@ namespace DominationAIO.NewPlugins.Yasuo
         private static void QcastTarget()
         {
             var target = FSTargetSelector.GetFSTarget(YasuoHelper.HaveQ3 ? Q3.Range : Q.Range);
-            if (target == null || !Q.IsReady()) return;
+            if (target == null || !Q.IsReady() || FunnySlayerCommon.OnAction.OnAA) return;
 
             if (!CheckImDashing)
             {
-                if (FunnySlayerCommon.OnAction.OnAA)
-                    return;
-                else
-                    CastQNormal(target);
+                CastQNormal(target);
             }
             else
             {
@@ -1049,7 +1031,7 @@ namespace DominationAIO.NewPlugins.Yasuo
             if (CheckImDashing)
                 return;
 
-            if (YasuoHelper.HaveQ3 && YasuoMenu.Qcombo.Yasuo_Windcombo.Enabled)
+            if (YasuoHelper.HaveQ3)
             {
                 var targetpred = FSpred.Prediction.Prediction.GetPrediction(Q3, target);
                 if(target != null && targetpred.Hitchance >= FSpred.Prediction.HitChance.High)
@@ -1185,12 +1167,12 @@ namespace DominationAIO.NewPlugins.Yasuo
             {
                 if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active || YasuoMenu.Yasuo_Keys.EQFlashKey.Active)
                 {
-                    Orbwalker.AttackEnabled = false;
+                    //Orbwalker.AttackEnabled = false;
                     ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 }
-                else Orbwalker.AttackEnabled = true;
+                //else Orbwalker.AttackEnabled = true;
 
-                if (YasuoMenu.Ecombo.ddtest.Enabled)
+                /*if (YasuoMenu.Ecombo.ddtest.Enabled)
                 {
                     if (ObjectManager.Player.IsDashing())
                     {
@@ -1208,7 +1190,8 @@ namespace DominationAIO.NewPlugins.Yasuo
                 else
                 {
                     Orbwalker.MoveEnabled = true;
-                }
+                }*/
+
                 if (YasuoMenu.Yasuo_Keys.Yasuo_Flee.Active && E.IsReady(0) && !FunnySlayerCommon.OnAction.OnAA)
                 {
                     var obj = ObjectManager.Get<AIBaseClient>().Where(i => i.IsValidTarget(E.Range) && !i.IsAlly && YasuoHelper.CanE(i));

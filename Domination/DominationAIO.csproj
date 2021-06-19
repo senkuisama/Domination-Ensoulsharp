@@ -84,25 +84,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp">
-      <HintPath>C:\Users\FunnySlayer\Desktop\Ensoul\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.SDK">
-      <HintPath>C:\Users\FunnySlayer\Desktop\Ensoul\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
-      <HintPath>C:\Users\FunnySlayer\Desktop\Ensoul\EnsoulSharp\Reference\log4net.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>C:\Users\FunnySlayer\Desktop\Ensoul\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\FunnySlayer\Desktop\Ensoul\EnsoulSharp\Reference\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Users\FunnySlayer\Desktop\Ensoul\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>C:\Users\FunnySlayer\Desktop\Ensoul\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>C:\Users\FunnySlayer\Desktop\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -191,6 +191,7 @@
     <Compile Include="NewPlugins\Jinx\MyJinx.cs" />
     <Compile Include="NewPlugins\Katarina\MyKatarina.cs" />
     <Compile Include="NewPlugins\Leesin\MyLee.cs" />
+    <Compile Include="NewPlugins\Riven\MyRiven.cs" />
     <Compile Include="NewPlugins\Sylas\MySylas.cs" />
     <Compile Include="NewPlugins\URF_Lucian.cs" />
     <Compile Include="NewPlugins\Vayne\MyVayne.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="SPrediction\Utility.cs" />
     <Compile Include="SPrediction\VectorPrediction.cs" />
     <Compile Include="TrackerHelper.cs" />
+    <Compile Include="TyDaoHungAIO\Anivia.cs" />
     <Compile Include="TyDaoHungAIO\Fiora.cs" />
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplank.cs" />
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankAuto.cs" />
@@ -266,6 +268,7 @@
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankLaneClear.cs" />
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoGangplankVariables.cs" />
     <Compile Include="TyDaoHungAIO\Gangplank\BadaoMainVariables.cs" />
+    <Compile Include="TyDaoHungAIO\Jayce.cs" />
     <Compile Include="TyDaoHungAIO\Kayle.cs" />
     <Compile Include="TyDaoHungAIO\Viktor.cs" />
   </ItemGroup>
@@ -294,6 +297,9 @@
   <ItemGroup>
     <Folder Include="Champions\Troll Chat xD\obj\" />
     <Folder Include="NewPlugins\Draven\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\LoadBitmap.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

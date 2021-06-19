@@ -14,7 +14,7 @@ namespace DominationAIO.NewPlugins
     {
         public static void EPrediction(bool Checkbuff = true)
         {
-            var target = TargetSelector.GetTarget(775);
+            var target = TargetSelector.GetTarget(775, DamageType.Physical);
 
             if (!Irelia.E.IsReady() || target == null)
                 return;

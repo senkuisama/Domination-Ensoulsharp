@@ -31,7 +31,7 @@ namespace FunnySlayerCommon
 
         public static Menu GetPriority = new Menu("Get Priority", "Get Priority");
 
-        public static MenuBool SetOrbWalkerTarget = new MenuBool("SetOrbWalkerTarget", "Set Combo Orbwalker target");
+        public static MenuBool SetOrbWalkerTarget = new MenuBool("SetOrbWalkerTarget", "Set Combo Orbwalker target", false);
         public static MenuSliderButton DrawTarget = new MenuSliderButton("Draw Target", "Draw Target", 1000, 0, 2000, false);
      
         public static void AddTargetSelectorMenu(this Menu menu)
@@ -68,8 +68,21 @@ namespace FunnySlayerCommon
             ThisMenu.Add(SetOrbWalkerTarget);
             ThisMenu.Add(DrawTarget);
 
-            if(SetOrbWalkerTarget.Enabled)
+            if (SetOrbWalkerTarget.Enabled)
                 Game.OnUpdate += Game_OnUpdate;
+            else
+                Game.OnUpdate -= Game_OnUpdate;
+
+            SetOrbWalkerTarget.ValueChanged += (a, e) =>
+            {
+                if (SetOrbWalkerTarget.Enabled)
+                    Game.OnUpdate += Game_OnUpdate;
+                else
+                {
+                    Game.OnUpdate -= Game_OnUpdate;
+                    Game.Print("Remove Set Combo Target");
+                }
+            };
 
             Drawing.OnDraw += Drawing_OnDraw;
 
@@ -105,9 +118,6 @@ namespace FunnySlayerCommon
 
         public static void ResetOrbwalker()
         {
-            Orbwalker.MoveEnabled = true;
-            Orbwalker.AttackEnabled = true;
-
             if (Orbwalker.ActiveMode > OrbwalkerMode.LastHit)
             {               
                 Orbwalker.SetOrbwalkerPosition(Vector3.Zero);

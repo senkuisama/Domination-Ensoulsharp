@@ -128,7 +128,7 @@ namespace DaoHungAIO.Champions
 
                     if (Orbwalker.ActiveMode == OrbwalkerMode.Combo && ecomboafteraa.Enabled)
                     {
-                        var target = TargetSelector.GetTarget(Player.GetRealAutoAttackRange());
+                        var target = TargetSelector.GetTarget(Player.GetRealAutoAttackRange(), DamageType.Magical);
                         var selectedTarget = TargetSelector.SelectedTarget;
                         if (selectedTarget != null && selectedTarget.IsValidTarget(Player.GetRealAutoAttackRange()))
                         {
@@ -145,7 +145,7 @@ namespace DaoHungAIO.Champions
                     }
                     if (Orbwalker.ActiveMode == OrbwalkerMode.Harass && Player.ManaPercent > manaharass.Value && eafteraa.Enabled)
                     {
-                        var target = TargetSelector.GetTarget(Player.GetRealAutoAttackRange());
+                        var target = TargetSelector.GetTarget(Player.GetRealAutoAttackRange(), DamageType.Magical);
                         var selectedTarget = TargetSelector.SelectedTarget;
                         if (selectedTarget != null && selectedTarget.IsValidTarget(Player.GetRealAutoAttackRange()))
                         {
@@ -331,7 +331,7 @@ namespace DaoHungAIO.Champions
         private void DoHarass()
         {
 
-            var target = TargetSelector.GetTarget(q.Range + 300);
+            var target = TargetSelector.GetTarget(q.Range + 300, DamageType.Magical);
             var selectedTarget = TargetSelector.SelectedTarget;
             if (selectedTarget != null && selectedTarget.IsValidTarget(q.Range + 300))
             {
@@ -354,7 +354,7 @@ namespace DaoHungAIO.Champions
 
         private void DoCombo()
         {
-            var target = TargetSelector.GetTarget(q.Range + 300);
+            var target = TargetSelector.GetTarget(q.Range + 300, DamageType.Magical);
             var selectedTarget = TargetSelector.SelectedTarget;
             if(selectedTarget != null && selectedTarget.IsValidTarget(q.Range + 300))
             {

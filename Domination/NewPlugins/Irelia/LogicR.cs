@@ -29,7 +29,7 @@ namespace DominationAIO.NewPlugins
                 return false;
             }
 
-            var target = TargetSelector.GetTarget(1000);
+            var target = TargetSelector.GetTarget(1000, DamageType.Physical);
             if (target == null || target.HasBuff("ireliamark"))
             {
                 GetRPos1 = null;

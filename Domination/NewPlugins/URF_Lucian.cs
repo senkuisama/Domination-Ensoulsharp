@@ -2,6 +2,7 @@
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
 using EnsoulSharp.SDK.Utility;
+using FunnySlayerCommon;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,10 +61,6 @@ namespace Luian
                 if (Passive())
                     Player.IssueOrder(GameObjectOrder.AttackUnit, Orbwalker.GetTarget());
             }*/
-
-            if (Variables.GameTimeTickCount - LastQWE >= 1000)
-                LastQWE = 0;
-
             if (Orbwalker.ActiveMode != OrbwalkerMode.Combo)
                 return;
 
@@ -78,66 +75,31 @@ namespace Luian
 
             var dashPos = Player.Position.Extend(Game.CursorPos, LMenu.ESettings.ECombo.ActiveValue);
 
-            if (E.IsReady() && TargetSelector.GetTarget(ObjectManager.Player.GetCurrentAutoAttackRange()) != null && LMenu.ESettings.ECombo.Enabled)
+            var target = FSTargetSelector.GetFSTarget(ObjectManager.Player.GetCurrentAutoAttackRange());
+            if(target != null)
             {
-                if (Passive())
+                if (E.IsReady() && LMenu.ESettings.ECombo.Enabled)
                 {
-                    if (FunnySlayerCommon.OnAction.AfterAA)
-                    {
-                        if (E.Cast(dashPos))
-                            return;
-                    }
-                }
-                else
-                {                   
                     if (E.Cast(dashPos))
                         return;
                 }
-            }
-            else
-            {
-                if (Q.IsReady() && LMenu.QSettings.QCombo.Enabled && TargetSelector.GetTarget(Q.Range) != null)
+                else
                 {
-                    if (Passive())
+                    if (Q.IsReady() && LMenu.QSettings.QCombo.Enabled)
                     {
-                        if (FunnySlayerCommon.OnAction.AfterAA)
-                        {
-                            if (Q.Cast(TargetSelector.GetTarget(Q.Range)) == CastStates.SuccessfullyCasted)
-                                return;
-                        }
+                        if (Q.Cast(target) == CastStates.SuccessfullyCasted)
+                            return;
                     }
                     else
                     {
-                        if (FunnySlayerCommon.OnAction.BeforeAA)
-                            return;
-
-                        if (Q.Cast(TargetSelector.GetTarget(Q.Range)) == CastStates.SuccessfullyCasted)
-                            return;
-                    }
-                }
-                else
-                {
-                    if (W.IsReady() && LMenu.WSettings.WCombo.Enabled && TargetSelector.GetTarget(W.Range) != null)
-                    {
-                        if (Passive())
+                        if (W.IsReady() && LMenu.WSettings.WCombo.Enabled)
                         {
-                            if (FunnySlayerCommon.OnAction.AfterAA)
-                            {
-                                if (W.Cast(TargetSelector.GetTarget(W.Range).Position))
-                                    return;
-                            }
-                        }
-                        else
-                        {
-                            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA)
-                                return;
-
-                            if (W.Cast(TargetSelector.GetTarget(W.Range).Position))
+                            if (W.Cast(target.Position))
                                 return;
                         }
                     }
                 }
-            }
+            }           
         }
 
         private static int LastQWE = 0;
@@ -221,8 +183,6 @@ namespace Luian
             if (Player.HasBuff("LucianR"))
             {
                 Orbwalker.AttackEnabled = false;
-                /*if (Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos))
-                    return;*/
             }
             else
                 Orbwalker.AttackEnabled = true;
@@ -296,7 +256,7 @@ namespace Luian
             if (!W.IsReady())
                 return;
 
-            var target = TargetSelector.GetTarget(W.Range);
+            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             if(target != null)
             {
                 if (Orbwalker.ActiveMode == OrbwalkerMode.Harass && LMenu.WSettings.WHarass.Enabled)
@@ -352,7 +312,7 @@ namespace Luian
 
             if (!Q.IsReady())
                 return;
-            var target = TargetSelector.GetTarget(Q.Range);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             if(target != null)
             {
                 if (Orbwalker.ActiveMode == OrbwalkerMode.Harass && LMenu.QSettings.QHarass.Enabled)

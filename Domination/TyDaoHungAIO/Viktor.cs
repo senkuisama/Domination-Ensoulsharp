@@ -173,7 +173,7 @@ namespace DaoHungAIO.Champions
                             ignoredchamps.Add(hero);
                         }
                     }
-                    AIHeroClient RTarget = TargetSelector.GetTarget(R.Range);
+                    AIHeroClient RTarget = TargetSelector.GetTarget(R.Range, DamageType.Magical);
                     if (RTarget.IsValidTarget())
                     {
                         R.Cast(RTarget);
@@ -184,7 +184,7 @@ namespace DaoHungAIO.Champions
             // Ultimate follow
             if (R.Instance.Name != "ViktorChaosStorm" && boolLinks["AutoFollowR"].GetValue<MenuBool>().Enabled && Environment.TickCount - lasttick > 0)
             {
-                var stormT = TargetSelector.GetTarget(1100);
+                var stormT = TargetSelector.GetTarget(1100, DamageType.Magical);
                 if (stormT != null)
                 {
                     R.Cast(stormT.Position);
@@ -681,14 +681,14 @@ namespace DaoHungAIO.Champions
             bool useQ = boolLinks["harassUseQ"].GetValue<MenuBool>().Enabled && Q.IsReady();
             if (useQ)
             {
-                var qtarget = TargetSelector.GetTarget(Q.Range);
+                var qtarget = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
                 if (qtarget != null)
                     Q.Cast(qtarget);
             }
             if (useE)
             {
                 var harassrange = sliderLinks["eDistance"].GetValue<MenuSlider>().Value;
-                var target = TargetSelector.GetTarget(harassrange);
+                var target = TargetSelector.GetTarget(harassrange, DamageType.Magical);
 
                 if (target != null)
                     if (EpredictionList.Index == 0)

@@ -157,7 +157,7 @@ namespace DominationAIO.NewPlugins
                 }
                 else
                 {
-                    var target = TargetSelector.GetTarget(E.Range);
+                    var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
                     if(target != null)
                     {
                         E.Cast(target.Position);
@@ -217,7 +217,7 @@ namespace DominationAIO.NewPlugins
             {
                 if (LastCasted + 1750 <= Variables.GameTimeTickCount && W.IsReady() && SylasMenu.WMenu.UseWCombo.Enabled)
                 {
-                    var target = TargetSelector.GetTarget(400);
+                    var target = TargetSelector.GetTarget(400, DamageType.Physical);
                     if (target != null)
                     {
                         W.Cast(target);

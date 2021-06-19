@@ -58,7 +58,7 @@ namespace DominationAIO.NewPlugins
                 return;
             }
 
-            var target = TargetSelector.GetTarget(1000);
+            var target = TargetSelector.GetTarget(1000, DamageType.Physical);
             if (target == null)
                 return;
 
@@ -130,7 +130,7 @@ namespace DominationAIO.NewPlugins
                 #region R
                 try
                 {
-                    var targets = TargetSelector.GetTargets(900);
+                    var targets = TargetSelector.GetTargets(900, DamageType.Physical);
                     Vector3 Rpos = Vector3.Zero;
 
                     if (targets != null)

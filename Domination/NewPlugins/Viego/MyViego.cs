@@ -261,7 +261,7 @@ namespace DominationAIO.NewPlugins
 
             if (Orbwalker.ActiveMode > OrbwalkerMode.Harass) 
                 return;
-            var target = TargetSelector.GetTarget(900);
+            var target = TargetSelector.GetTarget(900, DamageType.Physical);
             if (target == null)
                 return;
 
@@ -279,7 +279,8 @@ namespace DominationAIO.NewPlugins
                 }
                 else
                 {
-                    var Rtarget = TargetSelector.GetTarget(R.Range);
+
+                    var Rtarget = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                     if (Rtarget != null)
                     {
                         if (R.IsReady() && ViegoMenu.RCombo.useR.Enabled && CanUseR(Rtarget))
@@ -303,7 +304,7 @@ namespace DominationAIO.NewPlugins
                             }
 
                             {
-                                var Etarget = TargetSelector.GetTarget(E.Range);
+                                var Etarget = TargetSelector.GetTarget(E.Range, DamageType.Physical);
                                 if (Etarget != null)
                                 {
                                     if (E.IsReady() && CanUseE(Etarget))
@@ -317,7 +318,7 @@ namespace DominationAIO.NewPlugins
                                         {
                                             if (Q.IsReady() && CanUseQ(target))
                                             {
-                                                var Qtarget = TargetSelector.GetTarget(Q.Range);
+                                                var Qtarget = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                                                 if (target != null)
                                                 {
                                                     var Qpred = Q.GetPrediction(Qtarget);
@@ -330,7 +331,7 @@ namespace DominationAIO.NewPlugins
                                             }
                                             else
                                             {
-                                                if (!W.IsCharging && W.IsReady() && CanUseW(target))
+                                                if (!W.IsCharging && W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                                 {
                                                     if (W.StartCharging())
                                                         return;
@@ -342,7 +343,7 @@ namespace DominationAIO.NewPlugins
                                     {
                                         if (Q.IsReady() && CanUseQ(target))
                                         {
-                                            var Qtarget = TargetSelector.GetTarget(Q.Range);
+                                            var Qtarget = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                                             if (target != null)
                                             {
                                                 var Qpred = Q.GetPrediction(Qtarget);
@@ -355,7 +356,7 @@ namespace DominationAIO.NewPlugins
                                         }
                                         else
                                         {
-                                            if (W.IsReady() && CanUseW(target))
+                                            if (W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                             {
                                                 if (W.StartCharging())
                                                     return;
@@ -365,7 +366,7 @@ namespace DominationAIO.NewPlugins
                                 }
                                 else
                                 {
-                                    var Qtarget = TargetSelector.GetTarget(Q.Range);
+                                    var Qtarget = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                                     if (Qtarget != null)
                                     {
                                         if (Q.IsReady() && CanUseQ(Qtarget))
@@ -379,7 +380,7 @@ namespace DominationAIO.NewPlugins
                                         }
                                         else
                                         {
-                                            if (W.IsReady() && CanUseW(target))
+                                            if (W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                             {
                                                 if (W.StartCharging())
                                                     return;
@@ -388,7 +389,7 @@ namespace DominationAIO.NewPlugins
                                     }
                                     else
                                     {
-                                        if (W.IsReady() && CanUseW(target))
+                                        if (W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                         {
                                             if (W.StartCharging())
                                                 return;
@@ -415,7 +416,7 @@ namespace DominationAIO.NewPlugins
                             }
 
                             {
-                                var Etarget = TargetSelector.GetTarget(800);
+                                var Etarget = TargetSelector.GetTarget(800, DamageType.Physical);
                                 if (Etarget != null)
                                 {
                                     if (E.IsReady() && CanUseE(Etarget))
@@ -429,7 +430,7 @@ namespace DominationAIO.NewPlugins
                                         {
                                             if (Q.IsReady() && CanUseQ(target))
                                             {
-                                                var Qtarget = TargetSelector.GetTarget(Q.Range);
+                                                var Qtarget = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                                                 if (target != null)
                                                 {
                                                     var Qpred = Q.GetPrediction(Qtarget);
@@ -442,7 +443,7 @@ namespace DominationAIO.NewPlugins
                                             }
                                             else
                                             {
-                                                if (W.IsReady() && CanUseW(target))
+                                                if (W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                                 {
                                                     if (W.StartCharging())
                                                         return;
@@ -454,7 +455,7 @@ namespace DominationAIO.NewPlugins
                                     {
                                         if (Q.IsReady() && CanUseQ(target))
                                         {
-                                            var Qtarget = TargetSelector.GetTarget(Q.Range);
+                                            var Qtarget = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                                             if (target != null)
                                             {
                                                 var Qpred = Q.GetPrediction(Qtarget);
@@ -467,7 +468,7 @@ namespace DominationAIO.NewPlugins
                                         }
                                         else
                                         {
-                                            if (W.IsReady() && CanUseW(target))
+                                            if (W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                             {
                                                 if (W.StartCharging())
                                                     return;
@@ -477,7 +478,7 @@ namespace DominationAIO.NewPlugins
                                 }
                                 else
                                 {
-                                    var Qtarget = TargetSelector.GetTarget(Q.Range);
+                                    var Qtarget = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                                     if (Qtarget != null)
                                     {
                                         if (Q.IsReady() && CanUseQ(Qtarget))
@@ -491,7 +492,7 @@ namespace DominationAIO.NewPlugins
                                         }
                                         else
                                         {
-                                            if (W.IsReady() && CanUseW(target))
+                                            if (W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                             {
                                                 if (W.StartCharging())
                                                     return;
@@ -500,7 +501,7 @@ namespace DominationAIO.NewPlugins
                                     }
                                     else
                                     {
-                                        if (W.IsReady() && CanUseW(target))
+                                        if (W.IsReady() && CanUseW(target) && Orbwalker.ActiveMode == OrbwalkerMode.Combo)
                                         {
                                             if (W.StartCharging())
                                                 return;

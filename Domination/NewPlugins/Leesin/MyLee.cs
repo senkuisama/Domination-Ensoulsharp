@@ -6,8 +6,6 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DominationAIO.NewPlugins
 {
@@ -94,7 +92,7 @@ namespace DominationAIO.NewPlugins
         }
 
         private static void Game_OnUpdate2(EventArgs args)
-        {                     
+        {
             switch (Orbwalker.ActiveMode)
             {
                 case OrbwalkerMode.Combo:
@@ -107,7 +105,7 @@ namespace DominationAIO.NewPlugins
         }
 
         private static void Game_OnUpdate1(EventArgs args)
-        {                        
+        {
             foreach (var item in spells)
             {
                 if (!isState2(item))
@@ -160,7 +158,7 @@ namespace DominationAIO.NewPlugins
         {
             if (sender.IsMe)
             {
-                if(args.Slot <= SpellSlot.E)
+                if (args.Slot <= SpellSlot.E)
                 {
                     LastSpell = Variables.GameTimeTickCount;
                 }
@@ -180,13 +178,13 @@ namespace DominationAIO.NewPlugins
         }
         private static List<Spell> spells = new List<Spell>();
         private static void Game_OnUpdate(EventArgs args)
-        {           
+        {
             if (ObjectManager.Player.IsDead)
             {
                 LastSpell = 0;
             }
 
-            DoWWrad();                      
+            DoWWrad();
         }
 
         private static AIHeroClient FindtargetInsecMaxhit(out int maxtargethit)
@@ -460,7 +458,7 @@ namespace DominationAIO.NewPlugins
                                 newtarget = gettarget;
                                 var check = GameObjects.EnemyHeroes.Where(i => i.IsValidTarget() && i.NetworkId != target.NetworkId && line.IsInside(Rout.GetPrediction(i).CastPosition) && i.DistanceToPlayer() <= 900 * 2 && !i.IsDead);
                                 targethitCount += check.Count();
-                                targethit.AddRange(check);                                
+                                targethit.AddRange(check);
                             }
                             if (targethitCount >= 2 && targethitCount > maxhit)
                             {
@@ -486,7 +484,7 @@ namespace DominationAIO.NewPlugins
         private static void PosUpdate()
         {
             TheDictionary.Clear();
-            if(HaveQBuff() != null)
+            if (HaveQBuff() != null)
             {
                 var line = new Geometry.Rectangle(ObjectManager.Player.Position.Extend(HaveQBuff().Position, -150)
                     , HaveQBuff().Position.Extend(ObjectManager.Player.Position, -150), 250);
@@ -545,7 +543,7 @@ namespace DominationAIO.NewPlugins
                         }
                     }
 
-                    if(targethitCount > max)
+                    if (targethitCount > max)
                     {
                         gtarget = ttarget;
                         thepos = pos.ToVector3();
@@ -763,8 +761,8 @@ namespace DominationAIO.NewPlugins
                     }
                 }
 
-                if(rtarget != null && R.IsReady())
-                {                                       
+                if (rtarget != null && R.IsReady())
+                {
                     if (R.GetDamage(rtarget) + (rtarget.HasQBuff() ? Q.GetDamage(rtarget) : 0) >= rtarget.Health)
                     {
                         R.Cast(rtarget);
@@ -849,12 +847,12 @@ namespace DominationAIO.NewPlugins
                                     readtarget = target;
                                 }
                             }                           
-                        }*/                       
-                    }                    
+                        }*/
+                    }
                 }
             }
 
-            if(Q.IsReady() && (LeeMenu.LeeQ.UseQ1.Enabled || LeeMenu.LeeQ.UseQ2.Enabled))
+            if (Q.IsReady() && (LeeMenu.LeeQ.UseQ1.Enabled || LeeMenu.LeeQ.UseQ2.Enabled))
                 if (CastQ())
                     return;
 
@@ -866,15 +864,15 @@ namespace DominationAIO.NewPlugins
 
         private static bool CastQ()
         {
-            if(Q.IsReady())
+            if (Q.IsReady())
             {
                 if (!isState2(Q) && LeeMenu.LeeQ.UseQ1.Enabled)
                 {
-                    var findqtarget = ObjectManager.Get<AIHeroClient>().Where(i => 
-                    i.IsValidTarget(1300) 
-                    && !i.IsDead 
-                    && !i.IsAlly 
-                    && FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance 
+                    var findqtarget = ObjectManager.Get<AIHeroClient>().Where(i =>
+                    i.IsValidTarget(1300)
+                    && !i.IsDead
+                    && !i.IsAlly
+                    && FSpred.Prediction.Prediction.GetPrediction(Q, i).Hitchance
                     >= FSpred.Prediction.HitChance.High)
                         .OrderBy(i => i.Health)
                         .FirstOrDefault();
@@ -889,7 +887,7 @@ namespace DominationAIO.NewPlugins
                     }
                     else
                     {
-                        var refindtarget = TargetSelector.GetTargets(Q.Range + 400).FirstOrDefault();
+                        var refindtarget = TargetSelector.GetTargets(Q.Range + 400, DamageType.Physical).FirstOrDefault();
 
                         if (refindtarget != null && Q.GetPrediction(refindtarget).Hitchance < HitChance.High)
                         {
@@ -986,9 +984,9 @@ namespace DominationAIO.NewPlugins
                             }
                         }
                     }
-                }               
+                }
             }
-                        
+
             return false;
         }
 
@@ -1008,7 +1006,7 @@ namespace DominationAIO.NewPlugins
             {
                 basedmg = 450 + (ObjectManager.Player.Level - 4) * 30;
             }
-            if(ObjectManager.Player.Level <= 4)
+            if (ObjectManager.Player.Level <= 4)
             {
                 basedmg += 4 * 20;
             }
@@ -1018,11 +1016,11 @@ namespace DominationAIO.NewPlugins
 
         private static bool CastWandE()
         {
-            if (TargetSelector.GetTarget(E.Range).Health <= ObjectManager.Player.GetAutoAttackDamage(TargetSelector.GetTarget(E.Range)) + E.GetDamage(TargetSelector.GetTarget(E.Range)) && E.IsReady() && !isState2(E))
+            if (TargetSelector.GetTarget(E.Range, DamageType.Physical).Health <= ObjectManager.Player.GetAutoAttackDamage(TargetSelector.GetTarget(E.Range, DamageType.Physical)) + E.GetDamage(TargetSelector.GetTarget(E.Range, DamageType.Physical)) && E.IsReady() && !isState2(E))
             {
                 return E.Cast();
             }
-            if (W.IsReady() && TargetSelector.GetTarget(ObjectManager.Player.GetCurrentAutoAttackRange() + 100) != null && (isState2(W) ? Variables.GameTimeTickCount - LastWTimer >= 1000 : Variables.GameTimeTickCount - LastSpell >= 1000))
+            if (W.IsReady() && TargetSelector.GetTarget(ObjectManager.Player.GetCurrentAutoAttackRange() + 100, DamageType.Physical) != null && (isState2(W) ? Variables.GameTimeTickCount - LastWTimer >= 1000 : Variables.GameTimeTickCount - LastSpell >= 1000))
             {
                 if (isState2(W))
                 {
@@ -1030,7 +1028,7 @@ namespace DominationAIO.NewPlugins
                 }
                 else
                 {
-                    var obj = FindWBestTarget(TargetSelector.GetTarget(W.Range).Position, false, LeeMenu.LeeW.BonusWRange.Value, new List<GameObjectType>() { GameObjectType.AIHeroClient});
+                    var obj = FindWBestTarget(TargetSelector.GetTarget(W.Range, DamageType.Physical).Position, false, LeeMenu.LeeW.BonusWRange.Value, new List<GameObjectType>() { GameObjectType.AIHeroClient });
                     if (obj != null)
                         return W.CastOnUnit(obj);
 
@@ -1043,15 +1041,15 @@ namespace DominationAIO.NewPlugins
                 {
                     if (!isState2(E))
                     {
-                        if (TargetSelector.GetTarget(E.Range) != null)
+                        if (TargetSelector.GetTarget(E.Range, DamageType.Physical) != null)
                         {
-                            if(Variables.GameTimeTickCount - LastSpell >= 1000)
+                            if (Variables.GameTimeTickCount - LastSpell >= 1000)
                             {
                                 return E.Cast();
                             }
                             else
                             {
-                                if(TargetSelector.GetTarget(E.Range).Health <= ObjectManager.Player.GetAutoAttackDamage(TargetSelector.GetTarget(E.Range)) + E.GetDamage(TargetSelector.GetTarget(E.Range)) + (R.IsReady() ? R.GetDamage(TargetSelector.GetTarget(E.Range)) + (Q.IsReady() ? Q.GetDamage(TargetSelector.GetTarget(E.Range)) : 0) : 0))
+                                if (TargetSelector.GetTarget(E.Range, DamageType.Physical).Health <= ObjectManager.Player.GetAutoAttackDamage(TargetSelector.GetTarget(E.Range, DamageType.Physical)) + E.GetDamage(TargetSelector.GetTarget(E.Range, DamageType.Physical)) + (R.IsReady() ? R.GetDamage(TargetSelector.GetTarget(E.Range, DamageType.Physical)) + (Q.IsReady() ? Q.GetDamage(TargetSelector.GetTarget(E.Range, DamageType.Physical)) : 0) : 0))
                                 {
                                     return E.Cast();
                                 }
@@ -1070,7 +1068,7 @@ namespace DominationAIO.NewPlugins
 
             var jungles = GameObjects.Jungle.Where(i => i.IsValidTarget(Q.Range)).OrderBy(i => i.MaxHealth);
 
-            if(jungles.FirstOrDefault() != null)
+            if (jungles.FirstOrDefault() != null)
             {
                 var jungle = jungles.FirstOrDefault();
 
@@ -1177,7 +1175,7 @@ namespace DominationAIO.NewPlugins
         private static bool isState2(Spell skill)
         {
             return skill.Name.ToString().Contains("Two");
-                //false;
+            //false;
         }
 
         private static bool HasQBuff(this AIBaseClient unit)
@@ -1191,7 +1189,7 @@ namespace DominationAIO.NewPlugins
                     .Where(a => a.IsValidTarget(1300) && a.HasQBuff())
                     .FirstOrDefault();
         }
-        
+
         public static bool FlashReady()
         {
             if (Flash.Slot != SpellSlot.Unknown && Flash.IsReady())
@@ -1284,7 +1282,7 @@ namespace DominationAIO.NewPlugins
         public static class LeeR
         {
             public static MenuSliderButton user = new MenuSliderButton("user", "R Combo", 40, 40, 150);
-            public static MenuList LogicInsec = new MenuList("LogicInsec", "Logic Insec", new string[] { "Old", "New"}, 0);
+            public static MenuList LogicInsec = new MenuList("LogicInsec", "Logic Insec", new string[] { "Old", "New" }, 0);
         }
 
         public static class LeeKey

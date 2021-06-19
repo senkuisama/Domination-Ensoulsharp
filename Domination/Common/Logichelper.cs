@@ -116,7 +116,7 @@ namespace Yasuo_LogicHelper
         }
         public static List<AIHeroClient> GetBestEnemyHeroesTargetsInRange(float range)
         {
-            return TargetSelector.GetTargets(range);
+            return TargetSelector.GetTargets(range, DamageType.Physical);
         }
         public static List<AIMinionClient> GetJungleTargetsInRange(float range)
         {

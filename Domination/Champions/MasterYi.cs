@@ -44,7 +44,7 @@ namespace DominationAIO.Champions
 
             if (Q.IsReady())
             {
-                var target = TargetSelector.GetTargets(Q.Range).Where(i => i.Health < Q.GetDamage(i)).OrderBy(i => i.Health).FirstOrDefault();
+                var target = TargetSelector.GetTargets(Q.Range, DamageType.Physical).Where(i => i.Health < Q.GetDamage(i)).OrderBy(i => i.Health).FirstOrDefault();
                 if(target != null)
                 {
                     if (Q.Cast(target) == CastStates.SuccessfullyCasted || Q.CastOnUnit(target))
@@ -68,7 +68,7 @@ namespace DominationAIO.Champions
                 {
                     if(Orbwalker.ActiveMode <= OrbwalkerMode.Harass)
                     {
-                        var target = TargetSelector.GetTargets(Q.Range).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
+                        var target = TargetSelector.GetTargets(Q.Range, DamageType.Physical).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
                         if(target != null)
                         {
                             if(Q.Cast(target) == CastStates.SuccessfullyCasted || Q.CastOnUnit(target))
@@ -101,7 +101,7 @@ namespace DominationAIO.Champions
             {
                 if (Orbwalker.ActiveMode <= OrbwalkerMode.Harass)
                 {
-                    var target = TargetSelector.GetTargets(Q.Range).OrderBy(i => i.Health).FirstOrDefault();
+                    var target = TargetSelector.GetTargets(Q.Range, DamageType.Physical).OrderBy(i => i.Health).FirstOrDefault();
                     if (target != null)
                     {
                         if (Q.Cast(target) == CastStates.SuccessfullyCasted || Q.CastOnUnit(target))
@@ -120,7 +120,7 @@ namespace DominationAIO.Champions
                             return;
                         }
                     }
-                    var target = TargetSelector.GetTargets(Q.Range).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
+                    var target = TargetSelector.GetTargets(Q.Range, DamageType.Physical).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
                     if (target != null)
                     {
                         if (Q.Cast(target) == CastStates.SuccessfullyCasted || Q.CastOnUnit(target))
@@ -134,7 +134,7 @@ namespace DominationAIO.Champions
             {
                 if (Orbwalker.ActiveMode <= OrbwalkerMode.Harass)
                 {
-                    var target = TargetSelector.GetTargets(Q.Range).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
+                    var target = TargetSelector.GetTargets(Q.Range, DamageType.Physical).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
                     if (target != null)
                     {
                         if (Q.Cast(target) == CastStates.SuccessfullyCasted || Q.CastOnUnit(target))
@@ -153,7 +153,7 @@ namespace DominationAIO.Champions
                             return;
                         }
                     }
-                    var target = TargetSelector.GetTargets(Q.Range).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
+                    var target = TargetSelector.GetTargets(Q.Range, DamageType.Physical).OrderBy(i => i.Health).FirstOrDefault(i => !Yasuo_LogicHelper.Logichelper.UnderTower(i.Position));
                     if (target != null)
                     {
                         if (Q.Cast(target) == CastStates.SuccessfullyCasted || Q.CastOnUnit(target))

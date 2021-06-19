@@ -31,48 +31,154 @@ namespace DominationAIO.NewPlugins
             Game.OnUpdate += Game_OnUpdate;
             Game.OnUpdate += Game_OnUpdate1;
             AIBaseClient.OnBuffAdd += AIBaseClient_OnBuffAdd;
+            AIBaseClient.OnBuffRemove += AIBaseClient_OnBuffRemove;
 
             foreach (var item in GameObjects.EnemyHeroes)
             {
                 var target = item;
                 ListDmg.Add(new DmgOnTarget(target.NetworkId, 0));
             }
+            AIBaseClient.OnDoCast += AIBaseClient_OnDoCast;
+            Drawing.OnDraw += Drawing_OnDraw;
+        }
+      
+        private static void Drawing_OnDraw(System.EventArgs args)
+        {
+            if(pos != Vector3.Zero)
+                Render.Circle.DrawCircle(pos, 50, System.Drawing.Color.Red);
+        }
+        private static Vector3 pos = Vector3.Zero;
+
+        private static void AIBaseClient_OnDoCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && isE2())
+            {
+                var target = args.Target;
+                if(target != null)
+                {
+                    var FindinList = ListDmg.Where(i => i.UID == target.NetworkId);
+                    if (FindinList.Count() >= 1)
+                    {
+                        var dmgtarget = FindinList.FirstOrDefault();
+                        dmgtarget.dmg += ObjectManager.Player.GetAutoAttackDamage(target as AIHeroClient);
+                    }
+                }
+                else
+                {
+                    pos = args.To;
+                    List<AIHeroClient> gettarget = new List<AIHeroClient>();
+                    if (args.Slot == SpellSlot.Q)
+                    {
+                        var poly = isQ3() ? new Geometry.Rectangle(ObjectManager.Player.Position, ObjectManager.Player.Position.Extend(pos, Q3.Range), 80) : new Geometry.Rectangle(ObjectManager.Player.Position, ObjectManager.Player.Position.Extend(pos, Q1.Range), 50);
+                        gettarget.AddRange(GameObjects.EnemyHeroes.Where(i => !i.IsDead && poly.IsInside(i.Position.ToVector2())));
+
+                        foreach (var item in gettarget)
+                        {
+                            var Qtarget = item;
+
+                            var FindinList = ListDmg.Where(i => i.UID == Qtarget.NetworkId);
+                            if (FindinList.Count() >= 1)
+                            {
+                                var dmgtarget = FindinList.FirstOrDefault();
+                                dmgtarget.dmg += Q1.GetDamage(Qtarget);
+                            }
+                        }
+                    }
+
+                    if (args.Slot == SpellSlot.W)
+                    {
+                        var poly = new Geometry.Line(ObjectManager.Player.Position, ObjectManager.Player.Position.Extend(pos, W.Range), 200);
+                        gettarget.AddRange(GameObjects.EnemyHeroes.Where(i => !i.IsDead && poly.IsInside(i.Position.ToVector2())));
+
+                        foreach (var item in gettarget)
+                        {
+                            var Qtarget = item;
+
+                            var FindinList = ListDmg.Where(i => i.UID == Qtarget.NetworkId);
+                            if (FindinList.Count() >= 1)
+                            {
+                                var dmgtarget = FindinList.FirstOrDefault();
+                                dmgtarget.dmg += W.GetDamage(Qtarget);
+                            }
+                        }
+                    }
+
+                    if (args.Slot == SpellSlot.R)
+                    {
+                        var poly = new Geometry.Line(ObjectManager.Player.Position, ObjectManager.Player.Position.Extend(pos, R.Range), 150);
+                        gettarget.AddRange(GameObjects.EnemyHeroes.Where(i => !i.IsDead && poly.IsInside(i.Position.ToVector2())));
+
+                        foreach (var item in gettarget)
+                        {
+                            var Qtarget = item;
+
+                            var FindinList = ListDmg.Where(i => i.UID == Qtarget.NetworkId);
+                            if (FindinList.Count() >= 1)
+                            {
+                                var dmgtarget = FindinList.FirstOrDefault();
+                                dmgtarget.dmg += R.GetDamage(Qtarget);
+                            }
+                        }
+                    }
+                }                
+            }
         }
 
+        private static void PrintLine(object a)
+        {
+            Game.Print(a.ToString());
+        }
         private static List<DmgOnTarget> ListDmg = new List<DmgOnTarget>();
         class DmgOnTarget
 
         {
             public int UID;
             public double dmg;
+            public double LastHeath;
             public DmgOnTarget(int ID, double Dmg)
             {
                 UID = ID;
                 dmg = Dmg;
+                LastHeath = ObjectManager.GetUnitByNetworkId<AIHeroClient>(ID).Health;
             }
         }
 
-
+        private static string YoneEDeath = "yoneedeathmark";    
         private static void AIBaseClient_OnBuffAdd(AIBaseClient sender, AIBaseClientBuffAddEventArgs args)
         {
-            if (args.Buff.Name != "")
+            if (args.Buff.Name != "YoneE")
                 return;
 
-
-            var FindinList = ListDmg.Where(i => i.UID == sender.NetworkId);
-            if (FindinList.Count() >= 1)
+            foreach (var item in ListDmg)
             {
-                var target = FindinList.FirstOrDefault();
+                var target = item;
 
-                //start dmg
+                //Start dmg
                 target.dmg = 0;
+                target.LastHeath = sender.Health;
+            }
+        }
+
+        private static void AIBaseClient_OnBuffRemove(AIBaseClient sender, AIBaseClientBuffRemoveEventArgs args)
+        {
+            if (args.Buff.Name != "YoneE")
+                return;
+
+            foreach (var item in ListDmg)
+            {
+                var target = item;
+
+                //End dmg
+                target.dmg = 0;
+                target.LastHeath = sender.Health;
             }
         }
 
         private static double GetEDmg(AIBaseClient target)
         {
-            if(!target.HasBuff(""))
+            if(!isE2() || !target.HasBuff(YoneEDeath))
                 return 0;
+
             var findinlist = ListDmg.Where(i => i.UID == target.NetworkId);
             if (findinlist.Count() < 1)
                 return 0;
@@ -83,7 +189,7 @@ namespace DominationAIO.NewPlugins
                 0.25, 0.275, 0.3, 0.325, 0.35
             };
             var xtarget = findinlist.FirstOrDefault();
-            dmg += list[E.Level] * xtarget.dmg;
+            dmg += list[E.Level - 1] * xtarget.dmg;
 
             return dmg;
         }
@@ -249,6 +355,22 @@ namespace DominationAIO.NewPlugins
                     if (!Yasuo.YasuoHelper.UnderTower(ObjectManager.Player.Position.Extend(target.Position, 300)))
                     {
                         E.Cast(target.Position);
+                        return;
+                    }
+                }
+            }
+
+            {
+                if (E.IsReady() && isE2() && ObjectManager.Player.CountEnemyHeroesInRange(R.Range) <= 1)
+                {
+                    if(GameObjects.EnemyHeroes.Any(
+                        i => !i.IsDead && (
+                        i.Health - GetEDmg(i) <= 0 
+                        || (ObjectManager.Player.HasItem(ItemId.The_Collector) && 100 * (i.Health - GetEDmg(i)) <= 5))
+                        )
+                        )
+                    {
+                        E.Cast(ObjectManager.Player.Position);
                         return;
                     }
                 }

@@ -11,6 +11,11 @@ using DominationAIO.NewPlugins;
 using System.Collections.Generic;
 using System.Linq;
 using SharpDX;
+using System.IO;
+using System.Reflection;
+using System.Drawing;
+using System.Resources;
+using EnsoulSharp.SDK.Utility;
 
 namespace DominationAIO
 {
@@ -31,14 +36,50 @@ namespace DominationAIO
         }*/
 
         public static void Main(string[] args)
-        {           
+        {            
             GameEvent.OnGameLoad += OnLoadingComplete;
         }
 
         private static List<TrackerHelper> TrackerHelp = new List<TrackerHelper>();
 
+        public static bool ChampLoaded = false;
+        public static string ImagesFolderPath = "";
+        public static Bitmap myimages = null;
+        public static string pathfound = "";
         private static void OnLoadingComplete()
-        {            
+        {                      
+            try
+            {
+                var process = Process.GetProcessesByName("Loader").FirstOrDefault();
+
+                if (process != null)
+                {
+                    Console.WriteLine("________");
+                    Console.WriteLine(process.MainModule.FileName);
+                    Console.WriteLine("________");
+                    pathfound = process.MainModule.FileName;
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            ImagesFolderPath = Path.GetDirectoryName(pathfound) + @"\Cache\Images\Champions";
+
+            Console.WriteLine("________");
+            Console.WriteLine(ImagesFolderPath);
+            Console.WriteLine(EnsoulSharp.SDK.Core.Config.ImageFolder.FullName);
+            Console.WriteLine("________");
+
+            if (ObjectManager.Player.CharacterName != "Yasuo")
+                myimages = TrackerHelper.Load(ObjectManager.Player.NetworkId);
+            else
+                myimages = TrackerHelper.resizeImage(new Bitmap(Properties.Resources.LoadBitmap), false, 100);
+            Drawing.OnEndScene += Drawing_OnEndScene1;
+            DelayAction.Add(7000, () => {
+                Drawing.OnEndScene -= Drawing_OnEndScene1;
+            });
+
             if (ObjectManager.Player == null)
                 return;
             FSpred.Prediction.Prediction.Initialize();
@@ -73,175 +114,140 @@ namespace DominationAIO
                 {
                     switch (GameObjects.Player.CharacterName)
                     {
+                        case "Anivia":
+                            new xSaliceResurrected_Rework.Pluging.Anivia();
+                            SendLoadChamp();
+                            break;
+                        case "Jayce":
+                            DaoHungAIO.Champions.Jayce.JayceLoad();
+                            SendLoadChamp();
+                            break;
                         case "Lucian":
                             Luian.URF_Lucian.LoadLucian();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Viktor":
                             DaoHungAIO.Champions.Viktor.LoadViktor();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Gwen":
                             MyGwen.GwenLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Yone":
                             MyYone.YoneLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Kayle":
                             new DaoHungAIO.Champions.Kayle();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Sylas":
                             MySylas.LoadSylas();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "LeeSin":
                             MyLee.MyLeeLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Aphelios":
                             Champions.Aphelios.loaded.OnLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Velkoz":
                             NewPlugins.MyVelKoz.VelkozLoad();
-
+                            SendLoadChamp();
                             break;
                         case "Viego":
                             NewPlugins.MyViego.ViegoLoad();
+                            SendLoadChamp();
                             break;
                         case "Jinx":
                             MyJinx.LoadJinx();
+                            SendLoadChamp();
                             break;
                         case "Fiora":
                             new DaoHungAIO.Champions.Fiora();
+                            SendLoadChamp();
                             break;
                         case "Xerath":
                             NewPlugins.MyXerath.XerathLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
+                            SendLoadChamp();
                             break;
                         case "Yasuo":
                             NewPlugins.Yasuo.MyYS.YasuoLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Katarina":
                             NewPlugins.Katarina.MyKatarina.LoadKata();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
-                            break;
-                        /*case "Lucian":
-                            //URF_Lucian.LoadLucian();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
-                            break;*/
-                        /*case "TahmKench":
-                            TahmKench.Load();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.BuildDate + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
-                            break;*/
-                        case "Qiyana":
-                            //Qiyana.Load();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Blitzcrank":
                             Blit.Load();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Zoe":
                             Zoe.Load();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Samira":
                             Samira.SamiraLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "MasterYi":
                             MasterYi.YiLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Brand":
                             Champions.Brand.BrandLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
-                        /*case "Yasuo":
-                            //ProdragonYasuo.loaded();
-                            //Yasuo.Yasuo.OnLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
-                            break;*/
                         case "Irelia":
                             NewPlugins.Irelia.NewIre();
-                            Game.Print(Game.Version);
-
+                            SendLoadChamp();
                             break;
                         case "Riven":
-                            //Rupdate.OnLoaded();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            MyRiven.LoadRiven();
+                            SendLoadChamp();
                             break;
                         case "Vayne":
-                            //PRADA_Vayne.Program.VayneMain();
                             NewPlugins.MyVayne.MyVayneLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Kaisa":
                             Kaisa.ongameload();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Gangplank":
                             DaoHungAIO.Champions.Gangplank.BadaoGangplank.BadaoActivate();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Sion":
                             Sion.SionLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Akali":
                             Akali.OnLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Ezreal":
                             Ezreal.Ezreal_Load();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Pyke":
                             Pyke_Ryū.Program.GameEvent_OnGameLoad();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         case "Rengar":
-                            //Rengar.RengarLoader();
-                            Game.Print("<font color='#b756c5' size='25'>" + Game.Version + "</font>: DominationAIO " + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by ProDragon</font>");
-
+                            SendLoadChamp();
                             break;
                         default:
                             Game.Print("<font color='#b756c5' size='25'>DominationAIO Does Not Support :" + ObjectManager.Player.CharacterName + "</font>");
                             Console.WriteLine("DominationAIO Does Not Support " + ObjectManager.Player.CharacterName);
                             break;
                     }
+
+                    ChampLoaded = true;
                 }
 
                 if (LoadSkin.Enabled)
@@ -256,7 +262,8 @@ namespace DominationAIO
                         "Draven",
                         "Ezreal",
                         "Ashe",
-                        "Jinx"
+                        "Jinx",
+                        "Senna"
                     };
 
                     if (listbaseultsupported.Contains(ObjectManager.Player.CharacterName))
@@ -274,47 +281,67 @@ namespace DominationAIO
             //Load Tracker
             if (LoadTracker.Enabled)
             {
-                foreach (var item in GameObjects.EnemyHeroes)
+                foreach (var item in GameObjects.EnemyHeroes.Where(i => i.CharacterName != "PracticeTool_TargetDummy"))
                 {
                     var target = item;
-                    var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId);
-                    if (histracker == null || histracker.Count() < 1)
-                        TrackerHelp.Add(new TrackerHelper(target));
+                    new TrackerHelper(target);
                 }
-                Game.OnUpdate += Game_OnUpdate;
-
-                Drawing.OnDraw += Drawing_OnEndScene;
-            }            
+            }
         }
 
-        private static void Game_OnUpdate(EventArgs args)
+        private static void SendLoadChamp()
         {
-            foreach (var item in GameObjects.EnemyHeroes)
+            Game.Print("<font color='#b756c5' size='35'>DominationAIO " + Game.Version + "</font> :" + ObjectManager.Player.CharacterName + " Loaded <font color='#1dff00' size='25'>by FunnySlayer</font>");
+        }
+
+        private static void Drawing_OnEndScene1(EventArgs args)
+        {
+            if(ObjectManager.Player.CharacterName == "Yasuo")
             {
-                var target = item;
-                var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId);
-                if (histracker.Count() >= 1)
+                var pos = new Vector2((Drawing.Width / 2) - 256, (Drawing.Height / 2) - 256);
+                using (var r = new Render.Sprite(myimages, pos))
                 {
-                    var thetracker = histracker.FirstOrDefault();
-                    if (thetracker.Unit.IsValidTarget())
-                    {
-                        thetracker.ValidPosition = target.Position;
-                        thetracker.InValidPosition = target.Position;
-                    }
-                    else
-                    {
-                        thetracker.InValidPosition = target.Position;
-                    }
+                    r.Draw();
                 }
-                else
+            }
+            else
+            {
+                var pos = new Vector2((Drawing.Width / 2) - 270, (Drawing.Height / 2) - 270);
+                using (var r = new Render.Sprite(myimages, pos))
                 {
-                    TrackerHelp.Add(new TrackerHelper(target));
+                    r.Draw();
                 }
-            }        
+
+                var newpos = new Vector2((Drawing.Width / 2) - 300, (Drawing.Height / 2) - 300 - 65);
+                var Qspell = TrackerHelper.SpellLoad(ObjectManager.Player.GetSpell(SpellSlot.Q).Name, false, 100);
+                var Wspell = TrackerHelper.SpellLoad(ObjectManager.Player.GetSpell(SpellSlot.W).Name, false, 100);
+                var Espell = TrackerHelper.SpellLoad(ObjectManager.Player.GetSpell(SpellSlot.E).Name, false, 100);
+                var Rspell = TrackerHelper.SpellLoad(ObjectManager.Player.GetSpell(SpellSlot.R).Name, false, 100);
+                newpos.X += 68.8f;
+                using (var r = new Render.Sprite(Qspell, newpos))
+                {
+                    r.Draw();
+                }
+                newpos.X += 68.8f + 64f;
+                using (var r = new Render.Sprite(Wspell, newpos))
+                {
+                    r.Draw();
+                }
+                newpos.X += 68.8f + 64f;
+                using (var r = new Render.Sprite(Espell, newpos))
+                {
+                    r.Draw();
+                }
+                newpos.X += 68.8f + 64f;
+                using (var r = new Render.Sprite(Rspell, newpos))
+                {
+                    r.Draw();
+                }
+            }
         }
 
         private static Menu programmenu = null;
-        private static MenuBool LoadTracker = new MenuBool("Tracker", "Tracker Load");
+        public static MenuBool LoadTracker = new MenuBool("Tracker", "Tracker Load");
         private static MenuBool LoadBaseUlt = new MenuBool("BaseUlt", "Base Ult Load");
         private static MenuBool LoadSkin = new MenuBool("Skin", "Skin Load");
         private static MenuBool LoadChamps = new MenuBool("Champs", "Champions Load");
@@ -331,63 +358,9 @@ namespace DominationAIO
             programmenu.AddTargetSelectorMenu();
 
             programmenu.Attach();
+
         }
 
         private static Dictionary<int, Vector3> SaveLastPoint = new Dictionary<int, Vector3>();
-
-        private static void Drawing_OnEndScene(EventArgs args)
-        {
-
-            if (!LoadTracker.Enabled)
-                return;
-
-            foreach (var item in GameObjects.EnemyHeroes)
-            {
-                var target = item;
-                var histracker = TrackerHelp.Where(i => i.Unit.NetworkId == target.NetworkId).FirstOrDefault();
-
-                if (histracker != null)
-                {
-                    if(histracker.InValidPosition.DistanceToPlayer() <= 3000)
-                    {
-                        var line = new Geometry.Line(ObjectManager.Player.Position, histracker.InValidPosition);
-                        line.Draw(System.Drawing.Color.Red);
-                    }
-                    
-                    if (histracker.ValidPosition.IsOnScreen() || histracker.InValidPosition.IsOnScreen())
-                    {
-                        if (histracker.InValidPosition.IsOnScreen())
-                        {
-                            var pos = Drawing.WorldToScreen(histracker.InValidPosition);
-                            Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Yellow, target.CharacterName);
-                            Render.Circle.DrawCircle(histracker.InValidPosition, 50, System.Drawing.Color.Red);                           
-                        }
-
-                        if (histracker.ValidPosition.IsOnScreen() && histracker.ValidPosition.Distance(histracker.InValidPosition) > histracker.Unit.BoundingRadius)
-                        {
-                            var pos = Drawing.WorldToScreen(histracker.ValidPosition);
-                            Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Yellow, target.CharacterName);
-                            Render.Circle.DrawCircle(histracker.ValidPosition, 50, System.Drawing.Color.Green);
-                        }
-
-                        /*if (histracker.InValidPosition.Distance(histracker.ValidPosition) > histracker.Unit.BoundingRadius)
-                        {
-                            var line = new Geometry.Line(histracker.InValidPosition, histracker.ValidPosition);
-                            line.Draw(System.Drawing.Color.Blue);
-                        }*/
-
-                        /*if (histracker.InValidPosition.Distance(histracker.ValidPosition) > histracker.Unit.BoundingRadius)
-                        {
-                                                   
-                        }
-                        else
-                        {
-                            
-                        }*/
-                    }
-
-                }
-            }
-        }    
     }   
 }

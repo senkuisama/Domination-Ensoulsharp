@@ -172,7 +172,7 @@ namespace DaoHungAIO.Champions
             var ulted = GetUltedTarget();
             if (ulted.IsValidTarget(500))
                 return ulted;
-            return TargetSelector.GetTarget(range);
+            return TargetSelector.GetTarget(range, DamageType.Physical);
         }
 
         public static float PriorityRange { get { return Fiora.Config["TargetingModes"]["Priority"].GetValue<MenuSlider>("PriorityRange").Value; } }
@@ -577,7 +577,7 @@ namespace DaoHungAIO.Champions
                     Game.Ping * i.Obj.SData.MissileSpeed / 1000
                     )).OrderBy(i => i.Obj.Position.Distance(Player.Position)))
                 {
-                    var tar = TargetSelector.GetTarget(Fiora.W.Range);
+                    var tar = TargetSelector.GetTarget(Fiora.W.Range, DamageType.Physical);
                     if (tar.IsValidTarget(Fiora.W.Range))
                         Player.Spellbook.CastSpell(SpellSlot.W, tar.Position);
                     else
@@ -1549,7 +1549,7 @@ namespace DaoHungAIO.Champions
                 )
             {
                 //Game.Print("Find target");
-                var tar = TargetSelector.GetTarget(Fiora.W.Range);
+                var tar = TargetSelector.GetTarget(Fiora.W.Range, DamageType.Physical);
                 if (tar.IsValidTarget(Fiora.W.Range))
                     Player.Spellbook.CastSpell(SpellSlot.W, tar.Position);
                 else
@@ -1570,7 +1570,7 @@ namespace DaoHungAIO.Champions
                 return;
             DelayAction.Add(timeDelayMinisecond, () =>
             {
-                var tar = TargetSelector.GetTarget(Fiora.W.Range);
+                var tar = TargetSelector.GetTarget(Fiora.W.Range, DamageType.Physical);
                 if (tar.IsValidTarget(Fiora.W.Range))
                     Player.Spellbook.CastSpell(SpellSlot.W, tar.Position);
                 else
@@ -1590,7 +1590,7 @@ namespace DaoHungAIO.Champions
             if (Player.IsDead || Player.HasBuffOfType(BuffType.SpellShield) || Player.HasBuffOfType(BuffType.SpellImmunity)
                 || !Fiora.Config["EvadeOthers"].GetValue<MenuBool>("W").Enabled || !Fiora.W.IsReady())
                 return;
-            var tar = TargetSelector.GetTarget(Fiora.W.Range);
+            var tar = TargetSelector.GetTarget(Fiora.W.Range, DamageType.Physical);
             if (tar.IsValidTarget(Fiora.W.Range))
                 Player.Spellbook.CastSpell(SpellSlot.W, tar.Position);
             else
@@ -1965,7 +1965,7 @@ namespace DaoHungAIO.Champions
                     {
                         return;
                     }
-                    var tar = TargetSelector.GetTarget(W.Range);
+                    var tar = TargetSelector.GetTarget(W.Range, DamageType.Magical);
                     if (tar.IsValidTarget(W.Range))
                     {
 
@@ -2018,7 +2018,7 @@ namespace DaoHungAIO.Champions
                     if (dashdata != null && target.Hero.Position.ToVector2().Distance(Player.Position.ToVector2())
                         < target.DistanceDash + Game.Ping * dashdata.Speed / 1000)
                     {
-                        var tar = TargetSelector.GetTarget(W.Range);
+                        var tar = TargetSelector.GetTarget(W.Range, DamageType.Magical);
                         if (tar.IsValidTarget(W.Range))
                             Player.Spellbook.CastSpell(SpellSlot.W, tar.Position);
                         else

@@ -692,7 +692,7 @@ namespace DominationAIO.Champions
                 {
                     if (args.Target.IsMe || args.Target.NetworkId == ObjectManager.Player.NetworkId)
                     {
-                        if (TargetSelector.GetTargets(W.Range + E.Range) != null && TargetSelector.GetTargets(W.Range + E.Range).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
+                        if (TargetSelector.GetTargets(W.Range + E.Range, DamageType.Physical) != null && TargetSelector.GetTargets(W.Range + E.Range, DamageType.Physical).Count() >= SamiraSetMenu.WSettings.EnemyCount.Value)
                         {
                             if (SamiraSetMenu.WSettings.WBlock.Enabled && (Orbwalker.ActiveMode == OrbwalkerMode.Combo || !SamiraSetMenu.WSettings.WonlyBlockIncombo.Enabled) && !FunnySlayerCommon.OnAction.BeforeAA && !FunnySlayerCommon.OnAction.OnAA)
                             {

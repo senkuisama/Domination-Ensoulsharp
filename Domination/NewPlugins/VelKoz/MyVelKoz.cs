@@ -272,7 +272,7 @@ namespace DominationAIO.NewPlugins
             {
                 if(Q.Name == "VelkozQ")
                 {
-                    var target = TargetSelector.GetTarget(1050f);
+                    var target = TargetSelector.GetTarget(1050f, DamageType.Magical);
                     if (target != null)
                     {
                         var pred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
@@ -282,7 +282,7 @@ namespace DominationAIO.NewPlugins
                                 return Q.Cast(pred.CastPosition);
                         }
                     }
-                    var alltargets = TargetSelector.GetTargets(MaxRange);
+                    var alltargets = TargetSelector.GetTargets(MaxRange, DamageType.Magical);
                     if (alltargets != null)
                     {
                         var gettarget = alltargets.Where(i =>

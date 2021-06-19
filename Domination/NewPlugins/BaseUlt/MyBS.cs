@@ -24,6 +24,7 @@ namespace DominationAIO.NewPlugins
             menu.Add(new MenuSeparator("Ezreal", "Ezreal"));
             menu.Add(new MenuSeparator("Ashe", "Ashe"));
             menu.Add(new MenuSeparator("Jinx", "Jinx"));
+            menu.Add(new MenuSeparator("Senna", "Senna"));
 
             menu.Add(MaxDmg);
             menu.Attach();
@@ -100,7 +101,13 @@ namespace DominationAIO.NewPlugins
                     Delay = 250;
                     Speed = 1600;
                     break;
+                case "Senna":
+                    Delay = 1000;
+                    Speed = 20000;
+                    break;
             }
+
+            Delay += Game.Ping / 2;
 
             if (key.Active)
                 return;
@@ -108,7 +115,7 @@ namespace DominationAIO.NewPlugins
             if (ObjectManager.Player.IsDead)
                 return;
             var R = new Spell(SpellSlot.R);
-            if(GameObjects.EnemyHeroes != null && R.IsReady())
+            if (GameObjects.EnemyHeroes != null && R.IsReady())
             {
                 foreach(var target in GameObjects.EnemyHeroes)
                 {
@@ -151,9 +158,9 @@ namespace DominationAIO.NewPlugins
                                 }
                             }
                         }
-                        if (ObjectManager.Player.CharacterName == "Draven" && R.Name == "DravenRCast")
+                        if (ObjectManager.Player.CharacterName != "Draven" || R.Name == "DravenRCast")
                         {
-                            if (target.Health <= ObjectManager.Player.GetDravenRDmg(target) * 1.5)
+                            if (target.Health <= GetRDmg(target))
                             {
                                 if (!BaseUltChampions.Contains(target))
                                     BaseUltChampions.Add(target);
@@ -163,44 +170,11 @@ namespace DominationAIO.NewPlugins
                                     {
                                         if (R.Cast(getinfo.PosBaseUlt))
                                             return;
-                                    }                                   
+                                    }
                                 }
                             }
 
-                        }
-                        if(ObjectManager.Player.CharacterName == "Ezreal")
-                        {
-                            if (target.Health <= ObjectManager.Player.GetEzrealRDmg(target) * MaxDmg.Value / 100)
-                            {
-                                if (!BaseUltChampions.Contains(target))
-                                    BaseUltChampions.Add(target);
-                                if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay >= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
-                                {
-                                    if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay <= 750 + getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
-                                    {
-                                        if (R.Cast(getinfo.PosBaseUlt))
-                                            return;
-                                    }                                    
-                                }
-                            }
-                        }
-
-                        if(ObjectManager.Player.CharacterName == "Ashe")
-                        {
-                            if (target.Health <= ObjectManager.Player.GetAsheRDmg(target))
-                            {
-                                if (!BaseUltChampions.Contains(target))
-                                    BaseUltChampions.Add(target);
-                                if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay >= getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
-                                {
-                                    if (getinfo.PosBaseUlt.DistanceToPlayer() / Speed * 1000 + Delay <= 750 + getinfo.Duration - (Variables.GameTimeTickCount - getinfo.Start))
-                                    {
-                                        if (R.Cast(getinfo.PosBaseUlt))
-                                            return;
-                                    }                                    
-                                }
-                            }
-                        }
+                        }                      
                     }
                     else
                     {
@@ -215,6 +189,28 @@ namespace DominationAIO.NewPlugins
                 BaseUltChampions.Clear();
             }
         }
+
+        private static double GetRDmg(this AIHeroClient target)
+        {
+            var R = new Spell(SpellSlot.R);
+
+            switch (ObjectManager.Player.CharacterName)
+            {
+                case "Ashe":
+                    return ObjectManager.Player.GetAsheRDmg(target);
+                case "Ezreal":
+                    return ObjectManager.Player.GetEzrealRDmg(target);
+                case "Draven":
+                    return ObjectManager.Player.GetDravenRDmg(target);
+                case "Jinx":
+                    return ObjectManager.Player.GetJinxRDmg(target);
+                case "Senna":
+                    return ObjectManager.Player.GetSennaRDmg(target);
+                default:
+                    return R.GetDamage(target);
+            }          
+        }
+
         private static double GetAsheRDmg(this AIHeroClient sources, AIBaseClient target)
         {
             var RBaseDamage = new double[] { 0f, 200, 400, 600 };
@@ -257,6 +253,55 @@ namespace DominationAIO.NewPlugins
 
             var bonusad = sources.GetBonusPhysicalDamage();
             var alldmg = sources.CalculatePhysicalDamage(target, Dmgs[level - 1] + BonusDmgs[level - 1] * bonusad);
+
+            return alldmg;
+        }
+
+        private static double GetJinxRDmg(this AIHeroClient sources, AIBaseClient target)
+        {
+            var level = (new Spell(SpellSlot.R)).Level;
+            if (level == 0)
+                return 0;
+
+            double dmg = 0;
+            var list1 = new double[]
+            {
+                0, 250, 400, 550,
+            };
+
+            var list2 = new double[]
+            {
+                0, 0.25, 0.3, 0.35
+            };
+
+            dmg += 1.5 * ObjectManager.Player.GetBonusPhysicalDamage();
+
+            dmg += list1[level];
+
+            dmg += list2[level] * target.MaxHealth - target.Health;
+
+            var alldmg = sources.CalculatePhysicalDamage(target, dmg);
+
+            return alldmg;
+        }
+
+        private static double GetSennaRDmg(this AIHeroClient sources, AIBaseClient target)
+        {
+            var level = (new Spell(SpellSlot.R)).Level;
+            if (level == 0)
+                return 0;
+
+            double dmg = 0;
+            var list = new double[]
+            {
+                0, 250 , 375 , 500,
+            };
+
+            dmg += list[level];
+            dmg += ObjectManager.Player.GetBonusPhysicalDamage();
+            dmg += 0.5 * ObjectManager.Player.TotalMagicalDamage;
+
+            var alldmg = sources.CalculatePhysicalDamage(target, dmg);
 
             return alldmg;
         }

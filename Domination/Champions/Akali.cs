@@ -394,7 +394,7 @@ namespace DominationAIO.Champions
 
         private static void KS()
         {
-            var targets = TargetSelector.GetTargets(R.IsReady() ? 750 : 500);
+            var targets = TargetSelector.GetTargets(R.IsReady() ? 750 : 500, DamageType.Magical);
 
             if (targets == null) return;
 

@@ -128,6 +128,9 @@ namespace Pyke_Ryū
         {
             if (Player.IsDead) return;
 
+            if (FunnySlayerCommon.OnAction.BeforeAA || FunnySlayerCommon.OnAction.OnAA)
+                return;
+
             if(Orbwalker.ActiveMode == OrbwalkerMode.Combo || Orbwalker.ActiveMode == OrbwalkerMode.Harass)
             {
                 var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(2000);
@@ -137,7 +140,7 @@ namespace Pyke_Ryū
                     {
                         if (target.IsValidTarget(400))
                         {
-                            if (E.IsReady() && !Q.IsCharging)
+                            if (E.IsReady() && !Q.IsCharging && !ObjectManager.Player.Spellbook.IsCharging)
                             {
                                 Orbwalker.AttackEnabled = true;
                                 CASTE();
@@ -150,7 +153,7 @@ namespace Pyke_Ryū
                         else
                         {
                             var pred = SebbyLibPorted.Prediction.Prediction.GetPrediction(E, target);
-                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High && !Q.IsCharging)
+                            if (pred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High && !Q.IsCharging && !ObjectManager.Player.Spellbook.IsCharging)
                             {
                                 Orbwalker.AttackEnabled = true;
                                 if (E.Cast(pred.CastPosition))
@@ -158,8 +161,8 @@ namespace Pyke_Ryū
                             }
                             else
                             {
-                                var Qpred = SebbyLibPorted.Prediction.Prediction.GetPrediction(Q, target);
-                                if (Qpred.Hitchance >= SebbyLibPorted.Prediction.HitChance.High)
+                                var Qpred = FSpred.Prediction.Prediction.GetPrediction(Q, target);
+                                if (Qpred.Hitchance >= FSpred.Prediction.HitChance.High)
                                 {
                                     if (Q.IsCharging)
                                     {

@@ -13,7 +13,7 @@ namespace DominationAIO.NewPlugins
     {
         private static class GwenMenu
         {
-            public static MenuBool AutoConfig = new MenuBool("AutoConfig", "Auto Settings");
+            public static MenuBool AutoConfig = new MenuBool("AutoConfig", "Auto Settings", false);
             public static class QMenu
             {
                 public static MenuBool UseQCombo = new MenuBool("UseQCombo", "Use Q Combo");
@@ -21,6 +21,8 @@ namespace DominationAIO.NewPlugins
                 public static MenuBool MinStacks = new MenuBool("MinStacks", "Min Stacks");
                 public static MenuSlider Stacks = new MenuSlider("Stacks", "Stacks", 2, 0, 4);
                 public static MenuBool QResetAA = new MenuBool("QResetAA", "Reset AA timer");
+
+                public static MenuBool QJGClear = new MenuBool("QJGClear", "Q Jungle Clear");
             }
             public static class WMenu
             {
@@ -36,6 +38,14 @@ namespace DominationAIO.NewPlugins
                 public static MenuSlider ERange = new MenuSlider("ERange", "E Range", 500, 350, 700);
                 public static MenuBool EFollowCursor = new MenuBool("FollowCursor", "Follow Mouse");
                 public static MenuBool EResetAA = new MenuBool("EResetAA", "Reset AA timer");
+
+                public static class Eturret
+                {
+                    public static MenuBool UseETurret = new MenuBool("ETurret", "Turret Clear");
+                    public static MenuSlider EManaAccept = new MenuSlider("EManaAccept", "Min mana %", 60, 0, 100);
+                    public static MenuBool CastOnMouse = new MenuBool("CastOnMouse", "Cast On Cursor", false);
+                    public static MenuBool CheckTarget = new MenuBool("CheckTarget", "Check Target Around");
+                }
 
             }
             public static class RMenu
@@ -60,6 +70,8 @@ namespace DominationAIO.NewPlugins
             Qs.Add(GwenMenu.QMenu.MinStacks);
             Qs.Add(GwenMenu.QMenu.Stacks).Permashow();
             Qs.Add(GwenMenu.QMenu.QResetAA);
+            Qs.Add(GwenMenu.QMenu.QJGClear);
+
 
             Ws.Add(GwenMenu.WMenu.UseW);
             Ws.Add(GwenMenu.WMenu.WAfterDash);
@@ -71,6 +83,14 @@ namespace DominationAIO.NewPlugins
             Es.Add(GwenMenu.EMenu.ERange);
             Es.Add(GwenMenu.EMenu.EFollowCursor);
             Es.Add(GwenMenu.EMenu.EResetAA);
+
+            var Eturretmenu = new Menu("Eturretmenu", "Turret");
+            Eturretmenu.Add(GwenMenu.EMenu.Eturret.UseETurret);
+            Eturretmenu.Add(GwenMenu.EMenu.Eturret.EManaAccept);
+            Eturretmenu.Add(GwenMenu.EMenu.Eturret.CastOnMouse);
+            Eturretmenu.Add(GwenMenu.EMenu.Eturret.CheckTarget);
+
+            Es.Add(Eturretmenu);
 
             Rs.Add(GwenMenu.RMenu.useR);
             Rs.Add(GwenMenu.RMenu.Rrange);
@@ -137,14 +157,15 @@ namespace DominationAIO.NewPlugins
                 }
             }
 
-            if (FunnySlayerCommon.OnAction.AfterAA)
-                count += 1;
+            /*if (FunnySlayerCommon.OnAction.AfterAA)
+                count += 1;*/
 
             return count;
         }
 
 
         private static Spell Q, W, E, R;
+        private static Spell EQ;
         public static void GwenLoad()
         {
             Q = new Spell(SpellSlot.Q, 475f);
@@ -155,6 +176,9 @@ namespace DominationAIO.NewPlugins
             R.SetSkillshot(0.25f, 35f, 1500f, false, SpellType.Line);
 
             R.Range = GwenMenu.RMenu.Rrange.Value;
+
+            EQ = new Spell(SpellSlot.Unknown, 475f);
+            EQ.SetSkillshot(1.5f, 55f, float.MaxValue, false, SpellType.Line);
 
             GwenMenu.RMenu.Rrange.ValueChanged += Rrange_ValueChanged;
             LoadMenu();
@@ -168,6 +192,60 @@ namespace DominationAIO.NewPlugins
             R.Range = GwenMenu.RMenu.Rrange.Value;
         }
 
+
+        private static int GetQHitCount(AIHeroClient target)
+        {
+            int value = 0;
+
+            if(target != null && target.IsValidTarget(Q.Range + E.Range))
+            {
+                for (int i = 1500; i > 0; i -= 250)
+                {
+                    var pred = FSpred.Prediction.Prediction.PredictUnitPosition(target, i);
+
+                    if(pred.DistanceToPlayer() <= Q.Range + E.Range - 100)
+                    {
+                        value = i / 250;
+                        break;
+                    }
+                }
+            }
+
+            if (value > QBuffCount() + 2)
+                value = 2 + QBuffCount();
+
+            return value;
+        }
+
+        private static double GetQDmg(AIHeroClient target)
+        {
+            double value = 0;
+
+            if (target != null && target.IsValidTarget(Q.Range + E.Range))
+            {
+                var hitcount = GetQHitCount(target);
+
+                int[] perdmg = new int[]
+                {
+                    0 , 9 , 12 , 15 , 18 , 21
+                };
+
+                int[] finaldmg = new int[]
+                {
+                    0 , 45 , 60 , 75 , 90 , 105
+                };
+
+                value += ((perdmg[Q.Level] + 5 / 100 * ObjectManager.Player.TotalMagicalDamage) + (1 + 0.8 * (int)(ObjectManager.Player.TotalMagicalDamage / 100)) / 100 * target.MaxHealth) * hitcount;
+
+                if (6 - hitcount <= 0)
+                {
+                    value += finaldmg[Q.Level] + 25 / 100 * ObjectManager.Player.TotalMagicalDamage
+                        + (1 + 0.8 * (int)(ObjectManager.Player.TotalMagicalDamage / 100)) / 100 * target.MaxHealth;
+                }
+            }
+
+            return value;
+        }
         private static void AIBaseClient_OnDoCast(AIBaseClient sender, AIBaseClientProcessSpellCastEventArgs args)
         {
             if (GwenMenu.QMenu.MoreQDelay.Enabled && Q.Delay < 0.5f)
@@ -283,13 +361,54 @@ namespace DominationAIO.NewPlugins
             {
                 if (JungleClearLogic())
                     return;
+
+                var orbtarget = Orbwalker.GetTarget();
+                if (FunnySlayerCommon.OnAction.AfterAA && orbtarget != null && orbtarget.Type == GameObjectType.AITurretClient)
+                {
+                    if(GwenMenu.EMenu.Eturret.UseETurret.Enabled && ObjectManager.Player.ManaPercent >= GwenMenu.EMenu.Eturret.EManaAccept.Value)
+                    {
+                        if (GwenMenu.EMenu.Eturret.CheckTarget.Enabled && GameObjects.EnemyHeroes.Where(i => i.IsValidTarget() && !i.IsDead && i.Distance(orbtarget) <= 1000).FirstOrDefault() != null)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            if (GwenMenu.EMenu.Eturret.CastOnMouse.Enabled)
+                            {
+                                E.Cast(Game.CursorPos);
+                                return;
+                            }
+                            else
+                            {
+                                E.Cast(ObjectManager.Player.Position);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            {
+                var target = FunnySlayerCommon.FSTargetSelector.GetFSTarget(Q.Range + E.Range);
+
+                if (target != null && E.IsReady() && Q.IsReady() && ObjectManager.Player.Mana >= Q.Mana + E.Mana)
+                {
+                    var pred = FSpred.Prediction.Prediction.GetPrediction(EQ, target);
+                    if (target.Health <= GetQDmg(target) && 
+                        (pred.Hitchance < FSpred.Prediction.HitChance.High || pred.CastPosition.DistanceToPlayer() >= Q.Range))
+                    {
+                        E.Cast(ObjectManager.Player.Position.Extend(target.Position, 350));
+                        Q.Cast(pred.CastPosition);
+                        return;
+                    }
+                }
             }
         }
         private static bool JungleClearLogic()
         {
             var mobs = GameObjects.Jungle.Where(x => x.IsValidTarget(ObjectManager.Player.GetCurrentAutoAttackRange()) && x.GetJungleType() != JungleType.Unknown & !x.GetMinionType().HasFlag(MinionTypes.JunglePlant) ).ToList();
 
-            if (mobs.Any())
+            if (mobs.Any() && GwenMenu.QMenu.QJGClear.Enabled)
             {
                 var first = mobs.FirstOrDefault();
                 if (E.IsReady())
@@ -301,6 +420,8 @@ namespace DominationAIO.NewPlugins
                             E.Cast(ObjectManager.Player.Position);
                         else
                             E.Cast(first.Position);
+
+                        return true;
                     }
                 }
                 if (Q.IsReady() && QBuffCount() >= 4)
@@ -333,7 +454,7 @@ namespace DominationAIO.NewPlugins
             if (FunnySlayerCommon.OnAction.BeforeAA || FunnySlayerCommon.OnAction.OnAA)
                 return;
             {
-                var target = TargetSelector.GetTarget(GwenMenu.EMenu.ERange.Value);
+                var target = TargetSelector.GetTarget(GwenMenu.EMenu.ERange.Value, DamageType.Physical);
                 if(target != null)
                 {
                     if (E.IsReady() && GwenMenu.EMenu.UseE.Enabled)
@@ -374,13 +495,13 @@ namespace DominationAIO.NewPlugins
             }
 
             {
-                var target = TargetSelector.GetTarget(1000);
+                var target = TargetSelector.GetTarget(1000, DamageType.Physical);
                 if (target != null)
                 {
                     var pred = FSpred.Prediction.Prediction.GetPrediction(R, target);
                     if (pred.Hitchance >= FSpred.Prediction.HitChance.High && R.IsReady())
                     {
-                        var Qtarget = TargetSelector.GetTarget(475);
+                        var Qtarget = TargetSelector.GetTarget(475, DamageType.Physical);
                         var orbtarget = Orbwalker.GetTarget();
                         
                         if (GwenMenu.RMenu.useR.Enabled)
@@ -483,7 +604,7 @@ namespace DominationAIO.NewPlugins
                 }
             }
             {
-                var target = TargetSelector.GetTarget(475);
+                var target = TargetSelector.GetTarget(475, DamageType.Physical);
                 if(target != null)
                 {
                     if(W.Name != "GwenW" && W.IsReady() && GwenMenu.WMenu.UseW.Enabled && GwenMenu.WMenu.AutoW.Enabled)
@@ -497,7 +618,7 @@ namespace DominationAIO.NewPlugins
                 }
             }
             {
-                var target = TargetSelector.GetTarget(475);
+                var target = TargetSelector.GetTarget(475, DamageType.Physical);
                 var orbtarget = Orbwalker.GetTarget();
 
 

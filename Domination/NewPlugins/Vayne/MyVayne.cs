@@ -451,10 +451,10 @@ namespace DominationAIO.NewPlugins
 
             if(R.IsReady() && VayneMenu.Misc.RSettings.FindOut.Enabled)
             {
-                if(TargetSelector.GetTargets(750) != null && !FunnySlayerCommon.OnAction.OnAA)
+                if(TargetSelector.GetTargets(750, DamageType.Physical) != null && !FunnySlayerCommon.OnAction.OnAA)
                 {
-                    var target = TargetSelector.GetTarget(750);
-                    if(TargetSelector.GetTargets(750).Count() >= 2 && ObjectManager.Player.CountAllyHeroesInRange(750) <= 1)
+                    var target = TargetSelector.GetTarget(750, DamageType.Physical);
+                    if(TargetSelector.GetTargets(750, DamageType.Physical).Count() >= 2 && ObjectManager.Player.CountAllyHeroesInRange(750) <= 1)
                     {
                         if (FunnySlayerCommon.OnAction.BeforeAA)
                         {
@@ -512,7 +512,7 @@ namespace DominationAIO.NewPlugins
                         }
                     }
 
-                    if(TargetSelector.GetTargets(750).Any(i => i.HealthPercent >= 40 && (i.MaxHealth <= 2000 || i.CombatType == GameObjectCombatType.Melee || i.TotalAttackDamage >= 200 || i.TotalMagicalDamage >= 250)))
+                    if(TargetSelector.GetTargets(750, DamageType.Physical).Any(i => i.HealthPercent >= 40 && (i.MaxHealth <= 2000 || i.CombatType == GameObjectCombatType.Melee || i.TotalAttackDamage >= 200 || i.TotalMagicalDamage >= 250)))
                     {
                         if (target.DistanceToPlayer() <= ObjectManager.Player.GetCurrentAutoAttackRange())
                         {

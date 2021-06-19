@@ -131,7 +131,7 @@ namespace DominationAIO.Champions
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if(TargetSelector.GetTarget(1100f) == null)
+            if(TargetSelector.GetTarget(1100f, DamageType.Magical) == null)
             {
                 //if(WPoly != null)
                     WPoly = null;
@@ -359,7 +359,7 @@ namespace DominationAIO.Champions
             if (!R.IsReady())
                 return;
 
-            var targets = TargetSelector.GetTargets(R.Range + 600).OrderBy(i => i.DistanceToPlayer());
+            var targets = TargetSelector.GetTargets(R.Range + 600, DamageType.Magical).OrderBy(i => i.DistanceToPlayer());
             if (targets == null)
                 return;
 
@@ -389,7 +389,7 @@ namespace DominationAIO.Champions
             if (!E.IsReady())
                 return;
 
-            var targets = TargetSelector.GetTargets(E.Range + 375f).OrderBy(i => i.DistanceToPlayer());
+            var targets = TargetSelector.GetTargets(E.Range + 375f, DamageType.Magical).OrderBy(i => i.DistanceToPlayer());
 
             if (targets == null)
                 return;
@@ -422,7 +422,7 @@ namespace DominationAIO.Champions
             if (!W.IsReady())
                 return;
 
-            var targets = TargetSelector.GetTargets(W.Range).OrderBy(i => i.DistanceToPlayer());
+            var targets = TargetSelector.GetTargets(W.Range, DamageType.Magical).OrderBy(i => i.DistanceToPlayer());
             if (targets == null)
                 return;
 
@@ -455,7 +455,7 @@ namespace DominationAIO.Champions
             if (!Q.IsReady())
                 return;
 
-            var targets = TargetSelector.GetTargets(Q.Range).Where(i => i.Burning()).OrderBy(i => i.Health);
+            var targets = TargetSelector.GetTargets(Q.Range, DamageType.Magical).Where(i => i.Burning()).OrderBy(i => i.Health);
             if (targets == null)
                 return;
 

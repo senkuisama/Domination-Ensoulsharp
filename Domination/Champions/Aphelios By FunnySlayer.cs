@@ -919,7 +919,7 @@ namespace DominationAIO.Champions.Aphelios
             if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
                 return;
 
-            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range, DamageType.Physical) == null)
             {
                 return;
             }
@@ -1213,14 +1213,14 @@ namespace DominationAIO.Champions.Aphelios
             }
             if (ObjectManager.Player.HasBuff(loaded.SeverumOn) && loaded.Q2.IsReady())
             {
-                var targets = TargetSelector.GetTarget(550f);
+                var targets = TargetSelector.GetTarget(550f, DamageType.Physical);
                 if (targets != null)
                     if (loaded.Q2.Cast())
                         return;
             }
             if (ObjectManager.Player.HasBuff(loaded.GravitumOn) && loaded.Q3.IsReady())
             {
-                var targets = TargetSelector.GetTargets(loaded.Q3.Range);
+                var targets = TargetSelector.GetTargets(loaded.Q3.Range, DamageType.Physical);
                 if (targets != null && targets.Any(i => i.HasBuff(loaded.GravitumDebuff)))
                     if (loaded.Q3.Cast())
                         return;
@@ -1300,7 +1300,7 @@ namespace DominationAIO.Champions.Aphelios
             if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
                 return;
 
-            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range, DamageType.Physical) == null)
             {
                 return;
             }
@@ -1477,7 +1477,7 @@ namespace DominationAIO.Champions.Aphelios
             if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
                 return;
 
-            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range, DamageType.Physical) == null)
             {
                 return;
             }
@@ -1705,7 +1705,7 @@ namespace DominationAIO.Champions.Aphelios
             if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
                 return;
 
-            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range, DamageType.Physical) == null)
             {
                 return;
             }
@@ -1895,7 +1895,7 @@ namespace DominationAIO.Champions.Aphelios
             if (ObjectManager.Player.IsDead || OnAA || BeforeAA)
                 return;
 
-            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range) == null)
+            if (!loaded.W.IsReady() || TargetSelector.GetTarget(loaded.W.Range, DamageType.Physical) == null)
             {
                 return;
             }

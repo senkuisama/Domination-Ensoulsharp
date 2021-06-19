@@ -150,7 +150,7 @@ namespace DominationAIO.Champions
             //Orbwalker.OnAction += Orbwalker_OnAction;
             AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
             //Teleport.OnTeleport += Teleport_OnTeleport;
-            Teleport.OnTeleport += Teleport_OnTeleport1;
+            //Teleport.OnTeleport += Teleport_OnTeleport1;
         }
 
         private static void Teleport_OnTeleport1(AttackableUnit sender, Teleport.TeleportEventArgs args)
@@ -185,11 +185,7 @@ namespace DominationAIO.Champions
         {
             if (sender.IsMe)
             {
-                if (Orbwalker.IsAutoAttack(args.SData.Name))
-                {
-                    LastAfterAA = Environment.TickCount;
-                }
-                if (Orbwalker.IsAutoAttack(args.SData.Name))
+                if (Orbwalker.IsAutoAttack(args.SData.Name) && !Orbwalker.IsAutoAttackReset(args.SData.Name))
                 {
                     LastAfterAA = Environment.TickCount;
                 }
@@ -265,7 +261,7 @@ namespace DominationAIO.Champions
             if (Player.IsDashing())
                 return;
 
-            if (FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA)
+            if (Variables.GameTimeTickCount - OnAction.LastAttack < ObjectManager.Player.AttackCastDelay * 1000 || FunnySlayerCommon.OnAction.OnAA || FunnySlayerCommon.OnAction.BeforeAA)
                 return;
 
             {
@@ -511,18 +507,18 @@ namespace DominationAIO.Champions
 
         private static void EzECombo()
         {
-            var target = TargetSelector.GetTargets(Q.Range + E.Range).OrderBy(i => i.Health).FirstOrDefault();
+            var target = TargetSelector.GetTargets(Q.Range + E.Range, DamageType.Physical).OrderBy(i => i.Health).FirstOrDefault();
 
             if (target == null || !(target is AIHeroClient)) return;
 
             if (target.HealthPercent > EEzSettings.TargetHeath.Value + 1) return;
 
-            if (FunnySlayerCommon.OnAction.OnAA) return;
+            if (FunnySlayerCommon.OnAction.OnAA || OnAction.BeforeAA) return;
 
             EnsoulSharp.SDK.Geometry.Circle EPoints = new EnsoulSharp.SDK.Geometry.Circle(Player.Position, E.Range);
             var Echeck = new Spell(SpellSlot.Unknown, 1000f);
-            Echeck.SetSkillshot(0.3f, 60f, 2000f, true, SpellType.Line);
-            foreach (var EPoint in EPoints.Points)
+            Echeck.SetSkillshot(0.3f, 80f, 2000f, true, SpellType.Line);
+            foreach (var EPoint in EPoints.Points.OrderBy(i => i.Distance(target)))
             {
                 if (Yasuo_LogicHelper.Logichelper.UnderTower(EPoint.ToVector3()))
                     return;
@@ -549,7 +545,7 @@ namespace DominationAIO.Champions
 
             if (target == null || !target.IsValidTarget(Q.Range))
             {
-                target = TargetSelector.GetTarget(Q.Range);
+                target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             }
 
             if (target == null || target.InAutoAttackRange())

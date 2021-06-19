@@ -79,7 +79,7 @@ namespace DominationAIO.NewPlugins
                 return;
             if (HaveQBuff && _Q.IsReady() && JinxMenu.Qmenu.autoQ.Enabled)
             {
-                if(TargetSelector.GetTarget(1300) == null)
+                if(TargetSelector.GetTarget(1300, DamageType.Physical) == null)
                 {
                     if (_Q.Cast())
                         return;
@@ -100,7 +100,7 @@ namespace DominationAIO.NewPlugins
 
             if (_W.IsReady() && JinxMenu.Wmenu.useW.Enabled)
             {
-                var targets = TargetSelector.GetTargets(1500);
+                var targets = TargetSelector.GetTargets(1500, DamageType.Physical);
 
                 if(targets != null)
                 {
@@ -123,7 +123,7 @@ namespace DominationAIO.NewPlugins
 
             if (_E.IsReady() && JinxMenu.Emenu.useE.Enabled)
             {
-                var targets = TargetSelector.GetTargets(900);
+                var targets = TargetSelector.GetTargets(900, DamageType.Physical);
 
                 if (targets != null)
                 {
@@ -147,7 +147,7 @@ namespace DominationAIO.NewPlugins
                 {
                     if(Orbwalker.GetTarget() != null)
                     {
-                        var target = TargetSelector.GetTarget((float)(ObjectManager.Player.GetCurrentAutoAttackRange() - BonusQRange[_Q.Level]));
+                        var target = TargetSelector.GetTarget((float)(ObjectManager.Player.GetCurrentAutoAttackRange() - BonusQRange[_Q.Level]), DamageType.Physical);
                         if(target != null)
                         {
                             if(target.NetworkId == Orbwalker.GetTarget().NetworkId)
@@ -162,7 +162,7 @@ namespace DominationAIO.NewPlugins
                 {
                     if(Orbwalker.GetTarget() == null)
                     {
-                        var target = TargetSelector.GetTarget((float)(ObjectManager.Player.GetCurrentAutoAttackRange() + BonusQRange[_Q.Level]));                    
+                        var target = TargetSelector.GetTarget((float)(ObjectManager.Player.GetCurrentAutoAttackRange() + BonusQRange[_Q.Level]), DamageType.Physical);                    
                         if(target != null)
                         {
                             if (_Q.Cast())
